@@ -1,0 +1,13 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+SNDLIB_LANGUAGE=@SNDLIB_LANGUAGE@
+SNDLIB_AUDIO=@AUDIO_CHOICE@
+
+Name: sndlib_shuriken
+Description: audio library
+Version: @SNDLIB_VERSION@
+Libs: @LIBS@ @GSL_LIBS@ @AUDIO_LIB@ @XEN_LIBS@ @JACK_LIBS@ -lm
+Cflags: 

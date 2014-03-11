@@ -1,0 +1,308 @@
+sndlib change log
+
+14-Jul: removed aclocal.m4, added sndlib.pc.
+7-Jul:  removed mus-config.h.in, sndlib.h.in, windows-*, added unix-config.h.in, mus-config.h.in.
+5-Jul:  added --with-audio to configure script.
+27-Mar: removed mus-file-prescaler and mus-prescaler  -- these no longer serve any purpose.
+
+2013 ----------------------------------------------------------------
+
+23-Nov:   mus_sample_t is now mus_float_t.
+22-Sep:   cload.scm and lint.scm.
+5-July:   removed run.c, internal int mus_sample_t option.
+1-May:    removed mus-audio-describe, ESD audio support, audinfo,
+	    mus_audio_read|write_buffers, mus_samples_peak.
+30-Apr:   removed mus_audio_systems.
+
+2012 ----------------------------------------------------------------
+
+20-Oct:   --with-defaults is now built-in (i.e. mus_float_t is double).
+14-Jul:   removed thread stuff.
+
+2011 ----------------------------------------------------------------
+
+22-Sep:   def-clm-struct is now just a synonym for defgenerator.
+27-Feb:   the run macro's argument no longer has to be a thunk.
+
+2010 ----------------------------------------------------------------
+
+11-Dec:   removed midi.c, sndrecord.c, SGI support, and Alsa < 1.0 support.
+7-Dec:    removed mus-audio-report and changed mus-audio-describe to return the description as a string.
+          removed mus_audio_device_p, mus_audio_system_name, mus_audio_mixer_write.
+27-Jul:   Float changed to mus_float_t, off_t changed to mus_long_t.
+14-Jul:   Rick fixed the windows build process; added sndlib.sln.
+13-Jul:   frame, mixer, and sound-data are set-applicable.
+          frame and mixer are functions like vct: (frame .1 .2).
+2-Jul:    default audio in Linux is now ALSA.
+17-Mar:   Matlab-5 headers.
+1-Jan:    added MUS_EXPORT to headers.
+
+2009 ----------------------------------------------------------------
+
+5-Dec:    mus-sox headers.
+7-Nov:    mus_header_type_to_string and mus_data_format_to_string are now const char*
+            so the string they return should not be freed
+4-Nov:    run.c (from snd-run.c), sndlib-ws.scm.
+23-Oct:   riff->rf64 autoconversion repaired.
+16-Oct:   removed Gauche support.
+11-Sep:   S7 support.
+14-Jul:   mus_samples_bounds.
+12-Jul:   mus_data_format_p and mus_header_type_p for C++'s benefit.
+30-Jun:   mus_max_malloc and mus_max_table_size.
+27-Feb:   removed mus_header_write_next_header (obsolete, deprecated since the days of Charlemagne)
+23-Jan    changes for OSS v4 thanks to Yair K.
+          new Jack environment variables thanks to Kjetil Matheussen.
+
+2008 ----------------------------------------------------------------
+
+25-Jun:   RIFF bugfix and minGW configure info thanks to Steve Beet.
+26-Mar:   mus_samples_peak.
+31-Jan:   caff headers.
+
+2007 ----------------------------------------------------------------
+
+12-Dec:   mus_clip_set_handler.
+21-Nov:   sound-data-scale! and sound-data-fill! with vct/sound-data with-sound output.
+20-Nov:   generic out-any, in-any, locsig.
+13-Nov:   RF64 headers.
+11-Nov:   MUS_BAD_SIZE and a warning for aifc/riff size > 2^31.
+26-Sep:   moved config.h to mus-config.h.
+31-Apr:   Gauche support.
+28-Mar:   version 20: 
+          Forth support thanks to Mike Scholz.
+17-Feb:   prescaler and clipping defaults are now mus_[set_]prescaler and mus_[set_]clipping
+            (old names in mus_file_*_default are deprecated).
+          The file specific forms are mus_file_*, replacing data_clipped with clipping.
+          The prescaler type is now Float (not float).
+2-Feb:    mus_audio_sun_outputs -> mus_sun_set_outputs, added mus_netbsd_set_outputs.
+          mus_audio_set_oss_buffers -> mus_oss_set_buffers.
+          changed ALSA environment variable names to use MUS, not SNDLIB.
+          changed ALSA default device to "default" from "hw:0"
+          added mus_alsa_buffers|buffer_size|device|playback_device|capture_device|squelch_warning.
+
+2006 ----------------------------------------------------------------
+
+21-Nov:   mus_sample_t is now double if use-float-samples and with-doubles.
+2-Nov:    -volume argument added to sndplay (Kjetil Matheussen).
+1-Nov:    mus-header-raw-defaults in sndlib2xen.
+18-Aug:   _sndlib.h and sndlib.h.in + configure.ac changes.
+1-Jul:    mus_data_format_short_name.
+23-Jun:   changed type of "cm" arg to mus_file_read_any and mus_file_read_chans.
+	     These actually were mus_sample_t** all along, so I'm not sure why
+	     they were declared mus_sample_t*.
+27-Apr:   vct* and vct+.
+
+2005 ----------------------------------------------------------------
+
+15-Nov:   removed mus_audio_save|restore.
+14-Jul:   added defaults for data_clipped and prescaler choices.
+30-Jun:   removed obsolete mus_sound_maxamp (CLM no longer needs it)
+9-Apr:    added -start and -end (in seconds) args to sndplay.
+29-Mar:   version 19:
+	  removed support for Digitracker SPL files (never have seen one).
+          removed mus_header_read_with_fd, mus_header_update_with_fd,
+          changed mus_header_change_samples to mus_header_change_data_size (in bytes).
+	  added header-type args to other mus_header_change_* functions
+15-Mar:   exported optkey support stuff (sndlib2xen.h).
+9-Mar:    Jack input and other improvements thanks to Kjetil S. Matheussen.
+26-Jan:   OSX Midi bugfix thanks to Ian MacArthur.
+
+2004 ----------------------------------------------------------------
+
+22-Dec:   sndplay jack support and other bugfixes thanks to Kjetil S. Matheussen.
+19-Dec:   changed mus-data-format-bytes-per-sample to mus-bytes-per-sample (also in C).
+24-Nov:   sndlib2xen mus-audio-open-* audio device check bugfix (thanks Michael Scholz).
+5-Nov:    Jack audio support thanks to Kjetil S. Matheussen.
+10-Oct:   libsndlib.a in Linux should be built with ld, not gcc -- thanks to Craig Sapp.
+6-Oct:    added sndins and gfm directories, both written by Michael Scholz.
+11-Aug:   int -> bool.
+10-July:  Sun audio support for Jurgen Keil's driver.
+          Removed mmreg.h dependency in windoze audio support.
+6-June:   CLM FFI name change: *_reset_c -> mus_*_reset_c (for consistency).
+30-Apr:   realloc support of Mac (old) OS thanks to Michael Klingbeil.
+28-Apr:   removed mus_sound_seek, mus_file_seek, mus_header_aiff_p, mus_sound_finalize,
+	    mus_header_set_aiff_loop_info, and mus_sound_aiff_p.
+          for mus_header_aiff_p, just check the header type for MUS_AIFF (as opposed to MUS_AIFC)
+	  for mus_header_set_aiff_loop_info use mus_header_set_full_aiff_loop_info
+26-Apr:   added 4 more header readers.
+9-Apr:    removed mus_header_update, mus_file_full_name -- use mus_expand_filename.
+31-Mar:   version 18.
+          fftw-3 support.
+	  removed mus_audio_mixer_save and mus_audio_mixer_restore.
+25-Mar:   changed install process in makefile.in (thanks to Hugo Villeneuve)
+17-Mar:   mus_audio input for Mac OSX.
+12-Mar:   removed mus_audio_clear_soundcard_inputs.
+11-Mar:   --prefix bugfixes in configure.
+4-Mar:    removed mus_header_write_with_fd.
+
+2003 ----------------------------------------------------------------
+
+18-Dec:   mus_audio_read|write_buffers.
+11-Dec:   sndlib-config, configure/make writes libsndlib.a|so
+2-Dec:    added mus_header_write hook.
+18-Oct:   xen-sndlib initialization now includes vct (thanks to Michael Scholz).
+	  protect Ruby's kernel.rand as kernel_rand.
+25-Sep:   removed support for Tandy headers (I never have seen one).
+24-Sep:   removed obsolete mus_sound_set_maxamp.
+13-Sep:   removed obsolete mus_header_set_aifc.
+10-Sep:   removed NeXT (audio) support.
+6-Sep:    removed mus_header_distributed and mus_sound_distributed.
+15-Jul:   sndlib-config
+20-May:   moved LONG_INT_P stuff to cmus.h (it was CL/CLM-specific).
+16-May:   added mus_sound_maxamps and mus_sound_set_maxamps (for off_t times).
+9-May:    removed mus_sound_set_loop_info (deprecated long ago).
+3-May:    version 16.
+          many int->off_t changes for large files.
+          MUS_SAMPLE_TYPE -> mus_sample_t.
+29-Apr:   added optional initial-element to make_vct.
+          moved vct_do, vcts_do, vcts_map to snd5.scm.
+23-Apr:   added strdup for MPW.
+18-Apr:   tie run optimizer into vct-map!
+29-Mar:   mus_sound_srate|chans|data_location|data_format|header_type settable via Xen.
+26-Mar:   vct->vector.
+24-Mar:   removed ALSA 0.5 support.
+11-Mar:   version 15.
+	  mus_header_change_chans|srate|type|format|location|comment|samples.
+1-Feb:    removed mus_header_update_comment.
+24-Jan:   removed "max_amp" functions -- use "maxamp".
+23-Jan:   ALSA improvements from Fernando.
+          removed old-sndlib2scm.scm, old-sndlib.h, sndlib.txt, transnd.cl, sndlib.i, snd-noguile.h
+
+2002 ----------------------------------------------------------------
+
+10-Dec:   added midi.c
+14-Nov:   mus_audio_compatible_format.
+12-Nov:   Mac-OSX stuff.
+29-Oct:   soundforge 64-bit "riff" headers.
+24-Sep:   version 14.
+          mus_sound_max_amp -> mus_sound_maxamp (also the set form and exists)
+            the old names exist as macros for backwards compatibility
+12-Sep:   changed IRCAM "Vax" handling to match Csound/MixViews (unscaled lfloats)
+29-Aug:   added mus-audio-reinitialize.
+10-Aug:   added wrap_sound_data.
+12-Jul:   ALSA 0.9 support from Fernando.
+6-Jul:    version 13.
+          sg.h, sl.h, noguile.h, sr.h, sz.h -> xen.h.
+          clm2scm.[ch], sndlib2scm.[ch] -> xen for scm.
+          many internal name changes to change scm to xen.
+          mus_xen rather than mus_scm (clm2xen), 
+          mus_xen_init for init_mus2scm_module, 
+          mus_sndlib2xen_initialize for mus_sndlib2scm_initialize.
+2-Jul:    a couple soundfont header bugfixes.
+21-Jun:   Mac fixups.
+4-June:   configure.ac for autoconf 2.50.
+22-May:   in OSS, DSP_SETFRAGMENT ioctl now only called if set_oss_buffers has been called.
+	    old default was (set-oss-buffers 4 12) but 2 12 is usable in most cases.
+21-May:   mus_header_raw_defaults (to read back current settings).
+19-May:   vct->sound-data now returns the sound-data object, not the vct.
+28-Apr:   mus_sound_report_cache.
+17-Apr:   remove broken, obsolete BeOS audio support.
+4-Apr:    mus_snprintf.
+19-Mar:   removed gdbm option.
+12-Mar:   sndinfo loop info report bugfix.
+          added mus_sound_set_max_amp, mus_sound_max_amp_exists.
+          bumped version to 12.
+7-Mar:    added mus-sound-write-date to sndlib2scm.
+10-Feb:   added sndlib2clm.lisp.
+8-Feb:    added clm2scm.h.
+1-Feb:    added vct-subseq.
+31-Jan:   changed mus-audio-read (sndlib2scm) to assume shorts, like mus-audio-write.
+29-Jan:   mus_sound_read can read trailing chunks, necessitating many fixups.
+          added mgetty's pvf header.
+26-Jan:   audio.c windows uninitialized variable bugfix (thanks to Paul A. Steckler).
+
+2001 ----------------------------------------------------------------
+
+28-Nov:    BSD support thanks to Steven Schultz.
+           Dolph-Chebyshev window if HAVE_GSL.
+24-Nov:    split ALSA support out in sndplay.c (merging with Fernando's version).
+17-Nov:    esd support thanks to Nick Bailey.
+6-Nov:     char * -> const char * in various places for C++.
+17-Oct:    added optional offset arg to vct-add!.
+28-Sep:    removed mus_file_open_descriptors (was obsolete long ago -- use mus_file_set_descriptors).
+19-Sep:    version 11: changed error handling; in this version, any error is signalled
+             immediately by mus_error, then the error indication (-1 normally) is
+             returned.  The caller needs to set mus_error_handler to specialize
+             this (its default is to fprintf(stderr,error-message)).  mus_audio_error
+             has been folded into mus_error, so mus_audio_error_name etc have been
+             removed.  mus_print added to replace the informational calls that used
+             mus_error and mus_audio_error (the latter should not be called anymore with
+             MUS_NO_ERROR!) -- MUS_AUDIO_NO_ERROR removed.  added mus_error_to_string.
+             mus_error_make_tag -> mus_make_error with name as arg. removed mus_write.
+18-Sep:    changed mus_fwrite to mus_write, added mus_print.
+22-Aug:    sound_duration should return -1.0 if error, not 1.0 (thanks to Michael Edwards)
+5-Aug:     port to Mac OS-X (not audio yet).
+17-July:   added vct-move!
+20-June:   change to scm_make_smob_type rather than *_mfpe.
+14-June:   ALSA 0.60 updates thanks to Paul Barton-Davis.
+8-June:    Linux OSS/ALSA choice now made at run-time (thanks to Fernando!).
+17-May:    removed vax float support.
+12-May:    removed 'old' names -- use old-sndlib2scm.scm and old-sndlib.h
+           mus_prescaler overflow bugfix.
+           added sg.h
+8-May:     added "const" to various function arguments.
+1-May:     Sam 9407 (audio.c) improvements thanks to Gerd Rausch.
+           clm.c mus_make_frame|mixer va_arg -> float bugfix.
+24-Apr:    added CSL headers.
+12-Apr:    Fernando Lopez-Lezcano provided a new ALSA port!
+           changed clm2scm to use built-in keyword support (use (read-set! keywords 'prefix))
+10-Apr:    version 10: many name changes (this time for sure!) -- use transnd.cl to update.
+	   Be audio support changed to reflect release 5.
+           Alsa also changed.
+1-Mar:     version 9.
+           added gdbm choice to sound.c, added sndlib2scm.h
+           changed to allow either floats or any-size "fraction" ints as internal data choice
+           removed mus_unshort_sound, added mus_write_to_buffer and mus_read_from_buffer
+           changed header macros to use SNDLIB_ -- old-sndlib.h has the old names
+           removed mus_float_sound (replaced by mus_read_from_buffer)
+1-Jan-00:  various changes to mus_outa etc.
+           changed (internal) mus_set_file_descriptor to include file name.
+           added buffer-full? and changed various macro names.
+           added mus_prescaler for problematic float files
+           brought headers.c loop support into sound.c, sndlib2scm, sndinfo.c.
+           added aiff loop info to write header via mus_set_aiff_loop_info
+
+2000 ----------------------------------------------------------------
+
+1-Dec:     added several more configure switches, sound_print_cache.
+           sound_max_amp returned vals in wrong order.
+           several improvements to src, granulate, and convolve thanks to Marc Lehmann.
+1-Nov:     version 8.
+           decided to make a non-compatible change: AIFF_sound file is now AIFC_sound_file,
+             and old_style_AIFF_sound_file is now AIFF_sound_file.
+12-Sep:    version 7.
+           ALSA port thanks to Paul Barton-Davis
+           fixed 2 bugs related to Sonorus Studio support
+           several clm.c/clm2scm.c bugs and oversights repaired.
+           added list2vct, mus_file2array, mus_array2file, dsp_devices.
+           added configure files, README.sndlib, changed tar file to use sndlib directory
+           added -1 as error return from various functions (void->int change in io.c and headers.c)
+           added mus_header_writable, mus_header_aiff_p, sound_aiff_p
+           much more of sndlib tied into sndlib2scm
+           tried to get SGI new AL default devices to work right
+           USE_BYTESWAP in io.c (if you want to use the GLibC macros).
+           added forget_sound to remove entry from sound data base.
+           added more vct funcs, formant-bank, oscil-bank, etc.
+1-Sep:     added mus_set_raw_header_defaults, mus_probe_file
+1-Aug:     old-sndlib.h for backwards compatibility, added mus_fwrite
+1-Jul:     added sound_max_amp, mus_error
+1-Jun:     version 6.
+           moved clm-specific code out of sndlib files 
+           changed many names to use "mus" prefix, or "SNDLIB" (and upper case)
+           added sound_frames
+           added clm.c, clm.h, vct.c, vct.h, clm2scm.c
+           added reopen_sound_output (arg order changed rev 6), mus_seek_frame, sound_seek_frame
+1-Mar:     version 5. 
+           changed float_sound to omit the scaling by SNDLIB_SNDFLT
+           removed perror calls
+           added sndlib2scm.c, sndlib-strings.h
+           fixed windoze audio_output bug
+           fixed Mac p2cstr potential bug
+1-Jan-99:  version 4. Sun-related word-alignment changes, C++ fixups
+
+1999 ----------------------------------------------------------------
+
+1-Dec:     version 3. removed output_scaler
+12-Oct:    version 2. removed header override functions
+1-Oct-98   version 1.
+

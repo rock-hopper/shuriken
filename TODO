@@ -1,0 +1,74 @@
+TODO
+
+Release Critical
+================
+
+Bugs
+-----------
+Undo create slice points error: 
+QGraphicsScene::removeItem: item 0x89373d0's scene (0x0) is different from this scene (0x89af5a8)
+
+Moving a slice point to the left of another results in the moved slice point being ignored when creating slices
+
+Fix zooming
+
+Fix aubio-related stuff in main window inc. sensitivity slider
+
+
+GUI Improvements
+----------------
+Rename window overlap to hop size
+
+Make menu entries do something!
+
+Play button / loop button
+
+Separate boxes for original BPM and new BPM
+
+
+Code Improvements
+-----------------
+Change sndlib code from float** to OwnedArray< Array<float> >
+
+JUCE_MIDI/JUCE_JACK - class members public to private, getGlobalJackClient
+
+
+Add Features
+------------
+SoundTouch / RubbberBand
+
+Make use of aubio's file handling functions
+
+LADISH L1
+
+
+
+Future Enhancements
+===================
+
+Bugs
+----
+Fix gaps in waveform when zoomed in
+
+
+Add Features
+------------
+JACK Session, NSM
+
+Play loop sync'ed to JACK transport
+
+Export h2drumkit, SFZ
+
+
+Dialogs
+-------
+Assign samples to MIDI keys dialog
+
+Help dialog
+
+User interface dialog
+
+Audio outputs dialog
+
+Envelope ADSR dialog
+

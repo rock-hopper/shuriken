@@ -1,0 +1,13 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+SNDLIB_LANGUAGE=None
+SNDLIB_AUDIO=None
+
+Name: sndlib_shuriken
+Description: audio library
+Version: 22
+Libs:  -lm -ldl     -lm
+Cflags: 
