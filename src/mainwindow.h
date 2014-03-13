@@ -26,12 +26,12 @@
 #include <QMainWindow>
 #include <QList>
 #include <QUndoStack>
+#include <aubio/aubio.h>
 #include "JuceHeader.h"
 #include "samplebuffer.h"
 #include "audiosetupdialog.h"
 #include "audiofilehandler.h"
 #include "sampleraudiosource.h"
-#include "aubio/aubio.h"
 
 
 namespace Ui
@@ -42,6 +42,8 @@ namespace Ui
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+
+    friend class CreateSlicesCommand;
 
 public:
     MainWindow( QWidget* parent = NULL );
@@ -68,9 +70,9 @@ private:
     AudioDeviceManager mDeviceManager;
     AudioFileHandler mFileHandler;
 
-    SharedSampleBuffer mCurrentSample;
+    SharedSampleBuffer mCurrentSampleBuffer;
     SharedSampleHeader mCurrentSampleHeader;
-    QList<SharedSampleBuffer> mSlicedSampleBufferList;
+    QList<SharedSampleBuffer> mSlicedSampleBuffers;
 
     ScopedPointer<SamplerAudioSource> mSamplerAudioSource;
     AudioSourcePlayer mAudioSourcePlayer;
@@ -90,7 +92,7 @@ private:
     static QList<int> calcSampleSlicePoints( const SharedSampleBuffer sampleBuffer, const aubioRoutine routine, const DetectionSettings settings );
     static qreal calcBPM( const SharedSampleBuffer sampleBuffer, const DetectionSettings settings );
     static void fillAubioInputBuffer( fvec_t* pInputBuffer, const SharedSampleBuffer sampleBuffer, const int sampleOffset );
-    static void sliceSampleBuffer( const SharedSampleBuffer inputBuffer, const QList<int> sampleSlicePointList, QList<SharedSampleBuffer>& outputBufferList );
+    static void createSampleSlices( const SharedSampleBuffer inputBuffer, const QList<int> sampleSlicePointList, QList<SharedSampleBuffer>& outputBufferList );
 
 private slots:
     void on_pushButton_CalcBPM_clicked();

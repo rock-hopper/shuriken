@@ -5,9 +5,6 @@ Release Critical
 
 Bugs
 -----------
-Undo create slice points error: 
-QGraphicsScene::removeItem: item 0x89373d0's scene (0x0) is different from this scene (0x89af5a8)
-
 Moving a slice point to the left of another results in the moved slice point being ignored when creating slices
 
 Fix zooming

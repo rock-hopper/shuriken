@@ -21,6 +21,7 @@
 */
 
 #include "commands.h"
+#include <QApplication>
 //#include <QDebug>
 
 
@@ -33,6 +34,8 @@ AddSlicePointItemCommand::AddSlicePointItemCommand( const qreal scenePosX,
     setText( "Add Slice Point" );
 }
 
+
+
 void AddSlicePointItemCommand::undo()
 {
     mGraphicsView->deleteSlicePoint( mSlicePointItem );
@@ -43,6 +46,8 @@ void AddSlicePointItemCommand::undo()
         mSliceButton->setEnabled( false );
     }
 }
+
+
 
 void AddSlicePointItemCommand::redo()
 {
@@ -62,6 +67,8 @@ AddSlicePointItemsCommand::AddSlicePointItemsCommand( QPushButton* const findOns
     setText( "Add Slice Points" );
 }
 
+
+
 void AddSlicePointItemsCommand::undo()
 {
     mFindOnsetsButton->setEnabled( true );
@@ -74,6 +81,8 @@ void AddSlicePointItemsCommand::undo()
     }
 }
 
+
+
 void AddSlicePointItemsCommand::redo()
 {
     mFindOnsetsButton->setEnabled( false );
@@ -84,4 +93,67 @@ void AddSlicePointItemsCommand::redo()
         QUndoCommand* command = const_cast<QUndoCommand*>( child( i ) );
         command->redo();
     }
+}
+
+
+
+//==================================================================================================
+
+CreateSlicesCommand::CreateSlicesCommand( MainWindow* const mainWindow,
+                                          WaveGraphicsView* const graphicsView,
+                                          QPushButton* const sliceButton,
+                                          QAction* const addSlicePointAction,
+                                          QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    mMainWindow( mainWindow ),
+    mGraphicsView( graphicsView ),
+    mSliceButton( sliceButton ),
+    mAddSlicePointAction( addSlicePointAction )
+{
+    setText( "Create Slices" );
+}
+
+
+
+void CreateSlicesCommand::undo()
+{
+    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+    mMainWindow->mSlicedSampleBuffers.clear();
+    mMainWindow->mSamplerAudioSource->clearAllSamples();
+    mMainWindow->mSamplerAudioSource->addNewSample( mMainWindow->mCurrentSampleBuffer,
+                                                    mMainWindow->mCurrentSampleHeader->sampleRate );
+    mGraphicsView->clearWaveform();
+    mGraphicsView->createWaveform( mMainWindow->mCurrentSampleBuffer );
+    mGraphicsView->showSlicePoints();
+    mSliceButton->setEnabled( true );
+    mAddSlicePointAction->setEnabled( true );
+
+    QApplication::restoreOverrideCursor();
+}
+
+
+
+void CreateSlicesCommand::redo()
+{
+    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+    const QList<int> sampleSlicePoints = mMainWindow->getCurrentSampleSlicePoints();
+
+    Q_ASSERT_X( sampleSlicePoints.size() > 0, "CreateSlicesCommand::redo", "No sample slice points" );
+
+    MainWindow::createSampleSlices( mMainWindow->mCurrentSampleBuffer,
+                                    sampleSlicePoints,
+                                    mMainWindow->mSlicedSampleBuffers );
+
+    mMainWindow->mSamplerAudioSource->setSamples( mMainWindow->mSlicedSampleBuffers,
+                                                  mMainWindow->mCurrentSampleHeader->sampleRate );
+
+    mGraphicsView->hideSlicePoints();
+    mGraphicsView->clearWaveform();
+    mGraphicsView->createWaveformSlices( mMainWindow->mSlicedSampleBuffers );
+    mSliceButton->setEnabled( false );
+    mAddSlicePointAction->setEnabled( false );
+
+    QApplication::restoreOverrideCursor();
 }

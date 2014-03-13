@@ -141,7 +141,7 @@ QList<qreal> WaveGraphicsView::getSlicePointScenePosList()
 
 
 
-void WaveGraphicsView::clearView()
+void WaveGraphicsView::clearAll()
 {
     foreach ( QGraphicsItem* item, items() )
     {
@@ -149,6 +149,40 @@ void WaveGraphicsView::clearView()
     }
     mWaveformItemList.clear();
     mSlicePointItemList.clear();
+}
+
+
+
+void WaveGraphicsView::clearWaveform()
+{
+    foreach ( QGraphicsItem* item, items() )
+    {
+        if ( item->type() == WaveformItem::Type )
+        {
+            scene()->removeItem( item );
+        }
+    }
+    mWaveformItemList.clear();
+}
+
+
+
+void WaveGraphicsView::hideSlicePoints()
+{
+    foreach ( SharedSlicePointItem item, mSlicePointItemList )
+    {
+        item->setVisible( false );
+    }
+}
+
+
+
+void WaveGraphicsView::showSlicePoints()
+{
+    foreach ( SharedSlicePointItem item, mSlicePointItemList )
+    {
+        item->setVisible( true );
+    }
 }
 
 

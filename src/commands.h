@@ -25,14 +25,18 @@
 
 #include <QUndoCommand>
 #include <QPushButton>
+#include <QAction>
 #include "wavegraphicsview.h"
 #include "slicepointitem.h"
+#include "mainwindow.h"
 
 
 class AddSlicePointItemCommand : public QUndoCommand
 {
 public:
-    AddSlicePointItemCommand( const qreal scenePosX, WaveGraphicsView* const graphicsView, QPushButton* const sliceButton,
+    AddSlicePointItemCommand( const qreal scenePosX,
+                              WaveGraphicsView* const graphicsView,
+                              QPushButton* const sliceButton,
                               QUndoCommand* parent = NULL );
 
     void undo();
@@ -46,11 +50,13 @@ private:
 };
 
 
+
 class AddSlicePointItemsCommand : public QUndoCommand
 {
 public:
-    AddSlicePointItemsCommand( QPushButton* const findOnsetsButton, QPushButton* const findBeatsButton,
-                              QUndoCommand* parent = NULL );
+    AddSlicePointItemsCommand( QPushButton* const findOnsetsButton,
+                               QPushButton* const findBeatsButton,
+                               QUndoCommand* parent = NULL );
 
     void undo();
     void redo();
@@ -58,6 +64,27 @@ public:
 private:
     QPushButton* const mFindOnsetsButton;
     QPushButton* const mFindBeatsButton;
+};
+
+
+
+class CreateSlicesCommand : public QUndoCommand
+{
+public:
+    CreateSlicesCommand( MainWindow* const mainWindow,
+                         WaveGraphicsView* const graphicsView,
+                         QPushButton* const sliceButton,
+                         QAction* const addSlicePointAction,
+                         QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    MainWindow* const mMainWindow;
+    WaveGraphicsView* const mGraphicsView;
+    QPushButton* const mSliceButton;
+    QAction* const mAddSlicePointAction;
 };
 
 #endif // COMMANDS_H

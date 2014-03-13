@@ -24,7 +24,7 @@
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 #include <QFileDialog>
-#include "aubio/aubio.h"
+#include <aubio/aubio.h>
 #include "commands.h"
 //#include <QDebug>
 
@@ -210,7 +210,7 @@ QList<int> MainWindow::getCurrentSampleSlicePoints()
 {
     const QList<qreal> slicePointScenePosList = mUI->waveGraphicsView->getSlicePointScenePosList();
     const qreal sceneWidth = mUI->waveGraphicsView->scene()->width();
-    const int numFrames = mCurrentSample->getNumFrames();
+    const int numFrames = mCurrentSampleBuffer->getNumFrames();
     const qreal spaceBetweenSamplePlots = sceneWidth / numFrames;
     const qreal sampleRate = mCurrentSampleHeader->sampleRate;
     const int minSamplesBetweenSlicePoints = (int) floor( sampleRate * MIN_INTER_ONSET_SECS );
@@ -431,7 +431,7 @@ void MainWindow::fillAubioInputBuffer( fvec_t* pInputBuffer, const SharedSampleB
 
 
 
-void MainWindow::sliceSampleBuffer( const SharedSampleBuffer inputBuffer, const QList<int> sampleSlicePointList, QList<SharedSampleBuffer>& outputBufferList )
+void MainWindow::createSampleSlices( const SharedSampleBuffer inputBuffer, const QList<int> sampleSlicePointList, QList<SharedSampleBuffer>& outputBufferList )
 {
     const int numFrames = inputBuffer->getNumFrames();
     const int numChans = inputBuffer->getNumChannels();
@@ -469,8 +469,8 @@ void MainWindow::sliceSampleBuffer( const SharedSampleBuffer inputBuffer, const 
 
 void MainWindow::reorderSampleBufferList( const int oldOrderPos, const int newOrderPos )
 {
-    mSlicedSampleBufferList.move( oldOrderPos, newOrderPos );
-    mSamplerAudioSource->setSamples( mSlicedSampleBufferList, mCurrentSampleHeader->sampleRate );
+    mSlicedSampleBuffers.move( oldOrderPos, newOrderPos );
+    mSamplerAudioSource->setSamples( mSlicedSampleBuffers, mCurrentSampleHeader->sampleRate );
 }
 
 
@@ -494,8 +494,8 @@ void MainWindow::on_actionSave_Project_triggered()
 
 void MainWindow::on_actionClose_Project_triggered()
 {
-    mSlicedSampleBufferList.clear();
-    mCurrentSample.clear();
+    mSlicedSampleBuffers.clear();
+    mCurrentSampleBuffer.clear();
     mCurrentSampleHeader.clear();
 
     if ( mIsAudioInitialised )
@@ -503,7 +503,7 @@ void MainWindow::on_actionClose_Project_triggered()
         mSamplerAudioSource->clearAllSamples();
     }
 
-    mUI->waveGraphicsView->clearView();
+    mUI->waveGraphicsView->clearAll();
     mUI->zoomSlider->setValue( 1 );
     mUI->doubleSpinBox_BPM->setValue( 0.0 );
     mUI->pushButton_CalcBPM->setEnabled( false );
@@ -542,7 +542,7 @@ void MainWindow::on_actionImport_Audio_File_triggered()
         {
             on_actionClose_Project_triggered();
 
-            mCurrentSample = sampleBuffer;
+            mCurrentSampleBuffer = sampleBuffer;
             mCurrentSampleHeader = sampleHeader;
 
             mUI->waveGraphicsView->createWaveform( sampleBuffer );
@@ -716,7 +716,7 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     const DetectionSettings settings = getDetectionSettings();
-    const qreal bpm = calcBPM( mCurrentSample, settings );
+    const qreal bpm = calcBPM( mCurrentSampleBuffer, settings );
     mUI->doubleSpinBox_BPM->setValue( bpm );
 
     QApplication::restoreOverrideCursor();
@@ -726,23 +726,11 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
 
 void MainWindow::on_pushButton_Slice_clicked()
 {
-    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
-
-    const QList<int> sampleSlicePointList = getCurrentSampleSlicePoints();
-
-    if ( sampleSlicePointList.size() > 0 )
-    {
-        sliceSampleBuffer( mCurrentSample, sampleSlicePointList, mSlicedSampleBufferList );
-
-        mSamplerAudioSource->setSamples( mSlicedSampleBufferList, mCurrentSampleHeader->sampleRate );
-
-        mUI->waveGraphicsView->clearView();
-        mUI->waveGraphicsView->createWaveformSlices( mSlicedSampleBufferList );
-        mUI->pushButton_Slice->setEnabled( false );
-        mUI->actionAdd_Slice_Point->setEnabled( false );
-    }
-
-    QApplication::restoreOverrideCursor();
+    QUndoCommand* command = new CreateSlicesCommand( this,
+                                                     mUI->waveGraphicsView,
+                                                     mUI->pushButton_Slice,
+                                                     mUI->actionAdd_Slice_Point );
+    mUndoStack.push( command );
 }
 
 
@@ -759,10 +747,10 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     const DetectionSettings settings = getDetectionSettings();
-    QList<int> sampleSlicePointList = calcSampleSlicePoints( mCurrentSample, ONSET_DETECTION, settings );
+    QList<int> sampleSlicePointList = calcSampleSlicePoints( mCurrentSampleBuffer, ONSET_DETECTION, settings );
 
     const qreal sceneWidth = mUI->waveGraphicsView->scene()->width();
-    const qreal spaceBetweenSamplePlots = sceneWidth / mCurrentSample->getNumFrames();
+    const qreal spaceBetweenSamplePlots = sceneWidth / mCurrentSampleBuffer->getNumFrames();
 
     QUndoCommand* command = new AddSlicePointItemsCommand( mUI->pushButton_FindOnsets, mUI->pushButton_FindBeats );
     foreach ( int sampleSlicePoint, sampleSlicePointList )
@@ -782,10 +770,10 @@ void MainWindow::on_pushButton_FindBeats_clicked()
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     const DetectionSettings settings = getDetectionSettings();
-    QList<int> sampleSlicePointList = calcSampleSlicePoints( mCurrentSample, BEAT_DETECTION, settings );
+    QList<int> sampleSlicePointList = calcSampleSlicePoints( mCurrentSampleBuffer, BEAT_DETECTION, settings );
 
     const qreal sceneWidth = mUI->waveGraphicsView->scene()->width();
-    const qreal spaceBetweenSamplePlots = sceneWidth / mCurrentSample->getNumFrames();
+    const qreal spaceBetweenSamplePlots = sceneWidth / mCurrentSampleBuffer->getNumFrames();
 
     QUndoCommand* command = new AddSlicePointItemsCommand( mUI->pushButton_FindOnsets, mUI->pushButton_FindBeats );
     foreach ( int sampleSlicePoint, sampleSlicePointList )

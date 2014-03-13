@@ -46,7 +46,10 @@ public:
     SharedSlicePointItem createSlicePoint( const qreal scenePosX );
     void deleteSlicePoint( const SharedSlicePointItem slicePointItem );
     QList<qreal> getSlicePointScenePosList();
-    void clearView();
+    void clearAll();
+    void clearWaveform();
+    void hideSlicePoints();
+    void showSlicePoints();
 
 protected:
     void resizeEvent( QResizeEvent* event );
