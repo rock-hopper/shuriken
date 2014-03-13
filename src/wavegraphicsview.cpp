@@ -136,6 +136,8 @@ QList<qreal> WaveGraphicsView::getSlicePointScenePosList()
         slicePointScenePosList.append( slicePointItem->scenePos().x() );
     }
 
+    qSort( slicePointScenePosList );
+
     return slicePointScenePosList;
 }
 
