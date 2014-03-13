@@ -37,6 +37,7 @@ public:
     AddSlicePointItemCommand( const qreal scenePosX,
                               WaveGraphicsView* const graphicsView,
                               QPushButton* const sliceButton,
+                              MainWindow* const mainWindow,
                               QUndoCommand* parent = NULL );
 
     void undo();
@@ -46,6 +47,7 @@ private:
     const qreal mScenePosX;
     WaveGraphicsView* const mGraphicsView;
     QPushButton* const mSliceButton;
+    MainWindow* const mMainWindow;
     SharedSlicePointItem mSlicePointItem;
 };
 
@@ -64,6 +66,26 @@ public:
 private:
     QPushButton* const mFindOnsetsButton;
     QPushButton* const mFindBeatsButton;
+};
+
+
+
+class MoveSlicePointItemCommand : public QUndoCommand
+{
+public:
+    MoveSlicePointItemCommand( const qreal oldScenePosX,
+                               const qreal newScenePosX,
+                               WaveGraphicsView* const graphicsView,
+                               QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    const qreal mOldScenePosX;
+    const qreal mNewScenePosX;
+    WaveGraphicsView* const mGraphicsView;
+    bool mIsFirstRedoCall;
 };
 
 

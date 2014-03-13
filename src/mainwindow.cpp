@@ -90,6 +90,7 @@ MainWindow::MainWindow( QWidget* parent ) :
     mUI->checkBox_AdvancedOptions->setChecked( false );
 
 
+    // Connect signals to slots
     QObject::connect( mUI->zoomSlider, SIGNAL( valueChanged(int) ),
                       mUI->waveGraphicsView, SLOT( setZoom(int) ) );
 
@@ -474,6 +475,13 @@ void MainWindow::reorderSampleBufferList( const int oldOrderPos, const int newOr
 }
 
 
+void MainWindow::recordSlicePointScenePos( const qreal oldScenePosX, const qreal newScenePosX )
+{
+    QUndoCommand* command = new MoveSlicePointItemCommand( oldScenePosX, newScenePosX, mUI->waveGraphicsView );
+    mUndoStack.push( command );
+}
+
+
 
 //====================
 // "File" menu:
@@ -619,7 +627,7 @@ void MainWindow::on_actionDelete_triggered()
 
 void MainWindow::on_actionAdd_Slice_Point_triggered()
 {
-    QUndoCommand* command = new AddSlicePointItemCommand( 0.0, mUI->waveGraphicsView, mUI->pushButton_Slice );
+    QUndoCommand* command = new AddSlicePointItemCommand( 0.0, mUI->waveGraphicsView, mUI->pushButton_Slice, this );
     mUndoStack.push( command );
 }
 
@@ -756,7 +764,7 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
     foreach ( int sampleSlicePoint, sampleSlicePointList )
     {
         const qreal scenePosX = sampleSlicePoint * spaceBetweenSamplePlots;
-        new AddSlicePointItemCommand( scenePosX, mUI->waveGraphicsView, mUI->pushButton_Slice, command );
+        new AddSlicePointItemCommand( scenePosX, mUI->waveGraphicsView, mUI->pushButton_Slice, this, command );
     }
     mUndoStack.push( command );
 
@@ -779,7 +787,7 @@ void MainWindow::on_pushButton_FindBeats_clicked()
     foreach ( int sampleSlicePoint, sampleSlicePointList )
     {
         const qreal scenePosX = sampleSlicePoint * spaceBetweenSamplePlots;
-        new AddSlicePointItemCommand( scenePosX, mUI->waveGraphicsView, mUI->pushButton_Slice, command );
+        new AddSlicePointItemCommand( scenePosX, mUI->waveGraphicsView, mUI->pushButton_Slice, this, command );
     }
     mUndoStack.push( command );
 

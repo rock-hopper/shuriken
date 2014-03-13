@@ -32,6 +32,7 @@
 #include "audiosetupdialog.h"
 #include "audiofilehandler.h"
 #include "sampleraudiosource.h"
+#include "slicepointitem.h"
 
 
 namespace Ui
@@ -125,6 +126,7 @@ private slots:
     void on_actionOpen_Project_triggered();
 
     void reorderSampleBufferList( const int oldOrderPos, const int newOrderPos );
+    void recordSlicePointScenePos( const qreal oldScenePosX, const qreal newScenePosX );
 };
 
 #endif // MAINWINDOW_H

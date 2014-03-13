@@ -23,6 +23,7 @@
 #include "slicepointitem.h"
 #include <QBrush>
 #include <QGraphicsScene>
+//#include <QDebug>
 
 
 //==================================================================================================
@@ -35,6 +36,24 @@ SlicePointItem::SlicePointItem( const qreal height, QGraphicsItem* parent ) :
     setBrush( QBrush( QColor( Qt::red ) ) );
     setZValue( 2 );
     setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges );
+
+    mLastKnownScenePosX = pos().x();
+}
+
+
+
+void SlicePointItem::setPos( const QPointF& pos )
+{
+    QGraphicsItem::setPos( pos );
+
+    mLastKnownScenePosX = pos.x();
+}
+
+
+
+void SlicePointItem::setPos( qreal x, qreal y )
+{
+    setPos( QPointF(x, y) );
 }
 
 
@@ -80,4 +99,17 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant &
     }
 
     return QGraphicsItem::itemChange( change, value );
+}
+
+
+
+void SlicePointItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
+{
+    QGraphicsItem::mouseReleaseEvent( event );
+
+    const qreal newScenePosX = pos().x();
+
+    emit scenePosChanged( mLastKnownScenePosX, newScenePosX );
+
+    mLastKnownScenePosX = newScenePosX;
 }

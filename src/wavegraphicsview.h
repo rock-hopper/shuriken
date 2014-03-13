@@ -32,7 +32,7 @@
 
 
 typedef QSharedPointer<WaveformItem> SharedWaveformItem;
-typedef QSharedPointer<SlicePointItem> SharedSlicePointItem;
+
 
 class WaveGraphicsView : public QGraphicsView
 {

@@ -27,6 +27,10 @@
 #include <QGraphicsPolygonItem>
 
 
+class SlicePointItem;
+typedef QSharedPointer<SlicePointItem> SharedSlicePointItem;
+
+
 class SlicePointItem : public QObject, public QGraphicsPolygonItem
 {
     Q_OBJECT
@@ -36,11 +40,21 @@ public:
 
     SlicePointItem( const qreal height, QGraphicsItem* parent = NULL );
 
+    void setPos( const QPointF& pos );
+    void setPos( qreal x, qreal y );
     void setHeight( const qreal height );
     int type() const    { return Type; }
 
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
+    void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
+
+private:
+    qreal mLastKnownScenePosX;
+
+signals:
+    void scenePosChanged( const qreal oldScenePosX, const qreal newScenePosX );
 };
+
 
 #endif // SLICEPOINTITEM_H
