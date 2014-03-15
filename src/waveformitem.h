@@ -49,12 +49,13 @@ public:
 
     void setRect( const qreal x, const qreal y, const qreal width, const qreal height );
 
-    int getOrderPos() const                         { return mOrderPos; }
-    void setOrderPos( const int orderPos )          { mOrderPos = orderPos; }
+    int getOrderPos() const                         { return mCurrentOrderPos; }
+    void setOrderPos( const int orderPos )          { mCurrentOrderPos = orderPos; }
     int type() const                                { return Type; }
 
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
+    void mousePressEvent( QGraphicsSceneMouseEvent* event );
     void mouseMoveEvent( QGraphicsSceneMouseEvent* event );
     void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
@@ -68,7 +69,8 @@ private:
     QList<SharedPainterPath> mWavePathList;
     QPen mWavePen;
     QPen mCentreLinePen;
-    int mOrderPos;
+    int mCurrentOrderPos;
+    int mOrderPosBeforeMove;
     qreal mScaleFactor;
     int mNumBins;
     qreal mBinSize;
@@ -81,7 +83,9 @@ private:
     static const int NOT_SET = -1;
 
 signals:
-    void orderPosChanged( const int oldOrderPos, const int newOrderPos );
+    void orderPosIsChanging( const int oldOrderPos, const int newOrderPos );
+    void orderPosHasChanged( const int startOrderPos, const int destOrderPos );
+    void finishedMoving( const int orderPos );
 };
 
 #endif // WAVEFORMITEM_H

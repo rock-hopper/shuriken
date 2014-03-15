@@ -32,7 +32,7 @@ WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer, const int ord
     QObject(),
     QGraphicsRectItem( 0.0, 0.0, width, height, parent ),
     mSampleBuffer( sampleBuffer ),
-    mOrderPos( orderPos ),
+    mCurrentOrderPos( orderPos ),
     mScaleFactor( NOT_SET ),
     mFirstCalculatedBin( NOT_SET ),
     mLastCalculatedBin( NOT_SET )
@@ -218,6 +218,15 @@ QVariant WaveformItem::itemChange( GraphicsItemChange change, const QVariant &va
 
 
 
+void WaveformItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
+{
+    QGraphicsItem::mousePressEvent( event );
+
+    mOrderPosBeforeMove = mCurrentOrderPos;
+}
+
+
+
 void WaveformItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseMoveEvent( event );
@@ -232,15 +241,13 @@ void WaveformItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
         {
             WaveformItem* const otherWaveformItem = qgraphicsitem_cast<WaveformItem*>( item );
 
-            if ( otherWaveformItem->getOrderPos() < getOrderPos() )
+            if ( otherWaveformItem->getOrderPos() < mCurrentOrderPos )
             {
                 // If the left edge of this item is more than halfway across the other item then swap places
                 if ( scenePos().x() < otherWaveformItem->scenePos().x() + otherWaveformItem->rect().center().x() )
                 {
                     const int newOrderPos = otherWaveformItem->getOrderPos();
-                    const int oldOrderPos = getOrderPos();
-                    setOrderPos( newOrderPos );
-                    emit orderPosChanged( oldOrderPos, newOrderPos );
+                    emit orderPosIsChanging( mCurrentOrderPos, newOrderPos );
                 }
             }
         }
@@ -259,15 +266,13 @@ void WaveformItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
             {
                 WaveformItem* const otherWaveformItem = qgraphicsitem_cast<WaveformItem*>( item );
 
-                if ( otherWaveformItem->getOrderPos() > getOrderPos() )
+                if ( otherWaveformItem->getOrderPos() > mCurrentOrderPos )
                 {
                     // If the right edge of this item is more than halfway across the other item then swap places
                     if ( rightX > otherWaveformItem->scenePos().x() + otherWaveformItem->rect().center().x() )
                     {
                         const int newOrderPos = otherWaveformItem->getOrderPos();
-                        const int oldOrderPos = getOrderPos();
-                        setOrderPos( newOrderPos );
-                        emit orderPosChanged( oldOrderPos, newOrderPos );
+                        emit orderPosIsChanging( mCurrentOrderPos, newOrderPos );
                     }
                 }
             }
@@ -281,23 +286,12 @@ void WaveformItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseReleaseEvent( event );
 
-    qreal newScenePosX = 0.0;
-
-    // New scene position for this item = sum of the widths of all WaveformItems to the left of this one
-    foreach ( QGraphicsItem* const item, scene()->items() )
+    if ( mOrderPosBeforeMove != mCurrentOrderPos )
     {
-        if ( item->type() == type() ) // If the other item is a WaveformItem
-        {
-            WaveformItem* const otherWaveformItem = qgraphicsitem_cast<WaveformItem*>( item );
-
-            if ( otherWaveformItem->getOrderPos() < getOrderPos() )
-            {
-                newScenePosX += otherWaveformItem->rect().width();
-            }
-        }
+        emit orderPosHasChanged( mOrderPosBeforeMove, mCurrentOrderPos );
     }
 
-    setPos( newScenePosX, 0.0 );
+    emit finishedMoving( mCurrentOrderPos );
 }
 
 

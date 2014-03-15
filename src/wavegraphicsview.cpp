@@ -63,15 +63,16 @@ void WaveGraphicsView::createWaveform( const SharedSampleBuffer sampleBuffer )
 
 
 
-void WaveGraphicsView::createWaveformSlices( const QList<SharedSampleBuffer> sampleBufferList )
+QList<SharedWaveformItem> WaveGraphicsView::createWaveformSlices( const QList<SharedSampleBuffer> sampleBufferList )
 {
     uint totalNumFrames = 0;
+
     foreach ( SharedSampleBuffer sampleBuffer, sampleBufferList )
     {
         totalNumFrames += sampleBuffer->getNumFrames();
     }
 
-    Q_ASSERT_X( totalNumFrames != 0, "WaveGraphicsView::createWaveformSlices()", "division by zero" );
+    Q_ASSERT_X( totalNumFrames != 0, "WaveGraphicsView::createWaveformSlices", "division by zero" );
 
     qreal scenePosX = 0.0;
     int orderPos = 0;
@@ -85,12 +86,27 @@ void WaveGraphicsView::createWaveformSlices( const QList<SharedSampleBuffer> sam
         mWaveformItemList.append( SharedWaveformItem( waveformItem ) );
         scene()->addItem( waveformItem );
 
-        QObject::connect( waveformItem, SIGNAL( orderPosChanged(int,int) ),
+        QObject::connect( waveformItem, SIGNAL( orderPosIsChanging(int,int) ),
                           this, SLOT( reorderWaveformSlices(int,int) ) );
+
+        QObject::connect( waveformItem, SIGNAL( finishedMoving(int) ),
+                          this, SLOT( slideWaveformSliceIntoPlace(int) ) );
 
         scenePosX += sliceWidth;
         orderPos++;
     }
+
+    return mWaveformItemList;
+}
+
+
+
+void WaveGraphicsView::moveWaveformSlice( const int oldOrderPos, const int newOrderPos )
+{
+    Q_ASSERT_X( ! mWaveformItemList.isEmpty(), "WaveGraphicsView::moveWaveformSlice", "mWaveformItemList is empty" );
+
+    reorderWaveformSlices( oldOrderPos, newOrderPos );
+    slideWaveformSliceIntoPlace( newOrderPos );
 }
 
 
@@ -123,6 +139,26 @@ void WaveGraphicsView::deleteSlicePoint( const SharedSlicePointItem slicePointIt
 {
     scene()->removeItem( slicePointItem.data() );
     mSlicePointItemList.removeOne( slicePointItem );
+}
+
+
+
+void WaveGraphicsView::hideSlicePoints()
+{
+    foreach ( SharedSlicePointItem item, mSlicePointItemList )
+    {
+        item->setVisible( false );
+    }
+}
+
+
+
+void WaveGraphicsView::showSlicePoints()
+{
+    foreach ( SharedSlicePointItem item, mSlicePointItemList )
+    {
+        item->setVisible( true );
+    }
 }
 
 
@@ -165,26 +201,6 @@ void WaveGraphicsView::clearWaveform()
         }
     }
     mWaveformItemList.clear();
-}
-
-
-
-void WaveGraphicsView::hideSlicePoints()
-{
-    foreach ( SharedSlicePointItem item, mSlicePointItemList )
-    {
-        item->setVisible( false );
-    }
-}
-
-
-
-void WaveGraphicsView::showSlicePoints()
-{
-    foreach ( SharedSlicePointItem item, mSlicePointItemList )
-    {
-        item->setVisible( true );
-    }
 }
 
 
@@ -251,6 +267,8 @@ void WaveGraphicsView::setZoom( const int zoomFactor )
 
 void WaveGraphicsView::reorderWaveformSlices( const int oldOrderPos, const int newOrderPos )
 {
+    mWaveformItemList[ oldOrderPos ]->setOrderPos( newOrderPos );
+
     const qreal distanceToMove = mWaveformItemList[ oldOrderPos ]->rect().width();
 
     // If a slice has been dragged to the left
@@ -278,4 +296,27 @@ void WaveGraphicsView::reorderWaveformSlices( const int oldOrderPos, const int n
     mWaveformItemList.move( oldOrderPos, newOrderPos );
 
     emit orderPosChanged( oldOrderPos, newOrderPos );
+}
+
+
+
+void WaveGraphicsView::slideWaveformSliceIntoPlace( const int orderPos )
+{
+    qreal newScenePosX = 0.0;
+
+    // New scene position for this item = sum of the widths of all WaveformItems to the left of this one
+    foreach ( QGraphicsItem* const item, scene()->items() )
+    {
+        if ( item->type() == WaveformItem::Type )
+        {
+            WaveformItem* const otherWaveformItem = qgraphicsitem_cast<WaveformItem*>( item );
+
+            if ( otherWaveformItem->getOrderPos() < orderPos )
+            {
+                newScenePosX += otherWaveformItem->rect().width();
+            }
+        }
+    }
+
+    mWaveformItemList[ orderPos ]->setPos( newScenePosX, 0.0 );
 }

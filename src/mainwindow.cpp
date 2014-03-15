@@ -483,6 +483,14 @@ void MainWindow::recordSlicePointScenePos( const qreal oldScenePosX, const qreal
 
 
 
+void MainWindow::recordWaveformItemNewOrderPos( const int startOrderPos, const int destOrderPos )
+{
+    QUndoCommand* command = new MoveWaveformItemCommand( startOrderPos, destOrderPos, mUI->waveGraphicsView );
+    mUndoStack.push( command );
+}
+
+
+
 //====================
 // "File" menu:
 

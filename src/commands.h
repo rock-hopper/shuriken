@@ -109,4 +109,24 @@ private:
     QAction* const mAddSlicePointAction;
 };
 
+
+
+class MoveWaveformItemCommand : public QUndoCommand
+{
+public:
+    MoveWaveformItemCommand( const int startOrderPos,
+                             const int destOrderPos,
+                             WaveGraphicsView* const graphicsView,
+                             QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    const int mStartOrderPos;
+    const int mDestOrderPos;
+    WaveGraphicsView* const mGraphicsView;
+    bool mIsFirstRedoCall;
+};
+
 #endif // COMMANDS_H

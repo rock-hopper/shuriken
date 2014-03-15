@@ -42,14 +42,17 @@ public:
     WaveGraphicsView( QWidget* parent = NULL );
 
     void createWaveform( const SharedSampleBuffer sampleBuffer );
-    void createWaveformSlices( const QList<SharedSampleBuffer> sampleBufferList );
+    QList<SharedWaveformItem> createWaveformSlices( const QList<SharedSampleBuffer> sampleBufferList );
+    void moveWaveformSlice( const int oldOrderPos, const int newOrderPos );
+
     SharedSlicePointItem createSlicePoint( const qreal scenePosX );
     void deleteSlicePoint( const SharedSlicePointItem slicePointItem );
-    QList<qreal> getSlicePointScenePosList();
-    void clearAll();
-    void clearWaveform();
     void hideSlicePoints();
     void showSlicePoints();
+    QList<qreal> getSlicePointScenePosList();
+
+    void clearAll();
+    void clearWaveform();
 
 protected:
     void resizeEvent( QResizeEvent* event );
@@ -64,6 +67,7 @@ signals:
 private slots:
     void setZoom( const int zoomFactor );
     void reorderWaveformSlices( const int oldOrderPos, const int newOrderPos );
+    void slideWaveformSliceIntoPlace( const int orderPos );
 };
 
 #endif // WAVEGRAPHICSVIEW_H

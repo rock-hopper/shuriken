@@ -201,9 +201,53 @@ void CreateSlicesCommand::redo()
 
     mGraphicsView->hideSlicePoints();
     mGraphicsView->clearWaveform();
-    mGraphicsView->createWaveformSlices( mMainWindow->mSlicedSampleBuffers );
+
+    const QList<SharedWaveformItem> waveformItemList =
+            mGraphicsView->createWaveformSlices( mMainWindow->mSlicedSampleBuffers );
+
+    foreach ( SharedWaveformItem item, waveformItemList )
+    {
+        QObject::connect( item.data(), SIGNAL( orderPosHasChanged(int,int) ),
+                          mMainWindow, SLOT( recordWaveformItemNewOrderPos(int,int) ) );
+    }
+
     mSliceButton->setEnabled( false );
     mAddSlicePointAction->setEnabled( false );
 
     QApplication::restoreOverrideCursor();
+}
+
+
+
+//==================================================================================================
+
+MoveWaveformItemCommand::MoveWaveformItemCommand( const int startOrderPos,
+                                                  const int destOrderPos,
+                                                  WaveGraphicsView* const graphicsView,
+                                                  QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    mStartOrderPos( startOrderPos ),
+    mDestOrderPos( destOrderPos ),
+    mGraphicsView( graphicsView )
+{
+    setText( "Move Waveform Item" );
+    mIsFirstRedoCall = true;
+}
+
+
+
+void MoveWaveformItemCommand::undo()
+{
+    mGraphicsView->moveWaveformSlice( mDestOrderPos, mStartOrderPos );
+}
+
+
+
+void MoveWaveformItemCommand::redo()
+{
+    if ( ! mIsFirstRedoCall )
+    {
+        mGraphicsView->moveWaveformSlice( mStartOrderPos, mDestOrderPos );
+    }
+    mIsFirstRedoCall = false;
 }
