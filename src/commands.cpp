@@ -178,7 +178,7 @@ void CreateSlicesCommand::redo()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    const QList<int> slicePointFrameNumList = mMainWindow->getCurrentSlicePointFrameNumList();
+    const QList<int> slicePointFrameNumList = mMainWindow->getAmendedSlicePointFrameNumList();
 
     Q_ASSERT_X( slicePointFrameNumList.size() > 0, "CreateSlicesCommand::redo", "No sample slice points" );
 

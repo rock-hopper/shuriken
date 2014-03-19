@@ -210,7 +210,7 @@ MainWindow::DetectionSettings MainWindow::getDetectionSettings()
 
 
 
-QList<int> MainWindow::getCurrentSlicePointFrameNumList()
+QList<int> MainWindow::getAmendedSlicePointFrameNumList()
 {
     const QList<int> slicePointFrameNumList = mUI->waveGraphicsView->getSlicePointFrameNumList();
     const int numFrames = mCurrentSampleBuffer->getNumFrames();
@@ -764,13 +764,13 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     const DetectionSettings settings = getDetectionSettings();
-    const QList<int> sampleSlicePointList = calcSampleSlicePoints( mCurrentSampleBuffer, ONSET_DETECTION, settings );
+    const QList<int> slicePointFrameNumList = calcSampleSlicePoints( mCurrentSampleBuffer, ONSET_DETECTION, settings );
 
     QUndoCommand* command = new AddSlicePointItemsCommand( mUI->pushButton_FindOnsets, mUI->pushButton_FindBeats );
 
-    foreach ( int sampleNum, sampleSlicePointList )
+    foreach ( int frameNum, slicePointFrameNumList )
     {
-        new AddSlicePointItemCommand( sampleNum, mUI->waveGraphicsView, mUI->pushButton_Slice, this, command );
+        new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, this, command );
     }
     mUndoStack.push( command );
 
@@ -784,13 +784,13 @@ void MainWindow::on_pushButton_FindBeats_clicked()
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     const DetectionSettings settings = getDetectionSettings();
-    const QList<int> sampleSlicePointList = calcSampleSlicePoints( mCurrentSampleBuffer, BEAT_DETECTION, settings );
+    const QList<int> slicePointFrameNumList = calcSampleSlicePoints( mCurrentSampleBuffer, BEAT_DETECTION, settings );
 
     QUndoCommand* command = new AddSlicePointItemsCommand( mUI->pushButton_FindOnsets, mUI->pushButton_FindBeats );
 
-    foreach ( int sampleNum, sampleSlicePointList )
+    foreach ( int frameNum, slicePointFrameNumList )
     {
-        new AddSlicePointItemCommand( sampleNum, mUI->waveGraphicsView, mUI->pushButton_Slice, this, command );
+        new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, this, command );
     }
     mUndoStack.push( command );
 

@@ -84,7 +84,7 @@ private:
     QUndoStack mUndoStack;
 
     DetectionSettings getDetectionSettings();
-    QList<int> getCurrentSlicePointFrameNumList();
+    QList<int> getAmendedSlicePointFrameNumList();
 
 private:
     static const qreal MIN_INTER_ONSET_SECS = 0.03;
