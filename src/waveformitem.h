@@ -28,7 +28,6 @@
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
-#include <QPainterPath>
 #include <QStyleOptionGraphicsItem>
 #include <QList>
 #include "samplebuffer.h"

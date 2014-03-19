@@ -34,7 +34,7 @@
 class AddSlicePointItemCommand : public QUndoCommand
 {
 public:
-    AddSlicePointItemCommand( const qreal scenePosX,
+    AddSlicePointItemCommand( const int frameNum,
                               WaveGraphicsView* const graphicsView,
                               QPushButton* const sliceButton,
                               MainWindow* const mainWindow,
@@ -44,7 +44,7 @@ public:
     void redo();
 
 private:
-    const qreal mScenePosX;
+    const int mFrameNum;
     WaveGraphicsView* const mGraphicsView;
     QPushButton* const mSliceButton;
     MainWindow* const mMainWindow;
@@ -73,8 +73,8 @@ private:
 class MoveSlicePointItemCommand : public QUndoCommand
 {
 public:
-    MoveSlicePointItemCommand( const qreal oldScenePosX,
-                               const qreal newScenePosX,
+    MoveSlicePointItemCommand( const int oldFrameNum,
+                               const int newFrameNum,
                                WaveGraphicsView* const graphicsView,
                                QUndoCommand* parent = NULL );
 
@@ -82,8 +82,8 @@ public:
     void redo();
 
 private:
-    const qreal mOldScenePosX;
-    const qreal mNewScenePosX;
+    const int mOldFrameNum;
+    const int mNewFrameNum;
     WaveGraphicsView* const mGraphicsView;
     bool mIsFirstRedoCall;
 };

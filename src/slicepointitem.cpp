@@ -36,24 +36,6 @@ SlicePointItem::SlicePointItem( const qreal height, QGraphicsItem* parent ) :
     setBrush( QBrush( QColor( Qt::red ) ) );
     setZValue( 2 );
     setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges );
-
-    mLastKnownScenePosX = pos().x();
-}
-
-
-
-void SlicePointItem::setPos( const QPointF& pos )
-{
-    QGraphicsItem::setPos( pos );
-
-    mLastKnownScenePosX = pos.x();
-}
-
-
-
-void SlicePointItem::setPos( qreal x, qreal y )
-{
-    setPos( QPointF(x, y) );
 }
 
 
@@ -82,23 +64,31 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant &
     // Keep SlicePointItem within bounds of scene rect
     if ( change == ItemPositionChange && scene() != NULL )
     {
-        QPointF newPosTop = value.toPointF();
-        const QPointF newPosBottom( newPosTop.x(), newPosTop.y() + boundingRect().height() );
+        QPointF newPos = value.toPointF();
         const QRectF sceneRect = scene()->sceneRect();
 
-        if ( ! ( sceneRect.contains( newPosTop ) && sceneRect.contains( newPosBottom ) ) )
+        if ( ! sceneRect.contains( newPos ) )
         {
-            newPosTop.setX
+            newPos.setX
             (
-                    qMin( sceneRect.right() - 1, qMax( newPosTop.x(), sceneRect.left() ) )
+                    qMin( sceneRect.right() - 1, qMax( newPos.x(), sceneRect.left() ) )
             );
-            newPosTop.setY( 0.0 );
-
-            return newPosTop;
         }
+        newPos.setY( 0.0 );
+
+        return newPos;
     }
 
     return QGraphicsItem::itemChange( change, value );
+}
+
+
+
+void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
+{
+    QGraphicsItem::mousePressEvent( event );
+
+    mScenePosBeforeMove = pos().x();
 }
 
 
@@ -107,9 +97,8 @@ void SlicePointItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseReleaseEvent( event );
 
-    const qreal newScenePosX = pos().x();
-
-    emit scenePosChanged( mLastKnownScenePosX, newScenePosX );
-
-    mLastKnownScenePosX = newScenePosX;
+    if ( mScenePosBeforeMove != pos().x() )
+    {
+        emit scenePosChanged( this );
+    }
 }

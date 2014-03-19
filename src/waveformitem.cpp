@@ -198,10 +198,10 @@ QVariant WaveformItem::itemChange( GraphicsItemChange change, const QVariant &va
             (
                     qMin( sceneRect.right() - rect().width(), qMax( newPos.x(), sceneRect.left() ) )
             );
-            newPos.setY( 0.0 );
-
-            return newPos;
         }
+        newPos.setY( 0.0 );
+
+        return newPos;
     }
 
     // If this waveform item is selected then bring it to the front, else send it to the back

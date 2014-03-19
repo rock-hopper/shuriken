@@ -40,20 +40,22 @@ public:
 
     SlicePointItem( const qreal height, QGraphicsItem* parent = NULL );
 
-    void setPos( const QPointF& pos );
-    void setPos( qreal x, qreal y );
     void setHeight( const qreal height );
-    int type() const    { return Type; }
+    int getFrameNum() const                     { return mFrameNum; }
+    void setFrameNum( const int frameNum )      { mFrameNum = frameNum; }
+    int type() const                            { return Type; }
 
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
+    void mousePressEvent( QGraphicsSceneMouseEvent* event );
     void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
 private:
-    qreal mLastKnownScenePosX;
+    int mFrameNum;
+    qreal mScenePosBeforeMove;
 
 signals:
-    void scenePosChanged( const qreal oldScenePosX, const qreal newScenePosX );
+    void scenePosChanged( SlicePointItem* const item );
 };
 
 

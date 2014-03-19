@@ -45,8 +45,9 @@ public:
     QList<SharedWaveformItem> createWaveformSlices( const QList<SharedSampleBuffer> sampleBufferList );
     void moveWaveformSlice( const int oldOrderPos, const int newOrderPos );
 
-    SharedSlicePointItem createSlicePoint( const qreal scenePosX );
+    SharedSlicePointItem createSlicePoint( const int frameNum );
     void deleteSlicePoint( const SharedSlicePointItem slicePointItem );
+    void moveSlicePoint( const int currentFrameNum, const int newFrameNum );
     void hideSlicePoints();
     void showSlicePoints();
     QList<qreal> getSlicePointScenePosList();
@@ -58,16 +59,27 @@ protected:
     void resizeEvent( QResizeEvent* event );
 
 private:
+    qreal getScenePosX( const int frameNum );
+    int getFrameNum( const qreal scenePosX );
+    void sortSlicePointLists();
+
     QList<SharedWaveformItem> mWaveformItemList;
     QList<SharedSlicePointItem> mSlicePointItemList;
+    QList<int> mSlicePointFrameNumList;
+    int mNumFrames;
+
+private:
+    static bool isLessThan( const SharedSlicePointItem& lhs, const SharedSlicePointItem& rhs );
 
 signals:
-    void orderPosChanged( const int oldOrderPos, const int newOrderPos );
+    void waveformSliceOrderChanged( const int oldOrderPos, const int newOrderPos );
+    void slicePointOrderChanged( const int oldFrameNum, const int newFrameNum );
 
 private slots:
     void setZoom( const int zoomFactor );
     void reorderWaveformSlices( const int oldOrderPos, const int newOrderPos );
     void slideWaveformSliceIntoPlace( const int orderPos );
+    void reorderSlicePoints( SlicePointItem* const item );
 };
 
 #endif // WAVEGRAPHICSVIEW_H

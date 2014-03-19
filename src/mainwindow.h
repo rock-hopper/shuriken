@@ -126,8 +126,8 @@ private slots:
     void on_actionOpen_Project_triggered();
 
     void reorderSampleBufferList( const int oldOrderPos, const int newOrderPos );
-    void recordSlicePointScenePos( const qreal oldScenePosX, const qreal newScenePosX );
     void recordWaveformItemNewOrderPos( const int startOrderPos, const int destOrderPos );
+    void recordSlicePointItemNewFrameNum( const int oldFrameNum, const int newFrameNum );
 };
 
 #endif // MAINWINDOW_H

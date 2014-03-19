@@ -25,13 +25,13 @@
 //#include <QDebug>
 
 
-AddSlicePointItemCommand::AddSlicePointItemCommand( const qreal scenePosX,
+AddSlicePointItemCommand::AddSlicePointItemCommand( const int frameNum,
                                                     WaveGraphicsView* const graphicsView,
                                                     QPushButton* const sliceButton,
                                                     MainWindow* const mainWindow,
                                                     QUndoCommand* parent ) :
     QUndoCommand( parent ),
-    mScenePosX( scenePosX ),
+    mFrameNum( frameNum ),
     mGraphicsView( graphicsView ),
     mSliceButton( sliceButton ),
     mMainWindow( mainWindow )
@@ -56,11 +56,7 @@ void AddSlicePointItemCommand::undo()
 
 void AddSlicePointItemCommand::redo()
 {
-    mSlicePointItem = mGraphicsView->createSlicePoint( mScenePosX );
-
-    QObject::connect( mSlicePointItem.data(), SIGNAL( scenePosChanged(qreal,qreal) ),
-                      mMainWindow, SLOT( recordSlicePointScenePos(qreal,qreal) ) );
-
+    mSlicePointItem = mGraphicsView->createSlicePoint( mFrameNum );
     mSliceButton->setEnabled( true );
 }
 
@@ -108,13 +104,13 @@ void AddSlicePointItemsCommand::redo()
 
 //==================================================================================================
 
-MoveSlicePointItemCommand::MoveSlicePointItemCommand( const qreal oldScenePosX,
-                                                      const qreal newScenePosX,
+MoveSlicePointItemCommand::MoveSlicePointItemCommand( const int oldFrameNum,
+                                                      const int newFrameNum,
                                                       WaveGraphicsView* const graphicsView,
                                                       QUndoCommand* parent ) :
     QUndoCommand( parent ),
-    mOldScenePosX( oldScenePosX ),
-    mNewScenePosX( newScenePosX ),
+    mOldFrameNum( oldFrameNum ),
+    mNewFrameNum( newFrameNum ),
     mGraphicsView( graphicsView )
 {
     setText( "Move Slice Point" );
@@ -125,10 +121,7 @@ MoveSlicePointItemCommand::MoveSlicePointItemCommand( const qreal oldScenePosX,
 
 void MoveSlicePointItemCommand::undo()
 {
-    const QPoint viewCoords = mGraphicsView->mapFromScene( mNewScenePosX, 0.0 );
-    QGraphicsItem* const item = mGraphicsView->itemAt( viewCoords );
-
-    dynamic_cast<SlicePointItem*>( item )->setPos( mOldScenePosX, 0.0 );
+    mGraphicsView->moveSlicePoint( mNewFrameNum, mOldFrameNum );
 }
 
 
@@ -137,10 +130,7 @@ void MoveSlicePointItemCommand::redo()
 {
     if ( ! mIsFirstRedoCall )
     {
-        const QPoint viewCoords = mGraphicsView->mapFromScene( mOldScenePosX, 0.0 );
-        QGraphicsItem* const item = mGraphicsView->itemAt( viewCoords );
-
-        dynamic_cast<SlicePointItem*>( item )->setPos( mNewScenePosX, 0.0 );
+        mGraphicsView->moveSlicePoint( mOldFrameNum, mNewFrameNum );
     }
     mIsFirstRedoCall = false;
 }
