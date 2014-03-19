@@ -191,22 +191,6 @@ void WaveGraphicsView::showSlicePoints()
 
 
 
-QList<qreal> WaveGraphicsView::getSlicePointScenePosList()
-{
-    QList<qreal> slicePointScenePosList;
-
-    foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
-    {
-        slicePointScenePosList.append( slicePointItem->scenePos().x() );
-    }
-
-//    qSort( slicePointScenePosList );
-
-    return slicePointScenePosList;
-}
-
-
-
 void WaveGraphicsView::clearAll()
 {
     foreach ( QGraphicsItem* item, items() )

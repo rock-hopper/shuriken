@@ -50,7 +50,7 @@ public:
     void moveSlicePoint( const int currentFrameNum, const int newFrameNum );
     void hideSlicePoints();
     void showSlicePoints();
-    QList<qreal> getSlicePointScenePosList();
+    QList<int> getSlicePointFrameNumList() const    { return mSlicePointFrameNumList; }
 
     void clearAll();
     void clearWaveform();

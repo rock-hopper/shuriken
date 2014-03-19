@@ -210,35 +210,30 @@ MainWindow::DetectionSettings MainWindow::getDetectionSettings()
 
 
 
-QList<int> MainWindow::getCurrentSampleSlicePoints()
+QList<int> MainWindow::getCurrentSlicePointFrameNumList()
 {
-    const QList<qreal> slicePointScenePosList = mUI->waveGraphicsView->getSlicePointScenePosList();
-    const qreal sceneWidth = mUI->waveGraphicsView->scene()->width();
+    const QList<int> slicePointFrameNumList = mUI->waveGraphicsView->getSlicePointFrameNumList();
     const int numFrames = mCurrentSampleBuffer->getNumFrames();
-    const qreal spaceBetweenSamplePlots = sceneWidth / numFrames;
     const qreal sampleRate = mCurrentSampleHeader->sampleRate;
-    const int minSamplesBetweenSlicePoints = (int) floor( sampleRate * MIN_INTER_ONSET_SECS );
+    const int minNumFramesBetweenSlicePoints = (int) floor( sampleRate * MIN_INTER_ONSET_SECS );
 
-    QList<int> sampleSlicePointList;
-    int sampleSlicePoint = 0;
-    int prevSampleSlicePoint = 0;
+    QList<int> amendedSlicePointList;
+    int prevSlicePointFrameNum = 0;
 
-    foreach ( qreal slicePointScenePos, slicePointScenePosList )
+    foreach ( int slicePointFrameNum, slicePointFrameNumList )
     {
-        sampleSlicePoint = (int) floor( slicePointScenePos / spaceBetweenSamplePlots );
-
-        if ( sampleSlicePoint > 0 && sampleSlicePoint < numFrames - minSamplesBetweenSlicePoints )
+        if ( slicePointFrameNum > minNumFramesBetweenSlicePoints &&
+             slicePointFrameNum < numFrames - minNumFramesBetweenSlicePoints )
         {
-            if ( sampleSlicePoint >= prevSampleSlicePoint + minSamplesBetweenSlicePoints
-                 || sampleSlicePoint < minSamplesBetweenSlicePoints )
+            if ( slicePointFrameNum > prevSlicePointFrameNum + minNumFramesBetweenSlicePoints )
             {
-                sampleSlicePointList.append( sampleSlicePoint );
-                prevSampleSlicePoint = sampleSlicePoint;
+                amendedSlicePointList.append( slicePointFrameNum );
+                prevSlicePointFrameNum = slicePointFrameNum;
             }
         }
     }
 
-    return sampleSlicePointList;
+    return amendedSlicePointList;
 }
 
 
@@ -435,35 +430,37 @@ void MainWindow::fillAubioInputBuffer( fvec_t* pInputBuffer, const SharedSampleB
 
 
 
-void MainWindow::createSampleSlices( const SharedSampleBuffer inputBuffer, const QList<int> sampleSlicePointList, QList<SharedSampleBuffer>& outputBufferList )
+void MainWindow::createSampleSlices( const SharedSampleBuffer inputSampleBuffer,
+                                     const QList<int> slicePointFrameNumList,
+                                     QList<SharedSampleBuffer>& outputSampleBufferList )
 {
-    const int numFrames = inputBuffer->getNumFrames();
-    const int numChans = inputBuffer->getNumChannels();
-    int prevSampleSlicePoint = 0;
+    const int totalNumFrames = inputSampleBuffer->getNumFrames();
+    const int numChans = inputSampleBuffer->getNumChannels();
+    int prevSlicePointFrameNum = 0;
 
-    foreach ( int sampleSlicePoint, sampleSlicePointList )
+    foreach ( int slicePointFrameNum, slicePointFrameNumList )
     {
-        const int numSamples = sampleSlicePoint - prevSampleSlicePoint;
-        SharedSampleBuffer sampleBuffer( new SampleBuffer( numChans, numSamples ) );
+        const int numFrames = slicePointFrameNum - prevSlicePointFrameNum;
+        SharedSampleBuffer sampleBuffer( new SampleBuffer( numChans, numFrames ) );
 
         for ( int chanNum = 0; chanNum < numChans; chanNum++ )
         {
-            sampleBuffer->copyFrom( chanNum, 0, *inputBuffer.data(), chanNum, prevSampleSlicePoint, numSamples );
+            sampleBuffer->copyFrom( chanNum, 0, *inputSampleBuffer.data(), chanNum, prevSlicePointFrameNum, numFrames );
         }
 
-        outputBufferList.append( sampleBuffer );
-        prevSampleSlicePoint = sampleSlicePoint;
+        outputSampleBufferList.append( sampleBuffer );
+        prevSlicePointFrameNum = slicePointFrameNum;
     }
 
-    const int numSamples = numFrames - prevSampleSlicePoint;
-    SharedSampleBuffer sampleBuffer( new SampleBuffer( numChans, numSamples ) );
+    const int numFrames = totalNumFrames - prevSlicePointFrameNum;
+    SharedSampleBuffer sampleBuffer( new SampleBuffer( numChans, numFrames ) );
 
     for ( int chanNum = 0; chanNum < numChans; chanNum++ )
     {
-        sampleBuffer->copyFrom( chanNum, 0, *inputBuffer.data(), chanNum, prevSampleSlicePoint, numSamples );
+        sampleBuffer->copyFrom( chanNum, 0, *inputSampleBuffer.data(), chanNum, prevSlicePointFrameNum, numFrames );
     }
 
-    outputBufferList.append( sampleBuffer );
+    outputSampleBufferList.append( sampleBuffer );
 }
 
 

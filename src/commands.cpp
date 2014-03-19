@@ -46,7 +46,7 @@ void AddSlicePointItemCommand::undo()
     mGraphicsView->deleteSlicePoint( mSlicePointItem );
     mSlicePointItem.clear();
 
-    if ( mGraphicsView->getSlicePointScenePosList().isEmpty() )
+    if ( mGraphicsView->getSlicePointFrameNumList().isEmpty() )
     {
         mSliceButton->setEnabled( false );
     }
@@ -178,12 +178,12 @@ void CreateSlicesCommand::redo()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    const QList<int> sampleSlicePoints = mMainWindow->getCurrentSampleSlicePoints();
+    const QList<int> slicePointFrameNumList = mMainWindow->getCurrentSlicePointFrameNumList();
 
-    Q_ASSERT_X( sampleSlicePoints.size() > 0, "CreateSlicesCommand::redo", "No sample slice points" );
+    Q_ASSERT_X( slicePointFrameNumList.size() > 0, "CreateSlicesCommand::redo", "No sample slice points" );
 
     MainWindow::createSampleSlices( mMainWindow->mCurrentSampleBuffer,
-                                    sampleSlicePoints,
+                                    slicePointFrameNumList,
                                     mMainWindow->mSlicedSampleBuffers );
 
     mMainWindow->mSamplerAudioSource->setSamples( mMainWindow->mSlicedSampleBuffers,
