@@ -37,18 +37,16 @@ public:
     AddSlicePointItemCommand( const int frameNum,
                               WaveGraphicsView* const graphicsView,
                               QPushButton* const sliceButton,
-                              MainWindow* const mainWindow,
                               QUndoCommand* parent = NULL );
 
     void undo();
     void redo();
 
 private:
-    const int mFrameNum;
     WaveGraphicsView* const mGraphicsView;
     QPushButton* const mSliceButton;
-    MainWindow* const mMainWindow;
     SharedSlicePointItem mSlicePointItem;
+    bool mIsFirstRedoCall;
 };
 
 
@@ -86,6 +84,25 @@ private:
     const int mNewFrameNum;
     WaveGraphicsView* const mGraphicsView;
     bool mIsFirstRedoCall;
+};
+
+
+
+class DeleteSlicePointItemCommand : public QUndoCommand
+{
+public:
+    DeleteSlicePointItemCommand( SharedSlicePointItem slicePoint,
+                                 WaveGraphicsView* const graphicsView,
+                                 QPushButton* const sliceButton,
+                                 QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    const SharedSlicePointItem mSlicePointItem;
+    WaveGraphicsView* const mGraphicsView;
+    QPushButton* const mSliceButton;
 };
 
 

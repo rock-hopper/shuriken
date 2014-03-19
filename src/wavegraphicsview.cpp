@@ -144,14 +144,38 @@ SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
 
 
 
+void WaveGraphicsView::addSlicePoint( const SharedSlicePointItem slicePoint )
+{
+    const int slicePointFrameNum = slicePoint.data()->getFrameNum();
+    const qreal scenePosX = getScenePosX( slicePointFrameNum );
+
+    QTransform matrix;
+    const qreal currentScaleFactor = transform().m11(); // m11() returns horizontal scale factor
+    matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // slice point remains same width when view is scaled
+    slicePoint.data()->setTransform( matrix );
+
+    slicePoint.data()->setHeight( scene()->height() - 1 );
+    slicePoint.data()->setPos( scenePosX, 0.0 );
+
+    scene()->addItem( slicePoint.data() );
+
+    mSlicePointItemList.append( slicePoint );
+    mSlicePointFrameNumList.append( slicePointFrameNum );
+
+    sortSlicePointLists();
+}
+
+
+
 void WaveGraphicsView::deleteSlicePoint( const SharedSlicePointItem slicePointItem )
 {
     const int frameNum = slicePointItem->getFrameNum();
+    const int index = mSlicePointFrameNumList.indexOf( frameNum );
 
     scene()->removeItem( slicePointItem.data() );
 
-    mSlicePointItemList.removeOne( slicePointItem );
-    mSlicePointFrameNumList.removeOne( frameNum );
+    mSlicePointItemList.removeAt( index );
+    mSlicePointFrameNumList.removeAt( index );
 }
 
 
@@ -167,6 +191,21 @@ void WaveGraphicsView::moveSlicePoint( const int currentFrameNum, const int newF
     mSlicePointFrameNumList.replace( index, newFrameNum );
 
     sortSlicePointLists();
+}
+
+
+
+SharedSlicePointItem WaveGraphicsView::getSlicePointAt( const int frameNum )
+{
+    const int index = mSlicePointFrameNumList.indexOf( frameNum );
+    SharedSlicePointItem item;
+
+    if ( index >= 0 )
+    {
+        item = mSlicePointItemList.at( index );
+    }
+
+    return item;
 }
 
 

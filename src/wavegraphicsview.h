@@ -46,8 +46,10 @@ public:
     void moveWaveformSlice( const int oldOrderPos, const int newOrderPos );
 
     SharedSlicePointItem createSlicePoint( const int frameNum );
+    void addSlicePoint( const SharedSlicePointItem slicePoint );
     void deleteSlicePoint( const SharedSlicePointItem slicePointItem );
     void moveSlicePoint( const int currentFrameNum, const int newFrameNum );
+    SharedSlicePointItem getSlicePointAt( const int frameNum );
     void hideSlicePoints();
     void showSlicePoints();
     QList<int> getSlicePointFrameNumList() const    { return mSlicePointFrameNumList; }

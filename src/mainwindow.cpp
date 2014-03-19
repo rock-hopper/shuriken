@@ -628,15 +628,37 @@ void MainWindow::on_actionClear_Selection_triggered()
 
 
 void MainWindow::on_actionDelete_triggered()
-{
+{    
+    const QList<QGraphicsItem*> selectedItems = mUI->waveGraphicsView->scene()->selectedItems();
 
+    if ( ! selectedItems.isEmpty() )
+    {
+        QGraphicsItem* item = selectedItems.first();
+
+        // Only delete slice point items
+        if ( item->type() == SlicePointItem::Type )
+        {
+            item->setSelected( false );
+            SlicePointItem* const slicePointItem = qgraphicsitem_cast<SlicePointItem*>( item );
+            
+            const SharedSlicePointItem sharedSlicePoint =
+                    mUI->waveGraphicsView->getSlicePointAt( slicePointItem->getFrameNum() );
+
+            Q_ASSERT_X( ! sharedSlicePoint.isNull(), "MainWindow::on_actionDelete_triggered", "SharedSlicePoint points to null" );
+            
+            QUndoCommand* command = new DeleteSlicePointItemCommand( sharedSlicePoint, 
+                                                                     mUI->waveGraphicsView, 
+                                                                     mUI->pushButton_Slice );
+            mUndoStack.push( command );
+        }
+    }
 }
 
 
 
 void MainWindow::on_actionAdd_Slice_Point_triggered()
 {
-    QUndoCommand* command = new AddSlicePointItemCommand( 0.0, mUI->waveGraphicsView, mUI->pushButton_Slice, this );
+    QUndoCommand* command = new AddSlicePointItemCommand( 0.0, mUI->waveGraphicsView, mUI->pushButton_Slice );
     mUndoStack.push( command );
 }
 
@@ -770,7 +792,7 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
 
     foreach ( int frameNum, slicePointFrameNumList )
     {
-        new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, this, command );
+        new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, command );
     }
     mUndoStack.push( command );
 
@@ -790,7 +812,7 @@ void MainWindow::on_pushButton_FindBeats_clicked()
 
     foreach ( int frameNum, slicePointFrameNumList )
     {
-        new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, this, command );
+        new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, command );
     }
     mUndoStack.push( command );
 

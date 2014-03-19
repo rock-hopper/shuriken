@@ -28,15 +28,14 @@
 AddSlicePointItemCommand::AddSlicePointItemCommand( const int frameNum,
                                                     WaveGraphicsView* const graphicsView,
                                                     QPushButton* const sliceButton,
-                                                    MainWindow* const mainWindow,
                                                     QUndoCommand* parent ) :
     QUndoCommand( parent ),
-    mFrameNum( frameNum ),
     mGraphicsView( graphicsView ),
-    mSliceButton( sliceButton ),
-    mMainWindow( mainWindow )
+    mSliceButton( sliceButton )
 {
     setText( "Add Slice Point" );
+    mSlicePointItem = mGraphicsView->createSlicePoint( frameNum );
+    mIsFirstRedoCall = true;
 }
 
 
@@ -44,7 +43,6 @@ AddSlicePointItemCommand::AddSlicePointItemCommand( const int frameNum,
 void AddSlicePointItemCommand::undo()
 {
     mGraphicsView->deleteSlicePoint( mSlicePointItem );
-    mSlicePointItem.clear();
 
     if ( mGraphicsView->getSlicePointFrameNumList().isEmpty() )
     {
@@ -56,7 +54,12 @@ void AddSlicePointItemCommand::undo()
 
 void AddSlicePointItemCommand::redo()
 {
-    mSlicePointItem = mGraphicsView->createSlicePoint( mFrameNum );
+    if ( ! mIsFirstRedoCall )
+    {
+        mGraphicsView->addSlicePoint( mSlicePointItem );
+    }
+    mIsFirstRedoCall = false;
+
     mSliceButton->setEnabled( true );
 }
 
@@ -133,6 +136,42 @@ void MoveSlicePointItemCommand::redo()
         mGraphicsView->moveSlicePoint( mOldFrameNum, mNewFrameNum );
     }
     mIsFirstRedoCall = false;
+}
+
+
+
+//==================================================================================================
+
+DeleteSlicePointItemCommand::DeleteSlicePointItemCommand( SharedSlicePointItem slicePoint,
+                                                          WaveGraphicsView* const graphicsView,
+                                                          QPushButton* const sliceButton,
+                                                          QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    mSlicePointItem( slicePoint ),
+    mGraphicsView( graphicsView ),
+    mSliceButton( sliceButton )
+{
+    setText( "Add Slice Point" );
+}
+
+
+
+void DeleteSlicePointItemCommand::undo()
+{
+    mGraphicsView->addSlicePoint( mSlicePointItem );
+    mSliceButton->setEnabled( true );
+}
+
+
+
+void DeleteSlicePointItemCommand::redo()
+{
+    mGraphicsView->deleteSlicePoint( mSlicePointItem );
+
+    if ( mGraphicsView->getSlicePointFrameNumList().isEmpty() )
+    {
+        mSliceButton->setEnabled( false );
+    }
 }
 
 
