@@ -57,7 +57,9 @@ void WaveGraphicsView::createWaveform( const SharedSampleBuffer sampleBuffer )
     waveformItem->setPos( 0.0, 0.0 );
 
     mWaveformItemList.append( SharedWaveformItem( waveformItem ) );
+
     scene()->addItem( waveformItem );
+    scene()->update();
 }
 
 
@@ -83,13 +85,15 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveformSlices( const QList<Sh
         waveformItem->setPos( scenePosX, 0.0 );
 
         mWaveformItemList.append( SharedWaveformItem( waveformItem ) );
-        scene()->addItem( waveformItem );
 
         QObject::connect( waveformItem, SIGNAL( orderPosIsChanging(int,int) ),
                           this, SLOT( reorderWaveformSlices(int,int) ) );
 
         QObject::connect( waveformItem, SIGNAL( finishedMoving(int) ),
                           this, SLOT( slideWaveformSliceIntoPlace(int) ) );
+
+        scene()->addItem( waveformItem );
+        scene()->update();
 
         scenePosX += sliceWidth;
         orderPos++;
@@ -127,8 +131,6 @@ SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
         matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // slice point remains same width when view is scaled
         slicePointItem->setTransform( matrix );
 
-        scene()->addItem( slicePointItem );
-
         sharedSlicePoint = SharedSlicePointItem( slicePointItem );
         mSlicePointItemList.append( sharedSlicePoint );
         mSlicePointFrameNumList.append( frameNum );
@@ -137,6 +139,9 @@ SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
 
         QObject::connect( slicePointItem, SIGNAL( scenePosChanged(SlicePointItem*const) ),
                           this, SLOT( reorderSlicePoints(SlicePointItem*const) ) );
+
+        scene()->addItem( slicePointItem );
+        scene()->update();
     }
 
     return sharedSlicePoint;
@@ -157,12 +162,13 @@ void WaveGraphicsView::addSlicePoint( const SharedSlicePointItem slicePoint )
     slicePoint.data()->setHeight( scene()->height() - 1 );
     slicePoint.data()->setPos( scenePosX, 0.0 );
 
-    scene()->addItem( slicePoint.data() );
-
     mSlicePointItemList.append( slicePoint );
     mSlicePointFrameNumList.append( slicePointFrameNum );
 
     sortSlicePointLists();
+
+    scene()->addItem( slicePoint.data() );
+    scene()->update();
 }
 
 
@@ -173,6 +179,7 @@ void WaveGraphicsView::deleteSlicePoint( const SharedSlicePointItem slicePointIt
     const int index = mSlicePointFrameNumList.indexOf( frameNum );
 
     scene()->removeItem( slicePointItem.data() );
+    scene()->update();
 
     mSlicePointItemList.removeAt( index );
     mSlicePointFrameNumList.removeAt( index );
@@ -236,6 +243,8 @@ void WaveGraphicsView::clearAll()
     {
         scene()->removeItem( item );
     }
+    scene()->update();
+
     mWaveformItemList.clear();
     mSlicePointItemList.clear();
 }
@@ -251,6 +260,8 @@ void WaveGraphicsView::clearWaveform()
             scene()->removeItem( item );
         }
     }
+    scene()->update();
+
     mWaveformItemList.clear();
 }
 
