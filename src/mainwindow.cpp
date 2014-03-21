@@ -252,111 +252,109 @@ void MainWindow::showWarningBox( const QString text, const QString infoText )
 
 
 
-QList<int> MainWindow::calcSampleSlicePoints( const SharedSampleBuffer sampleBuffer, const aubioRoutine routine, const DetectionSettings settings )
+QList<int> MainWindow::calcSlicePointFrameNums( const SharedSampleBuffer sampleBuffer, const aubioRoutine routine, const DetectionSettings settings )
 {
-    char_t* pDetectionMethod = (char_t*) settings.detectionMethod.data();
+    char_t* detectionMethod = (char_t*) settings.detectionMethod.data();
     smpl_t threshold = settings.threshold;
     uint_t windowSize = settings.windowSize;
     uint_t hopSize = settings.hopSize;
     uint_t sampleRate = settings.sampleRate;
-    fvec_t* pDetectionResultVector;
-    fvec_t* pInputBuffer;
+    fvec_t* detectionResultVector;
+    fvec_t* inputBuffer;
 
-    QList<int> sampleSlicePointList;
+    QList<int> slicePointFrameNumList;
 
     const int numFrames = sampleBuffer->getNumFrames();
 
     if ( routine == ONSET_DETECTION )
     {
+        const int vectorSize = 1;
         const int onsetData = 0;
+        int slicePointFrameNum = 0;
 
         // Create onset detector and detection result vector
-        aubio_onset_t* pOnsetDetector = new_aubio_onset( pDetectionMethod, windowSize, hopSize, sampleRate );
-        aubio_onset_set_threshold( pOnsetDetector, threshold );
-        aubio_onset_set_minioi_s( pOnsetDetector, MIN_INTER_ONSET_SECS );
-        pDetectionResultVector = new_fvec( 1 );
+        aubio_onset_t* onsetDetector = new_aubio_onset( detectionMethod, windowSize, hopSize, sampleRate );
+        aubio_onset_set_threshold( onsetDetector, threshold );
+        aubio_onset_set_minioi_s( onsetDetector, MIN_INTER_ONSET_SECS );
+        detectionResultVector = new_fvec( vectorSize );
 
-        pInputBuffer = new_fvec( hopSize );
+        inputBuffer = new_fvec( hopSize );
 
         // Do onset detection
         for ( int frameNum = 0; frameNum < numFrames; frameNum += hopSize )
         {
-            fillAubioInputBuffer( pInputBuffer, sampleBuffer, frameNum );
+            fillAubioInputBuffer( inputBuffer, sampleBuffer, frameNum );
 
-            aubio_onset_do( pOnsetDetector, pInputBuffer, pDetectionResultVector );
+            aubio_onset_do( onsetDetector, inputBuffer, detectionResultVector );
 
             // If an onset is detected add a new slice point to the list
-            if ( pDetectionResultVector->data[ onsetData ] )
+            if ( detectionResultVector->data[ onsetData ] )
             {
-                sampleSlicePointList.append( aubio_onset_get_last( pOnsetDetector ) );
+                slicePointFrameNum = aubio_onset_get_last( onsetDetector );
+                slicePointFrameNumList.append( slicePointFrameNum );
             }
         }
 
         // Delete onset detector
-        del_aubio_onset( pOnsetDetector );
+        del_aubio_onset( onsetDetector );
     }
     else if ( routine == BEAT_DETECTION )
     {
+        const int vectorSize = 2;
         const int beatData = 0;
         const int onsetData = 1;
+        int slicePointFrameNum = 0;
 
         // Create beat detector and detection result vector
-        aubio_tempo_t* pBeatDetector = new_aubio_tempo( pDetectionMethod, windowSize, hopSize, sampleRate );
-        aubio_tempo_set_threshold( pBeatDetector, threshold );
-        pDetectionResultVector = new_fvec( 2 );
+        aubio_tempo_t* beatDetector = new_aubio_tempo( detectionMethod, windowSize, hopSize, sampleRate );
+        aubio_tempo_set_threshold( beatDetector, threshold );
+        detectionResultVector = new_fvec( vectorSize );
 
-        pInputBuffer = new_fvec( hopSize );
+        inputBuffer = new_fvec( hopSize );
 
         // Do beat detection
         for ( int frameNum = 0; frameNum < numFrames; frameNum += hopSize )
         {
-            fillAubioInputBuffer( pInputBuffer, sampleBuffer, frameNum );
+            fillAubioInputBuffer( inputBuffer, sampleBuffer, frameNum );
 
-            aubio_tempo_do( pBeatDetector, pInputBuffer, pDetectionResultVector );
+            aubio_tempo_do( beatDetector, inputBuffer, detectionResultVector );
 
             // If a beat of the bar (tactus) is detected add a new slice point to the list
-            if ( pDetectionResultVector->data[ beatData ] || pDetectionResultVector->data[ onsetData ] )
+            if ( detectionResultVector->data[ beatData ] )
             {
-                const int sampleSlicePoint = aubio_tempo_get_last( pBeatDetector );
-                if ( sampleSlicePointList.isEmpty() )
-                {
-                    sampleSlicePointList.append( sampleSlicePoint );
-                }
-                else
-                {
-                    if ( sampleSlicePoint >= sampleSlicePointList.last() + (sampleRate * MIN_INTER_ONSET_SECS) )
-                        sampleSlicePointList.append( sampleSlicePoint );
-                }
+                slicePointFrameNum = aubio_tempo_get_last( beatDetector );
+                slicePointFrameNumList.append( slicePointFrameNum );
             }
         }
 
         // Delete beat detector
-        del_aubio_tempo( pBeatDetector );
+        del_aubio_tempo( beatDetector );
     }
 
     // Clean up memory
-    del_fvec( pDetectionResultVector );
-    del_fvec( pInputBuffer );
+    del_fvec( detectionResultVector );
+    del_fvec( inputBuffer );
     aubio_cleanup();
 
-    return sampleSlicePointList;
+    return slicePointFrameNumList;
 }
 
 
 
 qreal MainWindow::calcBPM( const SharedSampleBuffer sampleBuffer, const DetectionSettings settings )
 {
-    char_t* pDetectionMethod = (char_t*) settings.detectionMethod.data();
+    char_t* detectionMethod = (char_t*) settings.detectionMethod.data();
     smpl_t threshold = settings.threshold;
     uint_t windowSize = settings.windowSize;
     uint_t hopSize = settings.hopSize;
     uint_t sampleRate = settings.sampleRate;
 
-    fvec_t* pDetectionResultVector;
-    fvec_t* pInputBuffer;
+    fvec_t* detectionResultVector;
+    fvec_t* inputBuffer;
 
     const int numFrames = sampleBuffer->getNumFrames();
 
+    const int vectorSize = 2;
     const int beatData = 0;
     const int onsetData = 1;
 
@@ -365,24 +363,24 @@ qreal MainWindow::calcBPM( const SharedSampleBuffer sampleBuffer, const Detectio
     qreal bpm = 0.0;
 
     // Create beat detector and detection result vector
-    aubio_tempo_t* pBeatDetector = new_aubio_tempo( pDetectionMethod, windowSize, hopSize, sampleRate );
-    aubio_tempo_set_threshold( pBeatDetector, threshold );
-    pDetectionResultVector = new_fvec( 2 );
+    aubio_tempo_t* beatDetector = new_aubio_tempo( detectionMethod, windowSize, hopSize, sampleRate );
+    aubio_tempo_set_threshold( beatDetector, threshold );
+    detectionResultVector = new_fvec( vectorSize );
 
-    pInputBuffer = new_fvec( hopSize );
+    inputBuffer = new_fvec( hopSize );
 
     // Do bpm detection
     for ( int frameNum = 0; frameNum < numFrames; frameNum += hopSize )
     {
-        fillAubioInputBuffer( pInputBuffer, sampleBuffer, frameNum );
+        fillAubioInputBuffer( inputBuffer, sampleBuffer, frameNum );
 
-        aubio_tempo_do( pBeatDetector, pInputBuffer, pDetectionResultVector );
+        aubio_tempo_do( beatDetector, inputBuffer, detectionResultVector );
 
         // If a beat of the bar (tactus) is detected get the current BPM
-        if ( pDetectionResultVector->data[ beatData ] || pDetectionResultVector->data[ onsetData ] )
+        if ( detectionResultVector->data[ beatData ] )
         {
-            const qreal currentBPM = aubio_tempo_get_bpm( pBeatDetector );
-            // aubio_tempo_get_confidence( pBeatDetector );
+            const qreal currentBPM = aubio_tempo_get_bpm( beatDetector );
+            // aubio_tempo_get_confidence( beatDetector );
 
             if ( currentBPM > 0.0 )
             {
@@ -393,11 +391,11 @@ qreal MainWindow::calcBPM( const SharedSampleBuffer sampleBuffer, const Detectio
     }
 
     // Delete beat detector
-    del_aubio_tempo( pBeatDetector );
+    del_aubio_tempo( beatDetector );
 
     // Clean up memory
-    del_fvec( pDetectionResultVector );
-    del_fvec( pInputBuffer );
+    del_fvec( detectionResultVector );
+    del_fvec( inputBuffer );
     aubio_cleanup();
 
     if ( numDetections > 0 )
@@ -410,21 +408,21 @@ qreal MainWindow::calcBPM( const SharedSampleBuffer sampleBuffer, const Detectio
 
 
 
-void MainWindow::fillAubioInputBuffer( fvec_t* pInputBuffer, const SharedSampleBuffer sampleBuffer, const int sampleOffset )
+void MainWindow::fillAubioInputBuffer( fvec_t* inputBuffer, const SharedSampleBuffer sampleBuffer, const int sampleOffset )
 {
     const int numFrames = sampleBuffer->getNumFrames();
     const int numChans = sampleBuffer->getNumChannels();
     const float multiplier = 1.0 / numChans;
-    const int hopSize = pInputBuffer->length;
+    const int hopSize = inputBuffer->length;
 
-    FloatVectorOperations::clear( pInputBuffer->data, hopSize );
+    FloatVectorOperations::clear( inputBuffer->data, hopSize );
 
     // Fill up the input buffer, converting stereo to mono if necessary
     for ( int chanNum = 0; chanNum < numChans; chanNum++ )
     {
-        const float* pSampleData = sampleBuffer->getSampleData( chanNum, sampleOffset );
-        const int numFramesToAdd = sampleOffset + hopSize <= numFrames ? hopSize : numFrames - sampleOffset - 1;
-        FloatVectorOperations::addWithMultiply( pInputBuffer->data, pSampleData, multiplier, numFramesToAdd );
+        const float* sampleData = sampleBuffer->getSampleData( chanNum, sampleOffset );
+        const int numFramesToAdd = ( sampleOffset + hopSize <= numFrames ? hopSize : numFrames - sampleOffset - 1 );
+        FloatVectorOperations::addWithMultiply( inputBuffer->data, sampleData, multiplier, numFramesToAdd );
     }
 }
 
@@ -776,7 +774,7 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     const DetectionSettings settings = getDetectionSettings();
-    const QList<int> slicePointFrameNumList = calcSampleSlicePoints( mCurrentSampleBuffer, ONSET_DETECTION, settings );
+    const QList<int> slicePointFrameNumList = calcSlicePointFrameNums( mCurrentSampleBuffer, ONSET_DETECTION, settings );
 
     QUndoCommand* command = new AddSlicePointItemsCommand( mUI->pushButton_FindOnsets, mUI->pushButton_FindBeats );
 
@@ -796,7 +794,7 @@ void MainWindow::on_pushButton_FindBeats_clicked()
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     const DetectionSettings settings = getDetectionSettings();
-    const QList<int> slicePointFrameNumList = calcSampleSlicePoints( mCurrentSampleBuffer, BEAT_DETECTION, settings );
+    const QList<int> slicePointFrameNumList = calcSlicePointFrameNums( mCurrentSampleBuffer, BEAT_DETECTION, settings );
 
     QUndoCommand* command = new AddSlicePointItemsCommand( mUI->pushButton_FindOnsets, mUI->pushButton_FindBeats );
 

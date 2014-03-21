@@ -169,8 +169,6 @@ void WaveGraphicsView::addSlicePoint( const SharedSlicePointItem slicePoint )
 
 void WaveGraphicsView::deleteSlicePoint( const SharedSlicePointItem slicePointItem )
 {
-    const int frameNum = slicePointItem->getFrameNum();
-
     scene()->removeItem( slicePointItem.data() );
     scene()->update();
 

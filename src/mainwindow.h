@@ -90,10 +90,21 @@ private:
     static const qreal MIN_INTER_ONSET_SECS = 0.03;
 
     static void showWarningBox( const QString text, const QString infoText );
-    static QList<int> calcSampleSlicePoints( const SharedSampleBuffer sampleBuffer, const aubioRoutine routine, const DetectionSettings settings );
-    static qreal calcBPM( const SharedSampleBuffer sampleBuffer, const DetectionSettings settings );
-    static void fillAubioInputBuffer( fvec_t* pInputBuffer, const SharedSampleBuffer sampleBuffer, const int sampleOffset );
-    static void createSampleSlices( const SharedSampleBuffer inputBuffer, const QList<int> sampleSlicePointList, QList<SharedSampleBuffer>& outputBufferList );
+
+    static QList<int> calcSlicePointFrameNums( const SharedSampleBuffer sampleBuffer,
+                                               const aubioRoutine routine,
+                                               const DetectionSettings settings );
+
+    static qreal calcBPM( const SharedSampleBuffer sampleBuffer,
+                          const DetectionSettings settings );
+
+    static void fillAubioInputBuffer( fvec_t* pInputBuffer,
+                                      const SharedSampleBuffer sampleBuffer,
+                                      const int sampleOffset );
+
+    static void createSampleSlices( const SharedSampleBuffer inputBuffer,
+                                    const QList<int> slicePointFrameNumList,
+                                    QList<SharedSampleBuffer>& outputBufferList );
 
 private slots:
     void on_pushButton_CalcBPM_clicked();
