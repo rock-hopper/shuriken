@@ -107,11 +107,13 @@ void AddSlicePointItemsCommand::redo()
 
 //==================================================================================================
 
-MoveSlicePointItemCommand::MoveSlicePointItemCommand( const int oldFrameNum,
+MoveSlicePointItemCommand::MoveSlicePointItemCommand( const SharedSlicePointItem slicePoint,
+                                                      const int oldFrameNum,
                                                       const int newFrameNum,
                                                       WaveGraphicsView* const graphicsView,
                                                       QUndoCommand* parent ) :
     QUndoCommand( parent ),
+    mSlicePointItem( slicePoint ),
     mOldFrameNum( oldFrameNum ),
     mNewFrameNum( newFrameNum ),
     mGraphicsView( graphicsView )
@@ -124,7 +126,7 @@ MoveSlicePointItemCommand::MoveSlicePointItemCommand( const int oldFrameNum,
 
 void MoveSlicePointItemCommand::undo()
 {
-    mGraphicsView->moveSlicePoint( mNewFrameNum, mOldFrameNum );
+    mGraphicsView->moveSlicePoint( mSlicePointItem, mOldFrameNum );
 }
 
 
@@ -133,7 +135,7 @@ void MoveSlicePointItemCommand::redo()
 {
     if ( ! mIsFirstRedoCall )
     {
-        mGraphicsView->moveSlicePoint( mOldFrameNum, mNewFrameNum );
+        mGraphicsView->moveSlicePoint( mSlicePointItem, mNewFrameNum );
     }
     mIsFirstRedoCall = false;
 }

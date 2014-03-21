@@ -127,7 +127,9 @@ private slots:
 
     void reorderSampleBufferList( const int oldOrderPos, const int newOrderPos );
     void recordWaveformItemNewOrderPos( const int startOrderPos, const int destOrderPos );
-    void recordSlicePointItemNewFrameNum( const int oldFrameNum, const int newFrameNum );
+    void recordSlicePointItemMove( const SharedSlicePointItem slicePointItem,
+                                   const int oldFrameNum,
+                                   const int newFrameNum );
 };
 
 #endif // MAINWINDOW_H

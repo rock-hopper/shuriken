@@ -97,8 +97,8 @@ MainWindow::MainWindow( QWidget* parent ) :
     QObject::connect( mUI->waveGraphicsView, SIGNAL( waveformSliceOrderChanged(int,int) ),
                       this, SLOT( reorderSampleBufferList(int,int) ) );
 
-    QObject::connect( mUI->waveGraphicsView, SIGNAL( slicePointOrderChanged(int,int) ),
-                      this, SLOT( recordSlicePointItemNewFrameNum(int,int) ) );
+    QObject::connect( mUI->waveGraphicsView, SIGNAL( slicePointOrderChanged(SharedSlicePointItem,int,int) ),
+                      this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int) ) );
 
     QObject::connect( &mUndoStack, SIGNAL( canUndoChanged(bool) ),
                       mUI->actionUndo, SLOT( setEnabled(bool) ) );
@@ -484,9 +484,11 @@ void MainWindow::recordWaveformItemNewOrderPos( const int startOrderPos, const i
 
 
 
-void MainWindow::recordSlicePointItemNewFrameNum( const int oldFrameNum, const int newFrameNum )
+void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePointItem,
+                                           const int oldFrameNum,
+                                           const int newFrameNum )
 {
-    QUndoCommand* command = new MoveSlicePointItemCommand( oldFrameNum, newFrameNum, mUI->waveGraphicsView );
+    QUndoCommand* command = new MoveSlicePointItemCommand( slicePointItem, oldFrameNum, newFrameNum, mUI->waveGraphicsView );
     mUndoStack.push( command );
 }
 
@@ -629,28 +631,16 @@ void MainWindow::on_actionClear_Selection_triggered()
 
 void MainWindow::on_actionDelete_triggered()
 {    
-    const QList<QGraphicsItem*> selectedItems = mUI->waveGraphicsView->scene()->selectedItems();
+    const SharedSlicePointItem selectedSlicePoint = mUI->waveGraphicsView->getSelectedSlicePoint();
 
-    if ( ! selectedItems.isEmpty() )
+    if ( ! selectedSlicePoint.isNull() )
     {
-        QGraphicsItem* item = selectedItems.first();
+        selectedSlicePoint->setSelected( false );
 
-        // Only delete slice point items
-        if ( item->type() == SlicePointItem::Type )
-        {
-            item->setSelected( false );
-            SlicePointItem* const slicePointItem = qgraphicsitem_cast<SlicePointItem*>( item );
-            
-            const SharedSlicePointItem sharedSlicePoint =
-                    mUI->waveGraphicsView->getSlicePointAt( slicePointItem->getFrameNum() );
-
-            Q_ASSERT_X( ! sharedSlicePoint.isNull(), "MainWindow::on_actionDelete_triggered", "SharedSlicePoint points to null" );
-            
-            QUndoCommand* command = new DeleteSlicePointItemCommand( sharedSlicePoint, 
-                                                                     mUI->waveGraphicsView, 
-                                                                     mUI->pushButton_Slice );
-            mUndoStack.push( command );
-        }
+        QUndoCommand* command = new DeleteSlicePointItemCommand( selectedSlicePoint,
+                                                                 mUI->waveGraphicsView,
+                                                                 mUI->pushButton_Slice );
+        mUndoStack.push( command );
     }
 }
 

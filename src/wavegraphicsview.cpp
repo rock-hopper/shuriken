@@ -133,9 +133,6 @@ SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
 
         sharedSlicePoint = SharedSlicePointItem( slicePointItem );
         mSlicePointItemList.append( sharedSlicePoint );
-        mSlicePointFrameNumList.append( frameNum );
-
-        sortSlicePointLists();
 
         QObject::connect( slicePointItem, SIGNAL( scenePosChanged(SlicePointItem*const) ),
                           this, SLOT( reorderSlicePoints(SlicePointItem*const) ) );
@@ -163,9 +160,6 @@ void WaveGraphicsView::addSlicePoint( const SharedSlicePointItem slicePoint )
     slicePoint.data()->setPos( scenePosX, 0.0 );
 
     mSlicePointItemList.append( slicePoint );
-    mSlicePointFrameNumList.append( slicePointFrameNum );
-
-    sortSlicePointLists();
 
     scene()->addItem( slicePoint.data() );
     scene()->update();
@@ -176,43 +170,49 @@ void WaveGraphicsView::addSlicePoint( const SharedSlicePointItem slicePoint )
 void WaveGraphicsView::deleteSlicePoint( const SharedSlicePointItem slicePointItem )
 {
     const int frameNum = slicePointItem->getFrameNum();
-    const int index = mSlicePointFrameNumList.indexOf( frameNum );
 
     scene()->removeItem( slicePointItem.data() );
     scene()->update();
 
-    mSlicePointItemList.removeAt( index );
-    mSlicePointFrameNumList.removeAt( index );
+    mSlicePointItemList.removeOne( slicePointItem );
 }
 
 
 
-void WaveGraphicsView::moveSlicePoint( const int currentFrameNum, const int newFrameNum )
+void WaveGraphicsView::moveSlicePoint( const SharedSlicePointItem slicePointItem, const int newFrameNum )
 {
-    const int index = mSlicePointFrameNumList.indexOf( currentFrameNum );
-    const SharedSlicePointItem item = mSlicePointItemList.at( index );
     const qreal newScenePosX = getScenePosX( newFrameNum );
 
-    item->setFrameNum( newFrameNum );
-    item->setPos( newScenePosX, 0.0 );
-    mSlicePointFrameNumList.replace( index, newFrameNum );
-
-    sortSlicePointLists();
+    slicePointItem->setFrameNum( newFrameNum );
+    slicePointItem->setPos( newScenePosX, 0.0 );
 }
 
 
 
-SharedSlicePointItem WaveGraphicsView::getSlicePointAt( const int frameNum )
+SharedSlicePointItem WaveGraphicsView::getSelectedSlicePoint()
 {
-    const int index = mSlicePointFrameNumList.indexOf( frameNum );
-    SharedSlicePointItem item;
+    const QList<QGraphicsItem*> selectedItems = scene()->selectedItems();
+    SharedSlicePointItem selectedSlicePointItem;
 
-    if ( index >= 0 )
+    if ( ! selectedItems.isEmpty() )
     {
-        item = mSlicePointItemList.at( index );
+        QGraphicsItem* const item = selectedItems.first();
+
+        if ( item->type() == SlicePointItem::Type )
+        {
+            SlicePointItem* const slicePointItem = qgraphicsitem_cast<SlicePointItem*>( item );
+
+            foreach ( SharedSlicePointItem sharedSlicePointItem, mSlicePointItemList )
+            {
+                if ( sharedSlicePointItem == slicePointItem )
+                {
+                    selectedSlicePointItem = sharedSlicePointItem;
+                }
+            }
+        }
     }
 
-    return item;
+    return selectedSlicePointItem;
 }
 
 
@@ -233,6 +233,22 @@ void WaveGraphicsView::showSlicePoints()
     {
         item->setVisible( true );
     }
+}
+
+
+
+QList<int> WaveGraphicsView::getSlicePointFrameNumList()
+{
+    QList<int> slicePointFrameNumList;
+
+    foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
+    {
+        slicePointFrameNumList.append( slicePointItem->getFrameNum() );
+    }
+
+    qSort( slicePointFrameNumList );
+
+    return slicePointFrameNumList;
 }
 
 
@@ -321,24 +337,6 @@ int WaveGraphicsView::getFrameNum( const qreal scenePosX )
 
 
 
-void WaveGraphicsView::sortSlicePointLists()
-{
-    qSort( mSlicePointFrameNumList );
-    qSort( mSlicePointItemList.begin(), mSlicePointItemList.end(), isLessThan );
-}
-
-
-
-//==================================================================================================
-// Private Static:
-
-bool WaveGraphicsView::isLessThan( const SharedSlicePointItem& lhs, const SharedSlicePointItem& rhs )
-{
-    return lhs->getFrameNum() < rhs->getFrameNum();
-}
-
-
-
 //==================================================================================================
 // Private Slots:
 
@@ -420,16 +418,21 @@ void WaveGraphicsView::slideWaveformSliceIntoPlace( const int orderPos )
 
 
 
-void WaveGraphicsView::reorderSlicePoints( SlicePointItem* const item )
+void WaveGraphicsView::reorderSlicePoints( SlicePointItem* const movedItem )
 {
-    const int oldFrameNum = item->getFrameNum();
-    const int newFrameNum = getFrameNum( item->pos().x() );
-    const int index = mSlicePointFrameNumList.indexOf( oldFrameNum );
+    SharedSlicePointItem slicePointItem;
 
-    item->setFrameNum( newFrameNum );
-    mSlicePointFrameNumList.replace( index, newFrameNum );
+    foreach ( SharedSlicePointItem sharedSlicePointItem, mSlicePointItemList )
+    {
+        if ( sharedSlicePointItem == movedItem )
+        {
+            slicePointItem = sharedSlicePointItem;
+        }
+    }
 
-    sortSlicePointLists();
+    const int oldFrameNum = slicePointItem->getFrameNum();
+    const int newFrameNum = getFrameNum( slicePointItem->pos().x() );
+    slicePointItem->setFrameNum( newFrameNum );
 
-    emit slicePointOrderChanged( oldFrameNum, newFrameNum );
+    emit slicePointOrderChanged( slicePointItem, oldFrameNum, newFrameNum );
 }
