@@ -28,19 +28,9 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_Loop">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Loop</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="label_3">
         <property name="text">
-         <string>BPM:</string>
+         <string>Original BPM:</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -63,6 +53,16 @@
          <string>Calc</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>New BPM:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
       </item>
       <item>
        <widget class="QCheckBox" name="checkBox_JackSync">
@@ -251,7 +251,7 @@
       <item>
        <widget class="QLabel" name="label_5">
         <property name="text">
-         <string>Window Overlap:</string>
+         <string>Hop Size:</string>
         </property>
        </widget>
       </item>
@@ -428,6 +428,9 @@
    </property>
   </action>
   <action name="actionExport_As">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Export As...</string>
    </property>
@@ -465,21 +468,33 @@
    </property>
   </action>
   <action name="actionReverse">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Reverse</string>
    </property>
   </action>
   <action name="actionEnvelope">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Envelope</string>
    </property>
   </action>
   <action name="actionUser_Interface">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>User Interface</string>
    </property>
   </action>
   <action name="actionHelp">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Help</string>
    </property>
@@ -490,11 +505,17 @@
    </property>
   </action>
   <action name="actionJoin">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Join</string>
    </property>
   </action>
   <action name="actionSelect_All">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Select All</string>
    </property>
@@ -503,21 +524,33 @@
    </property>
   </action>
   <action name="actionClear_Selection">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Clear Selection</string>
    </property>
   </action>
   <action name="actionApply_Gain">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Apply Gain</string>
    </property>
   </action>
   <action name="actionNormalise">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Normalise</string>
    </property>
   </action>
   <action name="actionApply_Ramp">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Apply Ramp</string>
    </property>

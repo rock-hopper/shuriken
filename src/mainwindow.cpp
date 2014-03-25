@@ -44,6 +44,7 @@ MainWindow::MainWindow( QWidget* parent ) :
     mUI->actionRedo->setEnabled( false );
 
 
+    // Populate "Detection Method" combo box
     QStringList detectMethodTextList, detectMethodDataList;
 
     detectMethodTextList << "Broadband Energy" << "High Frequency Content" << "Complex Domain"
@@ -59,6 +60,7 @@ MainWindow::MainWindow( QWidget* parent ) :
     }
 
 
+    // Populate "Window Size" combo box
     QStringList windowSizeTextList;
     QList<int> windowSizeDataList;
 
@@ -73,18 +75,19 @@ MainWindow::MainWindow( QWidget* parent ) :
     mUI->comboBox_WindowSize->setCurrentIndex( 3 ); // "1024"
 
 
-    QStringList overlapSizeTextList;
-    QList<qreal> overlapSizeDataList;
+    // Populate "Hop Size" combo box
+    QStringList hopSizeTextList;
+    QList<qreal> hopSizeDataList;
 
-    overlapSizeTextList << "None" << "50%" << "25%" << "12.5%" << "6.25%";
-    overlapSizeDataList << 100.0 << 50.0 << 25.0 << 12.5 << 6.25;
+    hopSizeTextList << "50%" << "25%" << "12.5%" << "6.25%";
+    hopSizeDataList << 50.0 << 25.0 << 12.5 << 6.25;
 
-    for ( int i = 0; i < overlapSizeTextList.size(); i++ )
+    for ( int i = 0; i < hopSizeTextList.size(); i++ )
     {
-        mUI->comboBox_HopSize->addItem( overlapSizeTextList[ i ], overlapSizeDataList[ i ] );
+        mUI->comboBox_HopSize->addItem( hopSizeTextList[ i ], hopSizeDataList[ i ] );
     }
 
-    mUI->comboBox_HopSize->setCurrentIndex( 1 ); // "50%"
+    mUI->comboBox_HopSize->setCurrentIndex( 0 ); // "50%"
 
 
     mUI->checkBox_AdvancedOptions->setChecked( false );
@@ -135,6 +138,7 @@ MainWindow::MainWindow( QWidget* parent ) :
 
         mIsAudioInitialised = TRUE;
     }
+
 
     // Check there were no errors while initialising the audio file handler
     if ( ! mFileHandler.getLastErrorTitle().isEmpty() )
@@ -189,8 +193,7 @@ MainWindow::DetectionSettings MainWindow::getDetectionSettings()
     DetectionSettings settings;
     int currentIndex;
 
-    // From aubio website: "Typical threshold values are within 0.001 and 0.900. Default is 0.1.
-    // The lower the more sensible. Try 0.3 in case of over-detections." Default is 0.3 in aubio-0.4.0
+    // From aubio website: "Typical threshold values are within 0.001 and 0.900." Default is 0.3 in aubio-0.4.0
     currentIndex = mUI->comboBox_DetectMethod->currentIndex();
     settings.detectionMethod = mUI->comboBox_DetectMethod->itemData( currentIndex ).toString().toLocal8Bit();
 
@@ -359,8 +362,10 @@ qreal MainWindow::calcBPM( const SharedSampleBuffer sampleBuffer, const Detectio
     const int onsetData = 1;
 
     int numDetections = 0;
+    qreal currentBPM = 0.0;
     qreal summedBPMs = 0.0;
-    qreal bpm = 0.0;
+    qreal averageBPM = 0.0;
+    qreal confidence = 0.0;
 
     // Create beat detector and detection result vector
     aubio_tempo_t* beatDetector = new_aubio_tempo( detectionMethod, windowSize, hopSize, sampleRate );
@@ -379,10 +384,10 @@ qreal MainWindow::calcBPM( const SharedSampleBuffer sampleBuffer, const Detectio
         // If a beat of the bar (tactus) is detected get the current BPM
         if ( detectionResultVector->data[ beatData ] )
         {
-            const qreal currentBPM = aubio_tempo_get_bpm( beatDetector );
-            // aubio_tempo_get_confidence( beatDetector );
+            currentBPM = aubio_tempo_get_bpm( beatDetector );
+            confidence = aubio_tempo_get_confidence( beatDetector );
 
-            if ( currentBPM > 0.0 )
+            if ( currentBPM > 0.0 && confidence > 0.1 )
             {
                 summedBPMs += currentBPM;
                 numDetections++;
@@ -400,10 +405,10 @@ qreal MainWindow::calcBPM( const SharedSampleBuffer sampleBuffer, const Detectio
 
     if ( numDetections > 0 )
     {
-         bpm = floor( (summedBPMs / numDetections) + 0.5 );
+         averageBPM = floor( (summedBPMs / numDetections) + 0.5 );
     }
 
-    return bpm;
+    return averageBPM;
 }
 
 

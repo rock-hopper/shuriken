@@ -42,40 +42,15 @@ bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer, co
     {
         mSynth.addVoice( new ShurikenSamplerVoice() );
 
-//        AudioSampleBufferAudioFormat sampleBufferFormat;
-//
-//        const int numFrames = sampleBuffer->getNumFrames();
-//        const int numChans = sampleBuffer->getNumChannels();
-//
-//        // calculate size of array of channels taking null terminator into account
-//        int sizeOfArrayOfChannels = ( ( numChans + 1 ) * sizeof( float* ) )
-//                                    + ( numChans * numFrames * sizeof( float ) );
-//
-//        ScopedPointer<AudioFormatReader> sampleReader( sampleBufferFormat.createReaderFor
-//                                                       ( new MemoryInputStream
-//                                                         ( sampleBuffer->getArrayOfChannels(),
-//                                                           sizeOfArrayOfChannels,
-//                                                           false ),
-//                                                         true ));
-
         BigInteger keyNum;
         keyNum.clear();
         keyNum.setBit( mNextFreeKey );
 
-//        mSynth.addSound( new SamplerSound( "key" + mNextFreeKey,
-//                                          *sampleReader,
-//                                          keyNum,
-//                                          mNextFreeKey,   // root midi key
-//                                          0.0,  // attack time
-//                                          0.0,  // release time
-//                                          3600.0  // maximum sample length in seconds
-//                                          ));
-
-        mSynth.addSound( new ShurikenSamplerSound( "key" + mNextFreeKey,
+        mSynth.addSound( new ShurikenSamplerSound( "key" + mNextFreeKey,    // Sample name
                                                    sampleBuffer,
                                                    sampleRate,
-                                                   keyNum,
-                                                   mNextFreeKey   // root midi key
+                                                   keyNum,                  // MIDI key this sample should be mapped to
+                                                   mNextFreeKey             // Root/pitch-centre MIDI key
                                                    ));
 
         mNextFreeKey++;

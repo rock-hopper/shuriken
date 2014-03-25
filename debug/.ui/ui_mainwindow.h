@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Fri Mar 21 12:17:51 2014
+** Created: Sat Mar 22 14:21:28 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -64,10 +64,11 @@ public:
     QVBoxLayout *verticalLayout;
     QHBoxLayout *horizontalLayout_2;
     QPushButton *pushButton_Play;
-    QPushButton *pushButton_Loop;
     QLabel *label_3;
     QDoubleSpinBox *doubleSpinBox_BPM;
     QPushButton *pushButton_CalcBPM;
+    QLabel *label_2;
+    QDoubleSpinBox *doubleSpinBox;
     QCheckBox *checkBox_JackSync;
     QCheckBox *checkBox_TimeStretch;
     QCheckBox *checkBox_CorrectPitch;
@@ -120,6 +121,7 @@ public:
         actionClose_Project->setObjectName(QString::fromUtf8("actionClose_Project"));
         actionExport_As = new QAction(MainWindow);
         actionExport_As->setObjectName(QString::fromUtf8("actionExport_As"));
+        actionExport_As->setEnabled(false);
         actionUndo = new QAction(MainWindow);
         actionUndo->setObjectName(QString::fromUtf8("actionUndo"));
         actionRedo = new QAction(MainWindow);
@@ -130,26 +132,36 @@ public:
         actionDelete->setObjectName(QString::fromUtf8("actionDelete"));
         actionReverse = new QAction(MainWindow);
         actionReverse->setObjectName(QString::fromUtf8("actionReverse"));
+        actionReverse->setEnabled(false);
         actionEnvelope = new QAction(MainWindow);
         actionEnvelope->setObjectName(QString::fromUtf8("actionEnvelope"));
+        actionEnvelope->setEnabled(false);
         actionUser_Interface = new QAction(MainWindow);
         actionUser_Interface->setObjectName(QString::fromUtf8("actionUser_Interface"));
+        actionUser_Interface->setEnabled(false);
         actionHelp = new QAction(MainWindow);
         actionHelp->setObjectName(QString::fromUtf8("actionHelp"));
+        actionHelp->setEnabled(false);
         actionAbout = new QAction(MainWindow);
         actionAbout->setObjectName(QString::fromUtf8("actionAbout"));
         actionJoin = new QAction(MainWindow);
         actionJoin->setObjectName(QString::fromUtf8("actionJoin"));
+        actionJoin->setEnabled(false);
         actionSelect_All = new QAction(MainWindow);
         actionSelect_All->setObjectName(QString::fromUtf8("actionSelect_All"));
+        actionSelect_All->setEnabled(false);
         actionClear_Selection = new QAction(MainWindow);
         actionClear_Selection->setObjectName(QString::fromUtf8("actionClear_Selection"));
+        actionClear_Selection->setEnabled(false);
         actionApply_Gain = new QAction(MainWindow);
         actionApply_Gain->setObjectName(QString::fromUtf8("actionApply_Gain"));
+        actionApply_Gain->setEnabled(false);
         actionNormalise = new QAction(MainWindow);
         actionNormalise->setObjectName(QString::fromUtf8("actionNormalise"));
+        actionNormalise->setEnabled(false);
         actionApply_Ramp = new QAction(MainWindow);
         actionApply_Ramp->setObjectName(QString::fromUtf8("actionApply_Ramp"));
+        actionApply_Ramp->setEnabled(false);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -164,12 +176,6 @@ public:
         pushButton_Play->setEnabled(false);
 
         horizontalLayout_2->addWidget(pushButton_Play);
-
-        pushButton_Loop = new QPushButton(centralWidget);
-        pushButton_Loop->setObjectName(QString::fromUtf8("pushButton_Loop"));
-        pushButton_Loop->setEnabled(false);
-
-        horizontalLayout_2->addWidget(pushButton_Loop);
 
         label_3 = new QLabel(centralWidget);
         label_3->setObjectName(QString::fromUtf8("label_3"));
@@ -188,6 +194,16 @@ public:
         pushButton_CalcBPM->setEnabled(false);
 
         horizontalLayout_2->addWidget(pushButton_CalcBPM);
+
+        label_2 = new QLabel(centralWidget);
+        label_2->setObjectName(QString::fromUtf8("label_2"));
+
+        horizontalLayout_2->addWidget(label_2);
+
+        doubleSpinBox = new QDoubleSpinBox(centralWidget);
+        doubleSpinBox->setObjectName(QString::fromUtf8("doubleSpinBox"));
+
+        horizontalLayout_2->addWidget(doubleSpinBox);
 
         checkBox_JackSync = new QCheckBox(centralWidget);
         checkBox_JackSync->setObjectName(QString::fromUtf8("checkBox_JackSync"));
@@ -443,9 +459,9 @@ public:
         actionNormalise->setText(QApplication::translate("MainWindow", "Normalise", 0, QApplication::UnicodeUTF8));
         actionApply_Ramp->setText(QApplication::translate("MainWindow", "Apply Ramp", 0, QApplication::UnicodeUTF8));
         pushButton_Play->setText(QApplication::translate("MainWindow", "Play", 0, QApplication::UnicodeUTF8));
-        pushButton_Loop->setText(QApplication::translate("MainWindow", "Loop", 0, QApplication::UnicodeUTF8));
-        label_3->setText(QApplication::translate("MainWindow", "BPM:", 0, QApplication::UnicodeUTF8));
+        label_3->setText(QApplication::translate("MainWindow", "Original BPM:", 0, QApplication::UnicodeUTF8));
         pushButton_CalcBPM->setText(QApplication::translate("MainWindow", "Calc", 0, QApplication::UnicodeUTF8));
+        label_2->setText(QApplication::translate("MainWindow", "New BPM:", 0, QApplication::UnicodeUTF8));
         checkBox_JackSync->setText(QApplication::translate("MainWindow", "JACK Sync", 0, QApplication::UnicodeUTF8));
         checkBox_TimeStretch->setText(QApplication::translate("MainWindow", "Time Stretch", 0, QApplication::UnicodeUTF8));
         checkBox_CorrectPitch->setText(QApplication::translate("MainWindow", "Correct Pitch", 0, QApplication::UnicodeUTF8));
@@ -456,7 +472,7 @@ public:
         checkBox_AdvancedOptions->setText(QApplication::translate("MainWindow", "Show Advanced Options", 0, QApplication::UnicodeUTF8));
         label_7->setText(QApplication::translate("MainWindow", "Detection Method:", 0, QApplication::UnicodeUTF8));
         label_4->setText(QApplication::translate("MainWindow", "Window Size:", 0, QApplication::UnicodeUTF8));
-        label_5->setText(QApplication::translate("MainWindow", "Window Overlap:", 0, QApplication::UnicodeUTF8));
+        label_5->setText(QApplication::translate("MainWindow", "Hop Size:", 0, QApplication::UnicodeUTF8));
         label_6->setText(QApplication::translate("MainWindow", "Zoom:", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0, QApplication::UnicodeUTF8));
         menuOptions->setTitle(QApplication::translate("MainWindow", "Options", 0, QApplication::UnicodeUTF8));
