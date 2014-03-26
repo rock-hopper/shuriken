@@ -10,13 +10,7 @@ Fix zooming
 
 GUI Improvements
 ----------------
-Rename window overlap to hop size
-
-Make menu entries do something!
-
-Play button / loop button
-
-Separate boxes for original BPM and new BPM
+Make play button do something
 
 
 Code Improvements
@@ -28,7 +22,7 @@ JUCE_MIDI/JUCE_JACK - class members public to private, getGlobalJackClient
 
 Add Features
 ------------
-SoundTouch / RubbberBand
+Play section of waveform between slice points when clicked
 
 Make use of aubio's file handling functions
 
@@ -54,6 +48,8 @@ JACK Session, NSM
 Play loop sync'ed to JACK transport
 
 Export h2drumkit, SFZ
+
+RubbberBand
 
 
 Dialogs

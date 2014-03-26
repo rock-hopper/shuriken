@@ -27,7 +27,7 @@
 #include "samplebuffer.h"
 
 
-class SamplerAudioSource : public AudioSource
+class SamplerAudioSource : public PositionableAudioSource
 {
 public:
     SamplerAudioSource();
@@ -35,15 +35,25 @@ public:
     bool addNewSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
     bool setSamples( const QList<SharedSampleBuffer> sampleBufferList, const qreal sampleRate );
     void clearAllSamples();
-    void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate );
-    void releaseResources();
-    void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill );
-    MidiMessageCollector* getMidiCollector() { return &mMidiCollector; }
+
+    void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;
+    void releaseResources() override {};
+    void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill ) override;
+
+    void setNextReadPosition( int64 newPosition ) override;
+    int64 getNextReadPosition() const override                  { return mNextPlayPos; }
+    int64 getTotalLength() const override;
+    bool isLooping() const override                             { return false; }
+
+    MidiMessageCollector* getMidiMessageCollector()             { return &mMidiCollector; }
 
 private:
     MidiMessageCollector mMidiCollector;
     Synthesiser mSynth;
     int mNextFreeKey;
+    CriticalSection mStartPosLock;
+    int64 volatile mNextPlayPos;
+    int64 mTotalNumFrames;
 
 private:
     static const int DEFAULT_KEY = 60; // MIDI key C4

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sat Mar 22 14:21:28 2014
+** Created: Wed Mar 26 15:35:18 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -65,13 +65,13 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QPushButton *pushButton_Play;
     QLabel *label_3;
-    QDoubleSpinBox *doubleSpinBox_BPM;
+    QDoubleSpinBox *doubleSpinBox_OriginalBPM;
     QPushButton *pushButton_CalcBPM;
     QLabel *label_2;
-    QDoubleSpinBox *doubleSpinBox;
+    QDoubleSpinBox *doubleSpinBox_NewBPM;
     QCheckBox *checkBox_JackSync;
     QCheckBox *checkBox_TimeStretch;
-    QCheckBox *checkBox_CorrectPitch;
+    QCheckBox *checkBox_PitchCorrection;
     QSpacerItem *horizontalSpacer;
     QHBoxLayout *horizontalLayout_4;
     QPushButton *pushButton_Slice;
@@ -183,11 +183,11 @@ public:
 
         horizontalLayout_2->addWidget(label_3);
 
-        doubleSpinBox_BPM = new QDoubleSpinBox(centralWidget);
-        doubleSpinBox_BPM->setObjectName(QString::fromUtf8("doubleSpinBox_BPM"));
-        doubleSpinBox_BPM->setMaximum(999.99);
+        doubleSpinBox_OriginalBPM = new QDoubleSpinBox(centralWidget);
+        doubleSpinBox_OriginalBPM->setObjectName(QString::fromUtf8("doubleSpinBox_OriginalBPM"));
+        doubleSpinBox_OriginalBPM->setMaximum(999.99);
 
-        horizontalLayout_2->addWidget(doubleSpinBox_BPM);
+        horizontalLayout_2->addWidget(doubleSpinBox_OriginalBPM);
 
         pushButton_CalcBPM = new QPushButton(centralWidget);
         pushButton_CalcBPM->setObjectName(QString::fromUtf8("pushButton_CalcBPM"));
@@ -200,13 +200,15 @@ public:
 
         horizontalLayout_2->addWidget(label_2);
 
-        doubleSpinBox = new QDoubleSpinBox(centralWidget);
-        doubleSpinBox->setObjectName(QString::fromUtf8("doubleSpinBox"));
+        doubleSpinBox_NewBPM = new QDoubleSpinBox(centralWidget);
+        doubleSpinBox_NewBPM->setObjectName(QString::fromUtf8("doubleSpinBox_NewBPM"));
+        doubleSpinBox_NewBPM->setMaximum(999.99);
 
-        horizontalLayout_2->addWidget(doubleSpinBox);
+        horizontalLayout_2->addWidget(doubleSpinBox_NewBPM);
 
         checkBox_JackSync = new QCheckBox(centralWidget);
         checkBox_JackSync->setObjectName(QString::fromUtf8("checkBox_JackSync"));
+        checkBox_JackSync->setEnabled(false);
         checkBox_JackSync->setLayoutDirection(Qt::LeftToRight);
 
         horizontalLayout_2->addWidget(checkBox_JackSync);
@@ -214,14 +216,16 @@ public:
         checkBox_TimeStretch = new QCheckBox(centralWidget);
         checkBox_TimeStretch->setObjectName(QString::fromUtf8("checkBox_TimeStretch"));
         checkBox_TimeStretch->setLayoutDirection(Qt::LeftToRight);
+        checkBox_TimeStretch->setChecked(true);
 
         horizontalLayout_2->addWidget(checkBox_TimeStretch);
 
-        checkBox_CorrectPitch = new QCheckBox(centralWidget);
-        checkBox_CorrectPitch->setObjectName(QString::fromUtf8("checkBox_CorrectPitch"));
-        checkBox_CorrectPitch->setLayoutDirection(Qt::LeftToRight);
+        checkBox_PitchCorrection = new QCheckBox(centralWidget);
+        checkBox_PitchCorrection->setObjectName(QString::fromUtf8("checkBox_PitchCorrection"));
+        checkBox_PitchCorrection->setLayoutDirection(Qt::LeftToRight);
+        checkBox_PitchCorrection->setChecked(true);
 
-        horizontalLayout_2->addWidget(checkBox_CorrectPitch);
+        horizontalLayout_2->addWidget(checkBox_PitchCorrection);
 
         horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
@@ -464,7 +468,7 @@ public:
         label_2->setText(QApplication::translate("MainWindow", "New BPM:", 0, QApplication::UnicodeUTF8));
         checkBox_JackSync->setText(QApplication::translate("MainWindow", "JACK Sync", 0, QApplication::UnicodeUTF8));
         checkBox_TimeStretch->setText(QApplication::translate("MainWindow", "Time Stretch", 0, QApplication::UnicodeUTF8));
-        checkBox_CorrectPitch->setText(QApplication::translate("MainWindow", "Correct Pitch", 0, QApplication::UnicodeUTF8));
+        checkBox_PitchCorrection->setText(QApplication::translate("MainWindow", "Pitch Correction", 0, QApplication::UnicodeUTF8));
         pushButton_Slice->setText(QApplication::translate("MainWindow", "Slice", 0, QApplication::UnicodeUTF8));
         label->setText(QApplication::translate("MainWindow", "Threshold:", 0, QApplication::UnicodeUTF8));
         pushButton_FindOnsets->setText(QApplication::translate("MainWindow", "Find Onsets", 0, QApplication::UnicodeUTF8));

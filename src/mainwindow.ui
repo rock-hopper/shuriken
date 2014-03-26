@@ -38,7 +38,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_BPM">
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_OriginalBPM">
         <property name="maximum">
          <double>999.990000000000009</double>
         </property>
@@ -62,10 +62,17 @@
        </widget>
       </item>
       <item>
-       <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+       <widget class="QDoubleSpinBox" name="doubleSpinBox_NewBPM">
+        <property name="maximum">
+         <double>999.990000000000009</double>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QCheckBox" name="checkBox_JackSync">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="layoutDirection">
          <enum>Qt::LeftToRight</enum>
         </property>
@@ -82,15 +89,21 @@
         <property name="text">
          <string>Time Stretch</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBox_CorrectPitch">
+       <widget class="QCheckBox" name="checkBox_PitchCorrection">
         <property name="layoutDirection">
          <enum>Qt::LeftToRight</enum>
         </property>
         <property name="text">
-         <string>Correct Pitch</string>
+         <string>Pitch Correction</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

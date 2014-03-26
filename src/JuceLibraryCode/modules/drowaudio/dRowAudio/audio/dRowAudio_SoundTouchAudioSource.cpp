@@ -62,7 +62,7 @@ void SoundTouchAudioSource::setPlaybackSettings (SoundTouchProcessor::PlaybackSe
 //==============================================================================
 void SoundTouchAudioSource::prepareToPlay (int /*samplesPerBlockExpected*/, double sampleRate_)
 {
-    soundTouchProcessor.initialise (numberOfChannels, sampleRate);
+    soundTouchProcessor.initialise (numberOfChannels, sampleRate_);
     
     if (sampleRate_ != sampleRate
         || numberOfSamplesToBuffer != buffer.getNumSamples()

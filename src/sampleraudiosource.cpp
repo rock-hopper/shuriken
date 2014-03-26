@@ -27,9 +27,11 @@
 //==================================================================================================
 // Public:
 
-SamplerAudioSource::SamplerAudioSource() : AudioSource()
+SamplerAudioSource::SamplerAudioSource() : PositionableAudioSource()
 {
     mNextFreeKey = DEFAULT_KEY;
+    mTotalNumFrames = 0;
+    mNextPlayPos = 0;
 }
 
 
@@ -54,6 +56,7 @@ bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer, co
                                                    ));
 
         mNextFreeKey++;
+        mTotalNumFrames += sampleBuffer->getNumFrames();
         isSampleAssignedToKey = true;
     }
 
@@ -88,6 +91,8 @@ void SamplerAudioSource::clearAllSamples()
     mSynth.clearVoices();
     mSynth.clearSounds();
     mNextFreeKey = DEFAULT_KEY;
+    mTotalNumFrames = 0;
+    mNextPlayPos = 0;
 }
 
 
@@ -101,14 +106,10 @@ void SamplerAudioSource::prepareToPlay( int /*samplesPerBlockExpected*/, double 
 
 
 
-void SamplerAudioSource::releaseResources()
-{
-}
-
-
-
 void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill )
 {
+//    const ScopedLock sl( mStartPosLock );
+
     // The synth always adds its output to the audio buffer, so we have to clear it first
     bufferToFill.clearActiveBufferRegion();
 
@@ -122,3 +123,16 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
 
 
 
+void SamplerAudioSource::setNextReadPosition( int64 newPosition )
+{
+//    const ScopedLock sl( mStartPosLock );
+//
+//    mNextPlayPos = newPosition;
+}
+
+
+
+int64 SamplerAudioSource::getTotalLength() const
+{
+    return mTotalNumFrames;
+}

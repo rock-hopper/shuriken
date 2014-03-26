@@ -127,15 +127,8 @@ MainWindow::MainWindow( QWidget* parent ) :
     }
     else
     {
-        // Create audio setup dialog
         mAudioSetupDialog = new AudioSetupDialog( mDeviceManager, this );
-
-        // Set up sample player and MIDI input listener
         mSamplerAudioSource = new SamplerAudioSource();
-        mAudioSourcePlayer.setSource( mSamplerAudioSource );
-        mDeviceManager.addAudioCallback( &mAudioSourcePlayer );
-        mDeviceManager.addMidiInputCallback( String::empty, mSamplerAudioSource->getMidiCollector() );
-
         mIsAudioInitialised = TRUE;
     }
 
@@ -154,14 +147,7 @@ MainWindow::MainWindow( QWidget* parent ) :
 
 MainWindow::~MainWindow()
 {
-    if ( mIsAudioInitialised )
-    {
-        // Tear down sample player and MIDI input listener
-        mAudioSourcePlayer.setSource( NULL );
-        mDeviceManager.removeMidiInputCallback( String::empty, mSamplerAudioSource->getMidiCollector() );
-        mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
-    }
-
+    on_actionClose_Project_triggered();
     delete mUI;
 }
 
@@ -522,12 +508,16 @@ void MainWindow::on_actionClose_Project_triggered()
 
     if ( mIsAudioInitialised )
     {
+        mAudioSourcePlayer.setSource( NULL );
+        mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
+        mDeviceManager.removeMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
         mSamplerAudioSource->clearAllSamples();
     }
 
     mUI->waveGraphicsView->clearAll();
     mUI->zoomSlider->setValue( 1 );
-    mUI->doubleSpinBox_BPM->setValue( 0.0 );
+    mUI->doubleSpinBox_OriginalBPM->setValue( 0.0 );
+    mUI->doubleSpinBox_NewBPM->setValue( 0.0 );
     mUI->pushButton_CalcBPM->setEnabled( false );
     mUI->pushButton_FindOnsets->setEnabled( false );
     mUI->pushButton_FindBeats->setEnabled( false );
@@ -571,7 +561,18 @@ void MainWindow::on_actionImport_Audio_File_triggered()
 
             if ( mIsAudioInitialised )
             {
+                const bool deleteSourceWhenDeleted = false;
+                const int bufferSize = 512;
+                const int numChans = mCurrentSampleBuffer->getNumChannels();
+
                 mSamplerAudioSource->addNewSample( sampleBuffer, sampleHeader->sampleRate );
+                mSoundTouchAudioSource = new SoundTouchAudioSource( mSamplerAudioSource,
+                                                                    deleteSourceWhenDeleted,
+                                                                    bufferSize,
+                                                                    numChans );
+                mAudioSourcePlayer.setSource( mSoundTouchAudioSource );
+                mDeviceManager.addAudioCallback( &mAudioSourcePlayer );
+                mDeviceManager.addMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
                 mUI->pushButton_Play->setEnabled( true );
             }
 
@@ -749,7 +750,8 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
 
     const DetectionSettings settings = getDetectionSettings();
     const qreal bpm = calcBPM( mCurrentSampleBuffer, settings );
-    mUI->doubleSpinBox_BPM->setValue( bpm );
+    mUI->doubleSpinBox_OriginalBPM->setValue( bpm );
+    mUI->doubleSpinBox_NewBPM->setValue( bpm );
 
     QApplication::restoreOverrideCursor();
 }
@@ -814,9 +816,9 @@ void MainWindow::on_pushButton_FindBeats_clicked()
 
 
 
-void MainWindow::on_checkBox_AdvancedOptions_toggled( const bool checked )
+void MainWindow::on_checkBox_AdvancedOptions_toggled( const bool isChecked )
 {
-    if ( checked ) // Show advanced options
+    if ( isChecked ) // Show advanced options
     {
         const int numWidgets = mUI->horizontalLayout_AdvancedOptions->count();
         for ( int i = 0; i < numWidgets; i++ )
@@ -837,3 +839,72 @@ void MainWindow::on_checkBox_AdvancedOptions_toggled( const bool checked )
 }
 
 
+
+void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
+{
+    const double originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
+    const bool isTimeStretchEnabled = mUI->checkBox_TimeStretch->isChecked();
+    const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
+
+    if ( isTimeStretchEnabled )
+    {
+        if ( newBPM > 0.0 && originalBPM > 0.0 )
+        {
+            const float rate = 1.0f;
+            const float tempo = newBPM / originalBPM;
+            const float pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
+
+            SoundTouchProcessor::PlaybackSettings settings( rate, tempo, pitch );
+            mSoundTouchAudioSource->setPlaybackSettings( settings );
+        }
+    }
+}
+
+
+
+void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
+{
+    const double originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
+    const double newBPM = mUI->doubleSpinBox_NewBPM->value();
+    const bool isTimeStretchEnabled = isChecked;
+    const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
+
+    if ( newBPM > 0.0 && originalBPM > 0.0 )
+    {
+        const float rate = 1.0f;
+        float tempo = 1.0f;
+        float pitch = 1.0f;
+
+        if ( isTimeStretchEnabled )
+        {
+            tempo = newBPM / originalBPM;
+            pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
+        }
+
+        SoundTouchProcessor::PlaybackSettings settings( rate, tempo, pitch );
+        mSoundTouchAudioSource->setPlaybackSettings( settings );
+    }
+}
+
+
+
+void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
+{
+    const double originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
+    const double newBPM = mUI->doubleSpinBox_NewBPM->value();
+    const bool isTimeStretchEnabled = mUI->checkBox_TimeStretch->isChecked();
+    const bool isPitchCorrectionEnabled = isChecked;
+
+    if ( isTimeStretchEnabled )
+    {
+        if ( newBPM > 0.0 && originalBPM > 0.0 )
+        {
+            const float rate = 1.0f;
+            const float tempo = newBPM / originalBPM;
+            const float pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
+
+            SoundTouchProcessor::PlaybackSettings settings( rate, tempo, pitch );
+            mSoundTouchAudioSource->setPlaybackSettings( settings );
+        }
+    }
+}

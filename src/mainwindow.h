@@ -76,6 +76,7 @@ private:
     QList<SharedSampleBuffer> mSlicedSampleBuffers;
 
     ScopedPointer<SamplerAudioSource> mSamplerAudioSource;
+    ScopedPointer<SoundTouchAudioSource> mSoundTouchAudioSource;
     AudioSourcePlayer mAudioSourcePlayer;
 
     bool mIsAudioInitialised;
@@ -107,9 +108,12 @@ private:
                                     QList<SharedSampleBuffer>& outputBufferList );
 
 private slots:
+    void on_checkBox_PitchCorrection_toggled( const bool isChecked );
+    void on_checkBox_TimeStretch_toggled( const bool isChecked );
+    void on_doubleSpinBox_NewBPM_valueChanged( const double newBPM );
     void on_pushButton_CalcBPM_clicked();
     void on_pushButton_FindBeats_clicked();
-    void on_checkBox_AdvancedOptions_toggled( const bool checked );
+    void on_checkBox_AdvancedOptions_toggled( const bool isChecked );
     void on_horizontalSlider_Threshold_valueChanged( const int value );
     void on_pushButton_FindOnsets_clicked();
     void on_pushButton_Slice_clicked();
