@@ -57,13 +57,13 @@ public:
     void clearAll();
     void clearWaveform();
 
+    qreal getScenePosX( const int frameNum ) const;
+    int getFrameNum( qreal scenePosX ) const;
+
 protected:
     void resizeEvent( QResizeEvent* event );
 
 private:
-    qreal getScenePosX( const int frameNum );
-    int getFrameNum( const qreal scenePosX );
-
     QList<SharedWaveformItem> mWaveformItemList;
     QList<SharedSlicePointItem> mSlicePointItemList;
     int mNumFrames;

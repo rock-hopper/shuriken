@@ -652,7 +652,11 @@ void MainWindow::on_actionDelete_triggered()
 
 void MainWindow::on_actionAdd_Slice_Point_triggered()
 {
-    QUndoCommand* command = new AddSlicePointItemCommand( 0.0, mUI->waveGraphicsView, mUI->pushButton_Slice );
+    const QPoint mousePos = mUI->waveGraphicsView->mapFromGlobal( QCursor::pos() );
+    const QPointF mouseScenePos = mUI->waveGraphicsView->mapToScene( mousePos );
+    const int frameNum = mUI->waveGraphicsView->getFrameNum( mouseScenePos.x() );
+
+    QUndoCommand* command = new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice );
     mUndoStack.push( command );
 }
 

@@ -281,6 +281,26 @@ void WaveGraphicsView::clearWaveform()
 
 
 
+qreal WaveGraphicsView::getScenePosX( const int frameNum ) const
+{
+    return frameNum * ( scene()->width() / mNumFrames );
+}
+
+
+
+int WaveGraphicsView::getFrameNum( qreal scenePosX ) const
+{
+    if ( scenePosX < 0.0)
+        scenePosX = 0.0;
+
+    if ( scenePosX > scene()->width() - 1 )
+        scenePosX = scene()->width() - 1;
+
+    return scenePosX / ( scene()->width() / mNumFrames );
+}
+
+
+
 //==================================================================================================
 // Protected:
 
@@ -314,23 +334,6 @@ void WaveGraphicsView::resizeEvent ( QResizeEvent* event )
     }
 
     QGraphicsView::resizeEvent( event );
-}
-
-
-
-//==================================================================================================
-// Private:
-
-qreal WaveGraphicsView::getScenePosX( const int frameNum )
-{
-    return frameNum * ( scene()->width() / mNumFrames );
-}
-
-
-
-int WaveGraphicsView::getFrameNum( const qreal scenePosX )
-{
-    return scenePosX / ( scene()->width() / mNumFrames );
 }
 
 
