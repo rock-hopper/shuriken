@@ -27,7 +27,6 @@ uname -v = #117 SMP PREEMPT Sat Jun 8 10:53:56 EDT 2013
 /usr/bin/oslevel       = unknown
 /bin/universe          = unknown
 
-PATH: /usr/bin
 PATH: /usr/local/bin
 PATH: /usr/bin
 PATH: /bin

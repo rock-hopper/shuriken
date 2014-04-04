@@ -1,0 +1,42 @@
+#!/bin/sh
+
+declare -ra ARGS=("$@")
+declare -ri NUM_ARGS=$#
+
+function usage() 
+{
+    cat << EOF
+
+Usage:  build
+        build clean
+
+EOF
+}
+
+if (( NUM_ARGS > 0 )); then
+    if [ "${ARGS[$i]}" == "clean" ]; then
+        make clean -w
+        rm -fv lib/libsndlib_shuriken.a
+        cd src/SndLibShuriken
+        make clean -w
+        cd ../..
+    else
+        usage
+    fi
+else
+    # make sndlib
+    mkdir -p lib
+    cd src/SndLibShuriken
+    ./configure --without-audio --without-s7
+    make -w
+    mv -v libsndlib_shuriken.a ../../lib/
+    cd ../..
+
+    # make shuriken
+    qmake-qt4 ./Shuriken.pro -spec linux-g++ -r CONFIG+=debug
+    make -w
+
+    if [ $? -eq 0 ]; then
+        echo -e "\nSuccessfully built debug/shuriken\n"
+    fi
+fi
