@@ -11,6 +11,6 @@ or to clean the project:
 
     ./build clean
 
-You must have qmake-qt4 and aubio installed on your system. fftw3 is recommended but not required.
+You must have qmake-qt4 and aubio 0.4 dev files installed on your system.
 
 This project is still in the early stages of development. Come back later!
