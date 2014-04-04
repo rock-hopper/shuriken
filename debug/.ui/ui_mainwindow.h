@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Fri Apr 4 13:20:55 2014
+** Created: Fri Apr 4 17:29:31 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -64,6 +64,7 @@ public:
     QVBoxLayout *verticalLayout;
     QHBoxLayout *horizontalLayout_2;
     QPushButton *pushButton_Play;
+    QPushButton *pushButton_Stop;
     QLabel *label_3;
     QDoubleSpinBox *doubleSpinBox_OriginalBPM;
     QPushButton *pushButton_CalcBPM;
@@ -174,8 +175,18 @@ public:
         pushButton_Play = new QPushButton(centralWidget);
         pushButton_Play->setObjectName(QString::fromUtf8("pushButton_Play"));
         pushButton_Play->setEnabled(false);
+        QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(pushButton_Play->sizePolicy().hasHeightForWidth());
+        pushButton_Play->setSizePolicy(sizePolicy);
 
         horizontalLayout_2->addWidget(pushButton_Play);
+
+        pushButton_Stop = new QPushButton(centralWidget);
+        pushButton_Stop->setObjectName(QString::fromUtf8("pushButton_Stop"));
+
+        horizontalLayout_2->addWidget(pushButton_Stop);
 
         label_3 = new QLabel(centralWidget);
         label_3->setObjectName(QString::fromUtf8("label_3"));
@@ -463,6 +474,7 @@ public:
         actionNormalise->setText(QApplication::translate("MainWindow", "Normalise", 0, QApplication::UnicodeUTF8));
         actionApply_Ramp->setText(QApplication::translate("MainWindow", "Apply Ramp", 0, QApplication::UnicodeUTF8));
         pushButton_Play->setText(QApplication::translate("MainWindow", "Play", 0, QApplication::UnicodeUTF8));
+        pushButton_Stop->setText(QApplication::translate("MainWindow", "Stop", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("MainWindow", "Original BPM:", 0, QApplication::UnicodeUTF8));
         pushButton_CalcBPM->setText(QApplication::translate("MainWindow", "Calc", 0, QApplication::UnicodeUTF8));
         label_2->setText(QApplication::translate("MainWindow", "New BPM:", 0, QApplication::UnicodeUTF8));

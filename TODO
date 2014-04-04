@@ -3,14 +3,11 @@ TODO
 Release Critical
 ================
 
-Bugs
------------
-Fix zooming
-
-
 GUI Improvements
 ----------------
-Make play button do something
+Make play button work properly with audio slices
+
+Fix zooming
 
 
 Code Improvements

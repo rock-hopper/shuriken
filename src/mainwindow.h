@@ -108,6 +108,8 @@ private:
                                     QList<SharedSampleBuffer>& outputBufferList );
 
 private slots:
+    void on_pushButton_Stop_clicked();
+    void on_pushButton_Play_clicked();
     void on_checkBox_PitchCorrection_toggled( const bool isChecked );
     void on_checkBox_TimeStretch_toggled( const bool isChecked );
     void on_doubleSpinBox_NewBPM_valueChanged( const double newBPM );

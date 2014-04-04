@@ -35,6 +35,8 @@ public:
     bool addNewSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
     bool setSamples( const QList<SharedSampleBuffer> sampleBufferList, const qreal sampleRate );
     void clearAllSamples();
+    void play();
+    void stop();
 
     void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;
     void releaseResources() override {};

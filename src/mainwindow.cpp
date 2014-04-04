@@ -912,3 +912,13 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
         }
     }
 }
+
+void MainWindow::on_pushButton_Play_clicked()
+{
+    mSamplerAudioSource->play();
+}
+
+void MainWindow::on_pushButton_Stop_clicked()
+{
+    mSamplerAudioSource->stop();
+}

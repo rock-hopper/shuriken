@@ -97,6 +97,28 @@ void SamplerAudioSource::clearAllSamples()
 
 
 
+void SamplerAudioSource::play()
+{
+    const int midiChannel = 1;
+    const int midiNoteNum = DEFAULT_KEY; // C4
+    const float velocity = 1.0;
+
+    mSynth.noteOn( midiChannel, midiNoteNum, velocity );
+}
+
+
+
+void SamplerAudioSource::stop()
+{
+    const int midiChannel = 1;
+    const int midiNoteNum = DEFAULT_KEY; // C4
+    const bool allowTailOff = false;
+
+    mSynth.noteOff( midiChannel, midiNoteNum, allowTailOff );
+}
+
+
+
 void SamplerAudioSource::prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate )
 {
     mMidiCollector.reset( sampleRate );
