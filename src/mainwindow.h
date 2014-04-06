@@ -147,6 +147,7 @@ private slots:
     void recordSlicePointItemMove( const SharedSlicePointItem slicePointItem,
                                    const int oldFrameNum,
                                    const int newFrameNum );
+    void playSample( const int sampleNum, const int startFrame, const int endFrame );
 };
 
 #endif // MAINWINDOW_H

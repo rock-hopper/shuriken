@@ -201,9 +201,8 @@ void CreateSlicesCommand::undo()
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     mMainWindow->mSlicedSampleBuffers.clear();
-    mMainWindow->mSamplerAudioSource->clearAllSamples();
-    mMainWindow->mSamplerAudioSource->addNewSample( mMainWindow->mCurrentSampleBuffer,
-                                                    mMainWindow->mCurrentSampleHeader->sampleRate );
+    mMainWindow->mSamplerAudioSource->setSample( mMainWindow->mCurrentSampleBuffer,
+                                                 mMainWindow->mCurrentSampleHeader->sampleRate );
     mGraphicsView->clearWaveform();
     mGraphicsView->createWaveform( mMainWindow->mCurrentSampleBuffer );
     mGraphicsView->showSlicePoints();

@@ -42,6 +42,7 @@
 */
 
 #include "shurikensampler.h"
+#include <QDebug>
 
 
 ShurikenSamplerSound::ShurikenSamplerSound( const String& soundName,
@@ -49,26 +50,29 @@ ShurikenSamplerSound::ShurikenSamplerSound( const String& soundName,
                                             const double sampleRate,
                                             const BigInteger& notes,
                                             const int midiNoteForNormalPitch ) :
-    name( soundName ),
-    sourceSampleRate( sampleRate ),
-    midiNotes( notes ),
-    midiRootNote( midiNoteForNormalPitch )
+    mName( soundName ),
+    mSourceSampleRate( sampleRate ),
+    mMidiNotes( notes ),
+    mMidiRootNote( midiNoteForNormalPitch )
 {
-    if ( sourceSampleRate <= 0 || sampleBuffer->getNumFrames() <= 0 )
+    if ( mSourceSampleRate <= 0 || sampleBuffer->getNumFrames() <= 0 )
     {
-        length = 0;
-        attackSamples = 0;
-        releaseSamples = 0;
+        mLength = 0;
+        mAttackSamples = 0;
+        mReleaseSamples = 0;
     }
     else
     {
-        length = sampleBuffer->getNumFrames();
+        mLength = sampleBuffer->getNumFrames();
 
-        data = sampleBuffer;
+        mData = sampleBuffer;
 
-        attackSamples = 0;
-        releaseSamples = 0;
+        mAttackSamples = 0;
+        mReleaseSamples = 0;
     }
+
+    mStartFrame = 0;
+    mEndFrame = mLength - 1;
 }
 
 
@@ -79,9 +83,17 @@ ShurikenSamplerSound::~ShurikenSamplerSound()
 
 
 
+void ShurikenSamplerSound::setPlaybackRange( const int startFrame, const int endFrame )
+{
+    mStartFrame = startFrame;
+    mEndFrame = endFrame;
+}
+
+
+
 bool ShurikenSamplerSound::appliesToNote( const int midiNoteNumber )
 {
-    return midiNotes [midiNoteNumber];
+    return mMidiNotes [midiNoteNumber];
 }
 
 
@@ -95,11 +107,11 @@ bool ShurikenSamplerSound::appliesToChannel( const int /*midiChannel*/ )
 
 //==============================================================================
 ShurikenSamplerVoice::ShurikenSamplerVoice()
-    : pitchRatio( 0.0 ),
-      sourceSamplePosition( 0.0 ),
-      lgain( 0.0f ), rgain( 0.0f ),
-      attackReleaseLevel( 0 ), attackDelta( 0 ), releaseDelta( 0 ),
-      isInAttack( false ), isInRelease( false )
+    : mPitchRatio( 0.0 ),
+      mSourceSamplePosition( 0.0 ),
+      mLeftGain( 0.0f ), mRightGain( 0.0f ),
+      mAttackReleaseLevel( 0 ), mAttackDelta( 0 ), mReleaseDelta( 0 ),
+      mIsInAttack( false ), mIsInRelease( false )
 {
 }
 
@@ -125,31 +137,31 @@ void ShurikenSamplerVoice::startNote( const int midiNoteNumber,
 {
     if ( const ShurikenSamplerSound* const sound = dynamic_cast<const ShurikenSamplerSound*>( s ) )
     {
-        pitchRatio = pow( 2.0, (midiNoteNumber - sound->midiRootNote) / 12.0 )
-                        * sound->sourceSampleRate / getSampleRate();
+        mPitchRatio = pow( 2.0, (midiNoteNumber - sound->mMidiRootNote) / 12.0 )
+                        * sound->mSourceSampleRate / getSampleRate();
 
-        sourceSamplePosition = 0.0;
-        lgain = velocity;
-        rgain = velocity;
+        mSourceSamplePosition = sound->mStartFrame;
+        mLeftGain = velocity;
+        mRightGain = velocity;
 
-        isInAttack =( sound->attackSamples > 0 );
-        isInRelease = false;
+        mIsInAttack =( sound->mAttackSamples > 0 );
+        mIsInRelease = false;
 
-        if  (isInAttack )
+        if  (mIsInAttack )
         {
-            attackReleaseLevel = 0.0f;
-            attackDelta = (float) (pitchRatio / sound->attackSamples);
+            mAttackReleaseLevel = 0.0f;
+            mAttackDelta = (float) (mPitchRatio / sound->mAttackSamples);
         }
         else
         {
-            attackReleaseLevel = 1.0f;
-            attackDelta = 0.0f;
+            mAttackReleaseLevel = 1.0f;
+            mAttackDelta = 0.0f;
         }
 
-        if ( sound->releaseSamples > 0 )
-            releaseDelta = (float) ( -pitchRatio / sound->releaseSamples );
+        if ( sound->mReleaseSamples > 0 )
+            mReleaseDelta = (float) ( -mPitchRatio / sound->mReleaseSamples );
         else
-            releaseDelta = 0.0f;
+            mReleaseDelta = 0.0f;
     }
     else
     {
@@ -161,14 +173,23 @@ void ShurikenSamplerVoice::startNote( const int midiNoteNumber,
 
 void ShurikenSamplerVoice::stopNote( const bool allowTailOff )
 {
+    ShurikenSamplerSound* const playingSound =
+            static_cast<ShurikenSamplerSound*>( getCurrentlyPlayingSound().get() );
+
     if ( allowTailOff )
     {
-        isInAttack = false;
-        isInRelease = true;
+        mIsInAttack = false;
+        mIsInRelease = true;
     }
     else
     {
         clearCurrentNote();
+    }
+
+    if ( playingSound != NULL )
+    {
+        playingSound->mStartFrame = 0;
+        playingSound->mEndFrame = playingSound->mLength - 1;
     }
 }
 
@@ -193,47 +214,47 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
     if ( const ShurikenSamplerSound* const playingSound =
          static_cast<ShurikenSamplerSound*>( getCurrentlyPlayingSound().get() ) )
     {
-        const float* const inL = playingSound->data->getSampleData( 0, 0 );
-        const float* const inR = playingSound->data->getNumChannels() > 1
-                                    ? playingSound->data->getSampleData( 1, 0 ) : nullptr;
+        const float* const inL = playingSound->mData->getSampleData( 0, 0 );
+        const float* const inR = playingSound->mData->getNumChannels() > 1
+                                    ? playingSound->mData->getSampleData( 1, 0 ) : nullptr;
 
         float* outL = outputBuffer.getSampleData( 0, startSample );
         float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getSampleData( 1, startSample ) : nullptr;
 
         while ( --numSamples >= 0 )
         {
-            const int pos = (int) sourceSamplePosition;
-            const float alpha = (float) ( sourceSamplePosition - pos );
+            const int pos = (int) mSourceSamplePosition;
+            const float alpha = (float) ( mSourceSamplePosition - pos );
             const float invAlpha = 1.0f - alpha;
 
             // just using a very simple linear interpolation here..
             float l = ( inL [pos] * invAlpha + inL [pos + 1] * alpha );
             float r = ( inR != nullptr ) ? ( inR [pos] * invAlpha + inR [pos + 1] * alpha ) : l;
 
-            l *= lgain;
-            r *= rgain;
+            l *= mLeftGain;
+            r *= mRightGain;
 
-            if ( isInAttack )
+            if ( mIsInAttack )
             {
-                l *= attackReleaseLevel;
-                r *= attackReleaseLevel;
+                l *= mAttackReleaseLevel;
+                r *= mAttackReleaseLevel;
 
-                attackReleaseLevel += attackDelta;
+                mAttackReleaseLevel += mAttackDelta;
 
-                if ( attackReleaseLevel >= 1.0f )
+                if ( mAttackReleaseLevel >= 1.0f )
                 {
-                    attackReleaseLevel = 1.0f;
-                    isInAttack = false;
+                    mAttackReleaseLevel = 1.0f;
+                    mIsInAttack = false;
                 }
             }
-            else if ( isInRelease )
+            else if ( mIsInRelease )
             {
-                l *= attackReleaseLevel;
-                r *= attackReleaseLevel;
+                l *= mAttackReleaseLevel;
+                r *= mAttackReleaseLevel;
 
-                attackReleaseLevel += releaseDelta;
+                mAttackReleaseLevel += mReleaseDelta;
 
-                if ( attackReleaseLevel <= 0.0f )
+                if ( mAttackReleaseLevel <= 0.0f )
                 {
                     stopNote( false );
                     break;
@@ -250,9 +271,9 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
                 *outL++ += (l + r) * 0.5f;
             }
 
-            sourceSamplePosition += pitchRatio;
+            mSourceSamplePosition += mPitchRatio;
 
-            if ( sourceSamplePosition > playingSound->length )
+            if ( mSourceSamplePosition > playingSound->mEndFrame )
             {
                 stopNote( false );
                 break;

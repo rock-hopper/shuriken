@@ -48,9 +48,12 @@ public:
 
     void setRect( const qreal x, const qreal y, const qreal width, const qreal height );
 
-    int getOrderPos() const                         { return mCurrentOrderPos; }
-    void setOrderPos( const int orderPos )          { mCurrentOrderPos = orderPos; }
-    int type() const                                { return Type; }
+    int getOrderPos() const                             { return mCurrentOrderPos; }
+    void setOrderPos( const int orderPos )              { mCurrentOrderPos = orderPos; }
+
+    const SharedSampleBuffer getSampleBuffer() const    { return mSampleBuffer; }
+
+    int type() const                                    { return Type; }
 
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
@@ -85,6 +88,7 @@ signals:
     void orderPosIsChanging( const int oldOrderPos, const int newOrderPos );
     void orderPosHasChanged( const int startOrderPos, const int destOrderPos );
     void finishedMoving( const int orderPos );
+    void rightMousePressed( const int itemOrderPos, const QPointF mouseScenePos );
 };
 
 #endif // WAVEFORMITEM_H

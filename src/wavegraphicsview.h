@@ -71,12 +71,14 @@ private:
 signals:
     void waveformSliceOrderChanged( const int oldOrderPos, const int newOrderPos );
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );
+    void rightMousePressed( const int waveformItemOrderPos, const int startFrame, const int endFrame );
 
 private slots:
     void setZoom( const int zoomFactor );
     void reorderWaveformSlices( const int oldOrderPos, const int newOrderPos );
     void slideWaveformSliceIntoPlace( const int orderPos );
     void reorderSlicePoints( SlicePointItem* const movedItem );
+    void determinePlayPos( const int waveformItemOrderPos, const QPointF mouseScenePos );
 };
 
 #endif // WAVEGRAPHICSVIEW_H

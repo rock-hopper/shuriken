@@ -85,12 +85,14 @@ up or down relative to this one
 
     //==============================================================================
     /** Returns the sample's name */
-    const String& getName() const noexcept { return name; }
+    const String& getName() const noexcept { return mName; }
 
     /** Returns the audio sample data.
 This could return nullptr if there was a problem loading the data.
 */
-    SharedSampleBuffer getAudioData() const noexcept { return data; }
+    SharedSampleBuffer getAudioData() const noexcept { return mData; }
+
+    void setPlaybackRange( const int startFrame, const int endFrame );
 
 
     //==============================================================================
@@ -102,12 +104,14 @@ private:
     //==============================================================================
     friend class ShurikenSamplerVoice;
 
-    String name;
-    SharedSampleBuffer data;
-    double sourceSampleRate;
-    BigInteger midiNotes;
-    int length, attackSamples, releaseSamples;
-    int midiRootNote;
+    String mName;
+    SharedSampleBuffer mData;
+    double mSourceSampleRate;
+    BigInteger mMidiNotes;
+    int mLength, mAttackSamples, mReleaseSamples;
+    int mMidiRootNote;
+
+    volatile int mStartFrame, mEndFrame;
 
     JUCE_LEAK_DETECTOR( ShurikenSamplerSound )
 };
@@ -146,10 +150,10 @@ public:
 
 private:
     //==============================================================================
-    double pitchRatio;
-    double sourceSamplePosition;
-    float lgain, rgain, attackReleaseLevel, attackDelta, releaseDelta;
-    bool isInAttack, isInRelease;
+    double mPitchRatio;
+    double mSourceSamplePosition;
+    float mLeftGain, mRightGain, mAttackReleaseLevel, mAttackDelta, mReleaseDelta;
+    bool mIsInAttack, mIsInRelease;
 
     JUCE_LEAK_DETECTOR( ShurikenSamplerVoice )
 };

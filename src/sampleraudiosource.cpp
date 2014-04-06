@@ -22,6 +22,7 @@
 
 #include "sampleraudiosource.h"
 #include "shurikensampler.h"
+//#include <QDebug>
 
 
 //==================================================================================================
@@ -30,37 +31,17 @@
 SamplerAudioSource::SamplerAudioSource() : PositionableAudioSource()
 {
     mNextFreeKey = DEFAULT_KEY;
+    mStartKey = DEFAULT_KEY;
     mTotalNumFrames = 0;
     mNextPlayPos = 0;
 }
 
 
 
-bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate )
+void SamplerAudioSource::setSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate )
 {
-    bool isSampleAssignedToKey = false;
-
-    if ( mNextFreeKey < MAX_POLYPHONY )
-    {
-        mSynth.addVoice( new ShurikenSamplerVoice() );
-
-        BigInteger keyNum;
-        keyNum.clear();
-        keyNum.setBit( mNextFreeKey );
-
-        mSynth.addSound( new ShurikenSamplerSound( "key" + mNextFreeKey,    // Sample name
-                                                   sampleBuffer,
-                                                   sampleRate,
-                                                   keyNum,                  // MIDI key this sample should be mapped to
-                                                   mNextFreeKey             // Root/pitch-centre MIDI key
-                                                   ));
-
-        mNextFreeKey++;
-        mTotalNumFrames += sampleBuffer->getNumFrames();
-        isSampleAssignedToKey = true;
-    }
-
-    return isSampleAssignedToKey;
+    clearAllSamples();
+    addNewSample( sampleBuffer, sampleRate );
 }
 
 
@@ -73,6 +54,8 @@ bool SamplerAudioSource::setSamples( const QList<SharedSampleBuffer> sampleBuffe
     {
         mNextFreeKey = qMax( MAX_POLYPHONY - sampleBufferList.size(), 0 );
     }
+
+    mStartKey = mNextFreeKey;
 
     bool isEverySampleAssignedToKey = false;
 
@@ -91,16 +74,17 @@ void SamplerAudioSource::clearAllSamples()
     mSynth.clearVoices();
     mSynth.clearSounds();
     mNextFreeKey = DEFAULT_KEY;
+    mStartKey = DEFAULT_KEY;
     mTotalNumFrames = 0;
     mNextPlayPos = 0;
 }
 
 
 
-void SamplerAudioSource::play()
+void SamplerAudioSource::playAll()
 {
     const int midiChannel = 1;
-    const int midiNoteNum = DEFAULT_KEY; // C4
+    const int midiNoteNum = mStartKey;
     const float velocity = 1.0;
 
     mSynth.noteOn( midiChannel, midiNoteNum, velocity );
@@ -108,13 +92,31 @@ void SamplerAudioSource::play()
 
 
 
+void SamplerAudioSource::playSample( const int sampleNum, const int startFrame, const int endFrame )
+{
+    const int midiChannel = 1;
+    const int midiNoteNum = mStartKey + sampleNum;
+    const float velocity = 1.0;
+
+    SynthesiserSound* sound = mSynth.getSound( sampleNum );
+
+    ShurikenSamplerSound* const samplerSound = dynamic_cast<ShurikenSamplerSound*>( sound );
+
+    if ( samplerSound != NULL )
+    {
+        samplerSound->setPlaybackRange( startFrame, endFrame );
+        mSynth.noteOn( midiChannel, midiNoteNum, velocity );
+    }
+}
+
+
+
 void SamplerAudioSource::stop()
 {
     const int midiChannel = 1;
-    const int midiNoteNum = DEFAULT_KEY; // C4
     const bool allowTailOff = false;
 
-    mSynth.noteOff( midiChannel, midiNoteNum, allowTailOff );
+    mSynth.allNotesOff( midiChannel, allowTailOff );
 }
 
 
@@ -157,4 +159,36 @@ void SamplerAudioSource::setNextReadPosition( int64 newPosition )
 int64 SamplerAudioSource::getTotalLength() const
 {
     return mTotalNumFrames;
+}
+
+
+
+//==================================================================================================
+// Private:
+
+bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate )
+{
+    bool isSampleAssignedToKey = false;
+
+    if ( mNextFreeKey < MAX_POLYPHONY )
+    {
+        mSynth.addVoice( new ShurikenSamplerVoice() );
+
+        BigInteger keyNum;
+        keyNum.clear();
+        keyNum.setBit( mNextFreeKey );
+
+        mSynth.addSound( new ShurikenSamplerSound( "key" + mNextFreeKey,    // Sample name
+                                                   sampleBuffer,
+                                                   sampleRate,
+                                                   keyNum,                  // MIDI key this sample should be mapped to
+                                                   mNextFreeKey             // Root/pitch-centre MIDI key
+                                                   ));
+
+        mNextFreeKey++;
+        mTotalNumFrames += sampleBuffer->getNumFrames();
+        isSampleAssignedToKey = true;
+    }
+
+    return isSampleAssignedToKey;
 }

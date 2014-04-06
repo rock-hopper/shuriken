@@ -58,6 +58,9 @@ void WaveGraphicsView::createWaveform( const SharedSampleBuffer sampleBuffer )
 
     mWaveformItemList.append( SharedWaveformItem( waveformItem ) );
 
+    QObject::connect( waveformItem, SIGNAL(rightMousePressed(int,QPointF)),
+                      this, SLOT(determinePlayPos(int,QPointF)) );
+
     scene()->addItem( waveformItem );
     scene()->update();
 }
@@ -91,6 +94,9 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveformSlices( const QList<Sh
 
         QObject::connect( waveformItem, SIGNAL( finishedMoving(int) ),
                           this, SLOT( slideWaveformSliceIntoPlace(int) ) );
+
+        QObject::connect( waveformItem, SIGNAL( rightMousePressed(int,QPointF) ),
+                          this, SLOT( determinePlayPos(int,QPointF) ) );
 
         scene()->addItem( waveformItem );
         scene()->update();
@@ -436,4 +442,38 @@ void WaveGraphicsView::reorderSlicePoints( SlicePointItem* const movedItem )
     slicePointItem->setFrameNum( newFrameNum );
 
     emit slicePointOrderChanged( slicePointItem, oldFrameNum, newFrameNum );
+}
+
+
+
+void WaveGraphicsView::determinePlayPos( const int waveformItemOrderPos, const QPointF mouseScenePos )
+{
+    if ( ! mWaveformItemList.isEmpty() )
+    {
+        int startFrame = 0;
+        int endFrame = mWaveformItemList.at( waveformItemOrderPos )->getSampleBuffer()->getNumFrames() - 1;
+
+        // If slice points are present and the waveform has not yet been sliced...
+        if ( mWaveformItemList.size() == 1 && ! mSlicePointItemList.isEmpty() )
+        {
+            const int mousePosFrameNum = getFrameNum( mouseScenePos.x() );
+
+            const QList<int> slicePointFrameNumList = getSlicePointFrameNumList();
+
+            foreach (  int slicePointFrameNum, slicePointFrameNumList )
+            {
+                if ( slicePointFrameNum <= mousePosFrameNum )
+                {
+                    startFrame = slicePointFrameNum;
+                }
+                else
+                {
+                    endFrame = slicePointFrameNum;
+                    break;
+                }
+            }
+        }
+
+        emit rightMousePressed( waveformItemOrderPos, startFrame, endFrame );
+    }
 }

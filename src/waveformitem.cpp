@@ -220,9 +220,16 @@ QVariant WaveformItem::itemChange( GraphicsItemChange change, const QVariant &va
 
 void WaveformItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
-    QGraphicsItem::mousePressEvent( event );
-
-    mOrderPosBeforeMove = mCurrentOrderPos;
+    if ( event->button() == Qt::RightButton )
+    {
+        emit rightMousePressed( mCurrentOrderPos, event->scenePos() );
+        event->ignore();
+    }
+    else
+    {
+        QGraphicsItem::mousePressEvent( event );
+        mOrderPosBeforeMove = mCurrentOrderPos;
+    }
 }
 
 

@@ -103,6 +103,9 @@ MainWindow::MainWindow( QWidget* parent ) :
     QObject::connect( mUI->waveGraphicsView, SIGNAL( slicePointOrderChanged(SharedSlicePointItem,int,int) ),
                       this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int) ) );
 
+    QObject::connect( mUI->waveGraphicsView, SIGNAL( rightMousePressed(int,int,int) ),
+                      this, SLOT( playSample(int,int,int) ) );
+
     QObject::connect( &mUndoStack, SIGNAL( canUndoChanged(bool) ),
                       mUI->actionUndo, SLOT( setEnabled(bool) ) );
 
@@ -483,6 +486,13 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
 
 
 
+void MainWindow::playSample( const int sampleNum, const int startFrame, const int endFrame )
+{
+    mSamplerAudioSource->playSample( sampleNum, startFrame, endFrame );
+}
+
+
+
 //====================
 // "File" menu:
 
@@ -565,7 +575,7 @@ void MainWindow::on_actionImport_Audio_File_triggered()
                 const int bufferSize = 512;
                 const int numChans = mCurrentSampleBuffer->getNumChannels();
 
-                mSamplerAudioSource->addNewSample( sampleBuffer, sampleHeader->sampleRate );
+                mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
                 mSoundTouchAudioSource = new SoundTouchAudioSource( mSamplerAudioSource,
                                                                     deleteSourceWhenDeleted,
                                                                     bufferSize,
@@ -913,10 +923,14 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
     }
 }
 
+
+
 void MainWindow::on_pushButton_Play_clicked()
 {
-    mSamplerAudioSource->play();
+    mSamplerAudioSource->playAll();
 }
+
+
 
 void MainWindow::on_pushButton_Stop_clicked()
 {

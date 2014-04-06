@@ -32,10 +32,11 @@ class SamplerAudioSource : public PositionableAudioSource
 public:
     SamplerAudioSource();
 
-    bool addNewSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
+    void setSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
     bool setSamples( const QList<SharedSampleBuffer> sampleBufferList, const qreal sampleRate );
     void clearAllSamples();
-    void play();
+    void playAll();
+    void playSample( const int sampleNum, const int startFrame, const int endFrame );
     void stop();
 
     void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;
@@ -50,10 +51,13 @@ public:
     MidiMessageCollector* getMidiMessageCollector()             { return &mMidiCollector; }
 
 private:
+    bool addNewSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
+
     MidiMessageCollector mMidiCollector;
     Synthesiser mSynth;
     int mNextFreeKey;
-    CriticalSection mStartPosLock;
+    int mStartKey;
+//    CriticalSection mStartPosLock;
     int64 volatile mNextPlayPos;
     int64 mTotalNumFrames;
 
