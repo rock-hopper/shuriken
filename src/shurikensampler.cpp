@@ -42,7 +42,7 @@
 */
 
 #include "shurikensampler.h"
-#include <QDebug>
+//#include <QDebug>
 
 
 ShurikenSamplerSound::ShurikenSamplerSound( const String& soundName,

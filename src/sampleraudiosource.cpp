@@ -34,6 +34,7 @@ SamplerAudioSource::SamplerAudioSource() : PositionableAudioSource()
     mStartKey = DEFAULT_KEY;
     mTotalNumFrames = 0;
     mNextPlayPos = 0;
+    mIsPlaySampleSeqEnabled = false;
 }
 
 
@@ -41,7 +42,11 @@ SamplerAudioSource::SamplerAudioSource() : PositionableAudioSource()
 void SamplerAudioSource::setSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate )
 {
     clearAllSamples();
-    addNewSample( sampleBuffer, sampleRate );
+
+    bool isSampleAssignedToKey = addNewSample( sampleBuffer, sampleRate );
+
+    if ( isSampleAssignedToKey )
+        mSampleBufferLengthsList.append( sampleBuffer->getNumFrames() );
 }
 
 
@@ -61,7 +66,12 @@ bool SamplerAudioSource::setSamples( const QList<SharedSampleBuffer> sampleBuffe
 
     foreach ( SharedSampleBuffer sampleBuffer, sampleBufferList )
     {
-        isEverySampleAssignedToKey = addNewSample( sampleBuffer, sampleRate );
+        bool isSampleAssignedToKey = addNewSample( sampleBuffer, sampleRate );
+
+        if ( isSampleAssignedToKey )
+            mSampleBufferLengthsList.append( sampleBuffer->getNumFrames() );
+
+        isEverySampleAssignedToKey = isSampleAssignedToKey;
     }
 
     return isEverySampleAssignedToKey;
@@ -77,17 +87,26 @@ void SamplerAudioSource::clearAllSamples()
     mStartKey = DEFAULT_KEY;
     mTotalNumFrames = 0;
     mNextPlayPos = 0;
+    mSampleBufferLengthsList.clear();
+    mIsPlaySampleSeqEnabled = false;
 }
 
 
 
-void SamplerAudioSource::playAll()
+void SamplerAudioSource::playAll( const qreal playSpeedRatio )
 {
-    const int midiChannel = 1;
-    const int midiNoteNum = mStartKey;
-    const float velocity = 1.0;
+    mNoteOnFrameNumList.clear();
 
-    mSynth.noteOn( midiChannel, midiNoteNum, velocity );
+    int noteOnFrameNum = 0;
+    foreach ( int sampleBufferLength, mSampleBufferLengthsList )
+    {
+        mNoteOnFrameNumList.append( noteOnFrameNum );
+        noteOnFrameNum += (int) floor( sampleBufferLength * playSpeedRatio );
+    }
+
+    mIsPlaySampleSeqEnabled = true;
+    mNoteCounter = 0;
+    mFrameCounter = 0;
 }
 
 
@@ -115,6 +134,7 @@ void SamplerAudioSource::stop()
 {
     const int midiChannel = 1;
     const bool allowTailOff = false;
+    mIsPlaySampleSeqEnabled = false;
 
     mSynth.allNotesOff( midiChannel, allowTailOff );
 }
@@ -140,6 +160,33 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
     // Fill a MIDI buffer with incoming messages from the MIDI input
     MidiBuffer incomingMidi;
     mMidiCollector.removeNextBlockOfMessages( incomingMidi, bufferToFill.numSamples );
+
+    if ( mIsPlaySampleSeqEnabled )
+    {
+        int noteOnFrameNum = mNoteOnFrameNumList.at( mNoteCounter );
+
+        while ( noteOnFrameNum >= mFrameCounter &&
+                noteOnFrameNum < mFrameCounter + bufferToFill.numSamples )
+        {
+            MidiMessage message = MidiMessage( MidiMessage::noteOn( 1,                          // MIDI channel
+                                                                    mStartKey + mNoteCounter,   // MIDI note no.
+                                                                    1.0f                        // Velocity
+                                                                    ));
+            incomingMidi.addEvent( message, noteOnFrameNum % bufferToFill.numSamples );
+
+            mNoteCounter++;
+            if ( mNoteCounter < mNoteOnFrameNumList.size() )
+            {
+                noteOnFrameNum = mNoteOnFrameNumList.at( mNoteCounter );
+            }
+            else
+            {
+                mIsPlaySampleSeqEnabled = false;
+                break;
+            }
+        }
+        mFrameCounter += bufferToFill.numSamples;
+    }
 
     // Tell the synth to process the MIDI events and generate its output
     mSynth.renderNextBlock( *bufferToFill.buffer, incomingMidi, 0, bufferToFill.numSamples );

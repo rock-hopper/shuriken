@@ -35,7 +35,7 @@ public:
     void setSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
     bool setSamples( const QList<SharedSampleBuffer> sampleBufferList, const qreal sampleRate );
     void clearAllSamples();
-    void playAll();
+    void playAll( const qreal playSpeedRatio );
     void playSample( const int sampleNum, const int startFrame, const int endFrame );
     void stop();
 
@@ -60,6 +60,12 @@ private:
 //    CriticalSection mStartPosLock;
     int64 volatile mNextPlayPos;
     int64 mTotalNumFrames;
+
+    QList<int> mSampleBufferLengthsList;
+    QList<int> mNoteOnFrameNumList;
+    volatile bool mIsPlaySampleSeqEnabled;
+    volatile int mNoteCounter;
+    volatile int mFrameCounter;
 
 private:
     static const int DEFAULT_KEY = 60; // MIDI key C4
