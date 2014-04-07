@@ -927,17 +927,7 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
 
 void MainWindow::on_pushButton_Play_clicked()
 {
-    const qreal originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
-    const qreal newBPM = mUI->doubleSpinBox_NewBPM->value();
-
-    if ( newBPM > 0.0 && originalBPM > 0.0 )
-    {
-        mSamplerAudioSource->playAll( newBPM / originalBPM );
-    }
-    else
-    {
-        mSamplerAudioSource->playAll( 1.0 );
-    }
+    mSamplerAudioSource->playAll();
 }
 
 

@@ -46,7 +46,7 @@ void SamplerAudioSource::setSample( const SharedSampleBuffer sampleBuffer, const
     bool isSampleAssignedToKey = addNewSample( sampleBuffer, sampleRate );
 
     if ( isSampleAssignedToKey )
-        mSampleBufferLengthsList.append( sampleBuffer->getNumFrames() );
+        mNoteOnFrameNumList.append( 0 );
 }
 
 
@@ -63,13 +63,17 @@ bool SamplerAudioSource::setSamples( const QList<SharedSampleBuffer> sampleBuffe
     mStartKey = mNextFreeKey;
 
     bool isEverySampleAssignedToKey = false;
+    int noteOnFrameNum = 0;
 
     foreach ( SharedSampleBuffer sampleBuffer, sampleBufferList )
     {
         bool isSampleAssignedToKey = addNewSample( sampleBuffer, sampleRate );
 
         if ( isSampleAssignedToKey )
-            mSampleBufferLengthsList.append( sampleBuffer->getNumFrames() );
+        {
+            mNoteOnFrameNumList.append( noteOnFrameNum );
+            noteOnFrameNum += sampleBuffer->getNumFrames();
+        }
 
         isEverySampleAssignedToKey = isSampleAssignedToKey;
     }
@@ -81,29 +85,20 @@ bool SamplerAudioSource::setSamples( const QList<SharedSampleBuffer> sampleBuffe
 
 void SamplerAudioSource::clearAllSamples()
 {
+    mIsPlaySampleSeqEnabled = false;
+    mNoteOnFrameNumList.clear();
     mSynth.clearVoices();
     mSynth.clearSounds();
     mNextFreeKey = DEFAULT_KEY;
     mStartKey = DEFAULT_KEY;
     mTotalNumFrames = 0;
     mNextPlayPos = 0;
-    mSampleBufferLengthsList.clear();
-    mIsPlaySampleSeqEnabled = false;
 }
 
 
 
-void SamplerAudioSource::playAll( const qreal playSpeedRatio )
+void SamplerAudioSource::playAll()
 {
-    mNoteOnFrameNumList.clear();
-
-    int noteOnFrameNum = 0;
-    foreach ( int sampleBufferLength, mSampleBufferLengthsList )
-    {
-        mNoteOnFrameNumList.append( noteOnFrameNum );
-        noteOnFrameNum += (int) floor( sampleBufferLength * playSpeedRatio );
-    }
-
     mIsPlaySampleSeqEnabled = true;
     mNoteCounter = 0;
     mFrameCounter = 0;

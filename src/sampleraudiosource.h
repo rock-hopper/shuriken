@@ -35,7 +35,7 @@ public:
     void setSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
     bool setSamples( const QList<SharedSampleBuffer> sampleBufferList, const qreal sampleRate );
     void clearAllSamples();
-    void playAll( const qreal playSpeedRatio );
+    void playAll();
     void playSample( const int sampleNum, const int startFrame, const int endFrame );
     void stop();
 
@@ -61,7 +61,6 @@ private:
     int64 volatile mNextPlayPos;
     int64 mTotalNumFrames;
 
-    QList<int> mSampleBufferLengthsList;
     QList<int> mNoteOnFrameNumList;
     volatile bool mIsPlaySampleSeqEnabled;
     volatile int mNoteCounter;
