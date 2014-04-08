@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sat Apr 5 15:52:21 2014
+** Created: Tue Apr 8 21:57:12 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -60,6 +60,9 @@ public:
     QAction *actionApply_Gain;
     QAction *actionNormalise;
     QAction *actionApply_Ramp;
+    QAction *actionZoom_In;
+    QAction *actionZoom_Out;
+    QAction *actionZoom_Original;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QHBoxLayout *horizontalLayout_2;
@@ -92,9 +95,6 @@ public:
     QComboBox *comboBox_HopSize;
     QSpacerItem *horizontalSpacer_2;
     WaveGraphicsView *waveGraphicsView;
-    QHBoxLayout *horizontalLayout_5;
-    QLabel *label_6;
-    QSlider *zoomSlider;
     QMenuBar *menuBar;
     QMenu *menuFile;
     QMenu *menuOptions;
@@ -107,30 +107,54 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(878, 600);
+        MainWindow->resize(934, 600);
         actionImport_Audio_File = new QAction(MainWindow);
         actionImport_Audio_File->setObjectName(QString::fromUtf8("actionImport_Audio_File"));
+        QIcon icon;
+        icon.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-import.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionImport_Audio_File->setIcon(icon);
         actionQuit = new QAction(MainWindow);
         actionQuit->setObjectName(QString::fromUtf8("actionQuit"));
         actionAudio_Setup = new QAction(MainWindow);
         actionAudio_Setup->setObjectName(QString::fromUtf8("actionAudio_Setup"));
         actionOpen_Project = new QAction(MainWindow);
         actionOpen_Project->setObjectName(QString::fromUtf8("actionOpen_Project"));
+        QIcon icon1;
+        icon1.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-open.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionOpen_Project->setIcon(icon1);
         actionSave_Project = new QAction(MainWindow);
         actionSave_Project->setObjectName(QString::fromUtf8("actionSave_Project"));
+        QIcon icon2;
+        icon2.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-save.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionSave_Project->setIcon(icon2);
         actionClose_Project = new QAction(MainWindow);
         actionClose_Project->setObjectName(QString::fromUtf8("actionClose_Project"));
+        QIcon icon3;
+        icon3.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-close.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionClose_Project->setIcon(icon3);
         actionExport_As = new QAction(MainWindow);
         actionExport_As->setObjectName(QString::fromUtf8("actionExport_As"));
         actionExport_As->setEnabled(false);
+        QIcon icon4;
+        icon4.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-export.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionExport_As->setIcon(icon4);
         actionUndo = new QAction(MainWindow);
         actionUndo->setObjectName(QString::fromUtf8("actionUndo"));
+        QIcon icon5;
+        icon5.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/edit-undo.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionUndo->setIcon(icon5);
         actionRedo = new QAction(MainWindow);
         actionRedo->setObjectName(QString::fromUtf8("actionRedo"));
+        QIcon icon6;
+        icon6.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/edit-redo.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionRedo->setIcon(icon6);
         actionAdd_Slice_Point = new QAction(MainWindow);
         actionAdd_Slice_Point->setObjectName(QString::fromUtf8("actionAdd_Slice_Point"));
         actionDelete = new QAction(MainWindow);
         actionDelete->setObjectName(QString::fromUtf8("actionDelete"));
+        QIcon icon7;
+        icon7.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/edit-delete.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionDelete->setIcon(icon7);
         actionReverse = new QAction(MainWindow);
         actionReverse->setObjectName(QString::fromUtf8("actionReverse"));
         actionReverse->setEnabled(false);
@@ -143,8 +167,14 @@ public:
         actionHelp = new QAction(MainWindow);
         actionHelp->setObjectName(QString::fromUtf8("actionHelp"));
         actionHelp->setEnabled(false);
+        QIcon icon8;
+        icon8.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/help-contents.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionHelp->setIcon(icon8);
         actionAbout = new QAction(MainWindow);
         actionAbout->setObjectName(QString::fromUtf8("actionAbout"));
+        QIcon icon9;
+        icon9.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/help-about.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionAbout->setIcon(icon9);
         actionJoin = new QAction(MainWindow);
         actionJoin->setObjectName(QString::fromUtf8("actionJoin"));
         actionJoin->setEnabled(false);
@@ -163,6 +193,21 @@ public:
         actionApply_Ramp = new QAction(MainWindow);
         actionApply_Ramp->setObjectName(QString::fromUtf8("actionApply_Ramp"));
         actionApply_Ramp->setEnabled(false);
+        actionZoom_In = new QAction(MainWindow);
+        actionZoom_In->setObjectName(QString::fromUtf8("actionZoom_In"));
+        QIcon icon10;
+        icon10.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/zoom-in.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionZoom_In->setIcon(icon10);
+        actionZoom_Out = new QAction(MainWindow);
+        actionZoom_Out->setObjectName(QString::fromUtf8("actionZoom_Out"));
+        QIcon icon11;
+        icon11.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/zoom-out.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionZoom_Out->setIcon(icon11);
+        actionZoom_Original = new QAction(MainWindow);
+        actionZoom_Original->setObjectName(QString::fromUtf8("actionZoom_Original"));
+        QIcon icon12;
+        icon12.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/zoom-original.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionZoom_Original->setIcon(icon12);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -352,31 +397,10 @@ public:
 
         verticalLayout->addWidget(waveGraphicsView);
 
-        horizontalLayout_5 = new QHBoxLayout();
-        horizontalLayout_5->setSpacing(6);
-        horizontalLayout_5->setObjectName(QString::fromUtf8("horizontalLayout_5"));
-        label_6 = new QLabel(centralWidget);
-        label_6->setObjectName(QString::fromUtf8("label_6"));
-
-        horizontalLayout_5->addWidget(label_6);
-
-        zoomSlider = new QSlider(centralWidget);
-        zoomSlider->setObjectName(QString::fromUtf8("zoomSlider"));
-        zoomSlider->setMinimum(1);
-        zoomSlider->setMaximum(50);
-        zoomSlider->setOrientation(Qt::Horizontal);
-        zoomSlider->setTickPosition(QSlider::TicksBothSides);
-        zoomSlider->setTickInterval(1);
-
-        horizontalLayout_5->addWidget(zoomSlider);
-
-
-        verticalLayout->addLayout(horizontalLayout_5);
-
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 878, 24));
+        menuBar->setGeometry(QRect(0, 0, 934, 24));
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
         menuOptions = new QMenu(menuBar);
@@ -425,6 +449,21 @@ public:
         menuHelp->addAction(actionHelp);
         menuHelp->addSeparator();
         menuHelp->addAction(actionAbout);
+        mainToolBar->addAction(actionOpen_Project);
+        mainToolBar->addAction(actionSave_Project);
+        mainToolBar->addAction(actionClose_Project);
+        mainToolBar->addSeparator();
+        mainToolBar->addAction(actionImport_Audio_File);
+        mainToolBar->addAction(actionExport_As);
+        mainToolBar->addSeparator();
+        mainToolBar->addAction(actionUndo);
+        mainToolBar->addAction(actionRedo);
+        mainToolBar->addSeparator();
+        mainToolBar->addAction(actionDelete);
+        mainToolBar->addSeparator();
+        mainToolBar->addAction(actionZoom_Original);
+        mainToolBar->addAction(actionZoom_Out);
+        mainToolBar->addAction(actionZoom_In);
 
         retranslateUi(MainWindow);
 
@@ -451,9 +490,14 @@ public:
         actionSave_Project->setShortcut(QApplication::translate("MainWindow", "Ctrl+S", 0, QApplication::UnicodeUTF8));
         actionClose_Project->setText(QApplication::translate("MainWindow", "Close Project", 0, QApplication::UnicodeUTF8));
         actionExport_As->setText(QApplication::translate("MainWindow", "Export As...", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        actionExport_As->setToolTip(QApplication::translate("MainWindow", "Export As...", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
+        actionExport_As->setShortcut(QApplication::translate("MainWindow", "Ctrl+E", 0, QApplication::UnicodeUTF8));
         actionUndo->setText(QApplication::translate("MainWindow", "Undo", 0, QApplication::UnicodeUTF8));
         actionUndo->setShortcut(QApplication::translate("MainWindow", "Ctrl+Z", 0, QApplication::UnicodeUTF8));
         actionRedo->setText(QApplication::translate("MainWindow", "Redo", 0, QApplication::UnicodeUTF8));
+        actionRedo->setShortcut(QApplication::translate("MainWindow", "Ctrl+Shift+Z", 0, QApplication::UnicodeUTF8));
         actionAdd_Slice_Point->setText(QApplication::translate("MainWindow", "Add Slice Point", 0, QApplication::UnicodeUTF8));
 #ifndef QT_NO_TOOLTIP
         actionAdd_Slice_Point->setToolTip(QApplication::translate("MainWindow", "Add Slice Point", 0, QApplication::UnicodeUTF8));
@@ -473,6 +517,21 @@ public:
         actionApply_Gain->setText(QApplication::translate("MainWindow", "Apply Gain", 0, QApplication::UnicodeUTF8));
         actionNormalise->setText(QApplication::translate("MainWindow", "Normalise", 0, QApplication::UnicodeUTF8));
         actionApply_Ramp->setText(QApplication::translate("MainWindow", "Apply Ramp", 0, QApplication::UnicodeUTF8));
+        actionZoom_In->setText(QApplication::translate("MainWindow", "Zoom In", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        actionZoom_In->setToolTip(QApplication::translate("MainWindow", "Zoom In (Ctrl++)", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
+        actionZoom_In->setShortcut(QApplication::translate("MainWindow", "+, Ctrl+=", 0, QApplication::UnicodeUTF8));
+        actionZoom_Out->setText(QApplication::translate("MainWindow", "Zoom Out", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        actionZoom_Out->setToolTip(QApplication::translate("MainWindow", "Zoom Out (Ctrl+-)", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
+        actionZoom_Out->setShortcut(QApplication::translate("MainWindow", "-, Ctrl+-", 0, QApplication::UnicodeUTF8));
+        actionZoom_Original->setText(QApplication::translate("MainWindow", "Zoom Original", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        actionZoom_Original->setToolTip(QApplication::translate("MainWindow", "Zoom Original (Ctrl+0)", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
+        actionZoom_Original->setShortcut(QApplication::translate("MainWindow", "Ctrl+0", 0, QApplication::UnicodeUTF8));
         pushButton_Play->setText(QApplication::translate("MainWindow", "Play", 0, QApplication::UnicodeUTF8));
         pushButton_Stop->setText(QApplication::translate("MainWindow", "Stop", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("MainWindow", "Original BPM:", 0, QApplication::UnicodeUTF8));
@@ -489,7 +548,6 @@ public:
         label_7->setText(QApplication::translate("MainWindow", "Detection Method:", 0, QApplication::UnicodeUTF8));
         label_4->setText(QApplication::translate("MainWindow", "Window Size:", 0, QApplication::UnicodeUTF8));
         label_5->setText(QApplication::translate("MainWindow", "Hop Size:", 0, QApplication::UnicodeUTF8));
-        label_6->setText(QApplication::translate("MainWindow", "Zoom:", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0, QApplication::UnicodeUTF8));
         menuOptions->setTitle(QApplication::translate("MainWindow", "Options", 0, QApplication::UnicodeUTF8));
         menuEdit->setTitle(QApplication::translate("MainWindow", "Edit", 0, QApplication::UnicodeUTF8));

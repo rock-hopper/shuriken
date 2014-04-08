@@ -60,6 +60,10 @@ public:
     qreal getScenePosX( const int frameNum ) const;
     int getFrameNum( qreal scenePosX ) const;
 
+    void zoomIn();
+    void zoomOut();
+    void zoomOriginal();
+
 protected:
     void resizeEvent( QResizeEvent* event );
 
@@ -74,7 +78,6 @@ signals:
     void rightMousePressed( const int waveformItemOrderPos, const int startFrame, const int endFrame );
 
 private slots:
-    void setZoom( const int zoomFactor );
     void reorderWaveformSlices( const int oldOrderPos, const int newOrderPos );
     void slideWaveformSliceIntoPlace( const int orderPos );
     void reorderSlicePoints( SlicePointItem* const movedItem );

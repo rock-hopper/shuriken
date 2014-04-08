@@ -108,6 +108,9 @@ private:
                                     QList<SharedSampleBuffer>& outputBufferList );
 
 private slots:
+    void on_actionZoom_Original_triggered();
+    void on_actionZoom_Out_triggered();
+    void on_actionZoom_In_triggered();
     void on_pushButton_Stop_clicked();
     void on_pushButton_Play_clicked();
     void on_checkBox_PitchCorrection_toggled( const bool isChecked );

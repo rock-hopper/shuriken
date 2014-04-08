@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>878</width>
+    <width>934</width>
     <height>600</height>
    </rect>
   </property>
@@ -302,36 +302,6 @@
     <item>
      <widget class="WaveGraphicsView" name="waveGraphicsView"/>
     </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_5">
-      <item>
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Zoom:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="zoomSlider">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>50</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="tickPosition">
-         <enum>QSlider::TicksBothSides</enum>
-        </property>
-        <property name="tickInterval">
-         <number>1</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -339,7 +309,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>878</width>
+     <width>934</width>
      <height>24</height>
     </rect>
    </property>
@@ -403,9 +373,28 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionOpen_Project"/>
+   <addaction name="actionSave_Project"/>
+   <addaction name="actionClose_Project"/>
+   <addaction name="separator"/>
+   <addaction name="actionImport_Audio_File"/>
+   <addaction name="actionExport_As"/>
+   <addaction name="separator"/>
+   <addaction name="actionUndo"/>
+   <addaction name="actionRedo"/>
+   <addaction name="separator"/>
+   <addaction name="actionDelete"/>
+   <addaction name="separator"/>
+   <addaction name="actionZoom_Original"/>
+   <addaction name="actionZoom_Out"/>
+   <addaction name="actionZoom_In"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionImport_Audio_File">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-import.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-import.png</iconset>
+   </property>
    <property name="text">
     <string>Import Audio File</string>
    </property>
@@ -430,6 +419,10 @@
    </property>
   </action>
   <action name="actionOpen_Project">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-open.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-open.png</iconset>
+   </property>
    <property name="text">
     <string>Open Project</string>
    </property>
@@ -441,6 +434,10 @@
    </property>
   </action>
   <action name="actionSave_Project">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-save.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-save.png</iconset>
+   </property>
    <property name="text">
     <string>Save Project</string>
    </property>
@@ -449,6 +446,10 @@
    </property>
   </action>
   <action name="actionClose_Project">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-close.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-close.png</iconset>
+   </property>
    <property name="text">
     <string>Close Project</string>
    </property>
@@ -457,11 +458,25 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-export.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-export.png</iconset>
+   </property>
    <property name="text">
     <string>Export As...</string>
    </property>
+   <property name="toolTip">
+    <string>Export As...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
   </action>
   <action name="actionUndo">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-undo.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-undo.png</iconset>
+   </property>
    <property name="text">
     <string>Undo</string>
    </property>
@@ -470,8 +485,15 @@
    </property>
   </action>
   <action name="actionRedo">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-redo.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-redo.png</iconset>
+   </property>
    <property name="text">
     <string>Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Z</string>
    </property>
   </action>
   <action name="actionAdd_Slice_Point">
@@ -486,6 +508,10 @@
    </property>
   </action>
   <action name="actionDelete">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-delete.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-delete.png</iconset>
+   </property>
    <property name="text">
     <string>Delete</string>
    </property>
@@ -521,11 +547,19 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/help-contents.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/help-contents.png</iconset>
+   </property>
    <property name="text">
     <string>Help</string>
    </property>
   </action>
   <action name="actionAbout">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/help-about.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/help-about.png</iconset>
+   </property>
    <property name="text">
     <string>About</string>
    </property>
@@ -579,6 +613,51 @@
    </property>
    <property name="text">
     <string>Apply Ramp</string>
+   </property>
+  </action>
+  <action name="actionZoom_In">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-in.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-in.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom In (Ctrl++)</string>
+   </property>
+   <property name="shortcut">
+    <string>+, Ctrl+=</string>
+   </property>
+  </action>
+  <action name="actionZoom_Out">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-out.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom Out (Ctrl+-)</string>
+   </property>
+   <property name="shortcut">
+    <string>-, Ctrl+-</string>
+   </property>
+  </action>
+  <action name="actionZoom_Original">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-original.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-original.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Original</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom Original (Ctrl+0)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+0</string>
    </property>
   </action>
  </widget>

@@ -94,9 +94,6 @@ MainWindow::MainWindow( QWidget* parent ) :
 
 
     // Connect signals to slots
-    QObject::connect( mUI->zoomSlider, SIGNAL( valueChanged(int) ),
-                      mUI->waveGraphicsView, SLOT( setZoom(int) ) );
-
     QObject::connect( mUI->waveGraphicsView, SIGNAL( waveformSliceOrderChanged(int,int) ),
                       this, SLOT( reorderSampleBufferList(int,int) ) );
 
@@ -525,7 +522,7 @@ void MainWindow::on_actionClose_Project_triggered()
     }
 
     mUI->waveGraphicsView->clearAll();
-    mUI->zoomSlider->setValue( 1 );
+    on_actionZoom_Original_triggered();
     mUI->doubleSpinBox_OriginalBPM->setValue( 0.0 );
     mUI->doubleSpinBox_NewBPM->setValue( 0.0 );
     mUI->pushButton_CalcBPM->setEnabled( false );
@@ -935,4 +932,25 @@ void MainWindow::on_pushButton_Play_clicked()
 void MainWindow::on_pushButton_Stop_clicked()
 {
     mSamplerAudioSource->stop();
+}
+
+
+
+void MainWindow::on_actionZoom_In_triggered()
+{
+    mUI->waveGraphicsView->zoomIn();
+}
+
+
+
+void MainWindow::on_actionZoom_Out_triggered()
+{
+    mUI->waveGraphicsView->zoomOut();
+}
+
+
+
+void MainWindow::on_actionZoom_Original_triggered()
+{
+    mUI->waveGraphicsView->zoomOriginal();
 }
