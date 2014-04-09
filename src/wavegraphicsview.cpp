@@ -307,6 +307,40 @@ int WaveGraphicsView::getFrameNum( qreal scenePosX ) const
 
 
 
+void WaveGraphicsView::zoomIn()
+{
+    const qreal newXScaleFactor = transform().m11() * 2; // m11() returns the current horizontal scale factor
+
+    QTransform matrix;
+    matrix.scale( newXScaleFactor, 1.0 );
+    setTransform( matrix );
+
+    scaleSlicePointItems( newXScaleFactor );
+}
+
+
+
+void WaveGraphicsView::zoomOut()
+{
+    const qreal newXScaleFactor = transform().m11() * 0.5; // m11() returns the current horizontal scale factor
+
+    QTransform matrix;
+    matrix.scale( newXScaleFactor, 1.0 );
+    setTransform( matrix );
+
+    scaleSlicePointItems( newXScaleFactor );
+}
+
+
+
+void WaveGraphicsView::zoomOriginal()
+{
+    resetTransform();
+    scaleSlicePointItems( 1.0 );
+}
+
+
+
 //==================================================================================================
 // Protected:
 
@@ -345,71 +379,26 @@ void WaveGraphicsView::resizeEvent ( QResizeEvent* event )
 
 
 //==================================================================================================
+// Private:
+
+void WaveGraphicsView::scaleSlicePointItems( const qreal newXScaleFactor )
+{
+    if ( ! mSlicePointItemList.isEmpty() && newXScaleFactor > 0.0 )
+    {
+        QTransform matrix;
+        matrix.scale( 1.0 / newXScaleFactor, 1.0 ); // Slice points remain same width when view is scaled
+
+        foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
+        {
+            slicePointItem->setTransform( matrix );
+        }
+    }
+}
+
+
+
+//==================================================================================================
 // Private Slots:
-
-void WaveGraphicsView::zoomIn()
-{
-    const qreal sx = transform().m11() * 2; // m11() returns the current horizontal scale factor
-    const qreal sy = 1.0;
-
-    QTransform matrix;
-    matrix.scale( sx, sy );
-    setTransform( matrix );
-
-    if ( ! mSlicePointItemList.isEmpty() )
-    {
-        QTransform matrix;
-        matrix.scale( 1.0 / sx, sy ); // slice points remain same width when view is scaled
-
-        foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
-        {
-            slicePointItem->setTransform( matrix );
-        }
-    }
-}
-
-
-
-void WaveGraphicsView::zoomOut()
-{
-    const qreal sx = transform().m11() * 0.5; // m11() returns the current horizontal scale factor
-    const qreal sy = 1.0;
-
-    QTransform matrix;
-    matrix.scale( sx, sy );
-    setTransform( matrix );
-
-    if ( ! mSlicePointItemList.isEmpty() )
-    {
-        QTransform matrix;
-        matrix.scale( 1.0 / sx, sy ); // slice points remain same width when view is scaled
-
-        foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
-        {
-            slicePointItem->setTransform( matrix );
-        }
-    }
-}
-
-
-
-void WaveGraphicsView::zoomOriginal()
-{
-    resetTransform();
-
-    if ( ! mSlicePointItemList.isEmpty() )
-    {
-        QTransform matrix;
-        matrix.scale( 1.0, 1.0 ); // slice points remain same width when view is scaled
-
-        foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
-        {
-            slicePointItem->setTransform( matrix );
-        }
-    }
-}
-
-
 
 void WaveGraphicsView::reorderWaveformSlices( const int oldOrderPos, const int newOrderPos )
 {

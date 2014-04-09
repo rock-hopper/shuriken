@@ -68,6 +68,8 @@ protected:
     void resizeEvent( QResizeEvent* event );
 
 private:
+    void scaleSlicePointItems( const qreal newXScaleFactor );
+
     QList<SharedWaveformItem> mWaveformItemList;
     QList<SharedSlicePointItem> mSlicePointItemList;
     int mNumFrames;
