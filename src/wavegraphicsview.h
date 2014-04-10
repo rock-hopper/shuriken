@@ -78,12 +78,15 @@ signals:
     void waveformSliceOrderChanged( const int oldOrderPos, const int newOrderPos );
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );
     void rightMousePressed( const int waveformItemOrderPos, const int startFrame, const int endFrame );
+    void minDetailLevelReached();
+    void maxDetailLevelReached();
 
 private slots:
     void reorderWaveformSlices( const int oldOrderPos, const int newOrderPos );
     void slideWaveformSliceIntoPlace( const int orderPos );
     void reorderSlicePoints( SlicePointItem* const movedItem );
     void determinePlayPos( const int waveformItemOrderPos, const QPointF mouseScenePos );
+    void relayMaxDetailLevelReached();
 };
 
 #endif // WAVEGRAPHICSVIEW_H

@@ -44,7 +44,7 @@ public:
     enum { Type = UserType + 1 };
 
     WaveformItem( const SharedSampleBuffer sampleBuffer, const int orderPos,
-                   const qreal width, const qreal height, QGraphicsItem* parent = NULL );
+                  const qreal width, const qreal height, QGraphicsItem* parent = NULL );
 
     void setRect( const qreal x, const qreal y, const qreal width, const qreal height );
 
@@ -67,6 +67,9 @@ private:
     void resetSampleBins();
     void findMinMaxSamples( const int startBin, const int endBin );
 
+    enum DetailLevel { LOW, HIGH, VERY_HIGH };
+    DetailLevel mDetailLevel;
+
     const SharedSampleBuffer mSampleBuffer;
     QList<SharedPainterPath> mWavePathList;
     QPen mWavePen;
@@ -83,12 +86,17 @@ private:
 
 private:
     static const int NOT_SET = -1;
+    static const qreal DETAIL_LEVEL_MAX_CUTOFF = 0.05;
+    static const qreal DETAIL_LEVEL_VERY_HIGH_CUTOFF = 1.0;
+    static const qreal DETAIL_LEVEL_HIGH_CUTOFF = 5.0;
 
 signals:
     void orderPosIsChanging( const int oldOrderPos, const int newOrderPos );
     void orderPosHasChanged( const int startOrderPos, const int destOrderPos );
     void finishedMoving( const int orderPos );
     void rightMousePressed( const int itemOrderPos, const QPointF mouseScenePos );
+    void maxDetailLevelReached();
+
 };
 
 #endif // WAVEFORMITEM_H

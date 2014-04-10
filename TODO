@@ -3,11 +3,6 @@ TODO
 Release Critical
 ================
 
-GUI Improvements
-----------------
-Fix gaps in waveform when zoomed in
-
-
 Code Improvements
 -----------------
 Change sndlib code from float** to OwnedArray< Array<float> >
@@ -54,4 +49,9 @@ User interface dialog
 Audio outputs dialog
 
 Envelope ADSR dialog
+
+
+GUI Improvements
+----------------
+Fix gaps in waveform when zoomed in / curved lines
 

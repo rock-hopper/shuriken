@@ -58,8 +58,11 @@ void WaveGraphicsView::createWaveform( const SharedSampleBuffer sampleBuffer )
 
     mWaveformItemList.append( SharedWaveformItem( waveformItem ) );
 
-    QObject::connect( waveformItem, SIGNAL(rightMousePressed(int,QPointF)),
-                      this, SLOT(determinePlayPos(int,QPointF)) );
+    QObject::connect( waveformItem, SIGNAL( rightMousePressed(int,QPointF) ),
+                      this, SLOT( determinePlayPos(int,QPointF) ) );
+
+    QObject::connect( waveformItem, SIGNAL( maxDetailLevelReached() ),
+                      this, SLOT( relayMaxDetailLevelReached() ) );
 
     scene()->addItem( waveformItem );
     scene()->update();
@@ -97,6 +100,9 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveformSlices( const QList<Sh
 
         QObject::connect( waveformItem, SIGNAL( rightMousePressed(int,QPointF) ),
                           this, SLOT( determinePlayPos(int,QPointF) ) );
+
+        QObject::connect( waveformItem, SIGNAL( maxDetailLevelReached() ),
+                          this, SLOT( relayMaxDetailLevelReached() ) );
 
         scene()->addItem( waveformItem );
         scene()->update();
@@ -329,6 +335,11 @@ void WaveGraphicsView::zoomOut()
     setTransform( matrix );
 
     scaleSlicePointItems( newXScaleFactor );
+
+    if ( newXScaleFactor == 1.0 )
+    {
+        emit minDetailLevelReached();
+    }
 }
 
 
@@ -509,4 +520,11 @@ void WaveGraphicsView::determinePlayPos( const int waveformItemOrderPos, const Q
 
         emit rightMousePressed( waveformItemOrderPos, startFrame, endFrame );
     }
+}
+
+
+
+void WaveGraphicsView::relayMaxDetailLevelReached()
+{
+    emit maxDetailLevelReached();
 }

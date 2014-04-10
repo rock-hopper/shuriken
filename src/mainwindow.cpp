@@ -103,6 +103,12 @@ MainWindow::MainWindow( QWidget* parent ) :
     QObject::connect( mUI->waveGraphicsView, SIGNAL( rightMousePressed(int,int,int) ),
                       this, SLOT( playSample(int,int,int) ) );
 
+    QObject::connect( mUI->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
+                      this, SLOT( disableZoomOut() ) );
+
+    QObject::connect( mUI->waveGraphicsView, SIGNAL( maxDetailLevelReached() ),
+                      this, SLOT( disableZoomIn() ) );
+
     QObject::connect( &mUndoStack, SIGNAL( canUndoChanged(bool) ),
                       mUI->actionUndo, SLOT( setEnabled(bool) ) );
 
@@ -490,6 +496,20 @@ void MainWindow::playSample( const int sampleNum, const int startFrame, const in
 
 
 
+void MainWindow::disableZoomIn()
+{
+    mUI->actionZoom_In->setEnabled( false );
+}
+
+
+
+void MainWindow::disableZoomOut()
+{
+    mUI->actionZoom_Out->setEnabled( false );
+}
+
+
+
 //====================
 // "File" menu:
 
@@ -522,13 +542,18 @@ void MainWindow::on_actionClose_Project_triggered()
     }
 
     mUI->waveGraphicsView->clearAll();
-    on_actionZoom_Original_triggered();
+
     mUI->doubleSpinBox_OriginalBPM->setValue( 0.0 );
     mUI->doubleSpinBox_NewBPM->setValue( 0.0 );
     mUI->pushButton_CalcBPM->setEnabled( false );
     mUI->pushButton_FindOnsets->setEnabled( false );
     mUI->pushButton_FindBeats->setEnabled( false );
     mUI->actionAdd_Slice_Point->setEnabled( false );
+
+    on_actionZoom_Original_triggered();
+    mUI->actionZoom_Original->setEnabled( false );
+    mUI->actionZoom_Out->setEnabled( false );
+    mUI->actionZoom_In->setEnabled( false );
 
     mUndoStack.clear();
 }
@@ -587,6 +612,8 @@ void MainWindow::on_actionImport_Audio_File_triggered()
             mUI->pushButton_FindOnsets->setEnabled( true );
             mUI->pushButton_FindBeats->setEnabled( true );
             mUI->actionAdd_Slice_Point->setEnabled( true );
+            mUI->actionZoom_Original->setEnabled( true );
+            mUI->actionZoom_In->setEnabled( true );
 
             QApplication::restoreOverrideCursor();
         }
@@ -939,6 +966,7 @@ void MainWindow::on_pushButton_Stop_clicked()
 void MainWindow::on_actionZoom_In_triggered()
 {
     mUI->waveGraphicsView->zoomIn();
+    mUI->actionZoom_Out->setEnabled( true );
 }
 
 
@@ -946,6 +974,7 @@ void MainWindow::on_actionZoom_In_triggered()
 void MainWindow::on_actionZoom_Out_triggered()
 {
     mUI->waveGraphicsView->zoomOut();
+    mUI->actionZoom_In->setEnabled( true );
 }
 
 
@@ -953,4 +982,6 @@ void MainWindow::on_actionZoom_Out_triggered()
 void MainWindow::on_actionZoom_Original_triggered()
 {
     mUI->waveGraphicsView->zoomOriginal();
+    mUI->actionZoom_In->setEnabled( true );
+    mUI->actionZoom_Out->setEnabled( false );
 }

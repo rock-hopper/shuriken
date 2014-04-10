@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Wed Apr 9 09:38:18 2014
+** Created: Thu Apr 10 16:39:01 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -195,16 +195,19 @@ public:
         actionApply_Ramp->setEnabled(false);
         actionZoom_In = new QAction(MainWindow);
         actionZoom_In->setObjectName(QString::fromUtf8("actionZoom_In"));
+        actionZoom_In->setEnabled(false);
         QIcon icon10;
         icon10.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/zoom-in.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionZoom_In->setIcon(icon10);
         actionZoom_Out = new QAction(MainWindow);
         actionZoom_Out->setObjectName(QString::fromUtf8("actionZoom_Out"));
+        actionZoom_Out->setEnabled(false);
         QIcon icon11;
         icon11.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/zoom-out.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionZoom_Out->setIcon(icon11);
         actionZoom_Original = new QAction(MainWindow);
         actionZoom_Original->setObjectName(QString::fromUtf8("actionZoom_Original"));
+        actionZoom_Original->setEnabled(false);
         QIcon icon12;
         icon12.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/zoom-original.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionZoom_Original->setIcon(icon12);
@@ -521,12 +524,12 @@ public:
 #ifndef QT_NO_TOOLTIP
         actionZoom_In->setToolTip(QApplication::translate("MainWindow", "Zoom In (Ctrl++)", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP
-        actionZoom_In->setShortcut(QApplication::translate("MainWindow", "+, Ctrl+=", 0, QApplication::UnicodeUTF8));
+        actionZoom_In->setShortcut(QApplication::translate("MainWindow", "Ctrl+=", 0, QApplication::UnicodeUTF8));
         actionZoom_Out->setText(QApplication::translate("MainWindow", "Zoom Out", 0, QApplication::UnicodeUTF8));
 #ifndef QT_NO_TOOLTIP
         actionZoom_Out->setToolTip(QApplication::translate("MainWindow", "Zoom Out (Ctrl+-)", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP
-        actionZoom_Out->setShortcut(QApplication::translate("MainWindow", "-, Ctrl+-", 0, QApplication::UnicodeUTF8));
+        actionZoom_Out->setShortcut(QApplication::translate("MainWindow", "Ctrl+-", 0, QApplication::UnicodeUTF8));
         actionZoom_Original->setText(QApplication::translate("MainWindow", "Zoom Original", 0, QApplication::UnicodeUTF8));
 #ifndef QT_NO_TOOLTIP
         actionZoom_Original->setToolTip(QApplication::translate("MainWindow", "Zoom Original (Ctrl+0)", 0, QApplication::UnicodeUTF8));

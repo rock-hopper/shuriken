@@ -616,6 +616,9 @@
    </property>
   </action>
   <action name="actionZoom_In">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-in.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-in.png</iconset>
@@ -627,10 +630,13 @@
     <string>Zoom In (Ctrl++)</string>
    </property>
    <property name="shortcut">
-    <string>+, Ctrl+=</string>
+    <string>Ctrl+=</string>
    </property>
   </action>
   <action name="actionZoom_Out">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-out.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-out.png</iconset>
@@ -642,10 +648,13 @@
     <string>Zoom Out (Ctrl+-)</string>
    </property>
    <property name="shortcut">
-    <string>-, Ctrl+-</string>
+    <string>Ctrl+-</string>
    </property>
   </action>
   <action name="actionZoom_Original">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-original.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-original.png</iconset>

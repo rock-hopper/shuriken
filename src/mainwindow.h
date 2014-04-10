@@ -151,6 +151,8 @@ private slots:
                                    const int oldFrameNum,
                                    const int newFrameNum );
     void playSample( const int sampleNum, const int startFrame, const int endFrame );
+    void disableZoomIn();
+    void disableZoomOut();
 };
 
 #endif // MAINWINDOW_H
