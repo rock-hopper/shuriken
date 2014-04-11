@@ -54,7 +54,7 @@ protected:
     void changeEvent( QEvent* e );
 
 private:
-    enum aubioRoutine { ONSET_DETECTION, BEAT_DETECTION };
+    enum AubioRoutine { ONSET_DETECTION, BEAT_DETECTION };
 
     struct DetectionSettings
     {
@@ -66,6 +66,7 @@ private:
     };
 
     Ui::MainWindow* mUI; // "Go to slot..." won't work if this is changed to ScopedPointer<Ui::MainWindow>
+
     ScopedPointer<AudioSetupDialog> mAudioSetupDialog;
 
     AudioDeviceManager mDeviceManager;
@@ -93,7 +94,7 @@ private:
     static void showWarningBox( const QString text, const QString infoText );
 
     static QList<int> calcSlicePointFrameNums( const SharedSampleBuffer sampleBuffer,
-                                               const aubioRoutine routine,
+                                               const AubioRoutine routine,
                                                const DetectionSettings settings );
 
     static qreal calcBPM( const SharedSampleBuffer sampleBuffer,

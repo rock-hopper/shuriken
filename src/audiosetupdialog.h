@@ -44,6 +44,13 @@ public:
     AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* parent = NULL );
     ~AudioSetupDialog();
 
+    void setAudioBackend( const int deviceTypeIndex );
+    void setAudioDevice( const QString deviceName );
+    void setOutputChannels( const BigInteger channels );
+    void setSampleRate( const int sampleRate );
+    void setBufferSize( const int bufferSize );
+    void enableMidiInput( const QString midiInputName, const bool isEnabled );
+
 protected:
     void changeEvent( QEvent* event );
     void showEvent( QShowEvent* event );
@@ -57,7 +64,7 @@ private:
     void updateMidiInputListWidget();
     void disableAllWidgets();
 
-    ScopedPointer<Ui::AudioSetupDialog> mUI;
+    Ui::AudioSetupDialog* mUI;
     AudioDeviceManager& mDeviceManager;
     ScopedPointer<SynthAudioSource> mSynthAudioSource;
     AudioSourcePlayer mAudioSourcePlayer;
@@ -65,16 +72,17 @@ private:
 private:
     static void showWarningBox( const QString text, const QString infoText );
     static String getNameForChannelPair( const String& name1, const String& name2 );
-    static QString getNoDeviceName() { return "<< " + tr("none") + " >>"; }
+    static QString getNoDeviceString() { return "<< " + tr("none") + " >>"; }
 
 private slots:
-    void setAudioBackend( const int currentIndex );
-    void setAudioDevice( const int currentIndex );
-    void setOutputChannel( const int currentIndex );
-    void setSampleRate( const int currentIndex );
-    void setBufferSize( const int currentIndex );
-    void enableMidiInput( QListWidgetItem* listItem );
-    void playTestSound();
+    void on_listWidget_MidiInput_itemClicked( QListWidgetItem* item );
+    void on_comboBox_BufferSize_activated( const int index );
+    void on_comboBox_SampleRate_activated( const int index );
+    void on_comboBox_OutputChannels_activated( const int index );
+    void on_pushButton_TestTone_clicked();
+    void on_comboBox_AudioDevice_activated( const QString deviceName );
+    void on_comboBox_AudioBackend_currentIndexChanged( const int index );
+
     void accept();
     void reject();
 };

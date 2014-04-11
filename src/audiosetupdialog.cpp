@@ -24,6 +24,7 @@
 #include "ui_audiosetupdialog.h"
 #include "simplesynth.h"
 #include <QMessageBox>
+//#include <QDebug>
 
 
 //==================================================================================================
@@ -37,8 +38,10 @@ AudioSetupDialog::AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* 
     // Setup user interface
     mUI->setupUi( this );
 
+
     // Get available audio backends (ALSA, JACK, etc.)
     const OwnedArray<AudioIODeviceType>& audioBackendTypes = mDeviceManager.getAvailableDeviceTypes();
+
 
     // Populate audio backend combo box
     for ( int i = 0; i < audioBackendTypes.size(); ++i )
@@ -46,33 +49,13 @@ AudioSetupDialog::AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* 
         mUI->comboBox_AudioBackend->addItem( audioBackendTypes.getUnchecked( i )->getTypeName().toRawUTF8() );
     }
 
+
     // Select current audio backend
     const QString currentAudioBackendName = mDeviceManager.getCurrentAudioDeviceType().toRawUTF8();
     const int index = mUI->comboBox_AudioBackend->findText( currentAudioBackendName );
+
     mUI->comboBox_AudioBackend->setCurrentIndex( index );
     setAudioBackend( index ); // This will also update all the other widgets
-
-    // Connect signals and slots
-    QObject::connect( mUI->comboBox_AudioBackend, SIGNAL(currentIndexChanged(int)),
-                      this, SLOT(setAudioBackend(int)) );
-
-    QObject::connect( mUI->comboBox_AudioDevice, SIGNAL(activated(int)),
-                      this, SLOT(setAudioDevice(int)) );
-
-    QObject::connect( mUI->comboBox_OutputChannels, SIGNAL(activated(int)),
-                      this, SLOT(setOutputChannel(int)) );
-
-    QObject::connect( mUI->comboBox_SampleRate, SIGNAL(activated(int)),
-                      this, SLOT(setSampleRate(int)) );
-
-    QObject::connect( mUI->comboBox_BufferSize, SIGNAL(activated(int)),
-                      this, SLOT(setBufferSize(int)) );
-
-    QObject::connect( mUI->listWidget_MidiInput, SIGNAL(itemClicked(QListWidgetItem*)),
-                      this, SLOT(enableMidiInput(QListWidgetItem*)) );
-
-    QObject::connect( mUI->pushButton_TestTone, SIGNAL(clicked()),
-                      this, SLOT(playTestSound()) );
 
 
     mUI->label_MidiInputTestTone->setText( tr( "MIDI input test tone enabled" ) );
@@ -82,6 +65,193 @@ AudioSetupDialog::AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* 
 
 AudioSetupDialog::~AudioSetupDialog()
 {
+    delete mUI;
+}
+
+
+
+void AudioSetupDialog::setAudioBackend( const int deviceTypeIndex )
+{
+    // Set audio backend
+    AudioIODeviceType* const audioBackendType = mDeviceManager.getAvailableDeviceTypes()[ deviceTypeIndex ];
+    const String audioBackendName = audioBackendType->getTypeName();
+    mDeviceManager.setCurrentAudioDeviceType( audioBackendName, true );
+
+    // If the audio backend is JACK then also enable JACK MIDI if required
+    if ( audioBackendName == "JACK" )
+    {
+        const int index = audioBackendType->getDefaultDeviceIndex( false );
+        const String defaultDeviceName = audioBackendType->getDeviceNames( false )[ index ];
+
+        if ( defaultDeviceName.contains( "MIDI" ) )
+        {
+            // Disable ALSA MIDI inputs as they conflict with JACK MIDI inputs
+            const StringArray deviceNames = MidiInput::getDevices();
+            for ( int i = 0; i < deviceNames.size(); ++i )
+            {
+                if ( deviceNames[ i ] != "jackmidi")
+                {
+                    mDeviceManager.setMidiInputEnabled( deviceNames[ i ], false );
+                }
+            }
+
+            mDeviceManager.setMidiInputEnabled( "jackmidi", true );
+        }
+        else
+        {
+            mDeviceManager.setMidiInputEnabled( "jackmidi", false );
+        }
+    }
+
+    // When a new audio backend is selected all widgets should be updated
+    updateAudioDeviceComboBox();
+    updateOutputChannelComboBox();
+    updateSampleRateComboBox();
+    updateBufferSizeComboBox();
+    updateMidiInputListWidget();
+}
+
+
+
+void AudioSetupDialog::setAudioDevice( const QString deviceName )
+{
+    QByteArray charArray = deviceName.toLocal8Bit();
+    const String newAudioDeviceName = charArray.data();
+
+    // Get current audio settings
+    AudioDeviceManager::AudioDeviceSetup config;
+    mDeviceManager.getAudioDeviceSetup( config );
+    String error;
+
+    // Update audio settings
+    if ( newAudioDeviceName != config.outputDeviceName )
+    {
+        QByteArray charArray = getNoDeviceString().toLocal8Bit();
+        if ( newAudioDeviceName != charArray.data() )
+        {
+            config.outputDeviceName = newAudioDeviceName;
+        }
+        else
+        {
+            config.outputDeviceName = String::empty;
+        }
+
+        config.useDefaultOutputChannels = true;
+        error = mDeviceManager.setAudioDeviceSetup( config, true );
+
+        // If this is a JACK audio device then also enable JACK MIDI if required
+        if ( newAudioDeviceName.startsWith( "JACK" ) )
+        {
+            if ( newAudioDeviceName.contains( "MIDI" ) )
+            {
+                // Disable ALSA MIDI inputs as they conflict with JACK MIDI inputs
+                const StringArray deviceNames = MidiInput::getDevices();
+                for ( int i = 0; i < deviceNames.size(); ++i )
+                {
+                    if ( deviceNames[ i ] != "jackmidi")
+                    {
+                        mDeviceManager.setMidiInputEnabled( deviceNames[ i ], false );
+                    }
+                }
+
+                mDeviceManager.setMidiInputEnabled( "jackmidi", true );
+            }
+            else
+            {
+                mDeviceManager.setMidiInputEnabled( "jackmidi", false );
+            }
+        }
+
+        // When a new audio device is selected the following widgets should be updated
+        updateOutputChannelComboBox();
+        updateSampleRateComboBox();
+        updateBufferSizeComboBox();
+        updateMidiInputListWidget();
+    }
+
+    if ( error.isNotEmpty() )
+    {
+        showWarningBox( tr("Error when trying to open audio device!"), error.toRawUTF8() );
+    }
+}
+
+
+
+void AudioSetupDialog::setOutputChannels( const BigInteger channels )
+{
+    AudioDeviceManager::AudioDeviceSetup config;
+    mDeviceManager.getAudioDeviceSetup( config );
+    String error;
+
+    if ( channels != config.outputChannels )
+    {
+        config.useDefaultOutputChannels = false;
+        config.outputChannels = channels;
+
+        error = mDeviceManager.setAudioDeviceSetup( config, true );
+    }
+
+    if ( error.isNotEmpty() )
+    {
+        showWarningBox( tr("Error when trying to set output channels!"), error.toRawUTF8() );
+    }
+}
+
+
+
+void AudioSetupDialog::setSampleRate( const int sampleRate )
+{
+    // Get current audio settings
+    AudioDeviceManager::AudioDeviceSetup config;
+    mDeviceManager.getAudioDeviceSetup( config );
+    String error;
+
+    // Update audio settings
+    if ( sampleRate != config.sampleRate )
+    {
+        config.sampleRate = sampleRate;
+        error = mDeviceManager.setAudioDeviceSetup( config, true );
+
+        // Update "Buffer Size" combo box to reflect the change in latency due to the new sample rate
+        updateBufferSizeComboBox();
+    }
+
+    if ( error.isNotEmpty() )
+    {
+        showWarningBox( tr("Error when trying to set sample rate!"), error.toRawUTF8() );
+    }
+}
+
+
+
+void AudioSetupDialog::setBufferSize( const int bufferSize )
+{
+    // Get current audio settings
+    AudioDeviceManager::AudioDeviceSetup config;
+    mDeviceManager.getAudioDeviceSetup( config );
+    String error;
+
+    // Update audio settings
+    if ( bufferSize != config.bufferSize )
+    {
+        config.bufferSize = bufferSize;
+        error = mDeviceManager.setAudioDeviceSetup( config, true );
+    }
+
+    if ( error.isNotEmpty() )
+    {
+        showWarningBox( tr("Error when trying to set buffer size!"), error.toRawUTF8() );
+    }
+}
+
+
+
+void AudioSetupDialog::enableMidiInput( const QString midiInputName, const bool isEnabled )
+{
+    QByteArray charArray = midiInputName.toLocal8Bit();
+    const String midiInputString( charArray.data() );
+
+    mDeviceManager.setMidiInputEnabled( midiInputString, isEnabled );
 }
 
 
@@ -153,7 +323,7 @@ void AudioSetupDialog::updateAudioDeviceComboBox()
             mUI->comboBox_AudioDevice->addItem( audioDeviceNames[i].toRawUTF8() );
         }
 
-        mUI->comboBox_AudioDevice->addItem( getNoDeviceName() );
+        mUI->comboBox_AudioDevice->addItem( getNoDeviceString() );
 
         // Select current audio device
         AudioIODevice* const currentAudioDevice = mDeviceManager.getCurrentAudioDevice();
@@ -206,12 +376,19 @@ void AudioSetupDialog::updateOutputChannelComboBox()
 
             for ( int i = 0; i < channelNames.size(); ++i )
             {
-                mUI->comboBox_OutputChannels->addItem( channelNames[i].toRawUTF8() );
+                // Each set bit represents an audio channel
+                BigInteger channels;
+                channels.setRange( i * 2,   // start bit
+                                   2,       // no. of bits to set
+                                   true     // set each bit in range to 1
+                                   );
+
+                mUI->comboBox_OutputChannels->addItem( channelNames[i].toRawUTF8(), channels.toInt64() );
             }
         }
         else
         {
-            mUI->comboBox_OutputChannels->addItem( getNoDeviceName() );
+            mUI->comboBox_OutputChannels->addItem( getNoDeviceString() );
             mUI->comboBox_OutputChannels->setEnabled( false );
         }
     }
@@ -244,7 +421,7 @@ void AudioSetupDialog::updateSampleRateComboBox()
     }
     else
     {
-        mUI->comboBox_SampleRate->addItem( getNoDeviceName() );
+        mUI->comboBox_SampleRate->addItem( getNoDeviceString() );
         mUI->comboBox_SampleRate->setEnabled( false );
     }
 
@@ -291,7 +468,7 @@ void AudioSetupDialog::updateBufferSizeComboBox()
     }
     else
     {
-        mUI->comboBox_BufferSize->addItem( getNoDeviceName() );
+        mUI->comboBox_BufferSize->addItem( getNoDeviceString() );
         mUI->comboBox_BufferSize->setEnabled( false );
     }
 
@@ -348,7 +525,7 @@ void AudioSetupDialog::updateMidiInputListWidget()
     else
     {
         // No MIDI
-        mUI->listWidget_MidiInput->addItem( getNoDeviceName() );
+        mUI->listWidget_MidiInput->addItem( getNoDeviceString() );
         mUI->listWidget_MidiInput->setEnabled( false );
     }
 }
@@ -357,12 +534,12 @@ void AudioSetupDialog::updateMidiInputListWidget()
 
 void AudioSetupDialog::disableAllWidgets()
 {
-    mUI->comboBox_AudioBackend->addItem( getNoDeviceName() );
-    mUI->comboBox_AudioDevice->addItem( getNoDeviceName() );
-    mUI->comboBox_OutputChannels->addItem( getNoDeviceName() );
-    mUI->comboBox_SampleRate->addItem( getNoDeviceName() );
-    mUI->comboBox_BufferSize->addItem( getNoDeviceName() );
-    mUI->listWidget_MidiInput->addItem( getNoDeviceName() );
+    mUI->comboBox_AudioBackend->addItem( getNoDeviceString() );
+    mUI->comboBox_AudioDevice->addItem( getNoDeviceString() );
+    mUI->comboBox_OutputChannels->addItem( getNoDeviceString() );
+    mUI->comboBox_SampleRate->addItem( getNoDeviceString() );
+    mUI->comboBox_BufferSize->addItem( getNoDeviceString() );
+    mUI->listWidget_MidiInput->addItem( getNoDeviceString() );
 
     mUI->comboBox_AudioBackend->setEnabled( false );
     mUI->comboBox_AudioDevice->setEnabled( false );
@@ -413,213 +590,6 @@ String AudioSetupDialog::getNameForChannelPair( const String& name1, const Strin
 //==================================================================================================
 // Private Slots:
 
-void AudioSetupDialog::setAudioBackend( const int currentIndex )
-{
-    // Set audio backend
-    AudioIODeviceType* const audioBackendType = mDeviceManager.getAvailableDeviceTypes()[ currentIndex ];
-    const String audioBackendName = audioBackendType->getTypeName();
-    mDeviceManager.setCurrentAudioDeviceType( audioBackendName, true );
-
-    // If the audio backend is JACK then also enable JACK MIDI if required
-    if ( audioBackendName == "JACK" )
-    {
-        const int index = audioBackendType->getDefaultDeviceIndex( false );
-        const String defaultDeviceName = audioBackendType->getDeviceNames( false )[ index ];
-
-        if ( defaultDeviceName.contains( "MIDI" ) )
-        {
-            // Disable ALSA MIDI inputs as they conflict with JACK MIDI inputs
-            const StringArray deviceNames = MidiInput::getDevices();
-            for ( int i = 0; i < deviceNames.size(); ++i )
-            {
-                if ( deviceNames[ i ] != "jackmidi")
-                {
-                    mDeviceManager.setMidiInputEnabled( deviceNames[ i ], false );
-                }
-            }
-
-            mDeviceManager.setMidiInputEnabled( "jackmidi", true );
-        }
-        else
-        {
-            mDeviceManager.setMidiInputEnabled( "jackmidi", false );
-        }
-    }
-
-    // When a new audio backend is selected all widgets should be updated
-    updateAudioDeviceComboBox();
-    updateOutputChannelComboBox();
-    updateSampleRateComboBox();
-    updateBufferSizeComboBox();
-    updateMidiInputListWidget();
-}
-
-
-
-void AudioSetupDialog::setAudioDevice( const int currentIndex )
-{
-    QByteArray charArray = mUI->comboBox_AudioDevice->itemText( currentIndex ).toLocal8Bit();
-    const String newAudioDeviceName = charArray.data();
-
-    // Get current audio settings
-    AudioDeviceManager::AudioDeviceSetup config;
-    mDeviceManager.getAudioDeviceSetup( config );
-    String error;
-
-    // Update audio settings
-    if ( newAudioDeviceName != config.outputDeviceName )
-    {
-        QByteArray charArray = getNoDeviceName().toLocal8Bit();
-        if ( newAudioDeviceName != charArray.data() )
-        {
-            config.outputDeviceName = newAudioDeviceName;
-        }
-        else
-        {
-            config.outputDeviceName = String::empty;
-        }
-
-        config.useDefaultOutputChannels = true;
-        error = mDeviceManager.setAudioDeviceSetup( config, true );
-
-        // If this is a JACK audio device then also enable JACK MIDI if required
-        if ( newAudioDeviceName.startsWith( "JACK" ) )
-        {
-            if ( newAudioDeviceName.contains( "MIDI" ) )
-            {
-                // Disable ALSA MIDI inputs as they conflict with JACK MIDI inputs
-                const StringArray deviceNames = MidiInput::getDevices();
-                for ( int i = 0; i < deviceNames.size(); ++i )
-                {
-                    if ( deviceNames[ i ] != "jackmidi")
-                    {
-                        mDeviceManager.setMidiInputEnabled( deviceNames[ i ], false );
-                    }
-                }
-
-                mDeviceManager.setMidiInputEnabled( "jackmidi", true );
-            }
-            else
-            {
-                mDeviceManager.setMidiInputEnabled( "jackmidi", false );
-            }
-        }
-
-        // When a new audio device is selected the following widgets should be updated
-        updateOutputChannelComboBox();
-        updateSampleRateComboBox();
-        updateBufferSizeComboBox();
-        updateMidiInputListWidget();
-    }
-
-    if ( error.isNotEmpty() )
-    {
-        showWarningBox( tr("Error when trying to open audio device!"), error.toRawUTF8() );
-    }
-}
-
-
-
-void AudioSetupDialog::setOutputChannel( const int currentIndex )
-{
-    AudioDeviceManager::AudioDeviceSetup config;
-    mDeviceManager.getAudioDeviceSetup( config );
-    String error;
-
-    const int previousIndex = config.outputChannels.findNextSetBit( 0 ) / 2;
-
-    if ( currentIndex != previousIndex )
-    {
-        config.useDefaultOutputChannels = false;
-        config.outputChannels.clear();
-        config.outputChannels.setRange( currentIndex * 2, 2, true );
-
-        error = mDeviceManager.setAudioDeviceSetup( config, true );
-    }
-
-    if ( error.isNotEmpty() )
-    {
-        showWarningBox( tr("Error when trying to open audio device!"), error.toRawUTF8() );
-    }
-}
-
-
-
-void AudioSetupDialog::setSampleRate( const int currentIndex )
-{
-    const int newSampleRate = mUI->comboBox_SampleRate->itemData( currentIndex ).toInt();
-
-    // Get current audio settings
-    AudioDeviceManager::AudioDeviceSetup config;
-    mDeviceManager.getAudioDeviceSetup( config );
-    String error;
-
-    // Update audio settings
-    if ( newSampleRate != config.sampleRate )
-    {
-        config.sampleRate = newSampleRate;
-        error = mDeviceManager.setAudioDeviceSetup( config, true );
-
-        // Update "Buffer Size" combo box to reflect the change in latency due to the new sample rate
-        updateBufferSizeComboBox();
-    }
-
-    if ( error.isNotEmpty() )
-    {
-        showWarningBox( tr("Error when trying to open audio device!"), error.toRawUTF8() );
-    }
-}
-
-
-
-void AudioSetupDialog::setBufferSize( const int currentIndex )
-{
-    const int newBufferSize = mUI->comboBox_BufferSize->itemData( currentIndex ).toInt();
-
-    // Get current audio settings
-    AudioDeviceManager::AudioDeviceSetup config;
-    mDeviceManager.getAudioDeviceSetup( config );
-    String error;
-
-    // Update audio settings
-    if ( newBufferSize != config.bufferSize )
-    {
-        config.bufferSize = newBufferSize;
-        error = mDeviceManager.setAudioDeviceSetup( config, true );
-    }
-
-    if ( error.isNotEmpty() )
-    {
-        showWarningBox( tr("Error when trying to open audio device!"), error.toRawUTF8() );
-    }
-}
-
-
-
-void AudioSetupDialog::enableMidiInput( QListWidgetItem* listItem )
-{
-    QByteArray charArray = listItem->text().toLocal8Bit();
-    const String midiInputName( charArray.data() );
-
-    if ( listItem->checkState() == Qt::Checked )
-    {
-        mDeviceManager.setMidiInputEnabled( midiInputName, true );
-    }
-    else
-    {
-        mDeviceManager.setMidiInputEnabled( midiInputName, false );
-    }
-}
-
-
-
-void AudioSetupDialog::playTestSound()
-{
-    mDeviceManager.playTestSound();
-}
-
-
-
 void AudioSetupDialog::accept()
 {
     // Tear down MIDI input test synth
@@ -640,4 +610,67 @@ void AudioSetupDialog::reject()
     mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
 
     QDialog::reject();
+}
+
+
+
+void AudioSetupDialog::on_comboBox_AudioBackend_currentIndexChanged( const int index )
+{
+    setAudioBackend( index );
+}
+
+
+
+void AudioSetupDialog::on_comboBox_AudioDevice_activated( const QString deviceName )
+{
+    setAudioDevice( deviceName );
+}
+
+
+
+void AudioSetupDialog::on_pushButton_TestTone_clicked()
+{
+    mDeviceManager.playTestSound();
+}
+
+
+
+void AudioSetupDialog::on_comboBox_OutputChannels_activated( const int index )
+{
+    const int64 channelBits = mUI->comboBox_OutputChannels->itemData( index ).toLongLong();
+    const BigInteger channels( channelBits );
+
+    setOutputChannels( channels );
+}
+
+
+
+void AudioSetupDialog::on_comboBox_SampleRate_activated( const int index )
+{
+    const int sampleRate = mUI->comboBox_SampleRate->itemData( index ).toInt();
+    setSampleRate( sampleRate );
+}
+
+
+
+void AudioSetupDialog::on_comboBox_BufferSize_activated( const int index )
+{
+    const int bufferSize = mUI->comboBox_BufferSize->itemData( index ).toInt();
+    setBufferSize( bufferSize );
+}
+
+
+
+void AudioSetupDialog::on_listWidget_MidiInput_itemClicked( QListWidgetItem* item )
+{
+    QString midiInputName = item->text();
+
+    if ( item->checkState() == Qt::Checked )
+    {
+        enableMidiInput( midiInputName, true );
+    }
+    else
+    {
+        enableMidiInput( midiInputName, false );
+    }
 }

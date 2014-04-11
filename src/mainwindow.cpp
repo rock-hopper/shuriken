@@ -247,7 +247,7 @@ void MainWindow::showWarningBox( const QString text, const QString infoText )
 
 
 
-QList<int> MainWindow::calcSlicePointFrameNums( const SharedSampleBuffer sampleBuffer, const aubioRoutine routine, const DetectionSettings settings )
+QList<int> MainWindow::calcSlicePointFrameNums( const SharedSampleBuffer sampleBuffer, const AubioRoutine routine, const DetectionSettings settings )
 {
     char_t* detectionMethod = (char_t*) settings.detectionMethod.data();
     smpl_t threshold = settings.threshold;
