@@ -273,7 +273,7 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
 
             mSourceSamplePosition += mPitchRatio;
 
-            if ( mSourceSamplePosition > playingSound->mEndFrame )
+            if ( mSourceSamplePosition > playingSound->mEndFrame + 1 )
             {
                 stopNote( false );
                 break;
