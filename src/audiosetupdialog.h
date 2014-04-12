@@ -26,6 +26,7 @@
 #include <QDialog>
 #include <QListWidgetItem>
 #include <QCloseEvent>
+#include <QAbstractButton>
 #include "JuceHeader.h"
 
 
@@ -71,6 +72,7 @@ private:
     static QString getNoDeviceString() { return "<< " + tr("none") + " >>"; }
 
 private slots:
+    void on_buttonBox_clicked( QAbstractButton* button );
     void on_listWidget_MidiInput_itemClicked( QListWidgetItem* item );
     void on_comboBox_BufferSize_activated( const int index );
     void on_comboBox_SampleRate_activated( const int index );

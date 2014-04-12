@@ -25,7 +25,7 @@
 #include "simplesynth.h"
 #include "globals.h"
 #include <QMessageBox>
-//#include <QDebug>
+#include <QDebug>
 
 
 //==================================================================================================
@@ -110,11 +110,7 @@ void AudioSetupDialog::showEvent( QShowEvent* event )
 
 void AudioSetupDialog::closeEvent( QCloseEvent* event )
 {
-    // Tear down MIDI input test synth
-    mAudioSourcePlayer.setSource( NULL );
-    mDeviceManager.removeMidiInputCallback( String::empty, &(mSynthAudioSource->midiCollector) );
-    mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
-
+    tearDownMidiInputTestSynth();
     event->accept();
 }
 
@@ -445,17 +441,7 @@ String AudioSetupDialog::getNameForChannelPair( const String& name1, const Strin
 
 void AudioSetupDialog::accept()
 {
-    ScopedPointer<XmlElement> stateXml( mDeviceManager.createStateXml() );
-
-    if ( stateXml != NULL )
-    {
-        File configFile( AUDIO_CONFIG_FILE_PATH );
-        configFile.create();
-        stateXml->writeToFile( configFile, "" );
-    }
-
     tearDownMidiInputTestSynth();
-
     QDialog::accept();
 }
 
@@ -649,5 +635,22 @@ void AudioSetupDialog::on_listWidget_MidiInput_itemClicked( QListWidgetItem* ite
     else
     {
         mDeviceManager.setMidiInputEnabled( midiInputName, false );
+    }
+}
+
+
+
+void AudioSetupDialog::on_buttonBox_clicked( QAbstractButton* button )
+{
+    if ( button->text() == "Save" )
+    {
+        ScopedPointer<XmlElement> stateXml( mDeviceManager.createStateXml() );
+
+        if ( stateXml != NULL )
+        {
+            File configFile( AUDIO_CONFIG_FILE_PATH );
+            configFile.create();
+            stateXml->writeToFile( configFile, "" );
+        }
     }
 }
