@@ -26,6 +26,7 @@
 #include <QFileDialog>
 #include <aubio/aubio.h>
 #include "commands.h"
+#include "globals.h"
 //#include <QDebug>
 
 
@@ -123,19 +124,27 @@ MainWindow::MainWindow( QWidget* parent ) :
 
 
     // Initialise the audio device manager
-    const String error = mDeviceManager.initialise( NUM_INPUT_CHANS, NUM_OUTPUT_CHANS, NULL, true );
+    ScopedPointer<XmlElement> stateXml;
+
+    File configFile( AUDIO_CONFIG_FILE_PATH );
+    if ( configFile.existsAsFile() )
+    {
+        stateXml = XmlDocument::parse( configFile );
+    }
+
+    const String error = mDeviceManager.initialise( NUM_INPUT_CHANS, NUM_OUTPUT_CHANS, stateXml, true );
 
     if ( error.isNotEmpty() )
     {
         showWarningBox( tr("Error initialising audio device manager!"), error.toRawUTF8() );
         mUI->actionAudio_Setup->setDisabled( true );
-        mIsAudioInitialised = FALSE;
+        mIsAudioInitialised = false;
     }
     else
     {
         mAudioSetupDialog = new AudioSetupDialog( mDeviceManager, this );
         mSamplerAudioSource = new SamplerAudioSource();
-        mIsAudioInitialised = TRUE;
+        mIsAudioInitialised = true;
     }
 
 

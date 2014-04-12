@@ -52,11 +52,9 @@ AudioSetupDialog::AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* 
 
 
     // Select current audio backend
-    const QString currentAudioBackendName = mDeviceManager.getCurrentAudioDeviceType().toRawUTF8();
-    const int index = mUI->comboBox_AudioBackend->findText( currentAudioBackendName );
-
-    mUI->comboBox_AudioBackend->setCurrentIndex( index );
-    on_comboBox_AudioBackend_currentIndexChanged( index ); // This will also update all the other widgets
+    const QString backendName = mDeviceManager.getCurrentAudioDeviceType().toRawUTF8();
+    const int index = mUI->comboBox_AudioBackend->findText( backendName );
+    mUI->comboBox_AudioBackend->setCurrentIndex( index ); // This will also update all the other widgets
 
 
     mUI->label_MidiInputTestTone->setText( tr( "MIDI input test tone enabled" ) );
@@ -474,20 +472,15 @@ void AudioSetupDialog::on_comboBox_AudioBackend_currentIndexChanged( const int i
     const String audioBackendName = audioBackendType->getTypeName();
     mDeviceManager.setCurrentAudioDeviceType( audioBackendName, true );
 
-    const int deviceIndex = audioBackendType->getDefaultDeviceIndex( false );
-    const String deviceName = audioBackendType->getDeviceNames( false )[ deviceIndex ];
-
     // Get current audio settings
     AudioDeviceManager::AudioDeviceSetup config;
     mDeviceManager.getAudioDeviceSetup( config );
 
-    config.outputDeviceName = deviceName;
-    config.useDefaultOutputChannels = true;
-
+    // Set audio settings and get any error message produced
     String error = mDeviceManager.setAudioDeviceSetup( config, true );
 
     // If this is a JACK audio device then also enable JACK MIDI if required
-    setJackMidiInput( deviceName );
+    setJackMidiInput( config.outputDeviceName );
 
     // When a new audio backend is selected all widgets should be updated
     updateAudioDeviceComboBox();
