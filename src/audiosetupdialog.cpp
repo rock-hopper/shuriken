@@ -91,6 +91,11 @@ void AudioSetupDialog::showEvent( QShowEvent* event )
 {
     if ( ! event->spontaneous() ) // If this dialog is not being maximised after previously being minimized...
     {
+        // Get current audio settings and store them so that any
+        // changes can be reverted if the user later clicks "Cancel"
+        mDeviceManager.getAudioDeviceSetup( mOriginalConfig );
+
+
         // Set up MIDI input test synth
         mSynthAudioSource = new SynthAudioSource();
         mAudioSourcePlayer.setSource( mSynthAudioSource );
@@ -459,6 +464,14 @@ void AudioSetupDialog::accept()
 void AudioSetupDialog::reject()
 {
     tearDownMidiInputTestSynth();
+
+    mDeviceManager.setAudioDeviceSetup( mOriginalConfig, true );
+
+    updateAudioDeviceComboBox();
+    updateAudioDeviceComboBox();
+    updateOutputChannelComboBox();
+    updateSampleRateComboBox();
+    updateBufferSizeComboBox();
 
     QDialog::reject();
 }

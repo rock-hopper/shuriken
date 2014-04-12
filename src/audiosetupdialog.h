@@ -61,6 +61,7 @@ private:
 
     Ui::AudioSetupDialog* mUI;
     AudioDeviceManager& mDeviceManager;
+    AudioDeviceManager::AudioDeviceSetup mOriginalConfig;
     ScopedPointer<SynthAudioSource> mSynthAudioSource;
     AudioSourcePlayer mAudioSourcePlayer;
 
