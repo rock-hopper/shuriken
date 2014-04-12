@@ -106,13 +106,6 @@
      <item row="6" column="1">
       <widget class="QListWidget" name="listWidget_MidiInput"/>
      </item>
-     <item row="7" column="1">
-      <widget class="QLabel" name="label_MidiInputTestTone">
-       <property name="text">
-        <string>MIDI input test tone disabled</string>
-       </property>
-      </widget>
-     </item>
      <item row="5" column="0">
       <widget class="QLabel" name="label_BufferSize">
        <property name="text">
@@ -127,6 +120,13 @@
          <width>170</width>
          <height>0</height>
         </size>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QCheckBox" name="checkBox_MidiInputTestTone">
+       <property name="text">
+        <string>Enable MIDI Input Test Tone</string>
        </property>
       </widget>
      </item>

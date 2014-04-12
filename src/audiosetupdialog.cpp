@@ -55,9 +55,6 @@ AudioSetupDialog::AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* 
     const QString backendName = mDeviceManager.getCurrentAudioDeviceType().toRawUTF8();
     const int index = mUI->comboBox_AudioBackend->findText( backendName );
     mUI->comboBox_AudioBackend->setCurrentIndex( index ); // This will also update all the other widgets
-
-
-    mUI->label_MidiInputTestTone->setText( tr( "MIDI input test tone enabled" ) );
 }
 
 
@@ -89,18 +86,18 @@ void AudioSetupDialog::changeEvent( QEvent* event )
 
 void AudioSetupDialog::showEvent( QShowEvent* event )
 {
-    if ( ! event->spontaneous() ) // If this dialog is not being maximised after previously being minimized...
+    // If the dialog is not being maximised after having previoulsy been minimised...
+    if ( ! event->spontaneous() )
     {
         // Get current audio settings and store them so that any
         // changes can be reverted if the user later clicks "Cancel"
         mDeviceManager.getAudioDeviceSetup( mOriginalConfig );
 
 
-        // Set up MIDI input test synth
-        mSynthAudioSource = new SynthAudioSource();
-        mAudioSourcePlayer.setSource( mSynthAudioSource );
-        mDeviceManager.addAudioCallback( &mAudioSourcePlayer );
-        mDeviceManager.addMidiInputCallback( String::empty, &(mSynthAudioSource->midiCollector) );
+        if ( mUI->checkBox_MidiInputTestTone->isChecked() )
+        {
+            setUpMidiInputTestSynth();
+        }
     }
 
     QDialog::showEvent( event );
@@ -363,6 +360,16 @@ void AudioSetupDialog::disableAllWidgets()
     mUI->comboBox_SampleRate->setEnabled( false );
     mUI->comboBox_BufferSize->setEnabled( false );
     mUI->listWidget_MidiInput->setEnabled( false );
+}
+
+
+
+void AudioSetupDialog::setUpMidiInputTestSynth()
+{
+    mSynthAudioSource = new SynthAudioSource();
+    mAudioSourcePlayer.setSource( mSynthAudioSource );
+    mDeviceManager.addAudioCallback( &mAudioSourcePlayer );
+    mDeviceManager.addMidiInputCallback( String::empty, &(mSynthAudioSource->midiCollector) );
 }
 
 
@@ -652,5 +659,19 @@ void AudioSetupDialog::on_buttonBox_clicked( QAbstractButton* button )
             configFile.create();
             stateXml->writeToFile( configFile, "" );
         }
+    }
+}
+
+
+
+void AudioSetupDialog::on_checkBox_MidiInputTestTone_clicked( const bool isChecked )
+{
+    if ( isChecked )
+    {
+        setUpMidiInputTestSynth();
+    }
+    else
+    {
+        tearDownMidiInputTestSynth();
     }
 }

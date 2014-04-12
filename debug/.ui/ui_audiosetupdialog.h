@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'audiosetupdialog.ui'
 **
-** Created: Sat Apr 12 18:33:05 2014
+** Created: Sat Apr 12 20:37:39 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -14,6 +14,7 @@
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
+#include <QtGui/QCheckBox>
 #include <QtGui/QComboBox>
 #include <QtGui/QDialog>
 #include <QtGui/QDialogButtonBox>
@@ -42,9 +43,9 @@ public:
     QComboBox *comboBox_SampleRate;
     QLabel *label_MidiInput;
     QListWidget *listWidget_MidiInput;
-    QLabel *label_MidiInputTestTone;
     QLabel *label_BufferSize;
     QComboBox *comboBox_BufferSize;
+    QCheckBox *checkBox_MidiInputTestTone;
     QDialogButtonBox *buttonBox;
 
     void setupUi(QDialog *AudioSetupDialog)
@@ -117,11 +118,6 @@ public:
 
         formLayout->setWidget(6, QFormLayout::FieldRole, listWidget_MidiInput);
 
-        label_MidiInputTestTone = new QLabel(AudioSetupDialog);
-        label_MidiInputTestTone->setObjectName(QString::fromUtf8("label_MidiInputTestTone"));
-
-        formLayout->setWidget(7, QFormLayout::FieldRole, label_MidiInputTestTone);
-
         label_BufferSize = new QLabel(AudioSetupDialog);
         label_BufferSize->setObjectName(QString::fromUtf8("label_BufferSize"));
 
@@ -132,6 +128,11 @@ public:
         comboBox_BufferSize->setMinimumSize(QSize(170, 0));
 
         formLayout->setWidget(5, QFormLayout::FieldRole, comboBox_BufferSize);
+
+        checkBox_MidiInputTestTone = new QCheckBox(AudioSetupDialog);
+        checkBox_MidiInputTestTone->setObjectName(QString::fromUtf8("checkBox_MidiInputTestTone"));
+
+        formLayout->setWidget(7, QFormLayout::FieldRole, checkBox_MidiInputTestTone);
 
 
         verticalLayout->addLayout(formLayout);
@@ -160,8 +161,8 @@ public:
         label_OutputChannels->setText(QApplication::translate("AudioSetupDialog", "Output Channels:", 0, QApplication::UnicodeUTF8));
         label_SampleRate->setText(QApplication::translate("AudioSetupDialog", "Sample Rate:", 0, QApplication::UnicodeUTF8));
         label_MidiInput->setText(QApplication::translate("AudioSetupDialog", "MIDI Input:", 0, QApplication::UnicodeUTF8));
-        label_MidiInputTestTone->setText(QApplication::translate("AudioSetupDialog", "MIDI input test tone disabled", 0, QApplication::UnicodeUTF8));
         label_BufferSize->setText(QApplication::translate("AudioSetupDialog", "Audio Buffer Size:", 0, QApplication::UnicodeUTF8));
+        checkBox_MidiInputTestTone->setText(QApplication::translate("AudioSetupDialog", "Enable MIDI Input Test Tone", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

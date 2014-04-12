@@ -57,6 +57,7 @@ private:
     void updateBufferSizeComboBox();
     void updateMidiInputListWidget();
     void disableAllWidgets();
+    void setUpMidiInputTestSynth();
     void tearDownMidiInputTestSynth();
     void setJackMidiInput( const String deviceName );
 
@@ -72,6 +73,7 @@ private:
     static QString getNoDeviceString() { return "<< " + tr("none") + " >>"; }
 
 private slots:
+    void on_checkBox_MidiInputTestTone_clicked( const bool isChecked );
     void on_buttonBox_clicked( QAbstractButton* button );
     void on_listWidget_MidiInput_itemClicked( QListWidgetItem* item );
     void on_comboBox_BufferSize_activated( const int index );
