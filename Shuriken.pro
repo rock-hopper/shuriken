@@ -575,7 +575,8 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/shurikensampler.h \
     src/slicepointitem.h \
     src/commands.h \
-    src/simplesynth.h
+    src/simplesynth.h \
+    src/globals.h
 FORMS += src/mainwindow.ui \
     src/audiosetupdialog.ui
 INCLUDEPATH += src \

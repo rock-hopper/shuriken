@@ -44,13 +44,6 @@ public:
     AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* parent = NULL );
     ~AudioSetupDialog();
 
-    void setAudioBackend( const int deviceTypeIndex );
-    void setAudioDevice( const QString deviceName );
-    void setOutputChannels( const BigInteger channels );
-    void setSampleRate( const int sampleRate );
-    void setBufferSize( const int bufferSize );
-    void enableMidiInput( const QString midiInputName, const bool isEnabled );
-
 protected:
     void changeEvent( QEvent* event );
     void showEvent( QShowEvent* event );
@@ -63,6 +56,8 @@ private:
     void updateBufferSizeComboBox();
     void updateMidiInputListWidget();
     void disableAllWidgets();
+    void tearDownMidiInputTestSynth();
+    void setJackMidiInput( const String deviceName );
 
     Ui::AudioSetupDialog* mUI;
     AudioDeviceManager& mDeviceManager;
