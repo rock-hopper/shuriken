@@ -289,8 +289,7 @@ void WaveformItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
                 // If the left edge of this item is more than halfway across the other item then swap places
                 if ( scenePos().x() < otherWaveformItem->scenePos().x() + otherWaveformItem->rect().center().x() )
                 {
-                    const int newOrderPos = otherWaveformItem->getOrderPos();
-                    emit orderPosIsChanging( mCurrentOrderPos, newOrderPos );
+                    emit orderPosIsChanging( mCurrentOrderPos, otherWaveformItem->getOrderPos() );
                 }
             }
         }
@@ -314,8 +313,7 @@ void WaveformItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
                     // If the right edge of this item is more than halfway across the other item then swap places
                     if ( rightX > otherWaveformItem->scenePos().x() + otherWaveformItem->rect().center().x() )
                     {
-                        const int newOrderPos = otherWaveformItem->getOrderPos();
-                        emit orderPosIsChanging( mCurrentOrderPos, newOrderPos );
+                        emit orderPosIsChanging( mCurrentOrderPos, otherWaveformItem->getOrderPos() );
                     }
                 }
             }

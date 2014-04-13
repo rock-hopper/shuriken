@@ -95,9 +95,6 @@ MainWindow::MainWindow( QWidget* parent ) :
 
 
     // Connect signals to slots
-    QObject::connect( mUI->waveGraphicsView, SIGNAL( waveformSliceOrderChanged(int,int) ),
-                      this, SLOT( reorderSampleBufferList(int,int) ) );
-
     QObject::connect( mUI->waveGraphicsView, SIGNAL( slicePointOrderChanged(SharedSlicePointItem,int,int) ),
                       this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int) ) );
 
@@ -480,7 +477,7 @@ void MainWindow::reorderSampleBufferList( const int oldOrderPos, const int newOr
 
 
 
-void MainWindow::recordWaveformItemNewOrderPos( const int startOrderPos, const int destOrderPos )
+void MainWindow::recordWaveformItemMove( const int startOrderPos, const int destOrderPos )
 {
     QUndoCommand* command = new MoveWaveformItemCommand( startOrderPos, destOrderPos, mUI->waveGraphicsView );
     mUndoStack.push( command );
@@ -598,7 +595,7 @@ void MainWindow::on_actionImport_Audio_File_triggered()
             mCurrentSampleBuffer = sampleBuffer;
             mCurrentSampleHeader = sampleHeader;
 
-            mUI->waveGraphicsView->createWaveform( sampleBuffer );
+            mUI->waveGraphicsView->createWaveformItem( sampleBuffer );
 
             if ( mIsAudioInitialised )
             {

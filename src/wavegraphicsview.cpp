@@ -45,7 +45,7 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) : QGraphicsView( parent )
 
 
 
-void WaveGraphicsView::createWaveform( const SharedSampleBuffer sampleBuffer )
+void WaveGraphicsView::createWaveformItem( const SharedSampleBuffer sampleBuffer )
 {
     mNumFrames = sampleBuffer->getNumFrames();
 
@@ -70,7 +70,7 @@ void WaveGraphicsView::createWaveform( const SharedSampleBuffer sampleBuffer )
 
 
 
-QList<SharedWaveformItem> WaveGraphicsView::createWaveformSlices( const QList<SharedSampleBuffer> sampleBufferList )
+QList<SharedWaveformItem> WaveGraphicsView::createWaveformItems( const QList<SharedSampleBuffer> sampleBufferList )
 {
     int totalNumFrames = 0;
 
@@ -93,10 +93,10 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveformSlices( const QList<Sh
         mWaveformItemList.append( SharedWaveformItem( waveformItem ) );
 
         QObject::connect( waveformItem, SIGNAL( orderPosIsChanging(int,int) ),
-                          this, SLOT( reorderWaveformSlices(int,int) ) );
+                          this, SLOT( reorderWaveformItems(int,int) ) );
 
         QObject::connect( waveformItem, SIGNAL( finishedMoving(int) ),
-                          this, SLOT( slideWaveformSliceIntoPlace(int) ) );
+                          this, SLOT( slideWaveformItemIntoPlace(int) ) );
 
         QObject::connect( waveformItem, SIGNAL( rightMousePressed(int,QPointF) ),
                           this, SLOT( determinePlayPos(int,QPointF) ) );
@@ -116,12 +116,12 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveformSlices( const QList<Sh
 
 
 
-void WaveGraphicsView::moveWaveformSlice( const int oldOrderPos, const int newOrderPos )
+void WaveGraphicsView::moveWaveformItem( const int oldOrderPos, const int newOrderPos )
 {
     Q_ASSERT_X( ! mWaveformItemList.isEmpty(), "WaveGraphicsView::moveWaveformSlice", "mWaveformItemList is empty" );
 
-    reorderWaveformSlices( oldOrderPos, newOrderPos );
-    slideWaveformSliceIntoPlace( newOrderPos );
+    reorderWaveformItems( oldOrderPos, newOrderPos );
+    slideWaveformItemIntoPlace( newOrderPos );
 }
 
 
@@ -411,13 +411,13 @@ void WaveGraphicsView::scaleSlicePointItems( const qreal newXScaleFactor )
 //==================================================================================================
 // Private Slots:
 
-void WaveGraphicsView::reorderWaveformSlices( const int oldOrderPos, const int newOrderPos )
+void WaveGraphicsView::reorderWaveformItems( const int oldOrderPos, const int newOrderPos )
 {
     mWaveformItemList[ oldOrderPos ]->setOrderPos( newOrderPos );
 
     const qreal distanceToMove = mWaveformItemList[ oldOrderPos ]->rect().width();
 
-    // If a slice has been dragged to the left
+    // If a waveform item has been dragged to the left
     if ( newOrderPos < oldOrderPos )
     {
         for ( int orderPos = newOrderPos; orderPos < oldOrderPos; orderPos++ )
@@ -428,7 +428,7 @@ void WaveGraphicsView::reorderWaveformSlices( const int oldOrderPos, const int n
         }
     }
 
-    // If a slice has been dragged to the right
+    // If a waveform item has been dragged to the right
     if ( newOrderPos > oldOrderPos )
     {
         for ( int orderPos = newOrderPos; orderPos > oldOrderPos; orderPos-- )
@@ -440,13 +440,11 @@ void WaveGraphicsView::reorderWaveformSlices( const int oldOrderPos, const int n
     }
 
     mWaveformItemList.move( oldOrderPos, newOrderPos );
-
-    emit waveformSliceOrderChanged( oldOrderPos, newOrderPos );
 }
 
 
 
-void WaveGraphicsView::slideWaveformSliceIntoPlace( const int orderPos )
+void WaveGraphicsView::slideWaveformItemIntoPlace( const int orderPos )
 {
     qreal newScenePosX = 0.0;
 

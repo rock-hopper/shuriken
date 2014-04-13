@@ -91,8 +91,14 @@ private:
     static const qreal DETAIL_LEVEL_HIGH_CUTOFF = 5.0;
 
 signals:
+    // As waveform items are moved their old and new order positions are emitted, allowing other
+    // waveform items to be reshuffled and their associated sample buffers to be reordered
     void orderPosIsChanging( const int oldOrderPos, const int newOrderPos );
+
+    // When the user finishes moving the waveform item its start and destination order positions
+    // are emitted, allowing the positions to be recorded in the undo stack
     void orderPosHasChanged( const int startOrderPos, const int destOrderPos );
+
     void finishedMoving( const int orderPos );
     void rightMousePressed( const int itemOrderPos, const QPointF mouseScenePos );
     void maxDetailLevelReached();

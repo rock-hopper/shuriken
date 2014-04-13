@@ -147,7 +147,7 @@ private slots:
     void on_actionOpen_Project_triggered();
 
     void reorderSampleBufferList( const int oldOrderPos, const int newOrderPos );
-    void recordWaveformItemNewOrderPos( const int startOrderPos, const int destOrderPos );
+    void recordWaveformItemMove( const int startOrderPos, const int destOrderPos );
     void recordSlicePointItemMove( const SharedSlicePointItem slicePointItem,
                                    const int oldFrameNum,
                                    const int newFrameNum );

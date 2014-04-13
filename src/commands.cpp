@@ -204,7 +204,7 @@ void CreateSlicesCommand::undo()
     mMainWindow->mSamplerAudioSource->setSample( mMainWindow->mCurrentSampleBuffer,
                                                  mMainWindow->mCurrentSampleHeader->sampleRate );
     mGraphicsView->clearWaveform();
-    mGraphicsView->createWaveform( mMainWindow->mCurrentSampleBuffer );
+    mGraphicsView->createWaveformItem( mMainWindow->mCurrentSampleBuffer );
     mGraphicsView->showSlicePoints();
     mSliceButton->setEnabled( true );
     mAddSlicePointAction->setEnabled( true );
@@ -233,12 +233,19 @@ void CreateSlicesCommand::redo()
     mGraphicsView->clearWaveform();
 
     const QList<SharedWaveformItem> waveformItemList =
-            mGraphicsView->createWaveformSlices( mMainWindow->mSlicedSampleBuffers );
+            mGraphicsView->createWaveformItems( mMainWindow->mSlicedSampleBuffers );
 
     foreach ( SharedWaveformItem item, waveformItemList )
     {
+        // As waveform items are moved their old and new order positions are emitted,
+        // allowing their associated sample buffers to be reordered
+        QObject::connect( item.data(), SIGNAL( orderPosIsChanging(int,int) ),
+                          mMainWindow, SLOT( reorderSampleBufferList(int,int) ) );
+
+        // Every time a waveform item is moved its old and new order positions are stored in a
+        // new MoveWaveformItemCommand object, allowing the user to undo and redo moves
         QObject::connect( item.data(), SIGNAL( orderPosHasChanged(int,int) ),
-                          mMainWindow, SLOT( recordWaveformItemNewOrderPos(int,int) ) );
+                          mMainWindow, SLOT( recordWaveformItemMove(int,int) ) );
     }
 
     mSliceButton->setEnabled( false );
@@ -268,7 +275,7 @@ MoveWaveformItemCommand::MoveWaveformItemCommand( const int startOrderPos,
 
 void MoveWaveformItemCommand::undo()
 {
-    mGraphicsView->moveWaveformSlice( mDestOrderPos, mStartOrderPos );
+    mGraphicsView->moveWaveformItem( mDestOrderPos, mStartOrderPos );
 }
 
 
@@ -277,7 +284,7 @@ void MoveWaveformItemCommand::redo()
 {
     if ( ! mIsFirstRedoCall )
     {
-        mGraphicsView->moveWaveformSlice( mStartOrderPos, mDestOrderPos );
+        mGraphicsView->moveWaveformItem( mStartOrderPos, mDestOrderPos );
     }
     mIsFirstRedoCall = false;
 }
