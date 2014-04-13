@@ -25,6 +25,8 @@
 
 #include <QObject>
 #include <QGraphicsPolygonItem>
+#include <QPainter>
+#include <QStyleOptionGraphicsItem>
 
 
 class SlicePointItem;
@@ -40,6 +42,7 @@ public:
 
     SlicePointItem( const qreal height, QGraphicsItem* parent = NULL );
 
+    void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
     void setHeight( const qreal height );
     int getFrameNum() const                     { return mFrameNum; }
     void setFrameNum( const int frameNum )      { mFrameNum = frameNum; }

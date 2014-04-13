@@ -57,18 +57,6 @@ WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer, const int ord
 
 
 
-void WaveformItem::setRect( const qreal x, const qreal y, const qreal width, const qreal height )
-{
-    QGraphicsRectItem::setRect( x, y, width, height );
-    setBackgroundGradient();
-    resetSampleBins();
-}
-
-
-
-//==================================================================================================
-// Protected:
-
 void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget )
 {
     Q_UNUSED( widget );
@@ -218,6 +206,18 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
 }
 
 
+
+void WaveformItem::setRect( const qreal x, const qreal y, const qreal width, const qreal height )
+{
+    QGraphicsRectItem::setRect( x, y, width, height );
+    setBackgroundGradient();
+    resetSampleBins();
+}
+
+
+
+//==================================================================================================
+// Protected:
 
 QVariant WaveformItem::itemChange( GraphicsItemChange change, const QVariant &value )
 {

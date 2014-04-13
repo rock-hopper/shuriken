@@ -46,6 +46,7 @@ public:
     WaveformItem( const SharedSampleBuffer sampleBuffer, const int orderPos,
                   const qreal width, const qreal height, QGraphicsItem* parent = NULL );
 
+    void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
     void setRect( const qreal x, const qreal y, const qreal width, const qreal height );
 
     int getOrderPos() const                             { return mCurrentOrderPos; }
@@ -60,7 +61,6 @@ protected:
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
     void mouseMoveEvent( QGraphicsSceneMouseEvent* event );
     void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
-    void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
 
 private:
     void setBackgroundGradient();

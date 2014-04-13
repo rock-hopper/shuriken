@@ -40,6 +40,26 @@ SlicePointItem::SlicePointItem( const qreal height, QGraphicsItem* parent ) :
 
 
 
+void SlicePointItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget )
+{
+    Q_UNUSED( widget );
+    
+    painter->setPen( pen() );
+
+    if ( option->state & QStyle::State_Selected )
+    {
+        painter->setBrush( QColor(255, 192, 0, 255) );
+    }
+    else
+    {
+        painter->setBrush( brush() );
+    }
+
+    painter->drawPolygon( polygon(), fillRule() );
+}
+
+
+
 void SlicePointItem::setHeight( const qreal height )
 {
     const qreal triangleWidth = 16.0;
