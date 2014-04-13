@@ -92,6 +92,7 @@ This could return nullptr if there was a problem loading the data.
 */
     SharedSampleBuffer getAudioData() const noexcept { return mData; }
 
+    // startFrame inclusive, endFrame exclusive
     void setPlaybackRange( const int startFrame, const int endFrame );
 
 

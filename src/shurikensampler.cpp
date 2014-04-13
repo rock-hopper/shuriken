@@ -72,7 +72,7 @@ ShurikenSamplerSound::ShurikenSamplerSound( const String& soundName,
     }
 
     mStartFrame = 0;
-    mEndFrame = mLength - 1;
+    mEndFrame = mLength;
 }
 
 
@@ -189,7 +189,7 @@ void ShurikenSamplerVoice::stopNote( const bool allowTailOff )
     if ( playingSound != NULL )
     {
         playingSound->mStartFrame = 0;
-        playingSound->mEndFrame = playingSound->mLength - 1;
+        playingSound->mEndFrame = playingSound->mLength;
     }
 }
 
@@ -273,7 +273,7 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
 
             mSourceSamplePosition += mPitchRatio;
 
-            if ( mSourceSamplePosition > playingSound->mEndFrame + 1 )
+            if ( mSourceSamplePosition > playingSound->mEndFrame )
             {
                 stopNote( false );
                 break;

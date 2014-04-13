@@ -495,7 +495,7 @@ void WaveGraphicsView::determinePlayPos( const int waveformItemOrderPos, const Q
     if ( ! mWaveformItemList.isEmpty() )
     {
         int startFrame = 0;
-        int endFrame = mWaveformItemList.at( waveformItemOrderPos )->getSampleBuffer()->getNumFrames() - 1;
+        int endFrame = mWaveformItemList.at( waveformItemOrderPos )->getSampleBuffer()->getNumFrames();
 
         // If slice points are present and the waveform has not yet been sliced...
         if ( mWaveformItemList.size() == 1 && ! mSlicePointItemList.isEmpty() )
