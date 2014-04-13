@@ -35,6 +35,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButton_Stop">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Stop</string>
         </property>
@@ -52,6 +55,9 @@
       </item>
       <item>
        <widget class="QDoubleSpinBox" name="doubleSpinBox_OriginalBPM">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="maximum">
          <double>999.990000000000009</double>
         </property>
@@ -76,6 +82,9 @@
       </item>
       <item>
        <widget class="QDoubleSpinBox" name="doubleSpinBox_NewBPM">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="maximum">
          <double>999.990000000000009</double>
         </property>
@@ -434,6 +443,9 @@
    </property>
   </action>
   <action name="actionSave_Project">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-save.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-save.png</iconset>
@@ -446,6 +458,9 @@
    </property>
   </action>
   <action name="actionClose_Project">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-close.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-close.png</iconset>
@@ -473,6 +488,9 @@
    </property>
   </action>
   <action name="actionUndo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-undo.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-undo.png</iconset>
@@ -485,6 +503,9 @@
    </property>
   </action>
   <action name="actionRedo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-redo.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-redo.png</iconset>
@@ -497,6 +518,9 @@
    </property>
   </action>
   <action name="actionAdd_Slice_Point">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Add Slice Point</string>
    </property>
@@ -508,6 +532,9 @@
    </property>
   </action>
   <action name="actionDelete">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-delete.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-delete.png</iconset>

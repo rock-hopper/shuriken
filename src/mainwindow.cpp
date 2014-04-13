@@ -40,10 +40,6 @@ MainWindow::MainWindow( QWidget* parent ) :
     // Set up user interface
     mUI->setupUi( this );
 
-    mUI->actionAdd_Slice_Point->setEnabled( false );
-    mUI->actionUndo->setEnabled( false );
-    mUI->actionRedo->setEnabled( false );
-
 
     // Populate "Detection Method" combo box
     QStringList detectMethodTextList, detectMethodDataList;
@@ -545,16 +541,26 @@ void MainWindow::on_actionClose_Project_triggered()
         mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
         mDeviceManager.removeMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
         mSamplerAudioSource->clearAllSamples();
+
+        mUI->pushButton_Play->setEnabled( false );
+        mUI->pushButton_Stop->setEnabled( false );
     }
 
     mUI->waveGraphicsView->clearAll();
 
     mUI->doubleSpinBox_OriginalBPM->setValue( 0.0 );
+    mUI->doubleSpinBox_OriginalBPM->setEnabled( false );
     mUI->doubleSpinBox_NewBPM->setValue( 0.0 );
+    mUI->doubleSpinBox_NewBPM->setEnabled( false );
     mUI->pushButton_CalcBPM->setEnabled( false );
+    mUI->pushButton_Slice->setEnabled( false );
     mUI->pushButton_FindOnsets->setEnabled( false );
     mUI->pushButton_FindBeats->setEnabled( false );
+
+    mUI->actionSave_Project->setEnabled( false );
+    mUI->actionClose_Project->setEnabled( false );
     mUI->actionAdd_Slice_Point->setEnabled( false );
+    mUI->actionDelete->setEnabled( false );
 
     on_actionZoom_Original_triggered();
     mUI->actionZoom_Original->setEnabled( false );
@@ -611,13 +617,20 @@ void MainWindow::on_actionImport_Audio_File_triggered()
                 mAudioSourcePlayer.setSource( mSoundTouchAudioSource );
                 mDeviceManager.addAudioCallback( &mAudioSourcePlayer );
                 mDeviceManager.addMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
+
                 mUI->pushButton_Play->setEnabled( true );
+                mUI->pushButton_Stop->setEnabled( true );
             }
 
+            mUI->doubleSpinBox_OriginalBPM->setEnabled( true );
+            mUI->doubleSpinBox_NewBPM->setEnabled( true );
             mUI->pushButton_CalcBPM->setEnabled( true );
             mUI->pushButton_FindOnsets->setEnabled( true );
             mUI->pushButton_FindBeats->setEnabled( true );
+            mUI->actionSave_Project->setEnabled( true );
+            mUI->actionClose_Project->setEnabled( true );
             mUI->actionAdd_Slice_Point->setEnabled( true );
+            mUI->actionDelete->setEnabled( true );
             mUI->actionZoom_Original->setEnabled( true );
             mUI->actionZoom_In->setEnabled( true );
 

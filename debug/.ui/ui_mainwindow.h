@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sun Apr 13 11:33:02 2014
+** Created: Sun Apr 13 14:49:25 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -124,11 +124,13 @@ public:
         actionOpen_Project->setIcon(icon1);
         actionSave_Project = new QAction(MainWindow);
         actionSave_Project->setObjectName(QString::fromUtf8("actionSave_Project"));
+        actionSave_Project->setEnabled(false);
         QIcon icon2;
         icon2.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-save.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionSave_Project->setIcon(icon2);
         actionClose_Project = new QAction(MainWindow);
         actionClose_Project->setObjectName(QString::fromUtf8("actionClose_Project"));
+        actionClose_Project->setEnabled(false);
         QIcon icon3;
         icon3.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-close.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionClose_Project->setIcon(icon3);
@@ -140,18 +142,22 @@ public:
         actionExport_As->setIcon(icon4);
         actionUndo = new QAction(MainWindow);
         actionUndo->setObjectName(QString::fromUtf8("actionUndo"));
+        actionUndo->setEnabled(false);
         QIcon icon5;
         icon5.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/edit-undo.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionUndo->setIcon(icon5);
         actionRedo = new QAction(MainWindow);
         actionRedo->setObjectName(QString::fromUtf8("actionRedo"));
+        actionRedo->setEnabled(false);
         QIcon icon6;
         icon6.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/edit-redo.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionRedo->setIcon(icon6);
         actionAdd_Slice_Point = new QAction(MainWindow);
         actionAdd_Slice_Point->setObjectName(QString::fromUtf8("actionAdd_Slice_Point"));
+        actionAdd_Slice_Point->setEnabled(false);
         actionDelete = new QAction(MainWindow);
         actionDelete->setObjectName(QString::fromUtf8("actionDelete"));
+        actionDelete->setEnabled(false);
         QIcon icon7;
         icon7.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/edit-delete.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionDelete->setIcon(icon7);
@@ -233,6 +239,7 @@ public:
 
         pushButton_Stop = new QPushButton(centralWidget);
         pushButton_Stop->setObjectName(QString::fromUtf8("pushButton_Stop"));
+        pushButton_Stop->setEnabled(false);
 
         horizontalLayout_2->addWidget(pushButton_Stop);
 
@@ -244,6 +251,7 @@ public:
 
         doubleSpinBox_OriginalBPM = new QDoubleSpinBox(centralWidget);
         doubleSpinBox_OriginalBPM->setObjectName(QString::fromUtf8("doubleSpinBox_OriginalBPM"));
+        doubleSpinBox_OriginalBPM->setEnabled(false);
         doubleSpinBox_OriginalBPM->setMaximum(999.99);
 
         horizontalLayout_2->addWidget(doubleSpinBox_OriginalBPM);
@@ -261,6 +269,7 @@ public:
 
         doubleSpinBox_NewBPM = new QDoubleSpinBox(centralWidget);
         doubleSpinBox_NewBPM->setObjectName(QString::fromUtf8("doubleSpinBox_NewBPM"));
+        doubleSpinBox_NewBPM->setEnabled(false);
         doubleSpinBox_NewBPM->setMaximum(999.99);
 
         horizontalLayout_2->addWidget(doubleSpinBox_NewBPM);
