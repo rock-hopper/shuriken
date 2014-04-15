@@ -41,22 +41,14 @@ public:
     QString getLastErrorInfo() const    { return sErrorInfo; }
 
 private:
-    AudioFormatManager mFormatManager;
-
-    SharedSampleBuffer juceLoadFile( const char* filePath );
-
-private:
     static QString sErrorTitle;
     static QString sErrorInfo;
 
     static int initSndLib();
-    static void sndlibErrorHandler( int errorCode, char* errorMessage );
+    static void recordSndLibError( int errorCode, char* errorMessage );
+
     static SharedSampleBuffer sndlibLoadFile( const char* filePath );
-
-signals:
-
-public slots:
-
+    static SharedSampleBuffer aubioLoadFile( const char* filePath );
 };
 
 #endif // AUDIOFILEHANDLER_H

@@ -22,6 +22,8 @@
 
 #include "audiofilehandler.h"
 #include "SndLibShuriken/_sndlib.h"
+#include <aubio/aubio.h>
+#include <QDebug>
 
 
 //==================================================================================================
@@ -30,9 +32,6 @@
 AudioFileHandler::AudioFileHandler( QObject* parent ) :
     QObject( parent )
 {
-    // Initialise JUCE AudioFormatManager so we can load OGG and FLAC files
-    mFormatManager.registerBasicFormats();
-
     // Initialise sndlib so we can load many other audio file formats
     const int errorCode = initSndLib();
 
@@ -50,25 +49,22 @@ SharedSampleBuffer AudioFileHandler::getSampleData( const QString filePath )
     Q_ASSERT_X( ! filePath.isEmpty(), "AudioFileHandler::getSampleData", "filePath is empty" );
 
     QByteArray charArray = filePath.toLocal8Bit();
-    const char* file_path = charArray.data();
+    const char* path = charArray.data();
     SharedSampleBuffer sampleBuffer;
 
     // If file exists
-    if ( mus_file_probe( file_path ) )
+    if ( mus_file_probe( path ) )
     {
-        const int header_code = mus_sound_header_type( file_path );
+        // First try using aubio to load the file; if that fails, try using sndlib
+        sampleBuffer = aubioLoadFile( path );
 
-        // If sndlib recognises the audio file type
-        if ( mus_header_type_p( header_code ) )
+        qDebug() << "aubioLoadFile( path )";
+
+        if ( sampleBuffer.isNull() )
         {
-            if ( header_code == MUS_OGG || header_code == MUS_FLAC )
-            {
-                sampleBuffer = juceLoadFile( file_path );
-            }
-            else
-            {
-                sampleBuffer = sndlibLoadFile( file_path );
-            }
+            sampleBuffer = sndlibLoadFile( path );
+
+            qDebug() << "sndlibLoadFile( path )";
         }
     }
 
@@ -109,50 +105,6 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
 
 
 //==================================================================================================
-// Private:
-
-SharedSampleBuffer AudioFileHandler::juceLoadFile( const char* filePath )
-{
-    const File audioFile( filePath );
-    SharedSampleBuffer sampleBuffer;
-
-    // Create a file reader that can read this type of audio file
-    ScopedPointer<AudioFormatReader> reader( mFormatManager.createReaderFor( audioFile ) );
-
-    if ( reader != NULL )
-    {
-        const int numChans = reader->numChannels;
-
-        if ( numChans >= 1 && numChans <= 2 )
-        {
-            const int numFrames = reader->lengthInSamples / numChans;
-
-            try
-            {
-                sampleBuffer = SharedSampleBuffer( new SampleBuffer( numChans, numFrames ) );
-                reader->read( sampleBuffer.data(), 0, numFrames, 0, true, true );
-            }
-            catch ( std::bad_alloc& )
-            {
-                mus_error( MUS_MEMORY_ALLOCATION_FAILED, "Not enough memory to load audio file" );
-            }
-        }
-        else
-        {
-            mus_error( MUS_UNSUPPORTED_DATA_FORMAT, "Only mono and stereo samples are supported" );
-        }
-    }
-    else
-    {
-        mus_error( MUS_CANT_OPEN_FILE, "Perhaps audio file is corrupted?" );
-    }
-
-    return sampleBuffer;
-}
-
-
-
-//==================================================================================================
 // Private Static:
 
 QString AudioFileHandler::sErrorTitle;
@@ -166,14 +118,14 @@ int AudioFileHandler::initSndLib()
         return MUS_ERROR;
     }
 
-    mus_error_set_handler( sndlibErrorHandler );
+    mus_error_set_handler( recordSndLibError );
 
     return MUS_NO_ERROR;
 }
 
 
 
-void AudioFileHandler::sndlibErrorHandler( int errorCode, char* errorMessage )
+void AudioFileHandler::recordSndLibError( int errorCode, char* errorMessage )
 {
     sErrorTitle = mus_error_type_to_string( errorCode );
     sErrorInfo = errorMessage;
@@ -192,7 +144,13 @@ SharedSampleBuffer AudioFileHandler::sndlibLoadFile( const char* filePath )
     mus_float_t** floatBuffers = NULL;
     SharedSampleBuffer sampleBuffer;
 
-    if ( ! (mus_data_format_p(mus_sound_data_format(filePath))) )
+
+    if ( ! mus_header_type_p( mus_sound_header_type(filePath) ) )
+    {
+        goto end;
+    }
+
+    if ( ! mus_data_format_p( mus_sound_data_format(filePath) ) )
     {
         goto end;
     }
@@ -278,15 +236,98 @@ SharedSampleBuffer AudioFileHandler::sndlibLoadFile( const char* filePath )
         }
 
         mus_sound_close_input( fileID );
-        for ( int i = 0; i < numChans; i++ )
-            free( floatBuffers[i] );
-        free( floatBuffers );
     }
     catch ( std::bad_alloc& )
     {
         mus_error( MUS_MEMORY_ALLOCATION_FAILED, "Not enough memory to load audio file" );
     }
 
+    // Clean up
+    for ( int i = 0; i < numChans; i++ )
+        free( floatBuffers[i] );
+    free( floatBuffers );
+
     end:
+    return sampleBuffer;
+}
+
+
+
+SharedSampleBuffer AudioFileHandler::aubioLoadFile( const char* filePath )
+{
+    uint_t sampleRate = 0; // If `0` is passed as `samplerate` to new_aubio_source, the sample rate of the original file is used.
+    uint_t hopSize = 4096;
+    uint_t numFrames = 0;
+    uint_t numFramesRead = 0;
+    uint_t numChans = 0;
+
+    int startFrame = 0;
+    int numFramesToCopy = hopSize;
+
+    aubio_source_t* audioSourceFile = new_aubio_source( const_cast<char*>(filePath), sampleRate, hopSize );
+    fmat_t* sampleData = NULL;
+
+    SharedSampleBuffer sampleBuffer;
+
+    if ( audioSourceFile != NULL )
+    {
+        sampleRate = aubio_source_get_samplerate( audioSourceFile );
+        numChans = aubio_source_get_channels( audioSourceFile );
+
+        if ( numChans > 2 )
+        {
+            mus_error( MUS_UNSUPPORTED_DATA_FORMAT, "Only mono and stereo samples are supported" );
+        }
+        else
+        {
+            sampleData = new_fmat( numChans, hopSize );
+
+            if ( sampleData != NULL )
+            {
+                numFrames = mus_sound_frames( filePath );
+                if ( numFrames < 1 )
+                {
+                    numFrames = 0;
+                    do
+                    {
+                        aubio_source_do_multi( audioSourceFile, sampleData, &numFramesRead );
+                        numFrames += numFramesRead;
+                    }
+                    while ( numFramesRead == hopSize );
+
+                    aubio_source_seek( audioSourceFile, 0 );
+                    numFramesRead = 0;
+                    fmat_zeros( sampleData );
+                }
+
+                try
+                {
+                    sampleBuffer = SharedSampleBuffer( new SampleBuffer( numChans, numFrames ) );
+
+                    do
+                    {
+                        aubio_source_do_multi( audioSourceFile, sampleData, &numFramesRead );
+
+                        numFramesToCopy = numFrames - startFrame >= hopSize ? hopSize : numFrames - startFrame;
+
+                        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                        {
+                            sampleBuffer->copyFrom( chanNum, startFrame, sampleData->data[ chanNum ], numFramesToCopy );
+                        }
+                        startFrame += numFramesRead;
+                    }
+                    while ( numFramesRead == hopSize );
+                }
+                catch ( std::bad_alloc& )
+                {
+                    mus_error( MUS_MEMORY_ALLOCATION_FAILED, "Not enough memory to load audio file" );
+                }
+
+                del_fmat( sampleData );
+            }
+        }
+        del_aubio_source( audioSourceFile );
+    }
+
     return sampleBuffer;
 }

@@ -12,8 +12,6 @@ JUCE_MIDI/JUCE_JACK - class members public to private, getGlobalJackClient
 
 Add Features
 ------------
-Make use of aubio's file handling functions
-
 LADISH L1
 
 
