@@ -567,6 +567,8 @@ void MainWindow::on_actionClose_Project_triggered()
     mUI->actionZoom_Out->setEnabled( false );
     mUI->actionZoom_In->setEnabled( false );
 
+    mUI->statusBar->clearMessage();
+
     mUndoStack.clear();
 }
 
@@ -582,9 +584,9 @@ void MainWindow::on_actionImport_Audio_File_triggered()
     {
         QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-        const QDir dir( filePath );
-        const QString fileName = dir.dirName();
-        mLastOpenedDir = dir.absolutePath().remove( fileName );
+        const QFileInfo fileInfo( filePath );
+        const QString fileName = fileInfo.fileName();
+        mLastOpenedDir = fileInfo.absolutePath();
 
         SharedSampleBuffer sampleBuffer = mFileHandler.getSampleData( filePath );
         SharedSampleHeader sampleHeader = mFileHandler.getSampleHeader( filePath );
@@ -621,6 +623,20 @@ void MainWindow::on_actionImport_Audio_File_triggered()
                 mUI->pushButton_Play->setEnabled( true );
                 mUI->pushButton_Stop->setEnabled( true );
             }
+
+            QString chanString = sampleHeader->numChans == 1 ? "Mono" : "Stereo";
+
+            QString bitsString;
+            bitsString.setNum( sampleHeader->bitsPerSample );
+            bitsString += " bits";
+
+            QString rateString;
+            rateString.setNum( sampleHeader->sampleRate );
+            rateString += " Hz";
+
+            QString message = fileName + ", " + chanString + ", " + bitsString + ", " + rateString +
+                              ", " + sampleHeader->format;
+            mUI->statusBar->showMessage( message );
 
             mUI->doubleSpinBox_OriginalBPM->setEnabled( true );
             mUI->doubleSpinBox_NewBPM->setEnabled( true );

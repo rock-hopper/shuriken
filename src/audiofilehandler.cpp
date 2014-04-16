@@ -99,6 +99,10 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
             sampleHeader->format = mus_header_type_name( headerCode );
             sampleHeader->bitsPerSample = mus_sound_bits_per_sample( path );
         }
+        else
+        {
+            sampleHeader->bitsPerSample = 0;
+        }
     }
     else
     {
