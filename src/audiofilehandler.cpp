@@ -23,7 +23,7 @@
 #include "audiofilehandler.h"
 #include "SndLibShuriken/_sndlib.h"
 #include <aubio/aubio.h>
-#include <QDebug>
+//#include <QDebug>
 
 
 //==================================================================================================
@@ -32,13 +32,14 @@
 AudioFileHandler::AudioFileHandler( QObject* parent ) :
     QObject( parent )
 {
-    // Initialise sndlib so we can load many other audio file formats
+    // Initialise sndlib so we can read header info not available through aubio's API
+    // and also open some audio file formats that may not be supported via aubio
     const int errorCode = initSndLib();
 
     if ( errorCode == MUS_ERROR )
     {
         sErrorTitle = tr("Error initialising sndlib!");
-        sErrorInfo = tr("It will not be possible to open many audio file formats");
+        sErrorInfo = tr("It may not be possible to read some audio files");
     }
 }
 
@@ -58,13 +59,9 @@ SharedSampleBuffer AudioFileHandler::getSampleData( const QString filePath )
         // First try using aubio to load the file; if that fails, try using sndlib
         sampleBuffer = aubioLoadFile( path );
 
-        qDebug() << "aubioLoadFile( path )";
-
         if ( sampleBuffer.isNull() )
         {
             sampleBuffer = sndlibLoadFile( path );
-
-            qDebug() << "sndlibLoadFile( path )";
         }
     }
 
@@ -78,27 +75,49 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
     Q_ASSERT_X( ! filePath.isEmpty(), "AudioFileHandler::getSampleHeader", "filePath is empty" );
 
     QByteArray charArray = filePath.toLocal8Bit();
-    const char* file_path = charArray.data();
+    const char* path = charArray.data();
+
     SharedSampleHeader sampleHeader;
 
-    // If file exists
-    if ( mus_file_probe( file_path ) )
+    // If `0` is passed as `samplerate` to new_aubio_source, the sample rate of the original file is used.
+    aubio_source_t* aubioSource = new_aubio_source( const_cast<char*>(path), 0, 4096 );
+
+    if ( aubioSource != NULL )
     {
-        const int header_code = mus_sound_header_type( file_path );
+        sampleHeader = SharedSampleHeader( new SampleHeader );
+
+        sampleHeader->sampleRate = aubio_source_get_samplerate( aubioSource );
+        sampleHeader->numChans = aubio_source_get_channels( aubioSource );
+
+        del_aubio_source( aubioSource );
+
+        const int headerCode = mus_sound_header_type( path );
 
         // If sndlib recognises the audio file type
-        if ( mus_header_type_p( header_code ) )
+        if ( mus_header_type_p( headerCode ) )
+        {
+            sampleHeader->format = mus_header_type_name( headerCode );
+            sampleHeader->bitsPerSample = mus_sound_bits_per_sample( path );
+        }
+    }
+    else
+    {
+        const int headerCode = mus_sound_header_type( path );
+
+        // If sndlib recognises the audio file type
+        if ( mus_header_type_p( headerCode ) )
         {
             sampleHeader = SharedSampleHeader( new SampleHeader );
-            sampleHeader->fileName = filePath;
-            sampleHeader->fileType = mus_header_type_name( mus_sound_header_type(file_path) );
-            sampleHeader->sampleRate = mus_sound_srate( file_path );
+
+            sampleHeader->format = mus_header_type_name( headerCode );
+            sampleHeader->numChans = mus_sound_chans( path );
+            sampleHeader->sampleRate = mus_sound_srate( path );
+            sampleHeader->bitsPerSample = mus_sound_bits_per_sample( path );
         }
     }
 
     return sampleHeader;
 
-//    QString headerTypeName = mus_header_type_name( mus_sound_header_type(file_path) );
 //    QString dataFormatName = mus_data_format_name( mus_sound_data_format(file_path) );
 }
 
@@ -264,15 +283,15 @@ SharedSampleBuffer AudioFileHandler::aubioLoadFile( const char* filePath )
     int startFrame = 0;
     int numFramesToCopy = hopSize;
 
-    aubio_source_t* audioSourceFile = new_aubio_source( const_cast<char*>(filePath), sampleRate, hopSize );
+    aubio_source_t* aubioSource = new_aubio_source( const_cast<char*>(filePath), sampleRate, hopSize );
     fmat_t* sampleData = NULL;
 
     SharedSampleBuffer sampleBuffer;
 
-    if ( audioSourceFile != NULL )
+    if ( aubioSource != NULL )
     {
-        sampleRate = aubio_source_get_samplerate( audioSourceFile );
-        numChans = aubio_source_get_channels( audioSourceFile );
+        sampleRate = aubio_source_get_samplerate( aubioSource );
+        numChans = aubio_source_get_channels( aubioSource );
 
         if ( numChans > 2 )
         {
@@ -290,12 +309,12 @@ SharedSampleBuffer AudioFileHandler::aubioLoadFile( const char* filePath )
                     numFrames = 0;
                     do
                     {
-                        aubio_source_do_multi( audioSourceFile, sampleData, &numFramesRead );
+                        aubio_source_do_multi( aubioSource, sampleData, &numFramesRead );
                         numFrames += numFramesRead;
                     }
                     while ( numFramesRead == hopSize );
 
-                    aubio_source_seek( audioSourceFile, 0 );
+                    aubio_source_seek( aubioSource, 0 );
                     numFramesRead = 0;
                     fmat_zeros( sampleData );
                 }
@@ -306,7 +325,7 @@ SharedSampleBuffer AudioFileHandler::aubioLoadFile( const char* filePath )
 
                     do
                     {
-                        aubio_source_do_multi( audioSourceFile, sampleData, &numFramesRead );
+                        aubio_source_do_multi( aubioSource, sampleData, &numFramesRead );
 
                         numFramesToCopy = numFrames - startFrame >= hopSize ? hopSize : numFrames - startFrame;
 
@@ -326,7 +345,7 @@ SharedSampleBuffer AudioFileHandler::aubioLoadFile( const char* filePath )
                 del_fmat( sampleData );
             }
         }
-        del_aubio_source( audioSourceFile );
+        del_aubio_source( aubioSource );
     }
 
     return sampleBuffer;

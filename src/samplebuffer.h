@@ -26,6 +26,7 @@
 #include <QSharedPointer>
 #include "JuceHeader.h"
 
+
 class SampleBuffer : public AudioSampleBuffer
 {
 
@@ -61,14 +62,16 @@ typedef ScopedPointer<SampleBuffer> ScopedSampleBuffer;
 
 
 
-struct SampleHeader {
-    QString fileName;
-    QString fileType;
+struct SampleHeader
+{
+    QString format;
+    int numChans;
     int bitsPerSample;
     double sampleRate;
 };
 
 typedef QSharedPointer<SampleHeader> SharedSampleHeader;
 typedef ScopedPointer<SampleHeader> ScopedSampleHeader;
+
 
 #endif // SAMPLEBUFFER_H
