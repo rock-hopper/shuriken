@@ -530,33 +530,36 @@ void MainWindow::on_actionSave_Project_triggered()
 
     if ( ! filePath.isEmpty() )
     {
-        const QFileInfo fileInfo( filePath );
-        const QString dirName = fileInfo.fileName();
-        const QDir parentDir = fileInfo.absoluteDir();
+        QDir projectDir( filePath );
+        QString projDirName = projectDir.dirName();
+
+        QDir parentDir( projectDir );
+        parentDir.cdUp();
+
         bool isOkToSave = true;
 
-        if ( parentDir.exists( dirName ) )
+        // If the directory already exists, ask the user if it should be overwritten
+        if ( parentDir.exists( projDirName ) )
         {
             QMessageBox msgBox;
             msgBox.setWindowTitle( "Shuriken Beat Slicer" );
             msgBox.setIcon( QMessageBox::Question );
-            msgBox.setText( "The directory \"" + dirName + "\"" + " already exists" );
-            msgBox.setInformativeText( "Do you want to overwrite the contents of "+ dirName +"?" );
+            msgBox.setText( "The directory \"" + projDirName + "\"" + " already exists" );
+            msgBox.setInformativeText( "Do you want to overwrite the contents of " + projDirName + "?" );
             msgBox.setStandardButtons( QMessageBox::Ok | QMessageBox::Cancel );
             msgBox.setDefaultButton( QMessageBox::Ok );
             const int buttonFlag = msgBox.exec();
 
             if ( buttonFlag == QMessageBox::Ok )
             {
-                QDir saveDir( filePath );
                 bool isSuccessful;
 
                 QStringList nameFilters;
                 nameFilters << "*.wav" << "*.xml";
 
-                foreach ( QString dirEntry, saveDir.entryList( nameFilters ) )
+                foreach ( QString dirEntry, projectDir.entryList( nameFilters ) )
                 {
-                    isSuccessful = saveDir.remove( dirEntry );
+                    isSuccessful = projectDir.remove( dirEntry );
 
                     if ( ! isSuccessful )
                         isOkToSave = false;
@@ -567,14 +570,15 @@ void MainWindow::on_actionSave_Project_triggered()
                 isOkToSave = false;
             }
         }
-        else
+        else // Directory does not yet exist
         {
-            isOkToSave = parentDir.mkdir( fileInfo.fileName() );
+            isOkToSave = parentDir.mkdir( projDirName );
         }
 
         if ( isOkToSave )
         {
             bool isSuccessful;
+            int numAudioFiles;
 
             QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
@@ -584,22 +588,47 @@ void MainWindow::on_actionSave_Project_triggered()
                 sampleBufferList << mCurrentSampleBuffer;
 
                 isSuccessful = mFileHandler.saveAudioFiles( filePath, sampleBufferList, mCurrentSampleHeader );
+                numAudioFiles = 1;
             }
             else
             {
                 isSuccessful = mFileHandler.saveAudioFiles( filePath, mSlicedSampleBuffers, mCurrentSampleHeader );
+                numAudioFiles = mSlicedSampleBuffers.size();
             }
 
-            QApplication::restoreOverrideCursor();
+            if ( isSuccessful )
+            {
+                XmlElement docElement( "project" );
+                docElement.setAttribute( "name", projDirName.toUtf8().data() );
 
-            if ( ! isSuccessful )
+                for ( int fileID = 0; fileID < numAudioFiles; ++fileID )
+                {
+                    String fileName( fileID );
+                    fileName += ".wav";
+
+                    XmlElement* sampleElement = new XmlElement( "sample" );
+                    sampleElement->setAttribute( "id", fileID );
+                    sampleElement->setAttribute( "filename", fileName );
+
+                    docElement.addChildElement( sampleElement );
+                }
+
+                File file( projectDir.absoluteFilePath( "shuriken.xml" ).toUtf8().data() );
+
+                docElement.writeToFile( file, String::empty );
+
+                QApplication::restoreOverrideCursor();
+            }
+            else // An error occurred while writing the audio files
+            {
+                QApplication::restoreOverrideCursor();
                 showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+            }
         }
-        else
+        else // It isn't possible to save the project
         {
-            showWarningBox( tr("Could not save project!"),
-                            tr("Failed to create directory ") + "\"" + dirName + "\"" +
-                            tr(" in ") + parentDir.path() );
+            showWarningBox( tr("Could not save project ") + "\"" + projDirName + "\"",
+                            tr("Failed to create directory ") + "\"" + projectDir.absolutePath() + "\"" );
         }
     }
 }

@@ -657,7 +657,7 @@ void AudioSetupDialog::on_buttonBox_clicked( QAbstractButton* button )
         {
             File configFile( AUDIO_CONFIG_FILE_PATH );
             configFile.create();
-            stateXml->writeToFile( configFile, "" );
+            stateXml->writeToFile( configFile, String::empty );
         }
     }
 }
