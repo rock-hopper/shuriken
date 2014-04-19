@@ -23,6 +23,8 @@
 #include "audiofilehandler.h"
 #include "SndLibShuriken/_sndlib.h"
 #include <aubio/aubio.h>
+#include <sndfile.h>
+#include <QDir>
 //#include <QDebug>
 
 
@@ -51,6 +53,7 @@ SharedSampleBuffer AudioFileHandler::getSampleData( const QString filePath )
 
     QByteArray charArray = filePath.toLocal8Bit();
     const char* path = charArray.data();
+
     SharedSampleBuffer sampleBuffer;
 
     // If file exists
@@ -122,7 +125,110 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
 
     return sampleHeader;
 
-//    QString dataFormatName = mus_data_format_name( mus_sound_data_format(file_path) );
+//    QString dataFormatName = mus_data_format_name( mus_sound_data_format(path) );
+}
+
+
+
+bool AudioFileHandler::saveAudioFiles( const QString dirPath,
+                                       const QList<SharedSampleBuffer> sampleBufferList,
+                                       const SharedSampleHeader sampleHeader )
+{
+    const int hopSize = 8192;
+    const int numChans = sampleHeader->numChans;
+
+    const QDir dir( dirPath );
+    int fileNum = 0;
+
+    bool isSuccessful = true;
+
+    SF_INFO sfInfo;
+    memset( &sfInfo, 0, sizeof( sfInfo ) );
+
+    sfInfo.samplerate = sampleHeader->sampleRate;
+    sfInfo.channels   = numChans;
+    sfInfo.format     = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
+
+    Q_ASSERT_X( sf_format_check( &sfInfo ), "AudioFileHandler::saveAudioFiles", "sfInfo.format is not valid" );
+
+    foreach ( SharedSampleBuffer sampleBuffer, sampleBufferList )
+    {
+        QString fileNumStr;
+        fileNumStr.setNum( fileNum );
+
+        const QString filePath = dir.filePath( fileNumStr + ".wav" );
+
+        SNDFILE* handle = sf_open( filePath.toUtf8().data(), SFM_WRITE, &sfInfo );
+
+        if ( handle != NULL )
+        {
+            const int numFrames = sampleBuffer->getNumFrames();
+            int numFramesToWrite = 0;
+            int startFrame = 0;
+            int numSamplesWritten = 0;
+
+            Array<float> tempBuffer;
+            tempBuffer.resize( hopSize * numChans );
+
+            float* sampleData = NULL;
+
+            do
+            {
+                numFramesToWrite = numFrames - startFrame >= hopSize ? hopSize : numFrames - startFrame;
+
+                // Interleave sample data
+                for ( int chanNum = 0; chanNum < numChans; ++chanNum )
+                {
+                    sampleData = sampleBuffer->getSampleData( chanNum, startFrame );
+
+                    for ( int frameNum = 0; frameNum < numFramesToWrite; ++frameNum )
+                    {
+                        tempBuffer.set( numChans * frameNum + chanNum,  // Index
+                                        sampleData[ frameNum ] );       // Value
+                    }
+                }
+
+                // Write sample data to file
+                numSamplesWritten = sf_write_float( handle, tempBuffer.getRawDataPointer(), numFramesToWrite * numChans );
+
+                startFrame += hopSize;
+
+                // If there was a write error
+                if ( numSamplesWritten != numFramesToWrite * numChans)
+                {
+                    QString samplesToWriteStr;
+                    samplesToWriteStr.setNum( numFramesToWrite * numChans );
+
+                    QString samplesWrittenStr;
+                    samplesWrittenStr.setNum( numSamplesWritten );
+
+                    sErrorTitle = tr("Error while writing file") + fileNumStr + ".wav";
+                    sErrorInfo = tr("no. of samples to write: ") + samplesToWriteStr +
+                                 tr("no. of samples written: ") + samplesWrittenStr;
+
+                    isSuccessful = false;
+                }
+            }
+            while ( numFramesToWrite == hopSize && isSuccessful );
+
+            sf_write_sync( handle );
+            sf_close( handle );
+        }
+        else
+        {
+            sErrorTitle = tr("Couldn't open file for writing: ") + fileNumStr + ".wav";
+            sErrorInfo = sf_strerror( NULL );
+            isSuccessful = false;
+        }
+
+        fileNum++;
+
+        // If a write error has occurred break out of the loop
+        if ( ! isSuccessful )
+            break;
+    }
+
+    return isSuccessful;
 }
 
 

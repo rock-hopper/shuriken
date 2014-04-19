@@ -37,6 +37,11 @@ public:
 
     SharedSampleBuffer getSampleData( const QString filePath );
     SharedSampleHeader getSampleHeader( const QString filePath );
+
+    bool saveAudioFiles( const QString dirPath,
+                         const QList<SharedSampleBuffer> sampleBufferList,
+                         const SharedSampleHeader sampleHeader );
+
     QString getLastErrorTitle() const   { return sErrorTitle; }
     QString getLastErrorInfo() const    { return sErrorInfo; }
 

@@ -581,8 +581,7 @@ FORMS += src/mainwindow.ui \
     src/audiosetupdialog.ui
 INCLUDEPATH += src \
     src/SndLibShuriken \
-    src/JuceLibraryCode \
-    usr/include/aubio
+    src/JuceLibraryCode
 LIBS += -Llib \
     -lsndlib_shuriken \
     -laubio \

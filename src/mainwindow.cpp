@@ -27,7 +27,7 @@
 #include <aubio/aubio.h>
 #include "commands.h"
 #include "globals.h"
-//#include <QDebug>
+#include <QDebug>
 
 
 //==================================================================================================
@@ -241,6 +241,7 @@ QList<int> MainWindow::getAmendedSlicePointFrameNumList()
 void MainWindow::showWarningBox( const QString text, const QString infoText )
 {
     QMessageBox msgBox;
+    msgBox.setWindowTitle( "Shuriken Beat Slicer" );
     msgBox.setIcon( QMessageBox::Warning );
     msgBox.setText( text );
     msgBox.setInformativeText( infoText );
@@ -524,7 +525,83 @@ void MainWindow::on_actionOpen_Project_triggered()
 
 void MainWindow::on_actionSave_Project_triggered()
 {
+    const QString filePath = QFileDialog::getSaveFileName( this, tr("Save Project"), mLastOpenedDir,
+                                                     tr("Shuriken Project (*.*)") );
 
+    if ( ! filePath.isEmpty() )
+    {
+        const QFileInfo fileInfo( filePath );
+        const QString dirName = fileInfo.fileName();
+        const QDir parentDir = fileInfo.absoluteDir();
+        bool isOkToSave = true;
+
+        if ( parentDir.exists( dirName ) )
+        {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle( "Shuriken Beat Slicer" );
+            msgBox.setIcon( QMessageBox::Question );
+            msgBox.setText( "The directory \"" + dirName + "\"" + " already exists" );
+            msgBox.setInformativeText( "Do you want to overwrite the contents of "+ dirName +"?" );
+            msgBox.setStandardButtons( QMessageBox::Ok | QMessageBox::Cancel );
+            msgBox.setDefaultButton( QMessageBox::Ok );
+            const int buttonFlag = msgBox.exec();
+
+            if ( buttonFlag == QMessageBox::Ok )
+            {
+                QDir saveDir( filePath );
+                bool isSuccessful;
+
+                QStringList nameFilters;
+                nameFilters << "*.wav" << "*.xml";
+
+                foreach ( QString dirEntry, saveDir.entryList( nameFilters ) )
+                {
+                    isSuccessful = saveDir.remove( dirEntry );
+
+                    if ( ! isSuccessful )
+                        isOkToSave = false;
+                }
+            }
+            else
+            {
+                isOkToSave = false;
+            }
+        }
+        else
+        {
+            isOkToSave = parentDir.mkdir( fileInfo.fileName() );
+        }
+
+        if ( isOkToSave )
+        {
+            bool isSuccessful;
+
+            QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+            if ( mSlicedSampleBuffers.isEmpty() )
+            {
+                QList<SharedSampleBuffer> sampleBufferList;
+                sampleBufferList << mCurrentSampleBuffer;
+
+                isSuccessful = mFileHandler.saveAudioFiles( filePath, sampleBufferList, mCurrentSampleHeader );
+            }
+            else
+            {
+                isSuccessful = mFileHandler.saveAudioFiles( filePath, mSlicedSampleBuffers, mCurrentSampleHeader );
+            }
+
+            QApplication::restoreOverrideCursor();
+
+            if ( ! isSuccessful )
+                showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+        }
+        else
+        {
+            showWarningBox( tr("Could not save project!"),
+                            tr("Failed to create directory ") + "\"" + dirName + "\"" +
+                            tr(" in ") + parentDir.path() );
+        }
+    }
 }
 
 
