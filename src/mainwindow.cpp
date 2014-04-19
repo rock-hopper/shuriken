@@ -421,7 +421,7 @@ void MainWindow::fillAubioInputBuffer( fvec_t* inputBuffer, const SharedSampleBu
     for ( int chanNum = 0; chanNum < numChans; chanNum++ )
     {
         const float* sampleData = sampleBuffer->getSampleData( chanNum, sampleOffset );
-        const int numFramesToAdd = ( sampleOffset + hopSize <= numFrames ? hopSize : numFrames - sampleOffset - 1 );
+        const int numFramesToAdd = ( sampleOffset + hopSize <= numFrames ? hopSize : numFrames - sampleOffset );
         FloatVectorOperations::addWithMultiply( inputBuffer->data, sampleData, multiplier, numFramesToAdd );
     }
 }
