@@ -35,7 +35,9 @@
 
 MainWindow::MainWindow( QWidget* parent ) :
     QMainWindow( parent ),
-    mUI( new Ui::MainWindow )
+    mUI( new Ui::MainWindow ),
+    mLastOpenedDir( QDir::homePath() ),
+    mSoundTouchBufferSize( 512 )
 {
     // Set up user interface
     mUI->setupUi( this );
@@ -146,9 +148,6 @@ MainWindow::MainWindow( QWidget* parent ) :
     {
         showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
     }
-
-
-    mLastOpenedDir = QDir::homePath();
 }
 
 
@@ -231,6 +230,83 @@ QList<int> MainWindow::getAmendedSlicePointFrameNumList()
     }
 
     return amendedSlicePointList;
+}
+
+
+
+void MainWindow::setUpSampler( const int numChans )
+{
+    if ( mIsAudioInitialised )
+    {
+        mSoundTouchAudioSource = new SoundTouchAudioSource( mSamplerAudioSource,
+                                                            false,                  // Don't delete source when deleted
+                                                            mSoundTouchBufferSize,
+                                                            numChans );
+        mAudioSourcePlayer.setSource( mSoundTouchAudioSource );
+        mDeviceManager.addAudioCallback( &mAudioSourcePlayer );
+        mDeviceManager.addMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
+    }
+}
+
+
+
+void MainWindow::tearDownSampler()
+{
+    if ( mIsAudioInitialised )
+    {
+        mAudioSourcePlayer.setSource( NULL );
+        mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
+        mDeviceManager.removeMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
+        mSamplerAudioSource->clearAllSamples();
+    }
+}
+
+
+
+void MainWindow::enableUI()
+{
+    mUI->doubleSpinBox_OriginalBPM->setEnabled( true );
+    mUI->doubleSpinBox_NewBPM->setEnabled( true );
+    mUI->pushButton_CalcBPM->setEnabled( true );
+    mUI->pushButton_FindOnsets->setEnabled( true );
+    mUI->pushButton_FindBeats->setEnabled( true );
+
+    if ( mIsAudioInitialised )
+    {
+        mUI->pushButton_Play->setEnabled( true );
+        mUI->pushButton_Stop->setEnabled( true );
+    }
+
+    mUI->actionSave_Project->setEnabled( true );
+    mUI->actionClose_Project->setEnabled( true );
+    mUI->actionAdd_Slice_Point->setEnabled( true );
+    mUI->actionDelete->setEnabled( true );
+    mUI->actionZoom_Original->setEnabled( true );
+    mUI->actionZoom_In->setEnabled( true );
+}
+
+
+
+void MainWindow::disableUI()
+{
+    mUI->doubleSpinBox_OriginalBPM->setValue( 0.0 );
+    mUI->doubleSpinBox_OriginalBPM->setEnabled( false );
+    mUI->doubleSpinBox_NewBPM->setValue( 0.0 );
+    mUI->doubleSpinBox_NewBPM->setEnabled( false );
+    mUI->pushButton_CalcBPM->setEnabled( false );
+    mUI->pushButton_Slice->setEnabled( false );
+    mUI->pushButton_FindOnsets->setEnabled( false );
+    mUI->pushButton_FindBeats->setEnabled( false );
+    mUI->pushButton_Play->setEnabled( false );
+    mUI->pushButton_Stop->setEnabled( false );
+
+    mUI->actionSave_Project->setEnabled( false );
+    mUI->actionClose_Project->setEnabled( false );
+    mUI->actionAdd_Slice_Point->setEnabled( false );
+    mUI->actionDelete->setEnabled( false );
+    mUI->actionZoom_Original->setEnabled( false );
+    mUI->actionZoom_Out->setEnabled( false );
+    mUI->actionZoom_In->setEnabled( false );
 }
 
 
@@ -518,7 +594,141 @@ void MainWindow::disableZoomOut()
 
 void MainWindow::on_actionOpen_Project_triggered()
 {
+    const QString filePath = QFileDialog::getOpenFileName( this, tr("Open Project"), mLastOpenedDir,
+                                                           tr("Shuriken Project (shuriken.xml)") );
 
+    // If user didn't click "Cancel"
+    if ( ! filePath.isEmpty() )
+    {
+        QFileInfo projFileInfo( filePath );
+        QDir projectDir = projFileInfo.absoluteDir();
+
+        ScopedPointer<XmlElement> docElement;
+        docElement = XmlDocument::parse( File( filePath.toUtf8().data() ) );
+
+        // If the xml file was successfully read
+        if ( docElement.get() != NULL )
+        {
+            // If the main document element has a valid "project" tag
+            if ( docElement->hasTagName("project") )
+            {
+                QString projectName = docElement->getStringAttribute( "name" ).toRawUTF8();
+                QStringList audioFileNames;
+
+                QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+                forEachXmlChildElement( *docElement, elem )
+                {
+                    if ( elem->hasTagName( "sample" ) )
+                    {
+                        audioFileNames << elem->getStringAttribute( "filename" ).toRawUTF8();
+                    }
+                }
+
+                if ( ! audioFileNames.isEmpty() )
+                {
+                    if ( audioFileNames.size() == 1 )
+                    {
+                        const QString audioFilePath = projectDir.absoluteFilePath( audioFileNames.first() );
+                        SharedSampleBuffer sampleBuffer = mFileHandler.getSampleData( audioFilePath );
+                        SharedSampleHeader sampleHeader = mFileHandler.getSampleHeader( audioFilePath );
+
+                        if ( sampleBuffer.isNull() || sampleHeader.isNull() )
+                        {
+                            QApplication::restoreOverrideCursor();
+                            showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+                        }
+                        else
+                        {
+                            on_actionClose_Project_triggered();
+
+                            mCurrentSampleBuffer = sampleBuffer;
+                            mCurrentSampleHeader = sampleHeader;
+
+                            mUI->waveGraphicsView->createWaveformItem( sampleBuffer );
+
+                            setUpSampler( sampleBuffer->getNumChannels() );
+                            mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
+
+                            enableUI();
+
+                            mUI->statusBar->showMessage( tr("Project: ") + projectName );
+
+                            QApplication::restoreOverrideCursor();
+                        }
+                    }
+                    else // audioFileNames.size() > 1
+                    {
+                        on_actionClose_Project_triggered();
+
+                        SharedSampleBuffer sampleBuffer;
+                        SharedSampleHeader sampleHeader;
+                        QString audioFilePath;
+                        bool isSuccessful = true;
+
+                        foreach ( QString fileName, audioFileNames )
+                        {
+                            audioFilePath = projectDir.absoluteFilePath( fileName );
+                            sampleBuffer = mFileHandler.getSampleData( audioFilePath );
+
+                            if ( sampleBuffer.isNull() )
+                            {
+                                isSuccessful = false;
+                                break;
+                            }
+                            else
+                            {
+                                mSlicedSampleBuffers << sampleBuffer;
+                            }
+                        }
+
+                        sampleHeader = mFileHandler.getSampleHeader( audioFilePath );
+
+                        if ( sampleHeader.isNull() )
+                        {
+                            isSuccessful = false;
+                        }
+
+                        if ( isSuccessful )
+                        {
+                            mUI->waveGraphicsView->createWaveformItems( mSlicedSampleBuffers );
+
+                            setUpSampler( sampleHeader->numChans );
+                            mSamplerAudioSource->setSamples( mSlicedSampleBuffers, sampleHeader->sampleRate );
+
+                            enableUI();
+                            mUI->actionAdd_Slice_Point->setEnabled( false );
+                            mUI->pushButton_FindBeats->setEnabled( false );
+                            mUI->pushButton_FindOnsets->setEnabled( false );
+
+                            mUI->statusBar->showMessage( tr("Project: ") + projectName );
+
+                            QApplication::restoreOverrideCursor();
+                        }
+                        else
+                        {
+                            QApplication::restoreOverrideCursor();
+                            mSlicedSampleBuffers.clear();
+                            showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+                        }
+                    }
+                }
+                else // The project file doesn't contain any "sample" elements
+                {
+                    QApplication::restoreOverrideCursor();
+                    showWarningBox( tr("Couldn't open project ") + projectName, tr("The project file is invalid") );
+                }
+            }
+            else // The project file doesn't have a valid "project" tag
+            {
+                showWarningBox( tr("Couldn't open project!"), tr("The project file is invalid") );
+            }
+        }
+        else // The file couldn't be read
+        {
+            showWarningBox( tr("Couldn't open project!"), tr("The project file is unreadable") );
+        }
+    }
 }
 
 
@@ -528,6 +738,7 @@ void MainWindow::on_actionSave_Project_triggered()
     const QString filePath = QFileDialog::getSaveFileName( this, tr("Save Project"), mLastOpenedDir,
                                                      tr("Shuriken Project (*.*)") );
 
+    // If user didn't click "Cancel"
     if ( ! filePath.isEmpty() )
     {
         QDir projectDir( filePath );
@@ -640,39 +851,11 @@ void MainWindow::on_actionClose_Project_triggered()
     mSlicedSampleBuffers.clear();
     mCurrentSampleBuffer.clear();
     mCurrentSampleHeader.clear();
-
-    if ( mIsAudioInitialised )
-    {
-        mAudioSourcePlayer.setSource( NULL );
-        mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
-        mDeviceManager.removeMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
-        mSamplerAudioSource->clearAllSamples();
-
-        mUI->pushButton_Play->setEnabled( false );
-        mUI->pushButton_Stop->setEnabled( false );
-    }
+    tearDownSampler();
 
     mUI->waveGraphicsView->clearAll();
-
-    mUI->doubleSpinBox_OriginalBPM->setValue( 0.0 );
-    mUI->doubleSpinBox_OriginalBPM->setEnabled( false );
-    mUI->doubleSpinBox_NewBPM->setValue( 0.0 );
-    mUI->doubleSpinBox_NewBPM->setEnabled( false );
-    mUI->pushButton_CalcBPM->setEnabled( false );
-    mUI->pushButton_Slice->setEnabled( false );
-    mUI->pushButton_FindOnsets->setEnabled( false );
-    mUI->pushButton_FindBeats->setEnabled( false );
-
-    mUI->actionSave_Project->setEnabled( false );
-    mUI->actionClose_Project->setEnabled( false );
-    mUI->actionAdd_Slice_Point->setEnabled( false );
-    mUI->actionDelete->setEnabled( false );
-
     on_actionZoom_Original_triggered();
-    mUI->actionZoom_Original->setEnabled( false );
-    mUI->actionZoom_Out->setEnabled( false );
-    mUI->actionZoom_In->setEnabled( false );
-
+    disableUI();
     mUI->statusBar->clearMessage();
 
     mUndoStack.clear();
@@ -686,6 +869,7 @@ void MainWindow::on_actionImport_Audio_File_triggered()
     const QString filePath = QFileDialog::getOpenFileName( this, tr("Import Audio File"), mLastOpenedDir,
                                                            tr("All Files (*.*)") );
 
+    // If user didn't click "Cancel"
     if ( ! filePath.isEmpty() )
     {
         QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
@@ -711,25 +895,12 @@ void MainWindow::on_actionImport_Audio_File_triggered()
 
             mUI->waveGraphicsView->createWaveformItem( sampleBuffer );
 
-            if ( mIsAudioInitialised )
-            {
-                const bool deleteSourceWhenDeleted = false;
-                const int bufferSize = 512;
-                const int numChans = mCurrentSampleBuffer->getNumChannels();
+            setUpSampler( sampleBuffer->getNumChannels() );
+            mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
 
-                mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
-                mSoundTouchAudioSource = new SoundTouchAudioSource( mSamplerAudioSource,
-                                                                    deleteSourceWhenDeleted,
-                                                                    bufferSize,
-                                                                    numChans );
-                mAudioSourcePlayer.setSource( mSoundTouchAudioSource );
-                mDeviceManager.addAudioCallback( &mAudioSourcePlayer );
-                mDeviceManager.addMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
+            enableUI();
 
-                mUI->pushButton_Play->setEnabled( true );
-                mUI->pushButton_Stop->setEnabled( true );
-            }
-
+            // Set status bar message
             QString chanString = sampleHeader->numChans == 1 ? "Mono" : "Stereo";
 
             QString bitsString;
@@ -743,18 +914,6 @@ void MainWindow::on_actionImport_Audio_File_triggered()
             QString message = fileName + ", " + chanString + ", " + bitsString + ", " + rateString +
                               ", " + sampleHeader->format;
             mUI->statusBar->showMessage( message );
-
-            mUI->doubleSpinBox_OriginalBPM->setEnabled( true );
-            mUI->doubleSpinBox_NewBPM->setEnabled( true );
-            mUI->pushButton_CalcBPM->setEnabled( true );
-            mUI->pushButton_FindOnsets->setEnabled( true );
-            mUI->pushButton_FindBeats->setEnabled( true );
-            mUI->actionSave_Project->setEnabled( true );
-            mUI->actionClose_Project->setEnabled( true );
-            mUI->actionAdd_Slice_Point->setEnabled( true );
-            mUI->actionDelete->setEnabled( true );
-            mUI->actionZoom_Original->setEnabled( true );
-            mUI->actionZoom_In->setEnabled( true );
 
             QApplication::restoreOverrideCursor();
         }

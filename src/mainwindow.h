@@ -54,8 +54,6 @@ protected:
     void changeEvent( QEvent* e );
 
 private:
-    enum AubioRoutine { ONSET_DETECTION, BEAT_DETECTION };
-
     struct DetectionSettings
     {
         QByteArray detectionMethod;
@@ -65,7 +63,14 @@ private:
         uint_t sampleRate;
     };
 
-    Ui::MainWindow* mUI; // "Go to slot..." won't work if this is changed to ScopedPointer<Ui::MainWindow>
+    DetectionSettings getDetectionSettings();
+    QList<int> getAmendedSlicePointFrameNumList();
+    void setUpSampler( const int numChans );
+    void tearDownSampler();
+    void enableUI();
+    void disableUI();
+
+    Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
     ScopedPointer<AudioSetupDialog> mAudioSetupDialog;
 
@@ -85,11 +90,10 @@ private:
 
     QUndoStack mUndoStack;
 
-    DetectionSettings getDetectionSettings();
-    QList<int> getAmendedSlicePointFrameNumList();
+    int mSoundTouchBufferSize;
 
 private:
-    static const qreal MIN_INTER_ONSET_SECS = 0.03;
+    enum AubioRoutine { ONSET_DETECTION, BEAT_DETECTION };
 
     static void showWarningBox( const QString text, const QString infoText );
 
@@ -107,6 +111,8 @@ private:
     static void createSampleSlices( const SharedSampleBuffer inputBuffer,
                                     const QList<int> slicePointFrameNumList,
                                     QList<SharedSampleBuffer>& outputBufferList );
+
+    static const qreal MIN_INTER_ONSET_SECS = 0.03;
 
 private slots:
     void on_actionZoom_Original_triggered();
