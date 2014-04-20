@@ -570,6 +570,7 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
 
 void MainWindow::playSample( const int sampleNum, const int startFrame, const int endFrame )
 {
+    mSamplerAudioSource->stop();
     mSamplerAudioSource->playSample( sampleNum, startFrame, endFrame );
 }
 
