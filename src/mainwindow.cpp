@@ -660,12 +660,14 @@ void MainWindow::on_actionOpen_Project_triggered()
                     }
                     else // audioFileNames.size() > 1
                     {
-                        on_actionClose_Project_triggered();
-
+                        QString audioFilePath;
                         SharedSampleBuffer sampleBuffer;
                         SharedSampleHeader sampleHeader;
-                        QString audioFilePath;
+
+                        int totalNumFrames = 0;
                         bool isSuccessful = true;
+
+                        on_actionClose_Project_triggered();
 
                         foreach ( QString fileName, audioFileNames )
                         {
@@ -680,6 +682,7 @@ void MainWindow::on_actionOpen_Project_triggered()
                             else
                             {
                                 mSlicedSampleBuffers << sampleBuffer;
+                                totalNumFrames += sampleBuffer->getNumFrames();
                             }
                         }
 
@@ -692,21 +695,46 @@ void MainWindow::on_actionOpen_Project_triggered()
 
                         if ( isSuccessful )
                         {
-                            mUI->waveGraphicsView->createWaveformItems( mSlicedSampleBuffers );
+                            const int numChans = sampleHeader->numChans;
+                            try
+                            {
+                                mCurrentSampleBuffer = SharedSampleBuffer( new SampleBuffer( numChans, totalNumFrames ) );
 
-                            setUpSampler( sampleHeader->numChans );
-                            mSamplerAudioSource->setSamples( mSlicedSampleBuffers, sampleHeader->sampleRate );
+                                for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                                {
+                                    int startFrame = 0;
+                                    foreach ( SharedSampleBuffer sampleBuffer, mSlicedSampleBuffers )
+                                    {
+                                        const int numFrames = sampleBuffer->getNumFrames();
+                                        mCurrentSampleBuffer->copyFrom( chanNum, startFrame,
+                                                                        *sampleBuffer.data(), chanNum, 0, numFrames );
+                                        startFrame += numFrames;
+                                    }
+                                }
+                                mCurrentSampleHeader = sampleHeader;
 
-                            enableUI();
-                            mUI->actionAdd_Slice_Point->setEnabled( false );
-                            mUI->pushButton_FindBeats->setEnabled( false );
-                            mUI->pushButton_FindOnsets->setEnabled( false );
+                                mUI->waveGraphicsView->createWaveformItems( mSlicedSampleBuffers );
 
-                            mUI->statusBar->showMessage( tr("Project: ") + projectName );
+                                setUpSampler( sampleHeader->numChans );
+                                mSamplerAudioSource->setSamples( mSlicedSampleBuffers, sampleHeader->sampleRate );
 
-                            QApplication::restoreOverrideCursor();
+                                enableUI();
+                                mUI->actionAdd_Slice_Point->setEnabled( false );
+                                mUI->pushButton_FindBeats->setEnabled( false );
+                                mUI->pushButton_FindOnsets->setEnabled( false );
+
+                                mUI->statusBar->showMessage( tr("Project: ") + projectName );
+
+                                QApplication::restoreOverrideCursor();
+                            }
+                            catch ( std::bad_alloc& )
+                            {
+                                QApplication::restoreOverrideCursor();
+                                mSlicedSampleBuffers.clear();
+                                showWarningBox( tr("Out of memory!"), tr("Not enough memory to load project") );
+                            }
                         }
-                        else
+                        else // An error occurred while reading the audio files
                         {
                             QApplication::restoreOverrideCursor();
                             mSlicedSampleBuffers.clear();
