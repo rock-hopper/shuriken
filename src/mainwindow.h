@@ -86,7 +86,9 @@ private:
     AudioSourcePlayer mAudioSourcePlayer;
 
     bool mIsAudioInitialised;
-    QString mLastOpenedDir;
+
+    QString mLastOpenedImportDir;
+    QString mLastOpenedProjDir;
 
     QUndoStack mUndoStack;
 

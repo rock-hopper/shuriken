@@ -36,7 +36,8 @@
 MainWindow::MainWindow( QWidget* parent ) :
     QMainWindow( parent ),
     mUI( new Ui::MainWindow ),
-    mLastOpenedDir( QDir::homePath() ),
+    mLastOpenedImportDir( QDir::homePath() ),
+    mLastOpenedProjDir( QDir::homePath() ),
     mSoundTouchBufferSize( 512 )
 {
     // Set up user interface
@@ -595,7 +596,7 @@ void MainWindow::disableZoomOut()
 
 void MainWindow::on_actionOpen_Project_triggered()
 {
-    const QString filePath = QFileDialog::getOpenFileName( this, tr("Open Project"), mLastOpenedDir,
+    const QString filePath = QFileDialog::getOpenFileName( this, tr("Open Project"), mLastOpenedProjDir,
                                                            tr("Shuriken Project (shuriken.xml)") );
 
     // If user didn't click "Cancel"
@@ -603,6 +604,11 @@ void MainWindow::on_actionOpen_Project_triggered()
     {
         QFileInfo projFileInfo( filePath );
         QDir projectDir = projFileInfo.absoluteDir();
+
+        QDir parentDir( projectDir );
+        parentDir.cdUp();
+
+        mLastOpenedProjDir = parentDir.absolutePath();
 
         ScopedPointer<XmlElement> docElement;
         docElement = XmlDocument::parse( File( filePath.toUtf8().data() ) );
@@ -764,7 +770,7 @@ void MainWindow::on_actionOpen_Project_triggered()
 
 void MainWindow::on_actionSave_Project_triggered()
 {
-    const QString filePath = QFileDialog::getSaveFileName( this, tr("Save Project"), mLastOpenedDir,
+    const QString filePath = QFileDialog::getSaveFileName( this, tr("Save Project"), mLastOpenedProjDir,
                                                      tr("Shuriken Project (*.*)") );
 
     // If user didn't click "Cancel"
@@ -775,6 +781,8 @@ void MainWindow::on_actionSave_Project_triggered()
 
         QDir parentDir( projectDir );
         parentDir.cdUp();
+
+        mLastOpenedProjDir = parentDir.absolutePath();
 
         bool isOkToSave = true;
 
@@ -895,7 +903,7 @@ void MainWindow::on_actionClose_Project_triggered()
 void MainWindow::on_actionImport_Audio_File_triggered()
 {
     // Open audio file dialog
-    const QString filePath = QFileDialog::getOpenFileName( this, tr("Import Audio File"), mLastOpenedDir,
+    const QString filePath = QFileDialog::getOpenFileName( this, tr("Import Audio File"), mLastOpenedImportDir,
                                                            tr("All Files (*.*)") );
 
     // If user didn't click "Cancel"
@@ -905,7 +913,8 @@ void MainWindow::on_actionImport_Audio_File_triggered()
 
         const QFileInfo fileInfo( filePath );
         const QString fileName = fileInfo.fileName();
-        mLastOpenedDir = fileInfo.absolutePath();
+
+        mLastOpenedImportDir = fileInfo.absolutePath();
 
         SharedSampleBuffer sampleBuffer = mFileHandler.getSampleData( filePath );
         SharedSampleHeader sampleHeader = mFileHandler.getSampleHeader( filePath );
