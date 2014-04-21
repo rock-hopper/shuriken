@@ -622,6 +622,11 @@ void MainWindow::on_actionOpen_Project_triggered()
                 QString projectName = docElement->getStringAttribute( "name" ).toRawUTF8();
                 QStringList audioFileNames;
 
+                qreal originalBpm;
+                qreal newBpm;
+                bool isTimeStretchChecked;
+                bool isPitchCorrectionChecked;
+
                 QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
                 forEachXmlChildElement( *docElement, elem )
@@ -629,6 +634,22 @@ void MainWindow::on_actionOpen_Project_triggered()
                     if ( elem->hasTagName( "sample" ) )
                     {
                         audioFileNames << elem->getStringAttribute( "filename" ).toRawUTF8();
+                    }
+                    else if ( elem->hasTagName( "original_bpm" ) )
+                    {
+                        originalBpm = elem->getDoubleAttribute( "value" );
+                    }
+                    else if ( elem->hasTagName( "new_bpm" ) )
+                    {
+                        newBpm = elem->getDoubleAttribute( "value" );
+                    }
+                    else if ( elem->hasTagName( "time_stretch" ) )
+                    {
+                        isTimeStretchChecked = elem->getBoolAttribute( "checked" );
+                    }
+                    else if ( elem->hasTagName( "pitch_correction" ) )
+                    {
+                        isPitchCorrectionChecked = elem->getBoolAttribute( "checked" );
                     }
                 }
 
@@ -658,6 +679,14 @@ void MainWindow::on_actionOpen_Project_triggered()
                             mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
 
                             enableUI();
+
+                            if ( originalBpm > 0.0 )
+                                mUI->doubleSpinBox_OriginalBPM->setValue( originalBpm );
+                            if ( newBpm > 0.0 )
+                                mUI->doubleSpinBox_NewBPM->setValue( newBpm );
+
+                            mUI->checkBox_TimeStretch->setChecked( isTimeStretchChecked );
+                            mUI->checkBox_PitchCorrection->setChecked( isPitchCorrectionChecked );
 
                             mUI->statusBar->showMessage( tr("Project: ") + projectName );
 
@@ -728,6 +757,14 @@ void MainWindow::on_actionOpen_Project_triggered()
                                 mUI->actionAdd_Slice_Point->setEnabled( false );
                                 mUI->pushButton_FindBeats->setEnabled( false );
                                 mUI->pushButton_FindOnsets->setEnabled( false );
+
+                                if ( originalBpm > 0.0 )
+                                    mUI->doubleSpinBox_OriginalBPM->setValue( originalBpm );
+                                if ( newBpm > 0.0 )
+                                    mUI->doubleSpinBox_NewBPM->setValue( newBpm );
+
+                                mUI->checkBox_TimeStretch->setChecked( isTimeStretchChecked );
+                                mUI->checkBox_PitchCorrection->setChecked( isPitchCorrectionChecked );
 
                                 mUI->statusBar->showMessage( tr("Project: ") + projectName );
 
@@ -848,6 +885,22 @@ void MainWindow::on_actionSave_Project_triggered()
             {
                 XmlElement docElement( "project" );
                 docElement.setAttribute( "name", projDirName.toUtf8().data() );
+
+                XmlElement* origBpmElement = new XmlElement( "original_bpm" );
+                origBpmElement->setAttribute( "value", mUI->doubleSpinBox_OriginalBPM->value() );
+                docElement.addChildElement( origBpmElement );
+
+                XmlElement* newBpmElement = new XmlElement( "new_bpm" );
+                newBpmElement->setAttribute( "value", mUI->doubleSpinBox_NewBPM->value() );
+                docElement.addChildElement( newBpmElement );
+
+                XmlElement* timeStretchElement = new XmlElement( "time_stretch" );
+                timeStretchElement->setAttribute( "checked", mUI->checkBox_TimeStretch->isChecked() );
+                docElement.addChildElement( timeStretchElement );
+
+                XmlElement* pitchCorrectionElement = new XmlElement( "pitch_correction" );
+                pitchCorrectionElement->setAttribute( "checked", mUI->checkBox_PitchCorrection->isChecked() );
+                docElement.addChildElement( pitchCorrectionElement );
 
                 for ( int fileID = 0; fileID < numAudioFiles; ++fileID )
                 {
