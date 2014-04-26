@@ -29,7 +29,6 @@
 
 class SampleBuffer : public AudioSampleBuffer
 {
-
 public:
     SampleBuffer( int numChannels, int numFrames ) :
             AudioSampleBuffer( numChannels, numFrames )
@@ -67,11 +66,22 @@ struct SampleHeader
     QString format;
     int numChans;
     int bitsPerSample;
-    double sampleRate;
+    qreal sampleRate;
 };
 
 typedef QSharedPointer<SampleHeader> SharedSampleHeader;
 typedef ScopedPointer<SampleHeader> ScopedSampleHeader;
+
+
+
+struct SampleRange
+{
+    int startFrame;
+    int numFrames;
+};
+
+typedef QSharedPointer<SampleRange> SharedSampleRange;
+typedef ScopedPointer<SampleRange> ScopedSampleRange;
 
 
 #endif // SAMPLEBUFFER_H

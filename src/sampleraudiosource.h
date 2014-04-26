@@ -33,41 +33,46 @@ public:
     SamplerAudioSource();
 
     void setSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
-    bool setSamples( const QList<SharedSampleBuffer> sampleBufferList, const qreal sampleRate );
-    void clearAllSamples();
+    bool setSampleRanges( const QList<SharedSampleRange> sampleRangeList );
+
+    void clearSample();
+
+    void playRange( const SharedSampleRange sampleRange );
     void playAll();
-    void playSample( const int sampleNum, const int startFrame, const int endFrame );
+
     void stop();
 
     void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;
     void releaseResources() override {};
     void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill ) override;
 
-    void setNextReadPosition( int64 newPosition ) override;
-    int64 getNextReadPosition() const override                  { return mNextPlayPos; }
-    int64 getTotalLength() const override;
+    void setNextReadPosition( int64 newPosition ) override      {}
+    int64 getNextReadPosition() const override                  { return 0; }
+    int64 getTotalLength() const override                       { return mTotalLength; }
     bool isLooping() const override                             { return false; }
 
     MidiMessageCollector* getMidiMessageCollector()             { return &mMidiCollector; }
 
 private:
-    bool addNewSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
+    bool addNewSample( const SharedSampleBuffer sampleBuffer,
+                       const SharedSampleRange sampleRange,
+                       const qreal sampleRate );
+    void clearSampleRanges();
 
+    SharedSampleBuffer mSampleBuffer;
+    int mSampleRate;
     MidiMessageCollector mMidiCollector;
     Synthesiser mSynth;
     int mNextFreeKey;
     int mStartKey;
-//    CriticalSection mStartPosLock;
-    int64 volatile mNextPlayPos;
-    int64 mTotalNumFrames;
-
+    int64 mTotalLength;
     QList<int> mNoteOnFrameNumList;
     volatile bool mIsPlaySampleSeqEnabled;
     volatile int mNoteCounter;
     volatile int mFrameCounter;
 
 private:
-    static const int DEFAULT_KEY = 60; // MIDI key C4
+    static const int DEFAULT_KEY = 60;      // MIDI key C4
     static const int MAX_POLYPHONY = 128;
 };
 

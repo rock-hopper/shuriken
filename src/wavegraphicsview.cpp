@@ -31,8 +31,8 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) : QGraphicsView( parent )
 {
     // Set up view
 //    setViewport( new QGLWidget( QGLFormat(QGL::SampleBuffers) ) );
-    setViewport( new QWidget() );
 //    setViewportUpdateMode( QGraphicsView::FullViewportUpdate );
+    setViewport( new QWidget() );
     setRenderHint( QPainter::Antialiasing, false );
     setRenderHint( QPainter::HighQualityAntialiasing, false );
     setOptimizationFlags( DontSavePainterState | DontAdjustForAntialiasing );
@@ -45,49 +45,44 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) : QGraphicsView( parent )
 
 
 
-void WaveGraphicsView::createWaveformItem( const SharedSampleBuffer sampleBuffer )
+SharedWaveformItem WaveGraphicsView::createWaveformItem( const SharedSampleBuffer sampleBuffer )
 {
     mNumFrames = sampleBuffer->getNumFrames();
 
-    Q_ASSERT_X( mNumFrames != 0, "WaveGraphicsView::createWaveform()", "No. of frames cannot be zero" );
+    Q_ASSERT( mNumFrames > 0 );
 
-    const int orderPos = 0;
-
-    WaveformItem* waveformItem = new WaveformItem( sampleBuffer, orderPos, scene()->width(), scene()->height() );
+    WaveformItem* waveformItem = new WaveformItem( sampleBuffer, scene()->width(), scene()->height() );
     waveformItem->setPos( 0.0, 0.0 );
 
     mWaveformItemList.append( SharedWaveformItem( waveformItem ) );
-
-    QObject::connect( waveformItem, SIGNAL( rightMousePressed(int,QPointF) ),
-                      this, SLOT( determinePlayPos(int,QPointF) ) );
 
     QObject::connect( waveformItem, SIGNAL( maxDetailLevelReached() ),
                       this, SLOT( relayMaxDetailLevelReached() ) );
 
     scene()->addItem( waveformItem );
     scene()->update();
+
+    return mWaveformItemList.first();
 }
 
 
 
-QList<SharedWaveformItem> WaveGraphicsView::createWaveformItems( const QList<SharedSampleBuffer> sampleBufferList )
+QList<SharedWaveformItem> WaveGraphicsView::createWaveformItems( const SharedSampleBuffer sampleBuffer,
+                                                                 const QList<SharedSampleRange> sampleRangeList )
 {
-    int totalNumFrames = 0;
-
-    foreach ( SharedSampleBuffer sampleBuffer, sampleBufferList )
-    {
-        totalNumFrames += sampleBuffer->getNumFrames();
-    }
-
-    Q_ASSERT_X( totalNumFrames != 0, "WaveGraphicsView::createWaveformSlices", "division by zero" );
-
+    const int totalNumFrames = sampleBuffer->getNumFrames();
     qreal scenePosX = 0.0;
     int orderPos = 0;
 
-    foreach ( SharedSampleBuffer sampleBuffer, sampleBufferList )
+    foreach ( SharedSampleRange sampleRange, sampleRangeList )
     {
-        const qreal sliceWidth = sampleBuffer->getNumFrames() * ( scene()->width() / totalNumFrames );
-        WaveformItem* waveformItem = new WaveformItem( sampleBuffer, orderPos, sliceWidth, scene()->height() );
+        const qreal sliceWidth = sampleRange->numFrames * ( scene()->width() / totalNumFrames );
+
+        WaveformItem* waveformItem = new WaveformItem( sampleBuffer,
+                                                       sampleRange,
+                                                       orderPos,
+                                                       sliceWidth,
+                                                       scene()->height() );
         waveformItem->setPos( scenePosX, 0.0 );
 
         mWaveformItemList.append( SharedWaveformItem( waveformItem ) );
@@ -97,9 +92,6 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveformItems( const QList<Sha
 
         QObject::connect( waveformItem, SIGNAL( finishedMoving(int) ),
                           this, SLOT( slideWaveformItemIntoPlace(int) ) );
-
-        QObject::connect( waveformItem, SIGNAL( rightMousePressed(int,QPointF) ),
-                          this, SLOT( determinePlayPos(int,QPointF) ) );
 
         QObject::connect( waveformItem, SIGNAL( maxDetailLevelReached() ),
                           this, SLOT( relayMaxDetailLevelReached() ) );
@@ -484,40 +476,6 @@ void WaveGraphicsView::reorderSlicePoints( SlicePointItem* const movedItem )
     slicePointItem->setFrameNum( newFrameNum );
 
     emit slicePointOrderChanged( slicePointItem, oldFrameNum, newFrameNum );
-}
-
-
-
-void WaveGraphicsView::determinePlayPos( const int waveformItemOrderPos, const QPointF mouseScenePos )
-{
-    if ( ! mWaveformItemList.isEmpty() )
-    {
-        int startFrame = 0;
-        int endFrame = mWaveformItemList.at( waveformItemOrderPos )->getSampleBuffer()->getNumFrames();
-
-        // If slice points are present and the waveform has not yet been sliced...
-        if ( mWaveformItemList.size() == 1 && ! mSlicePointItemList.isEmpty() )
-        {
-            const int mousePosFrameNum = getFrameNum( mouseScenePos.x() );
-
-            const QList<int> slicePointFrameNumList = getSlicePointFrameNumList();
-
-            foreach (  int slicePointFrameNum, slicePointFrameNumList )
-            {
-                if ( slicePointFrameNum <= mousePosFrameNum )
-                {
-                    startFrame = slicePointFrameNum;
-                }
-                else
-                {
-                    endFrame = slicePointFrameNum;
-                    break;
-                }
-            }
-        }
-
-        emit rightMousePressed( waveformItemOrderPos, startFrame, endFrame );
-    }
 }
 
 

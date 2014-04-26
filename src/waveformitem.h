@@ -43,16 +43,21 @@ class WaveformItem : public QObject, public QGraphicsRectItem
 public:
     enum { Type = UserType + 1 };
 
-    WaveformItem( const SharedSampleBuffer sampleBuffer, const int orderPos,
-                  const qreal width, const qreal height, QGraphicsItem* parent = NULL );
+    WaveformItem( const SharedSampleBuffer sampleBuffer,
+                  const qreal width, const qreal height,
+                  QGraphicsItem* parent = NULL );
+
+    WaveformItem( const SharedSampleBuffer sampleBuffer,
+                  const SharedSampleRange sampleRange,
+                  const int orderPos,
+                  const qreal width, const qreal height,
+                  QGraphicsItem* parent = NULL );
 
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
     void setRect( const qreal x, const qreal y, const qreal width, const qreal height );
 
     int getOrderPos() const                             { return mCurrentOrderPos; }
     void setOrderPos( const int orderPos )              { mCurrentOrderPos = orderPos; }
-
-    const SharedSampleBuffer getSampleBuffer() const    { return mSampleBuffer; }
 
     int type() const                                    { return Type; }
 
@@ -63,6 +68,7 @@ protected:
     void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
 private:
+    void init();
     void setBackgroundGradient();
     void resetSampleBins();
     void findMinMaxSamples( const int startBin, const int endBin );
@@ -71,7 +77,8 @@ private:
     DetailLevel mDetailLevel;
 
     const SharedSampleBuffer mSampleBuffer;
-    QList<SharedPainterPath> mWavePathList;
+    const int mStartFrame;
+    const int mNumFrames;
     QPen mWavePen;
     QPen mCentreLinePen;
     int mCurrentOrderPos;
@@ -91,16 +98,18 @@ private:
     static const qreal DETAIL_LEVEL_HIGH_CUTOFF = 5.0;
 
 signals:
-    // As waveform items are moved their old and new order positions are emitted, allowing other
-    // waveform items to be reshuffled and their associated sample buffers to be reordered
+    // As waveform items are being dragged their old and new order positions are emitted,
+    // allowing other waveform items to be reshuffled
     void orderPosIsChanging( const int oldOrderPos, const int newOrderPos );
 
-    // When the user finishes moving the waveform item its start and destination order positions
-    // are emitted, allowing the positions to be recorded in the undo stack
+    // This signal is emitted when the user has finished moving the waveform item and its
+    // destination order position is different from its starting order position
     void orderPosHasChanged( const int startOrderPos, const int destOrderPos );
 
     void finishedMoving( const int orderPos );
-    void rightMousePressed( const int itemOrderPos, const QPointF mouseScenePos );
+    void rightMousePressed( const int waveformItemStartFrame,
+                            const int waveformItemNumFrames,
+                            const QPointF mouseScenePos );
     void maxDetailLevelReached();
 
 };

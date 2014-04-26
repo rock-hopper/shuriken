@@ -21,38 +21,46 @@
 */
 
 #include "waveformitem.h"
-//#include <QDebug>
+#include <QDebug>
 
 
 //==================================================================================================
 // Public:
 
-WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer, const int orderPos,
-                            const qreal width, const qreal height, QGraphicsItem* parent ) :
+WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer,
+                            const qreal width, const qreal height,
+                            QGraphicsItem* parent ) :
     QObject(),
     QGraphicsRectItem( 0.0, 0.0, width, height, parent ),
     mSampleBuffer( sampleBuffer ),
+    mStartFrame( 0 ),
+    mNumFrames( sampleBuffer->getNumFrames() ),
+    mCurrentOrderPos( 0 ),
+    mScaleFactor( NOT_SET ),
+    mFirstCalculatedBin( NOT_SET ),
+    mLastCalculatedBin( NOT_SET )
+{
+    init();
+}
+
+
+
+WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer,
+                            const SharedSampleRange sampleRange,
+                            const int orderPos,
+                            const qreal width, const qreal height,
+                            QGraphicsItem* parent ) :
+    QObject(),
+    QGraphicsRectItem( 0.0, 0.0, width, height, parent ),
+    mSampleBuffer( sampleBuffer ),
+    mStartFrame( sampleRange->startFrame ),
+    mNumFrames( sampleRange->numFrames ),
     mCurrentOrderPos( orderPos ),
     mScaleFactor( NOT_SET ),
     mFirstCalculatedBin( NOT_SET ),
     mLastCalculatedBin( NOT_SET )
 {
-    setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges | ItemUsesExtendedStyleOption );
-
-    setBackgroundGradient();
-    mWavePen = QPen( QColor(0, 0, 127, 127) );
-    mCentreLinePen = QPen( QColor(127, 127, 127, 127) );
-
-    // Don't draw rect border
-    setPen( QPen( QColor(0, 0, 0, 0) ) );
-
-    // Set up min/max sample "bins"
-    const int numChans = mSampleBuffer->getNumChannels();
-    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-    {
-        mMinSampleValues.add( new Array<float> );
-        mMaxSampleValues.add( new Array<float> );
-    }
+    init();
 }
 
 
@@ -108,14 +116,12 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
     }
     else // mDetailLevel == VERY_HIGH
     {
-        const int numFrames = mSampleBuffer->getNumFrames();
+        distanceBetweenFrames = rect().width() / mNumFrames;
 
-        distanceBetweenFrames = rect().width() / numFrames;
+        firstVisibleFrame = mStartFrame + (int) floor( option->exposedRect.left() / distanceBetweenFrames );
 
-        firstVisibleFrame = (int) floor( option->exposedRect.left() / distanceBetweenFrames );
-
-        lastVisibleFrame = qMin( (int) ceil( option->exposedRect.right() / distanceBetweenFrames ),
-                                 numFrames - 1 );
+        lastVisibleFrame = mStartFrame + qMin( (int) ceil( option->exposedRect.right() / distanceBetweenFrames ),
+                                               mNumFrames - 1 );
 
         numVisibleFrames = lastVisibleFrame - firstVisibleFrame + 1;
     }
@@ -187,13 +193,13 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
 
             for ( int frameCount = 0; frameCount < numVisibleFrames; frameCount++ )
             {
-                points[ frameCount ] = QPointF( ( firstVisibleFrame + frameCount ) * distanceBetweenFrames,
-                                                 -(*sampleData) );
+                points[ frameCount ] = QPointF( leftEdge + (frameCount * distanceBetweenFrames),
+                                                -(*sampleData) );
                 sampleData++;
             }
             painter->drawPolyline( points, numVisibleFrames );
         }
-        painter->translate( 0.0, 1.0 * numChans );
+        painter->translate( 0.0, numChans );
     }
     painter->restore();
 
@@ -258,7 +264,7 @@ void WaveformItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
     if ( event->button() == Qt::RightButton )
     {
-        emit rightMousePressed( mCurrentOrderPos, event->scenePos() );
+        emit rightMousePressed( mStartFrame, mNumFrames, event->scenePos() );
         event->ignore();
     }
     else
@@ -340,6 +346,28 @@ void WaveformItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 //==================================================================================================
 // Private:
 
+void WaveformItem::init()
+{
+    setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges | ItemUsesExtendedStyleOption );
+
+    setBackgroundGradient();
+    mWavePen = QPen( QColor(0, 0, 127, 127) );
+    mCentreLinePen = QPen( QColor(127, 127, 127, 127) );
+
+    // Don't draw rect border
+    setPen( QPen( QColor(0, 0, 0, 0) ) );
+
+    // Set up min/max sample "bins"
+    const int numChans = mSampleBuffer->getNumChannels();
+    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+    {
+        mMinSampleValues.add( new Array<float> );
+        mMaxSampleValues.add( new Array<float> );
+    }
+}
+
+
+
 void WaveformItem::setBackgroundGradient()
 {
     QLinearGradient gradient( 0.0, 0.0, rect().width(), 0.0 );
@@ -357,13 +385,12 @@ void WaveformItem::setBackgroundGradient()
 void WaveformItem::resetSampleBins()
 {
     const int numChans = mSampleBuffer->getNumChannels();
-    const int numFrames = mSampleBuffer->getNumFrames();
 
     mFirstCalculatedBin = NOT_SET;
     mLastCalculatedBin = NOT_SET;
 
     mNumBins = rect().width() * mScaleFactor;
-    mBinSize = (qreal) numFrames / ( rect().width() * mScaleFactor );
+    mBinSize = (qreal) mNumFrames / ( rect().width() * mScaleFactor );
 
     if ( mBinSize <= DETAIL_LEVEL_VERY_HIGH_CUTOFF )
     {
@@ -398,7 +425,7 @@ void WaveformItem::resetSampleBins()
 
 
 
-// Both "startBin" and "endBin" are inclusive
+// Both `startBin` and `endBin` are inclusive
 void WaveformItem::findMinMaxSamples( const int startBin, const int endBin )
 {
     const int numChans = mSampleBuffer->getNumChannels();
@@ -409,7 +436,11 @@ void WaveformItem::findMinMaxSamples( const int startBin, const int endBin )
     {
         for ( int binNum = startBin; binNum <= endBin; binNum++ )
         {
-            mSampleBuffer->findMinMax( chanNum, int( binNum * mBinSize ), (int) mBinSize, min, max);
+            mSampleBuffer->findMinMax( chanNum,
+                                       mStartFrame + int( binNum * mBinSize ),
+                                       (int) mBinSize,
+                                       min,
+                                       max);
 
             mMinSampleValues[ chanNum ]->set( binNum, min );
             mMaxSampleValues[ chanNum ]->set( binNum, max );

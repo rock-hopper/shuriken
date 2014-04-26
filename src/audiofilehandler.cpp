@@ -130,15 +130,12 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
 
 
 
-bool AudioFileHandler::saveAudioFiles( const QString dirPath,
-                                       const QList<SharedSampleBuffer> sampleBufferList,
-                                       const SharedSampleHeader sampleHeader )
+bool AudioFileHandler::saveAudioFile( const QString filePath,
+                                      const SharedSampleBuffer sampleBuffer,
+                                      const SharedSampleHeader sampleHeader )
 {
     const int hopSize = 8192;
     const int numChans = sampleHeader->numChans;
-
-    const QDir dir( dirPath );
-    int fileNum = 0;
 
     bool isSuccessful = true;
 
@@ -149,83 +146,69 @@ bool AudioFileHandler::saveAudioFiles( const QString dirPath,
     sfInfo.channels   = numChans;
     sfInfo.format     = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
 
-    Q_ASSERT_X( sf_format_check( &sfInfo ), "AudioFileHandler::saveAudioFiles", "sfInfo.format is not valid" );
+    Q_ASSERT( sf_format_check( &sfInfo ) );
 
-    foreach ( SharedSampleBuffer sampleBuffer, sampleBufferList )
+    SNDFILE* handle = sf_open( filePath.toUtf8().data(), SFM_WRITE, &sfInfo );
+
+    if ( handle != NULL )
     {
-        QString fileNumStr;
-        fileNumStr.setNum( fileNum );
+        const int numFrames = sampleBuffer->getNumFrames();
+        int numFramesToWrite = 0;
+        int startFrame = 0;
+        int numSamplesWritten = 0;
 
-        const QString filePath = dir.filePath( fileNumStr + ".wav" );
+        Array<float> tempBuffer;
+        tempBuffer.resize( hopSize * numChans );
 
-        SNDFILE* handle = sf_open( filePath.toUtf8().data(), SFM_WRITE, &sfInfo );
+        float* sampleData = NULL;
 
-        if ( handle != NULL )
+        do
         {
-            const int numFrames = sampleBuffer->getNumFrames();
-            int numFramesToWrite = 0;
-            int startFrame = 0;
-            int numSamplesWritten = 0;
+            numFramesToWrite = numFrames - startFrame >= hopSize ? hopSize : numFrames - startFrame;
 
-            Array<float> tempBuffer;
-            tempBuffer.resize( hopSize * numChans );
-
-            float* sampleData = NULL;
-
-            do
+            // Interleave sample data
+            for ( int chanNum = 0; chanNum < numChans; ++chanNum )
             {
-                numFramesToWrite = numFrames - startFrame >= hopSize ? hopSize : numFrames - startFrame;
+                sampleData = sampleBuffer->getSampleData( chanNum, startFrame );
 
-                // Interleave sample data
-                for ( int chanNum = 0; chanNum < numChans; ++chanNum )
+                for ( int frameNum = 0; frameNum < numFramesToWrite; ++frameNum )
                 {
-                    sampleData = sampleBuffer->getSampleData( chanNum, startFrame );
-
-                    for ( int frameNum = 0; frameNum < numFramesToWrite; ++frameNum )
-                    {
-                        tempBuffer.set( numChans * frameNum + chanNum,  // Index
-                                        sampleData[ frameNum ] );       // Value
-                    }
-                }
-
-                // Write sample data to file
-                numSamplesWritten = sf_write_float( handle, tempBuffer.getRawDataPointer(), numFramesToWrite * numChans );
-
-                startFrame += hopSize;
-
-                // If there was a write error
-                if ( numSamplesWritten != numFramesToWrite * numChans)
-                {
-                    QString samplesToWriteStr;
-                    samplesToWriteStr.setNum( numFramesToWrite * numChans );
-
-                    QString samplesWrittenStr;
-                    samplesWrittenStr.setNum( numSamplesWritten );
-
-                    sErrorTitle = tr("Error while writing file") + fileNumStr + ".wav";
-                    sErrorInfo = tr("no. of samples to write: ") + samplesToWriteStr +
-                                 tr("no. of samples written: ") + samplesWrittenStr;
-
-                    isSuccessful = false;
+                    tempBuffer.set( numChans * frameNum + chanNum,  // Index
+                                    sampleData[ frameNum ] );       // Value
                 }
             }
-            while ( numFramesToWrite == hopSize && isSuccessful );
 
-            sf_write_sync( handle );
-            sf_close( handle );
+            // Write sample data to file
+            numSamplesWritten = sf_write_float( handle, tempBuffer.getRawDataPointer(), numFramesToWrite * numChans );
+
+            startFrame += hopSize;
+
+            // If there was a write error
+            if ( numSamplesWritten != numFramesToWrite * numChans)
+            {
+                QString samplesToWriteStr;
+                samplesToWriteStr.setNum( numFramesToWrite * numChans );
+
+                QString samplesWrittenStr;
+                samplesWrittenStr.setNum( numSamplesWritten );
+
+                sErrorTitle = tr("Error while writing to audio file");
+                sErrorInfo = tr("no. of samples to write: ") + samplesToWriteStr + ", " +
+                             tr("no. of samples written: ") + samplesWrittenStr;
+
+                isSuccessful = false;
+            }
         }
-        else
-        {
-            sErrorTitle = tr("Couldn't open file for writing: ") + fileNumStr + ".wav";
-            sErrorInfo = sf_strerror( NULL );
-            isSuccessful = false;
-        }
+        while ( numFramesToWrite == hopSize && isSuccessful );
 
-        fileNum++;
-
-        // If a write error has occurred break out of the loop
-        if ( ! isSuccessful )
-            break;
+        sf_write_sync( handle );
+        sf_close( handle );
+    }
+    else
+    {
+        sErrorTitle = tr("Couldn't open file for writing");
+        sErrorInfo = sf_strerror( NULL );
+        isSuccessful = false;
     }
 
     return isSuccessful;

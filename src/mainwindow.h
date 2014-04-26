@@ -63,12 +63,12 @@ private:
         uint_t sampleRate;
     };
 
-    DetectionSettings getDetectionSettings();
-    QList<int> getAmendedSlicePointFrameNumList();
     void setUpSampler( const int numChans );
     void tearDownSampler();
     void enableUI();
     void disableUI();
+    DetectionSettings getDetectionSettings();
+    void calcPlayRanges();
 
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
@@ -79,7 +79,7 @@ private:
 
     SharedSampleBuffer mCurrentSampleBuffer;
     SharedSampleHeader mCurrentSampleHeader;
-    QList<SharedSampleBuffer> mSlicedSampleBuffers;
+    QList<SharedSampleRange> mSampleRangeList;
 
     ScopedPointer<SamplerAudioSource> mSamplerAudioSource;
     ScopedPointer<SoundTouchAudioSource> mSoundTouchAudioSource;
@@ -109,10 +109,6 @@ private:
     static void fillAubioInputBuffer( fvec_t* pInputBuffer,
                                       const SharedSampleBuffer sampleBuffer,
                                       const int sampleOffset );
-
-    static void createSampleSlices( const SharedSampleBuffer inputBuffer,
-                                    const QList<int> slicePointFrameNumList,
-                                    QList<SharedSampleBuffer>& outputBufferList );
 
     static const qreal MIN_INTER_ONSET_SECS = 0.03;
 
@@ -154,12 +150,14 @@ private slots:
     void on_actionSave_Project_triggered();
     void on_actionOpen_Project_triggered();
 
-    void reorderSampleBufferList( const int oldOrderPos, const int newOrderPos );
+    void reorderSampleRangeList( const int startOrderPos, const int destOrderPos );
     void recordWaveformItemMove( const int startOrderPos, const int destOrderPos );
     void recordSlicePointItemMove( const SharedSlicePointItem slicePointItem,
                                    const int oldFrameNum,
                                    const int newFrameNum );
-    void playSample( const int sampleNum, const int startFrame, const int endFrame );
+    void playSampleRange( const int waveformItemStartFrame,
+                          const int waveformItemNumFrames,
+                          const QPointF mouseScenePos );
     void disableZoomIn();
     void disableZoomOut();
 };

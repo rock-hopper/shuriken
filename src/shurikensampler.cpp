@@ -45,34 +45,23 @@
 //#include <QDebug>
 
 
-ShurikenSamplerSound::ShurikenSamplerSound( const String& soundName,
-                                            const SharedSampleBuffer sampleBuffer,
-                                            const double sampleRate,
+ShurikenSamplerSound::ShurikenSamplerSound( const SharedSampleBuffer sampleBuffer,
+                                            const SharedSampleRange sampleRange,
+                                            const qreal sampleRate,
                                             const BigInteger& notes,
                                             const int midiNoteForNormalPitch ) :
-    mName( soundName ),
+    mData( sampleBuffer ),
+    mOriginalStartFrame( sampleRange->startFrame ),
+    mOriginalEndFrame( sampleRange->startFrame + sampleRange->numFrames ),
     mSourceSampleRate( sampleRate ),
     mMidiNotes( notes ),
     mMidiRootNote( midiNoteForNormalPitch )
 {
-    if ( mSourceSampleRate <= 0 || sampleBuffer->getNumFrames() <= 0 )
-    {
-        mLength = 0;
-        mAttackSamples = 0;
-        mReleaseSamples = 0;
-    }
-    else
-    {
-        mLength = sampleBuffer->getNumFrames();
+    mAttackSamples = 0;
+    mReleaseSamples = 0;
 
-        mData = sampleBuffer;
-
-        mAttackSamples = 0;
-        mReleaseSamples = 0;
-    }
-
-    mStartFrame = 0;
-    mEndFrame = mLength;
+    mStartFrame = mOriginalStartFrame;
+    mEndFrame = mOriginalEndFrame;
 }
 
 
@@ -83,17 +72,17 @@ ShurikenSamplerSound::~ShurikenSamplerSound()
 
 
 
-void ShurikenSamplerSound::setPlaybackRange( const int startFrame, const int endFrame )
+void ShurikenSamplerSound::setTempSampleRange( const SharedSampleRange sampleRange )
 {
-    mStartFrame = startFrame;
-    mEndFrame = endFrame;
+    mStartFrame = sampleRange->startFrame;
+    mEndFrame = sampleRange->startFrame + sampleRange->numFrames;
 }
 
 
 
 bool ShurikenSamplerSound::appliesToNote( const int midiNoteNumber )
 {
-    return mMidiNotes [midiNoteNumber];
+    return mMidiNotes[ midiNoteNumber ];
 }
 
 
@@ -188,8 +177,8 @@ void ShurikenSamplerVoice::stopNote( const bool allowTailOff )
 
     if ( playingSound != NULL )
     {
-        playingSound->mStartFrame = 0;
-        playingSound->mEndFrame = playingSound->mLength;
+        playingSound->mStartFrame = playingSound->mOriginalStartFrame;
+        playingSound->mEndFrame = playingSound->mOriginalEndFrame;
     }
 }
 

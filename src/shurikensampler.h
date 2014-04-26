@@ -47,70 +47,40 @@
 #include "JuceHeader.h"
 #include "samplebuffer.h"
 
-//==============================================================================
-/**
-A subclass of SynthesiserSound that represents a sampled audio clip.
 
-To use it, create a Synthesiser, add some ShurikenSamplerVoice objects to it, then
-give it some SampledSound objects to play.
+// A subclass of SynthesiserSound that represents a sampled audio clip.
+// To use it, create a Synthesiser, add some ShurikenSamplerVoice objects to it, then
+// give it some ShurikenSamplerSound objects to play.
 
-@see SamplerVoice, Synthesiser, SynthesiserSound
-*/
 class ShurikenSamplerSound : public SynthesiserSound
 {
 public:
-    //==============================================================================
-    /** Creates a sampled sound from an audio reader.
+    ShurikenSamplerSound( const SharedSampleBuffer sampleBuffer,
+                          const SharedSampleRange sampleRange,
+                          const qreal sampleRate,
+                          const BigInteger& midiNotes,
+                          const int midiNoteForNormalPitch );
 
-This will attempt to load the audio from the source into memory and store
-it in this object.
-
-@param name a name for the sample
-@param sampleBuffer this object can be safely deleted by the
-caller after this constructor returns
-@param midiNotes the set of midi keys that this sound should be played on. This
-is used by the SynthesiserSound::appliesToNote() method
-@param midiNoteForNormalPitch the midi note at which the sample should be played
-with its natural rate. All other notes will be pitched
-up or down relative to this one
-*/
-    ShurikenSamplerSound( const String& name,
-                  const SharedSampleBuffer sampleBuffer,
-                  const double sampleRate,
-                  const BigInteger& midiNotes,
-                  int midiNoteForNormalPitch );
-
-    /** Destructor. */
     ~ShurikenSamplerSound();
 
-    //==============================================================================
-    /** Returns the sample's name */
-    const String& getName() const noexcept { return mName; }
+    SharedSampleBuffer getAudioData() const     { return mData; }
 
-    /** Returns the audio sample data.
-This could return nullptr if there was a problem loading the data.
-*/
-    SharedSampleBuffer getAudioData() const noexcept { return mData; }
+    // Set temporary sample range; lasts only for duration of note
+    void setTempSampleRange( const SharedSampleRange sampleRange );
 
-    // startFrame inclusive, endFrame exclusive
-    void setPlaybackRange( const int startFrame, const int endFrame );
-
-
-    //==============================================================================
     bool appliesToNote( const int midiNoteNumber ) override;
     bool appliesToChannel( const int midiChannel ) override;
 
 
 private:
-    //==============================================================================
     friend class ShurikenSamplerVoice;
 
-    String mName;
-    SharedSampleBuffer mData;
-    double mSourceSampleRate;
+    const SharedSampleBuffer mData;
+    const int mOriginalStartFrame, mOriginalEndFrame;
+    const qreal mSourceSampleRate;
     BigInteger mMidiNotes;
-    int mLength, mAttackSamples, mReleaseSamples;
     int mMidiRootNote;
+    int mAttackSamples, mReleaseSamples;
 
     volatile int mStartFrame, mEndFrame;
 
@@ -118,26 +88,17 @@ private:
 };
 
 
-//==============================================================================
-/**
-A subclass of SynthesiserVoice that can play a ShurikenSamplerSound.
 
-To use it, create a Synthesiser, add some ShurikenSamplerVoice objects to it, then
-give it some SampledSound objects to play.
+// A subclass of SynthesiserVoice that can play a ShurikenSamplerSound.
+// To use it, create a Synthesiser, add some ShurikenSamplerVoice objects to it, then
+// give it some ShurikenSamplerSound objects to play.
 
-@see SamplerSound, Synthesiser, SynthesiserVoice
-*/
 class ShurikenSamplerVoice : public SynthesiserVoice
 {
 public:
-    //==============================================================================
-    /** Creates a ShurikenSamplerVoice. */
     ShurikenSamplerVoice();
-
-    /** Destructor. */
     ~ShurikenSamplerVoice();
 
-    //==============================================================================
     bool canPlaySound( SynthesiserSound* ) override;
 
     void startNote( int midiNoteNumber, float velocity, SynthesiserSound*, int pitchWheel ) override;
@@ -148,11 +109,9 @@ public:
 
     void renderNextBlock( AudioSampleBuffer&, int startSample, int numSamples ) override;
 
-
 private:
-    //==============================================================================
-    double mPitchRatio;
-    double mSourceSamplePosition;
+    qreal mPitchRatio;
+    qreal mSourceSamplePosition;
     float mLeftGain, mRightGain, mAttackReleaseLevel, mAttackDelta, mReleaseDelta;
     bool mIsInAttack, mIsInRelease;
 

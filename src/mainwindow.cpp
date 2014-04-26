@@ -97,9 +97,6 @@ MainWindow::MainWindow( QWidget* parent ) :
     QObject::connect( mUI->waveGraphicsView, SIGNAL( slicePointOrderChanged(SharedSlicePointItem,int,int) ),
                       this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int) ) );
 
-    QObject::connect( mUI->waveGraphicsView, SIGNAL( rightMousePressed(int,int,int) ),
-                      this, SLOT( playSample(int,int,int) ) );
-
     QObject::connect( mUI->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
                       this, SLOT( disableZoomOut() ) );
 
@@ -182,59 +179,6 @@ void MainWindow::changeEvent( QEvent* e )
 //==================================================================================================
 // Private:
 
-MainWindow::DetectionSettings MainWindow::getDetectionSettings()
-{
-    DetectionSettings settings;
-    int currentIndex;
-
-    // From aubio website: "Typical threshold values are within 0.001 and 0.900." Default is 0.3 in aubio-0.4.0
-    currentIndex = mUI->comboBox_DetectMethod->currentIndex();
-    settings.detectionMethod = mUI->comboBox_DetectMethod->itemData( currentIndex ).toString().toLocal8Bit();
-
-    settings.threshold = qreal( mUI->horizontalSlider_Threshold->value() ) / 1000.0;
-
-    currentIndex = mUI->comboBox_WindowSize->currentIndex();
-    settings.windowSize = (uint_t) mUI->comboBox_WindowSize->itemData( currentIndex ).toInt();
-
-    currentIndex = mUI->comboBox_HopSize->currentIndex();
-    const qreal percentage = mUI->comboBox_HopSize->itemData( currentIndex ).toReal();
-    settings.hopSize = (uint_t) ( settings.windowSize * ( percentage / 100.0 ) );
-
-    settings.sampleRate = (uint_t) mCurrentSampleHeader->sampleRate;
-
-    return settings;
-}
-
-
-
-QList<int> MainWindow::getAmendedSlicePointFrameNumList()
-{
-    const QList<int> slicePointFrameNumList = mUI->waveGraphicsView->getSlicePointFrameNumList();
-    const int numFrames = mCurrentSampleBuffer->getNumFrames();
-    const qreal sampleRate = mCurrentSampleHeader->sampleRate;
-    const int minNumFramesBetweenSlicePoints = (int) floor( sampleRate * MIN_INTER_ONSET_SECS );
-
-    QList<int> amendedSlicePointList;
-    int prevSlicePointFrameNum = 0;
-
-    foreach ( int slicePointFrameNum, slicePointFrameNumList )
-    {
-        if ( slicePointFrameNum > minNumFramesBetweenSlicePoints &&
-             slicePointFrameNum < numFrames - minNumFramesBetweenSlicePoints )
-        {
-            if ( slicePointFrameNum > prevSlicePointFrameNum + minNumFramesBetweenSlicePoints )
-            {
-                amendedSlicePointList.append( slicePointFrameNum );
-                prevSlicePointFrameNum = slicePointFrameNum;
-            }
-        }
-    }
-
-    return amendedSlicePointList;
-}
-
-
-
 void MainWindow::setUpSampler( const int numChans )
 {
     if ( mIsAudioInitialised )
@@ -258,7 +202,7 @@ void MainWindow::tearDownSampler()
         mAudioSourcePlayer.setSource( NULL );
         mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
         mDeviceManager.removeMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
-        mSamplerAudioSource->clearAllSamples();
+        mSamplerAudioSource->clearSample();
     }
 }
 
@@ -308,6 +252,76 @@ void MainWindow::disableUI()
     mUI->actionZoom_Original->setEnabled( false );
     mUI->actionZoom_Out->setEnabled( false );
     mUI->actionZoom_In->setEnabled( false );
+}
+
+
+
+MainWindow::DetectionSettings MainWindow::getDetectionSettings()
+{
+    DetectionSettings settings;
+    int currentIndex;
+
+    // From aubio website: "Typical threshold values are within 0.001 and 0.900." Default is 0.3 in aubio-0.4.0
+    currentIndex = mUI->comboBox_DetectMethod->currentIndex();
+    settings.detectionMethod = mUI->comboBox_DetectMethod->itemData( currentIndex ).toString().toLocal8Bit();
+
+    settings.threshold = qreal( mUI->horizontalSlider_Threshold->value() ) / 1000.0;
+
+    currentIndex = mUI->comboBox_WindowSize->currentIndex();
+    settings.windowSize = (uint_t) mUI->comboBox_WindowSize->itemData( currentIndex ).toInt();
+
+    currentIndex = mUI->comboBox_HopSize->currentIndex();
+    const qreal percentage = mUI->comboBox_HopSize->itemData( currentIndex ).toReal();
+    settings.hopSize = (uint_t) ( settings.windowSize * ( percentage / 100.0 ) );
+
+    settings.sampleRate = (uint_t) mCurrentSampleHeader->sampleRate;
+
+    return settings;
+}
+
+
+
+void MainWindow::calcPlayRanges()
+{
+    const QList<int> slicePointFrameNumList = mUI->waveGraphicsView->getSlicePointFrameNumList();
+    const int totalNumFrames = mCurrentSampleBuffer->getNumFrames();
+    const qreal sampleRate = mCurrentSampleHeader->sampleRate;
+    const int minFramesBetweenSlicePoints = (int) floor( sampleRate * MIN_INTER_ONSET_SECS );
+
+    QList<int> startFramesList;
+    int prevSlicePointFrameNum = 0;
+
+    foreach ( int slicePointFrameNum, slicePointFrameNumList )
+    {
+        if ( slicePointFrameNum > minFramesBetweenSlicePoints &&
+             slicePointFrameNum < totalNumFrames - minFramesBetweenSlicePoints )
+        {
+            if ( slicePointFrameNum > prevSlicePointFrameNum + minFramesBetweenSlicePoints )
+            {
+                startFramesList.append( slicePointFrameNum );
+                prevSlicePointFrameNum = slicePointFrameNum;
+            }
+        }
+    }
+
+    if ( startFramesList.first() != 0 )
+    {
+        startFramesList.prepend( 0 );
+    }
+
+    mSampleRangeList.clear();
+
+    for ( int i = 0; i < startFramesList.size(); ++i )
+    {
+        SharedSampleRange sampleRange( new SampleRange() );
+
+        sampleRange->startFrame = startFramesList.at( i );
+        sampleRange->numFrames  = i < startFramesList.size() - 1 ?
+                                  startFramesList.at( i + 1 ) - startFramesList.at( i ) :
+                                  totalNumFrames - startFramesList.at( i );
+
+        mSampleRangeList << sampleRange;
+    }
 }
 
 
@@ -505,48 +519,13 @@ void MainWindow::fillAubioInputBuffer( fvec_t* inputBuffer, const SharedSampleBu
 
 
 
-void MainWindow::createSampleSlices( const SharedSampleBuffer inputSampleBuffer,
-                                     const QList<int> slicePointFrameNumList,
-                                     QList<SharedSampleBuffer>& outputSampleBufferList )
-{
-    const int totalNumFrames = inputSampleBuffer->getNumFrames();
-    const int numChans = inputSampleBuffer->getNumChannels();
-    int prevSlicePointFrameNum = 0;
-
-    foreach ( int slicePointFrameNum, slicePointFrameNumList )
-    {
-        const int numFrames = slicePointFrameNum - prevSlicePointFrameNum;
-        SharedSampleBuffer sampleBuffer( new SampleBuffer( numChans, numFrames ) );
-
-        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-        {
-            sampleBuffer->copyFrom( chanNum, 0, *inputSampleBuffer.data(), chanNum, prevSlicePointFrameNum, numFrames );
-        }
-
-        outputSampleBufferList.append( sampleBuffer );
-        prevSlicePointFrameNum = slicePointFrameNum;
-    }
-
-    const int numFrames = totalNumFrames - prevSlicePointFrameNum;
-    SharedSampleBuffer sampleBuffer( new SampleBuffer( numChans, numFrames ) );
-
-    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-    {
-        sampleBuffer->copyFrom( chanNum, 0, *inputSampleBuffer.data(), chanNum, prevSlicePointFrameNum, numFrames );
-    }
-
-    outputSampleBufferList.append( sampleBuffer );
-}
-
-
-
 //==================================================================================================
 // Private Slots:
 
-void MainWindow::reorderSampleBufferList( const int oldOrderPos, const int newOrderPos )
+void MainWindow::reorderSampleRangeList( const int startOrderPos, const int destOrderPos )
 {
-    mSlicedSampleBuffers.move( oldOrderPos, newOrderPos );
-    mSamplerAudioSource->setSamples( mSlicedSampleBuffers, mCurrentSampleHeader->sampleRate );
+    mSampleRangeList.move( startOrderPos, destOrderPos );
+    mSamplerAudioSource->setSampleRanges( mSampleRangeList );
 }
 
 
@@ -569,10 +548,37 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
 
 
 
-void MainWindow::playSample( const int sampleNum, const int startFrame, const int endFrame )
+void MainWindow::playSampleRange( const int waveformItemStartFrame, const int waveformItemNumFrames, const QPointF mouseScenePos )
 {
-    mSamplerAudioSource->stop();
-    mSamplerAudioSource->playSample( sampleNum, startFrame, endFrame );
+    SharedSampleRange sampleRange( new SampleRange );
+    sampleRange->startFrame = waveformItemStartFrame;
+    sampleRange->numFrames = waveformItemNumFrames;
+    int endFrame = waveformItemStartFrame + waveformItemNumFrames;
+
+    const QList<int> slicePointFrameNumList = mUI->waveGraphicsView->getSlicePointFrameNumList();
+
+    // If slice points are present and the waveform has not yet been sliced...
+    if ( slicePointFrameNumList.size() > 0 && mSampleRangeList.isEmpty() )
+    {
+        const int mousePosFrameNum = mUI->waveGraphicsView->getFrameNum( mouseScenePos.x() );
+
+        foreach (  int slicePointFrameNum, slicePointFrameNumList )
+        {
+            if ( slicePointFrameNum <= mousePosFrameNum )
+            {
+                sampleRange->startFrame = slicePointFrameNum;
+            }
+            else
+            {
+                endFrame = slicePointFrameNum;
+                break;
+            }
+        }
+    }
+
+    sampleRange->numFrames = endFrame - sampleRange->startFrame;
+
+    mSamplerAudioSource->playRange( sampleRange );
 }
 
 
@@ -617,11 +623,10 @@ void MainWindow::on_actionOpen_Project_triggered()
         if ( docElement.get() != NULL )
         {
             // If the main document element has a valid "project" tag
-            if ( docElement->hasTagName("project") )
+            if ( docElement->hasTagName( "project" ) )
             {
                 QString projectName = docElement->getStringAttribute( "name" ).toRawUTF8();
-                QStringList audioFileNames;
-
+                QString audioFileName;
                 qreal originalBpm;
                 qreal newBpm;
                 bool isTimeStretchChecked;
@@ -629,11 +634,22 @@ void MainWindow::on_actionOpen_Project_triggered()
 
                 QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
+                on_actionClose_Project_triggered();
+
                 forEachXmlChildElement( *docElement, elem )
                 {
-                    if ( elem->hasTagName( "sample" ) )
+                    if ( elem->hasTagName( "sample_range" ) )
                     {
-                        audioFileNames << elem->getStringAttribute( "filename" ).toRawUTF8();
+                        SharedSampleRange sampleRange( new SampleRange() );
+
+                        sampleRange->startFrame = elem->getIntAttribute( "start_frame" );
+                        sampleRange->numFrames = elem->getIntAttribute( "num_frames" );
+
+                        mSampleRangeList << sampleRange;
+                    }
+                    else if ( elem->hasTagName( "sample" ) )
+                    {
+                        audioFileName = elem->getStringAttribute( "filename" ).toRawUTF8();
                     }
                     else if ( elem->hasTagName( "original_bpm" ) )
                     {
@@ -653,150 +669,91 @@ void MainWindow::on_actionOpen_Project_triggered()
                     }
                 }
 
-                if ( ! audioFileNames.isEmpty() )
+                if ( ! audioFileName.isEmpty() )
                 {
-                    if ( audioFileNames.size() == 1 )
+                    const QString audioFilePath = projectDir.absoluteFilePath( audioFileName );
+                    SharedSampleBuffer sampleBuffer = mFileHandler.getSampleData( audioFilePath );
+                    SharedSampleHeader sampleHeader = mFileHandler.getSampleHeader( audioFilePath );
+
+                    // If the audio file was loaded successfully
+                    if ( ! sampleBuffer.isNull() && ! sampleHeader.isNull() )
                     {
-                        const QString audioFilePath = projectDir.absoluteFilePath( audioFileNames.first() );
-                        SharedSampleBuffer sampleBuffer = mFileHandler.getSampleData( audioFilePath );
-                        SharedSampleHeader sampleHeader = mFileHandler.getSampleHeader( audioFilePath );
+                        mCurrentSampleBuffer = sampleBuffer;
+                        mCurrentSampleHeader = sampleHeader;
 
-                        if ( sampleBuffer.isNull() || sampleHeader.isNull() )
+                        // If no sample ranges are defined
+                        if ( mSampleRangeList.isEmpty() )
                         {
-                            QApplication::restoreOverrideCursor();
-                            showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
-                        }
-                        else
-                        {
-                            on_actionClose_Project_triggered();
+                            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveformItem( sampleBuffer );
 
-                            mCurrentSampleBuffer = sampleBuffer;
-                            mCurrentSampleHeader = sampleHeader;
-
-                            mUI->waveGraphicsView->createWaveformItem( sampleBuffer );
+                            QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
+                                              this, SLOT( playSampleRange(int,int,QPointF) ) );
 
                             setUpSampler( sampleBuffer->getNumChannels() );
                             mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
 
                             enableUI();
-
-                            if ( originalBpm > 0.0 )
-                                mUI->doubleSpinBox_OriginalBPM->setValue( originalBpm );
-                            if ( newBpm > 0.0 )
-                                mUI->doubleSpinBox_NewBPM->setValue( newBpm );
-
-                            mUI->checkBox_TimeStretch->setChecked( isTimeStretchChecked );
-                            mUI->checkBox_PitchCorrection->setChecked( isPitchCorrectionChecked );
-
-                            mUI->statusBar->showMessage( tr("Project: ") + projectName );
-
-                            QApplication::restoreOverrideCursor();
                         }
+                        else // Sample ranges are defined
+                        {
+                            const QList<SharedWaveformItem> waveformItemList =
+                                    mUI->waveGraphicsView->createWaveformItems( sampleBuffer, mSampleRangeList );
+
+                            foreach ( SharedWaveformItem item, waveformItemList )
+                            {
+                                QObject::connect( item.data(), SIGNAL( orderPosHasChanged(int,int) ),
+                                                  this, SLOT( recordWaveformItemMove(int,int) ) );
+
+                                QObject::connect( item.data(), SIGNAL( orderPosHasChanged(int,int) ),
+                                                  this, SLOT( reorderSampleRangeList(int,int) ) );
+
+                                QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
+                                                  this, SLOT( playSampleRange(int,int,QPointF) ) );
+                            }
+
+                            setUpSampler( sampleHeader->numChans );
+                            mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
+                            mSamplerAudioSource->setSampleRanges( mSampleRangeList );
+
+                            enableUI();
+                            mUI->actionAdd_Slice_Point->setEnabled( false );
+                            mUI->pushButton_FindBeats->setEnabled( false );
+                            mUI->pushButton_FindOnsets->setEnabled( false );
+                        }
+
+                        if ( originalBpm > 0.0 )
+                        {
+                            mUI->doubleSpinBox_OriginalBPM->setValue( originalBpm );
+                        }
+                        if ( newBpm > 0.0 )
+                        {
+                            mUI->doubleSpinBox_NewBPM->setValue( newBpm );
+                        }
+                        mUI->checkBox_TimeStretch->setChecked( isTimeStretchChecked );
+                        mUI->checkBox_PitchCorrection->setChecked( isPitchCorrectionChecked );
+
+                        mUI->statusBar->showMessage( tr("Project: ") + projectName );
+
+                        QApplication::restoreOverrideCursor();
                     }
-                    else // audioFileNames.size() > 1
+                    else // Error loading audio file
                     {
-                        QString audioFilePath;
-                        SharedSampleBuffer sampleBuffer;
-                        SharedSampleHeader sampleHeader;
-
-                        int totalNumFrames = 0;
-                        bool isSuccessful = true;
-
-                        on_actionClose_Project_triggered();
-
-                        foreach ( QString fileName, audioFileNames )
-                        {
-                            audioFilePath = projectDir.absoluteFilePath( fileName );
-                            sampleBuffer = mFileHandler.getSampleData( audioFilePath );
-
-                            if ( sampleBuffer.isNull() )
-                            {
-                                isSuccessful = false;
-                                break;
-                            }
-                            else
-                            {
-                                mSlicedSampleBuffers << sampleBuffer;
-                                totalNumFrames += sampleBuffer->getNumFrames();
-                            }
-                        }
-
-                        sampleHeader = mFileHandler.getSampleHeader( audioFilePath );
-
-                        if ( sampleHeader.isNull() )
-                        {
-                            isSuccessful = false;
-                        }
-
-                        if ( isSuccessful )
-                        {
-                            const int numChans = sampleHeader->numChans;
-                            try
-                            {
-                                mCurrentSampleBuffer = SharedSampleBuffer( new SampleBuffer( numChans, totalNumFrames ) );
-
-                                for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-                                {
-                                    int startFrame = 0;
-                                    foreach ( SharedSampleBuffer sampleBuffer, mSlicedSampleBuffers )
-                                    {
-                                        const int numFrames = sampleBuffer->getNumFrames();
-                                        mCurrentSampleBuffer->copyFrom( chanNum, startFrame,
-                                                                        *sampleBuffer.data(), chanNum, 0, numFrames );
-                                        startFrame += numFrames;
-                                    }
-                                }
-                                mCurrentSampleHeader = sampleHeader;
-
-                                mUI->waveGraphicsView->createWaveformItems( mSlicedSampleBuffers );
-
-                                setUpSampler( sampleHeader->numChans );
-                                mSamplerAudioSource->setSamples( mSlicedSampleBuffers, sampleHeader->sampleRate );
-
-                                enableUI();
-                                mUI->actionAdd_Slice_Point->setEnabled( false );
-                                mUI->pushButton_FindBeats->setEnabled( false );
-                                mUI->pushButton_FindOnsets->setEnabled( false );
-
-                                if ( originalBpm > 0.0 )
-                                    mUI->doubleSpinBox_OriginalBPM->setValue( originalBpm );
-                                if ( newBpm > 0.0 )
-                                    mUI->doubleSpinBox_NewBPM->setValue( newBpm );
-
-                                mUI->checkBox_TimeStretch->setChecked( isTimeStretchChecked );
-                                mUI->checkBox_PitchCorrection->setChecked( isPitchCorrectionChecked );
-
-                                mUI->statusBar->showMessage( tr("Project: ") + projectName );
-
-                                QApplication::restoreOverrideCursor();
-                            }
-                            catch ( std::bad_alloc& )
-                            {
-                                QApplication::restoreOverrideCursor();
-                                mSlicedSampleBuffers.clear();
-                                showWarningBox( tr("Out of memory!"), tr("Not enough memory to load project") );
-                            }
-                        }
-                        else // An error occurred while reading the audio files
-                        {
-                            QApplication::restoreOverrideCursor();
-                            mSlicedSampleBuffers.clear();
-                            showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
-                        }
+                        QApplication::restoreOverrideCursor();
+                        showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
                     }
                 }
-                else // The project file doesn't contain any "sample" elements
+                else // The xml file doesn't have a valid "sample" element
                 {
                     QApplication::restoreOverrideCursor();
                     showWarningBox( tr("Couldn't open project ") + projectName, tr("The project file is invalid") );
                 }
             }
-            else // The project file doesn't have a valid "project" tag
+            else // The xml file doesn't have a valid "project" tag
             {
                 showWarningBox( tr("Couldn't open project!"), tr("The project file is invalid") );
             }
         }
-        else // The file couldn't be read
+        else // The xml file couldn't be read
         {
             showWarningBox( tr("Couldn't open project!"), tr("The project file is unreadable") );
         }
@@ -807,13 +764,13 @@ void MainWindow::on_actionOpen_Project_triggered()
 
 void MainWindow::on_actionSave_Project_triggered()
 {
-    const QString filePath = QFileDialog::getSaveFileName( this, tr("Save Project"), mLastOpenedProjDir,
+    const QString dirPath = QFileDialog::getSaveFileName( this, tr("Save Project"), mLastOpenedProjDir,
                                                      tr("Shuriken Project (*.*)") );
 
     // If user didn't click "Cancel"
-    if ( ! filePath.isEmpty() )
+    if ( ! dirPath.isEmpty() )
     {
-        QDir projectDir( filePath );
+        QDir projectDir( dirPath );
         QString projDirName = projectDir.dirName();
 
         QDir parentDir( projectDir );
@@ -862,24 +819,12 @@ void MainWindow::on_actionSave_Project_triggered()
 
         if ( isOkToSave )
         {
+            const QString filePath = projectDir.absoluteFilePath( "audio.wav" );
             bool isSuccessful;
-            int numAudioFiles;
 
             QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-            if ( mSlicedSampleBuffers.isEmpty() )
-            {
-                QList<SharedSampleBuffer> sampleBufferList;
-                sampleBufferList << mCurrentSampleBuffer;
-
-                isSuccessful = mFileHandler.saveAudioFiles( filePath, sampleBufferList, mCurrentSampleHeader );
-                numAudioFiles = 1;
-            }
-            else
-            {
-                isSuccessful = mFileHandler.saveAudioFiles( filePath, mSlicedSampleBuffers, mCurrentSampleHeader );
-                numAudioFiles = mSlicedSampleBuffers.size();
-            }
+            isSuccessful = mFileHandler.saveAudioFile( filePath, mCurrentSampleBuffer, mCurrentSampleHeader );
 
             if ( isSuccessful )
             {
@@ -902,16 +847,19 @@ void MainWindow::on_actionSave_Project_triggered()
                 pitchCorrectionElement->setAttribute( "checked", mUI->checkBox_PitchCorrection->isChecked() );
                 docElement.addChildElement( pitchCorrectionElement );
 
-                for ( int fileID = 0; fileID < numAudioFiles; ++fileID )
+                XmlElement* sampleElement = new XmlElement( "sample" );
+                sampleElement->setAttribute( "filename", "audio.wav" );
+                docElement.addChildElement( sampleElement );
+
+                if ( ! mSampleRangeList.isEmpty() )
                 {
-                    String fileName( fileID );
-                    fileName += ".wav";
-
-                    XmlElement* sampleElement = new XmlElement( "sample" );
-                    sampleElement->setAttribute( "id", fileID );
-                    sampleElement->setAttribute( "filename", fileName );
-
-                    docElement.addChildElement( sampleElement );
+                    foreach ( SharedSampleRange sampleRange, mSampleRangeList )
+                    {
+                        XmlElement* rangeElement = new XmlElement( "sample_range" );
+                        rangeElement->setAttribute( "start_frame", sampleRange->startFrame );
+                        rangeElement->setAttribute( "num_frames", sampleRange->numFrames );
+                        docElement.addChildElement( rangeElement );
+                    }
                 }
 
                 File file( projectDir.absoluteFilePath( "shuriken.xml" ).toUtf8().data() );
@@ -920,7 +868,7 @@ void MainWindow::on_actionSave_Project_triggered()
 
                 QApplication::restoreOverrideCursor();
             }
-            else // An error occurred while writing the audio files
+            else // An error occurred while writing the audio file
             {
                 QApplication::restoreOverrideCursor();
                 showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
@@ -938,9 +886,9 @@ void MainWindow::on_actionSave_Project_triggered()
 
 void MainWindow::on_actionClose_Project_triggered()
 {
-    mSlicedSampleBuffers.clear();
     mCurrentSampleBuffer.clear();
     mCurrentSampleHeader.clear();
+    mSampleRangeList.clear();
     tearDownSampler();
 
     mUI->waveGraphicsView->clearAll();
@@ -984,7 +932,10 @@ void MainWindow::on_actionImport_Audio_File_triggered()
             mCurrentSampleBuffer = sampleBuffer;
             mCurrentSampleHeader = sampleHeader;
 
-            mUI->waveGraphicsView->createWaveformItem( sampleBuffer );
+            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveformItem( sampleBuffer );
+
+            QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
+                              this, SLOT( playSampleRange(int,int,QPointF) ) );
 
             setUpSampler( sampleBuffer->getNumChannels() );
             mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );

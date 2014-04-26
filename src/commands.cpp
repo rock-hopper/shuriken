@@ -200,12 +200,19 @@ void CreateSlicesCommand::undo()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    mMainWindow->mSlicedSampleBuffers.clear();
     mMainWindow->mSamplerAudioSource->setSample( mMainWindow->mCurrentSampleBuffer,
                                                  mMainWindow->mCurrentSampleHeader->sampleRate );
+    mMainWindow->mSampleRangeList.clear();
+
     mGraphicsView->clearWaveform();
-    mGraphicsView->createWaveformItem( mMainWindow->mCurrentSampleBuffer );
+
+    SharedWaveformItem item = mGraphicsView->createWaveformItem( mMainWindow->mCurrentSampleBuffer );
+
+    QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
+                      mMainWindow, SLOT( playSampleRange(int,int,QPointF) ) );
+
     mGraphicsView->showSlicePoints();
+
     mSliceButton->setEnabled( true );
     mAddSlicePointAction->setEnabled( true );
 
@@ -218,34 +225,29 @@ void CreateSlicesCommand::redo()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    const QList<int> slicePointFrameNumList = mMainWindow->getAmendedSlicePointFrameNumList();
+    mMainWindow->calcPlayRanges();
 
-    Q_ASSERT_X( slicePointFrameNumList.size() > 0, "CreateSlicesCommand::redo", "No sample slice points" );
+    Q_ASSERT( mMainWindow->mSampleRangeList.size() > 0 );
 
-    MainWindow::createSampleSlices( mMainWindow->mCurrentSampleBuffer,
-                                    slicePointFrameNumList,
-                                    mMainWindow->mSlicedSampleBuffers );
-
-    mMainWindow->mSamplerAudioSource->setSamples( mMainWindow->mSlicedSampleBuffers,
-                                                  mMainWindow->mCurrentSampleHeader->sampleRate );
+    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
 
     mGraphicsView->hideSlicePoints();
     mGraphicsView->clearWaveform();
 
     const QList<SharedWaveformItem> waveformItemList =
-            mGraphicsView->createWaveformItems( mMainWindow->mSlicedSampleBuffers );
+            mGraphicsView->createWaveformItems( mMainWindow->mCurrentSampleBuffer,
+                                                mMainWindow->mSampleRangeList );
 
     foreach ( SharedWaveformItem item, waveformItemList )
     {
-        // As waveform items are moved their old and new order positions are emitted,
-        // allowing their associated sample buffers to be reordered
-        QObject::connect( item.data(), SIGNAL( orderPosIsChanging(int,int) ),
-                          mMainWindow, SLOT( reorderSampleBufferList(int,int) ) );
-
-        // Every time a waveform item is moved its old and new order positions are stored in a
-        // new MoveWaveformItemCommand object, allowing the user to undo and redo moves
         QObject::connect( item.data(), SIGNAL( orderPosHasChanged(int,int) ),
                           mMainWindow, SLOT( recordWaveformItemMove(int,int) ) );
+
+        QObject::connect( item.data(), SIGNAL( orderPosHasChanged(int,int) ),
+                          mMainWindow, SLOT( reorderSampleRangeList(int,int) ) );
+
+        QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
+                          mMainWindow, SLOT( playSampleRange(int,int,QPointF) ) );
     }
 
     mSliceButton->setEnabled( false );

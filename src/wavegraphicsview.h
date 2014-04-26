@@ -41,8 +41,9 @@ class WaveGraphicsView : public QGraphicsView
 public:
     WaveGraphicsView( QWidget* parent = NULL );
 
-    void createWaveformItem( const SharedSampleBuffer sampleBuffer );
-    QList<SharedWaveformItem> createWaveformItems( const QList<SharedSampleBuffer> sampleBufferList );
+    SharedWaveformItem createWaveformItem( const SharedSampleBuffer sampleBuffer );
+    QList<SharedWaveformItem> createWaveformItems( const SharedSampleBuffer sampleBuffer,
+                                                   const QList<SharedSampleRange> sampleRangeList );
     void moveWaveformItem( const int oldOrderPos, const int newOrderPos );
 
     SharedSlicePointItem createSlicePoint( const int frameNum );
@@ -76,7 +77,6 @@ private:
 
 signals:
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );
-    void rightMousePressed( const int waveformItemOrderPos, const int startFrame, const int endFrame );
     void minDetailLevelReached();
     void maxDetailLevelReached();
 
@@ -84,7 +84,6 @@ private slots:
     void reorderWaveformItems( const int oldOrderPos, const int newOrderPos );
     void slideWaveformItemIntoPlace( const int orderPos );
     void reorderSlicePoints( SlicePointItem* const movedItem );
-    void determinePlayPos( const int waveformItemOrderPos, const QPointF mouseScenePos );
     void relayMaxDetailLevelReached();
 };
 
