@@ -51,10 +51,6 @@
 namespace drow {
 
 // Audio
-#include "audio/dRowAudio_AudioFilePlayer.cpp"
-#include "audio/dRowAudio_AudioFilePlayerExt.cpp"
-#include "audio/dRowAudio_AudioSampleBufferAudioFormat.cpp"
-
 #include "audio/dRowAudio_SoundTouchProcessor.cpp"
 #include "audio/dRowAudio_SoundTouchAudioSource.cpp"
 

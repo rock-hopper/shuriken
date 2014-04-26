@@ -50,63 +50,6 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_android_Audio.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/sources/juce_AudioTransportSource.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/sources/juce_AudioSourcePlayer.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/juce_audio_formats.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_WindowsMediaAudioFormat.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_WavAudioFormat.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_QuickTimeAudioFormat.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_MP3AudioFormat.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_LAMEEncoderAudioFormat.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_FlacAudioFormat.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_CoreAudioFormat.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_AiffAudioFormat.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/window_flac.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/stream_encoder_framing.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/stream_encoder.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/stream_decoder.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/memory.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/md5.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/lpc_flac.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/format.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/float.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/fixed.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/crc.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/cpu.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/bitwriter.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/bitreader.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/bitmath.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/framing.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/bitwise.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/window.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/vorbisfile.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/vorbisenc.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/synthesis.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/smallft.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/sharedbook.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/res0.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/registry.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/psy.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/mdct.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/mapping0.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/lsp.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/lpc.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/lookup.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/info.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/floor1.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/floor0.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/envelope.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/codebook.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/block.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/bitrate.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/analysis.c \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_BufferingAudioFormatReader.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_AudioSubsectionReader.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_AudioFormatWriter.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_AudioFormatReaderSource.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_AudioFormatReader.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_AudioFormatManager.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_AudioFormat.cpp \
-    src/JuceLibraryCode/modules/juce_audio_formats/sampler/juce_Sampler.cpp \
     src/JuceLibraryCode/modules/juce_core/juce_core.cpp \
     src/JuceLibraryCode/modules/juce_core/containers/juce_Variant.cpp \
     src/JuceLibraryCode/modules/juce_core/containers/juce_PropertySet.cpp \
@@ -213,9 +156,6 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_EnvelopeFollower.cpp \
     src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_Buffer.cpp \
     src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_AudioUtilityUnitTests.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_AudioSampleBufferAudioFormat.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_AudioFilePlayerExt.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_AudioFilePlayer.cpp \
     src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/filters/dRowAudio_OnePoleFilter.cpp \
     src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/filters/dRowAudio_BiquadFilter.cpp \
     src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/TDStretch.cpp \
@@ -283,83 +223,6 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_MidiDataConcatenator.h \
     src/JuceLibraryCode/modules/juce_audio_devices/sources/juce_AudioTransportSource.h \
     src/JuceLibraryCode/modules/juce_audio_devices/sources/juce_AudioSourcePlayer.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/juce_audio_formats.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_WindowsMediaAudioFormat.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_WavAudioFormat.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_QuickTimeAudioFormat.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_MP3AudioFormat.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_LAMEEncoderAudioFormat.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_FlacAudioFormat.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_CoreAudioFormat.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/juce_AiffAudioFormat.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/stream_encoder.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/stream_decoder.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/ordinals.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/metadata.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/format.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/export.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/callback.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/assert.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/alloc.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/all.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/vorbisfile.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/vorbisenc.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/os_types.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/ogg.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/config_types.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/codec.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/window.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/smallft.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/scales.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/registry.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/psy.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/os.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/misc.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/mdct.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/masking.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/lsp.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/lpc.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/lookup_data.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/lookup.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/highlevel.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/envelope.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/codec_internal.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/codebook.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/bitrate.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/backends.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/books/coupled/res_books_stereo.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/books/coupled/res_books_51.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/books/floor/floor_books.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/books/uncoupled/res_books_uncoupled.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/setup_X.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/setup_44u.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/setup_44p51.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/setup_44.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/setup_32.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/setup_22.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/setup_16.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/setup_11.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/setup_8.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/residue_44u.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/residue_44p51.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/residue_44.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/residue_16.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/residue_8.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/psych_44.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/psych_16.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/psych_11.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/psych_8.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/oggvorbis/libvorbis-1.3.2/lib/modes/floor_all.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_MemoryMappedAudioFormatReader.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_BufferingAudioFormatReader.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_AudioSubsectionReader.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_AudioFormatWriter.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_AudioFormatReaderSource.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_AudioFormatReader.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_AudioFormatManager.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/format/juce_AudioFormat.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/sampler/juce_Sampler.h \
     src/JuceLibraryCode/modules/juce_core/juce_core.h \
     src/JuceLibraryCode/modules/juce_core/containers/juce_Variant.h \
     src/JuceLibraryCode/modules/juce_core/containers/juce_SparseSet.h \
@@ -539,9 +402,6 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_EnvelopeFollower.h \
     src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_Buffer.h \
     src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_AudioUtility.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_AudioSampleBufferAudioFormat.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_AudioFilePlayerExt.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_AudioFilePlayer.h \
     src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/filters/dRowAudio_OnePoleFilter.h \
     src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/filters/dRowAudio_BiquadFilter.h \
     src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/TDStretch.h \

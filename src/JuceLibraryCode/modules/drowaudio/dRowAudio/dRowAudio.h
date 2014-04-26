@@ -170,7 +170,6 @@
 //=============================================================================
 #include <modules/juce_audio_basics/juce_audio_basics.h>
 #include <modules/juce_audio_devices/juce_audio_devices.h>
-#include <modules/juce_audio_formats/juce_audio_formats.h>
 #include <modules/juce_core/juce_core.h>
 #include <modules/juce_data_structures/juce_data_structures.h>
 #include <modules/juce_events/juce_events.h>
@@ -217,18 +216,6 @@ using juce::UnitTest;
 //using juce::Rectangle;
 
 // Audio
-#ifndef __DROWAUDIO_AUDIOFILEPLAYER_H__
-    #include "audio/dRowAudio_AudioFilePlayer.h"
-#endif
-
-#ifndef __DROWAUDIO_AUDIOFILEPLAYEREXT_H__
-    #include "audio/dRowAudio_AudioFilePlayerExt.h"
-#endif
-
-#ifndef __DROWAUDIO_AUDIOSAMPLEBUFFERAUDIOFORMAT_H__
-    #include "audio/dRowAudio_AudioSampleBufferAudioFormat.h"
-#endif
-
 #ifndef __DROWAUDIO_SOUNDTOUCHPROCESSOR_H__
     #include "audio/dRowAudio_SoundTouchProcessor.h"
 #endif

@@ -225,30 +225,6 @@ static bool matchesAudioWildcard (const String& extensionToTest, const String& w
 		return false;
 }
 
-/** Converts a block of audio sample to floating point samples if the reader
-    used an integer format.
- */
-static void convertToFloat (AudioFormatReader* reader, void* sourceBuffer, float* destBuffer, int numSamples)
-{
-	if (reader != nullptr)
-	{
-		if (! reader->usesFloatingPointData)
-		{
-#if JUCE_BIG_ENDIAN
-			AudioDataConverters::convertInt32BEToFloat ((void*) sourceBuffer, destBuffer,
-                                                        numSamples, sizeof (int));
-#else
-			AudioDataConverters::convertInt32LEToFloat ((void*) sourceBuffer, destBuffer,
-                                                        numSamples, sizeof (int));
-#endif
-		}
-		else
-        {
-			memcpy (destBuffer, sourceBuffer, sizeof (float) * numSamples);
-		}
-	}
-}
-
 //==============================================================================
 /** Returns the number bytes needed to store an AudioSampleBuffer with its
     channel header and sample data.
