@@ -82,7 +82,6 @@ private:
     QList<SharedSampleRange> mSampleRangeList;
 
     ScopedPointer<SamplerAudioSource> mSamplerAudioSource;
-    ScopedPointer<SoundTouchAudioSource> mSoundTouchAudioSource;
     AudioSourcePlayer mAudioSourcePlayer;
 
     bool mIsAudioInitialised;

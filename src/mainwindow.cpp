@@ -185,12 +185,7 @@ void MainWindow::setUpSampler( const int numChans )
         if ( mAudioSetupDialog->isRTTimeStretchModeEnabled() ) // Realtime timestretch mode
         {
             const int bufferSize = mAudioSetupDialog->getSoundTouchBufferSize();
-
-            mSoundTouchAudioSource = new SoundTouchAudioSource( mSamplerAudioSource,
-                                                                false,                // Don't delete source when deleted
-                                                                bufferSize,
-                                                                numChans );
-            mAudioSourcePlayer.setSource( mSoundTouchAudioSource );
+            //mAudioSourcePlayer.setSource(  );
         }
         else // Offline timestretch mode
         {
@@ -1242,7 +1237,7 @@ void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
     const bool isTimeStretchEnabled = mUI->checkBox_TimeStretch->isChecked();
     const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
 
-    if ( mSoundTouchAudioSource != NULL && isTimeStretchEnabled )
+    if ( isTimeStretchEnabled )
     {
         if ( newBPM > 0.0 && originalBPM > 0.0 )
         {
@@ -1250,8 +1245,7 @@ void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
             const float tempo = newBPM / originalBPM;
             const float pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
 
-            SoundTouchProcessor::PlaybackSettings settings( rate, tempo, pitch );
-            mSoundTouchAudioSource->setPlaybackSettings( settings );
+
         }
     }
 }
@@ -1265,23 +1259,19 @@ void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
     const bool isTimeStretchEnabled = isChecked;
     const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
 
-    if ( mSoundTouchAudioSource != NULL )
+    if ( newBPM > 0.0 && originalBPM > 0.0 )
     {
-        if ( newBPM > 0.0 && originalBPM > 0.0 )
+        const float rate = 1.0f;
+        float tempo = 1.0f;
+        float pitch = 1.0f;
+
+        if ( isTimeStretchEnabled )
         {
-            const float rate = 1.0f;
-            float tempo = 1.0f;
-            float pitch = 1.0f;
-
-            if ( isTimeStretchEnabled )
-            {
-                tempo = newBPM / originalBPM;
-                pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
-            }
-
-            SoundTouchProcessor::PlaybackSettings settings( rate, tempo, pitch );
-            mSoundTouchAudioSource->setPlaybackSettings( settings );
+            tempo = newBPM / originalBPM;
+            pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
         }
+
+
     }
 }
 
@@ -1294,7 +1284,7 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
     const bool isTimeStretchEnabled = mUI->checkBox_TimeStretch->isChecked();
     const bool isPitchCorrectionEnabled = isChecked;
 
-    if ( mSoundTouchAudioSource != NULL && isTimeStretchEnabled )
+    if ( isTimeStretchEnabled )
     {
         if ( newBPM > 0.0 && originalBPM > 0.0 )
         {
@@ -1302,8 +1292,7 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
             const float tempo = newBPM / originalBPM;
             const float pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
 
-            SoundTouchProcessor::PlaybackSettings settings( rate, tempo, pitch );
-            mSoundTouchAudioSource->setPlaybackSettings( settings );
+
         }
     }
 }
@@ -1364,7 +1353,7 @@ void MainWindow::on_pushButton_Apply_clicked()
         const float rate = 1.0f;
         const float tempo = newBPM / originalBPM;
         const float pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
-        SoundTouchProcessor::PlaybackSettings settings( rate, tempo, pitch );
+
 
         const int numChans = mCurrentSampleHeader->numChans;
         const int hopSize = 1024;
@@ -1372,10 +1361,7 @@ void MainWindow::on_pushButton_Apply_clicked()
         int numFramesRead = 0;
         int totalNumFramesRead = 0;
 
-        SoundTouchProcessor soundTouchProcessor;
         SharedSampleBuffer tempSampleBuffer;
-        SharedSampleBuffer emptySampleBuffer( new SampleBuffer( numChans, hopSize ) );
-        emptySampleBuffer->clear();
 
         // Get original, unmodified sample data
         tempSampleBuffer = mFileHandler.getSampleData( mCurrentAudioFilePath );
@@ -1384,65 +1370,23 @@ void MainWindow::on_pushButton_Apply_clicked()
         {
             const int origNumFrames = tempSampleBuffer->getNumFrames();
 
-            soundTouchProcessor.initialise( numChans, mCurrentSampleHeader->sampleRate );
-            soundTouchProcessor.setPlaybackSettings( settings );
-
             // Calculate new sample buffer size
             const int newBufferSize = (qreal) origNumFrames / tempo;
             mCurrentSampleBuffer->setSize( numChans, newBufferSize );
 
-            do
-            {
-                // Write sample data to the SoundTouch pipeline
-                while ( soundTouchProcessor.getNumReady() < hopSize )
-                {
-                    if ( startFrameOffset < origNumFrames )
-                    {
-                        const int numFramesToWrite = startFrameOffset + hopSize < origNumFrames ?
-                                                     hopSize : origNumFrames - startFrameOffset;
 
-                        soundTouchProcessor.writeSamples( tempSampleBuffer->getArrayOfChannels(),
-                                                          numChans,
-                                                          numFramesToWrite,
-                                                          startFrameOffset );
 
-                        startFrameOffset += numFramesToWrite;
+//            // Ensure enough space to store output from pipeline
+//            if ( mCurrentSampleBuffer->getNumFrames() < totalNumFramesRead + hopSize )
+//            {
+//                mCurrentSampleBuffer->setSize( numChans,                        // No. of channels
+//                                               totalNumFramesRead + hopSize,    // New no. of frames
+//                                               true,                            // Keep existing content
+//                                               false,                           // Clear extra space
+//                                               true );                          // Avoid reallocating
+//            }
 
-                        if ( numFramesToWrite < hopSize )
-                        {
-                            soundTouchProcessor.writeSamples( emptySampleBuffer->getArrayOfChannels(),
-                                                              numChans,
-                                                              hopSize - numFramesToWrite,
-                                                              0 );
-                        }
-                    }
-                    else // Write contents of empty sample buffer to pipeline
-                    {
-                        soundTouchProcessor.writeSamples( emptySampleBuffer->getArrayOfChannels(),
-                                                          numChans,
-                                                          hopSize,
-                                                          0 );
-                    }
-                }
 
-                // Ensure enough space to store output from pipeline
-                if ( mCurrentSampleBuffer->getNumFrames() < totalNumFramesRead + hopSize )
-                {
-                    mCurrentSampleBuffer->setSize( numChans,                        // No. of channels
-                                                   totalNumFramesRead + hopSize,    // New no. of frames
-                                                   true,                            // Keep existing content
-                                                   false,                           // Clear extra space
-                                                   true );                          // Avoid reallocating
-                }
-
-                // Read sample data from SoundTouch pipeline
-                numFramesRead = soundTouchProcessor.readSamples( mCurrentSampleBuffer->getArrayOfChannels(),
-                                                                 numChans,
-                                                                 hopSize,
-                                                                 totalNumFramesRead );
-                totalNumFramesRead += numFramesRead;
-            }
-            while ( totalNumFramesRead < newBufferSize );
 
             mCurrentSampleBuffer->setSize( numChans, newBufferSize, true );
 

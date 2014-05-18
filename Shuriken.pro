@@ -144,36 +144,6 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/JuceLibraryCode/modules/juce_events/timers/juce_Timer.cpp \
     src/JuceLibraryCode/modules/juce_events/timers/juce_MultiTimer.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/relay_libjack.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/dRowAudio.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_SoundTouchProcessor.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_SoundTouchAudioSource.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_SampleRateConverter.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_ReversibleAudioSource.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_PitchDetector.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_LoopingAudioSource.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_FilteringAudioSource.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_EnvelopeFollower.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_Buffer.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_AudioUtilityUnitTests.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/filters/dRowAudio_OnePoleFilter.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/filters/dRowAudio_BiquadFilter.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/TDStretch.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/sse_optimized.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/SoundTouch_Source.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/SoundTouch.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/RateTransposer.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/PeakFinder.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/mmx_optimized.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/FIRFilter.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/FIFOSampleBuffer.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/cpu_detect_x86_win.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/cpu_detect_x86_gcc.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/cpu_detect_x64_win.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/cpu_detect_x64_gcc.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/BPMDetect.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/AAFilter.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/maths/dRowAudio_MathsUnitTests.cpp \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/streams/dRowAudio_MemoryInputSource.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/wavegraphicsview.cpp \
@@ -387,43 +357,6 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/protected/stream_decoder.h \
     src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/protected/all.h \
     src/JuceLibraryCode/modules/juce_audio_devices/native/jack_device.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/dRowAudio.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_SoundTouchProcessor.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_SoundTouchAudioSource.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_SampleRateConverter.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_ReversibleAudioSource.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_PitchDetector.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_Pitch.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_LoopingAudioSource.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_FilteringAudioSource.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_FifoBuffer.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_EnvelopeFollower.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_Buffer.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/dRowAudio_AudioUtility.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/filters/dRowAudio_OnePoleFilter.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/filters/dRowAudio_BiquadFilter.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/TDStretch.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/STTypes.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/SoundTouch_Includes.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/soundtouch_config.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/SoundTouch.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/RateTransposer.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/PeakFinder.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/FIRFilter.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/FIFOSamplePipe.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/FIFOSampleBuffer.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/cpu_detect.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/BPMDetect.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/audio/soundtouch/AAFilter.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/maths/dRowAudio_MathsUtilities.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/maths/dRowAudio_CumulativeMovingAverage.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/maths/dRowAudio_BezierCurve.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/streams/dRowAudio_MemoryInputSource.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/utility/dRowAudio_Utility.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/utility/dRowAudio_XmlHelpers.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/utility/dRowAudio_DebugObject.h \
-    src/JuceLibraryCode/modules/drowaudio/dRowAudio/utility/dRowAudio_Constants.h \
     src/mainwindow.h \
     src/wavegraphicsview.h \
     src/waveformitem.h \
