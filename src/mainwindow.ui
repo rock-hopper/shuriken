@@ -68,6 +68,12 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>55</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>Calc</string>
         </property>
@@ -91,15 +97,27 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBox_JackSync">
+       <widget class="QPushButton" name="pushButton_Apply">
         <property name="enabled">
          <bool>false</bool>
         </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>55</width>
+          <height>16777215</height>
+         </size>
         </property>
         <property name="text">
-         <string>JACK Sync</string>
+         <string>Apply</string>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
         </property>
        </widget>
       </item>

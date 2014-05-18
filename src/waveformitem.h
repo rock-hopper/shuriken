@@ -33,7 +33,8 @@
 #include "samplebuffer.h"
 
 
-typedef QSharedPointer<QPainterPath> SharedPainterPath;
+class WaveformItem;
+typedef QSharedPointer<WaveformItem> SharedWaveformItem;
 
 
 class WaveformItem : public QObject, public QGraphicsRectItem
@@ -56,10 +57,19 @@ public:
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
     void setRect( const qreal x, const qreal y, const qreal width, const qreal height );
 
+    int getStartFrame() const                           { return mStartFrame; }
+    void setStartFrame( const int startFrame )          { mStartFrame = startFrame; }
+
+    int getNumFrames() const                            { return mNumFrames; }
+    void setNumFrames( const int numFrames )            { mNumFrames = numFrames; }
+
     int getOrderPos() const                             { return mCurrentOrderPos; }
     void setOrderPos( const int orderPos )              { mCurrentOrderPos = orderPos; }
 
     int type() const                                    { return Type; }
+
+public:
+    static bool isLessThan( const SharedWaveformItem item1, const SharedWaveformItem item2 );
 
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
@@ -77,8 +87,8 @@ private:
     DetailLevel mDetailLevel;
 
     const SharedSampleBuffer mSampleBuffer;
-    const int mStartFrame;
-    const int mNumFrames;
+    int mStartFrame;
+    int mNumFrames;
     QPen mWavePen;
     QPen mCentreLinePen;
     int mCurrentOrderPos;

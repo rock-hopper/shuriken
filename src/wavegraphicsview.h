@@ -31,9 +31,6 @@
 #include "samplebuffer.h"
 
 
-typedef QSharedPointer<WaveformItem> SharedWaveformItem;
-
-
 class WaveGraphicsView : public QGraphicsView
 {
     Q_OBJECT
@@ -54,6 +51,8 @@ public:
     void hideSlicePoints();
     void showSlicePoints();
     QList<int> getSlicePointFrameNumList();
+
+    void stretch( const int totalNumFrames );
 
     void clearAll();
     void clearWaveform();
@@ -86,5 +85,6 @@ private slots:
     void reorderSlicePoints( SlicePointItem* const movedItem );
     void relayMaxDetailLevelReached();
 };
+
 
 #endif // WAVEGRAPHICSVIEW_H

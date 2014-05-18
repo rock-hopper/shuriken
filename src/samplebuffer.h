@@ -74,14 +74,20 @@ typedef ScopedPointer<SampleHeader> ScopedSampleHeader;
 
 
 
+struct SampleRange;
+typedef QSharedPointer<SampleRange> SharedSampleRange;
+typedef ScopedPointer<SampleRange> ScopedSampleRange;
+
 struct SampleRange
 {
     int startFrame;
     int numFrames;
-};
 
-typedef QSharedPointer<SampleRange> SharedSampleRange;
-typedef ScopedPointer<SampleRange> ScopedSampleRange;
+    static bool isLessThan( const SharedSampleRange range1, const SharedSampleRange range2 )
+    {
+        return range1->startFrame < range2->startFrame;
+    }
+};
 
 
 #endif // SAMPLEBUFFER_H

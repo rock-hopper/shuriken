@@ -78,7 +78,7 @@ void SoundTouchProcessor::writeSamples (float** sourceChannelData, int numChanne
     soundTouch.putSamples ((SAMPLETYPE*) interleavedInputBuffer, numSamples);
 }
 
-void SoundTouchProcessor::readSamples (float** destinationChannelData, int numChannels, int numSamples, int startSampleOffset)
+int SoundTouchProcessor::readSamples (float** destinationChannelData, int numChannels, int numSamples, int startSampleOffset)
 {
     const int requiredBufferSize = numSamples * numChannels;
     
@@ -116,6 +116,8 @@ void SoundTouchProcessor::readSamples (float** destinationChannelData, int numCh
                                               numSamples, numChannels);
     for (int i = 0; i < numChannels; i++)
         destinationChannelData[i] -= startSampleOffset;
+
+    return numSamplesDone;
 }
 
 void SoundTouchProcessor::setPlaybackSettings (PlaybackSettings newSettings)

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sat Apr 26 15:45:55 2014
+** Created: Mon May 5 15:33:59 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -73,7 +73,7 @@ public:
     QPushButton *pushButton_CalcBPM;
     QLabel *label_2;
     QDoubleSpinBox *doubleSpinBox_NewBPM;
-    QCheckBox *checkBox_JackSync;
+    QPushButton *pushButton_Apply;
     QCheckBox *checkBox_TimeStretch;
     QCheckBox *checkBox_PitchCorrection;
     QSpacerItem *horizontalSpacer;
@@ -259,6 +259,7 @@ public:
         pushButton_CalcBPM = new QPushButton(centralWidget);
         pushButton_CalcBPM->setObjectName(QString::fromUtf8("pushButton_CalcBPM"));
         pushButton_CalcBPM->setEnabled(false);
+        pushButton_CalcBPM->setMaximumSize(QSize(55, 16777215));
 
         horizontalLayout_2->addWidget(pushButton_CalcBPM);
 
@@ -274,12 +275,15 @@ public:
 
         horizontalLayout_2->addWidget(doubleSpinBox_NewBPM);
 
-        checkBox_JackSync = new QCheckBox(centralWidget);
-        checkBox_JackSync->setObjectName(QString::fromUtf8("checkBox_JackSync"));
-        checkBox_JackSync->setEnabled(false);
-        checkBox_JackSync->setLayoutDirection(Qt::LeftToRight);
+        pushButton_Apply = new QPushButton(centralWidget);
+        pushButton_Apply->setObjectName(QString::fromUtf8("pushButton_Apply"));
+        pushButton_Apply->setEnabled(false);
+        sizePolicy.setHeightForWidth(pushButton_Apply->sizePolicy().hasHeightForWidth());
+        pushButton_Apply->setSizePolicy(sizePolicy);
+        pushButton_Apply->setMaximumSize(QSize(55, 16777215));
+        pushButton_Apply->setFlat(false);
 
-        horizontalLayout_2->addWidget(checkBox_JackSync);
+        horizontalLayout_2->addWidget(pushButton_Apply);
 
         checkBox_TimeStretch = new QCheckBox(centralWidget);
         checkBox_TimeStretch->setObjectName(QString::fromUtf8("checkBox_TimeStretch"));
@@ -549,7 +553,7 @@ public:
         label_3->setText(QApplication::translate("MainWindow", "Original BPM:", 0, QApplication::UnicodeUTF8));
         pushButton_CalcBPM->setText(QApplication::translate("MainWindow", "Calc", 0, QApplication::UnicodeUTF8));
         label_2->setText(QApplication::translate("MainWindow", "New BPM:", 0, QApplication::UnicodeUTF8));
-        checkBox_JackSync->setText(QApplication::translate("MainWindow", "JACK Sync", 0, QApplication::UnicodeUTF8));
+        pushButton_Apply->setText(QApplication::translate("MainWindow", "Apply", 0, QApplication::UnicodeUTF8));
         checkBox_TimeStretch->setText(QApplication::translate("MainWindow", "Time Stretch", 0, QApplication::UnicodeUTF8));
         checkBox_PitchCorrection->setText(QApplication::translate("MainWindow", "Pitch Correction", 0, QApplication::UnicodeUTF8));
         pushButton_Slice->setText(QApplication::translate("MainWindow", "Slice", 0, QApplication::UnicodeUTF8));

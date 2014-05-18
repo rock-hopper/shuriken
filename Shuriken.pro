@@ -2,8 +2,7 @@
 # Project created by QtCreator 2013-08-19T11:08:15
 # -------------------------------------------------
 QMAKE_CXXFLAGS += -msse \
-    -msse2 \
-    -mmmx
+    -msse2
 TARGET = shuriken
 TEMPLATE = app
 SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \

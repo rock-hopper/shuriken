@@ -37,8 +37,7 @@ MainWindow::MainWindow( QWidget* parent ) :
     QMainWindow( parent ),
     mUI( new Ui::MainWindow ),
     mLastOpenedImportDir( QDir::homePath() ),
-    mLastOpenedProjDir( QDir::homePath() ),
-    mSoundTouchBufferSize( 512 )
+    mLastOpenedProjDir( QDir::homePath() )
 {
     // Set up user interface
     mUI->setupUi( this );
@@ -183,11 +182,21 @@ void MainWindow::setUpSampler( const int numChans )
 {
     if ( mIsAudioInitialised )
     {
-        mSoundTouchAudioSource = new SoundTouchAudioSource( mSamplerAudioSource,
-                                                            false,                  // Don't delete source when deleted
-                                                            mSoundTouchBufferSize,
-                                                            numChans );
-        mAudioSourcePlayer.setSource( mSoundTouchAudioSource );
+        if ( mAudioSetupDialog->isRTTimeStretchModeEnabled() ) // Realtime timestretch mode
+        {
+            const int bufferSize = mAudioSetupDialog->getSoundTouchBufferSize();
+
+            mSoundTouchAudioSource = new SoundTouchAudioSource( mSamplerAudioSource,
+                                                                false,                // Don't delete source when deleted
+                                                                bufferSize,
+                                                                numChans );
+            mAudioSourcePlayer.setSource( mSoundTouchAudioSource );
+        }
+        else // Offline timestretch mode
+        {
+            mAudioSourcePlayer.setSource( mSamplerAudioSource );
+        }
+
         mDeviceManager.addAudioCallback( &mAudioSourcePlayer );
         mDeviceManager.addMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
     }
@@ -213,6 +222,7 @@ void MainWindow::enableUI()
     mUI->doubleSpinBox_OriginalBPM->setEnabled( true );
     mUI->doubleSpinBox_NewBPM->setEnabled( true );
     mUI->pushButton_CalcBPM->setEnabled( true );
+    mUI->pushButton_Apply->setEnabled( true );
     mUI->pushButton_FindOnsets->setEnabled( true );
     mUI->pushButton_FindBeats->setEnabled( true );
 
@@ -239,6 +249,7 @@ void MainWindow::disableUI()
     mUI->doubleSpinBox_NewBPM->setValue( 0.0 );
     mUI->doubleSpinBox_NewBPM->setEnabled( false );
     mUI->pushButton_CalcBPM->setEnabled( false );
+    mUI->pushButton_Apply->setEnabled( false );
     mUI->pushButton_Slice->setEnabled( false );
     mUI->pushButton_FindOnsets->setEnabled( false );
     mUI->pushButton_FindBeats->setEnabled( false );
@@ -281,7 +292,7 @@ MainWindow::DetectionSettings MainWindow::getDetectionSettings()
 
 
 
-void MainWindow::calcPlayRanges()
+void MainWindow::getSampleRanges( QList<SharedSampleRange>& sampleRangeList )
 {
     const QList<int> slicePointFrameNumList = mUI->waveGraphicsView->getSlicePointFrameNumList();
     const int totalNumFrames = mCurrentSampleBuffer->getNumFrames();
@@ -309,7 +320,7 @@ void MainWindow::calcPlayRanges()
         startFramesList.prepend( 0 );
     }
 
-    mSampleRangeList.clear();
+    sampleRangeList.clear();
 
     for ( int i = 0; i < startFramesList.size(); ++i )
     {
@@ -320,7 +331,7 @@ void MainWindow::calcPlayRanges()
                                   startFramesList.at( i + 1 ) - startFramesList.at( i ) :
                                   totalNumFrames - startFramesList.at( i );
 
-        mSampleRangeList << sampleRange;
+        sampleRangeList << sampleRange;
     }
 }
 
@@ -734,6 +745,8 @@ void MainWindow::on_actionOpen_Project_triggered()
 
                         mUI->statusBar->showMessage( tr("Project: ") + projectName );
 
+                        mCurrentAudioFilePath = filePath;
+
                         QApplication::restoreOverrideCursor();
                     }
                     else // Error loading audio file
@@ -956,6 +969,9 @@ void MainWindow::on_actionImport_Audio_File_triggered()
             QString message = fileName + ", " + chanString + ", " + bitsString + ", " + rateString +
                               ", " + sampleHeader->format;
             mUI->statusBar->showMessage( message );
+
+
+            mCurrentAudioFilePath = filePath;
 
             QApplication::restoreOverrideCursor();
         }
@@ -1226,7 +1242,7 @@ void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
     const bool isTimeStretchEnabled = mUI->checkBox_TimeStretch->isChecked();
     const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
 
-    if ( isTimeStretchEnabled )
+    if ( mSoundTouchAudioSource != NULL && isTimeStretchEnabled )
     {
         if ( newBPM > 0.0 && originalBPM > 0.0 )
         {
@@ -1249,20 +1265,23 @@ void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
     const bool isTimeStretchEnabled = isChecked;
     const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
 
-    if ( newBPM > 0.0 && originalBPM > 0.0 )
+    if ( mSoundTouchAudioSource != NULL )
     {
-        const float rate = 1.0f;
-        float tempo = 1.0f;
-        float pitch = 1.0f;
-
-        if ( isTimeStretchEnabled )
+        if ( newBPM > 0.0 && originalBPM > 0.0 )
         {
-            tempo = newBPM / originalBPM;
-            pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
-        }
+            const float rate = 1.0f;
+            float tempo = 1.0f;
+            float pitch = 1.0f;
 
-        SoundTouchProcessor::PlaybackSettings settings( rate, tempo, pitch );
-        mSoundTouchAudioSource->setPlaybackSettings( settings );
+            if ( isTimeStretchEnabled )
+            {
+                tempo = newBPM / originalBPM;
+                pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
+            }
+
+            SoundTouchProcessor::PlaybackSettings settings( rate, tempo, pitch );
+            mSoundTouchAudioSource->setPlaybackSettings( settings );
+        }
     }
 }
 
@@ -1275,7 +1294,7 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
     const bool isTimeStretchEnabled = mUI->checkBox_TimeStretch->isChecked();
     const bool isPitchCorrectionEnabled = isChecked;
 
-    if ( isTimeStretchEnabled )
+    if ( mSoundTouchAudioSource != NULL && isTimeStretchEnabled )
     {
         if ( newBPM > 0.0 && originalBPM > 0.0 )
         {
@@ -1326,4 +1345,136 @@ void MainWindow::on_actionZoom_Original_triggered()
     mUI->waveGraphicsView->zoomOriginal();
     mUI->actionZoom_In->setEnabled( true );
     mUI->actionZoom_Out->setEnabled( false );
+}
+
+
+
+void MainWindow::on_pushButton_Apply_clicked()
+{
+    Q_ASSERT( ! mCurrentAudioFilePath.isEmpty() );
+
+    const qreal originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
+    const qreal newBPM = mUI->doubleSpinBox_NewBPM->value();
+    const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
+
+    if ( newBPM > 0.0 && originalBPM > 0.0 )
+    {
+        QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+        const float rate = 1.0f;
+        const float tempo = newBPM / originalBPM;
+        const float pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
+        SoundTouchProcessor::PlaybackSettings settings( rate, tempo, pitch );
+
+        const int numChans = mCurrentSampleHeader->numChans;
+        const int hopSize = 1024;
+        int startFrameOffset = 0;
+        int numFramesRead = 0;
+        int totalNumFramesRead = 0;
+
+        SoundTouchProcessor soundTouchProcessor;
+        SharedSampleBuffer tempSampleBuffer;
+        SharedSampleBuffer emptySampleBuffer( new SampleBuffer( numChans, hopSize ) );
+        emptySampleBuffer->clear();
+
+        // Get original, unmodified sample data
+        tempSampleBuffer = mFileHandler.getSampleData( mCurrentAudioFilePath );
+
+        if ( ! tempSampleBuffer.isNull() )
+        {
+            const int origNumFrames = tempSampleBuffer->getNumFrames();
+
+            soundTouchProcessor.initialise( numChans, mCurrentSampleHeader->sampleRate );
+            soundTouchProcessor.setPlaybackSettings( settings );
+
+            // Calculate new sample buffer size
+            const int newBufferSize = (qreal) origNumFrames / tempo;
+            mCurrentSampleBuffer->setSize( numChans, newBufferSize );
+
+            do
+            {
+                // Write sample data to the SoundTouch pipeline
+                while ( soundTouchProcessor.getNumReady() < hopSize )
+                {
+                    if ( startFrameOffset < origNumFrames )
+                    {
+                        const int numFramesToWrite = startFrameOffset + hopSize < origNumFrames ?
+                                                     hopSize : origNumFrames - startFrameOffset;
+
+                        soundTouchProcessor.writeSamples( tempSampleBuffer->getArrayOfChannels(),
+                                                          numChans,
+                                                          numFramesToWrite,
+                                                          startFrameOffset );
+
+                        startFrameOffset += numFramesToWrite;
+
+                        if ( numFramesToWrite < hopSize )
+                        {
+                            soundTouchProcessor.writeSamples( emptySampleBuffer->getArrayOfChannels(),
+                                                              numChans,
+                                                              hopSize - numFramesToWrite,
+                                                              0 );
+                        }
+                    }
+                    else // Write contents of empty sample buffer to pipeline
+                    {
+                        soundTouchProcessor.writeSamples( emptySampleBuffer->getArrayOfChannels(),
+                                                          numChans,
+                                                          hopSize,
+                                                          0 );
+                    }
+                }
+
+                // Ensure enough space to store output from pipeline
+                if ( mCurrentSampleBuffer->getNumFrames() < totalNumFramesRead + hopSize )
+                {
+                    mCurrentSampleBuffer->setSize( numChans,                        // No. of channels
+                                                   totalNumFramesRead + hopSize,    // New no. of frames
+                                                   true,                            // Keep existing content
+                                                   false,                           // Clear extra space
+                                                   true );                          // Avoid reallocating
+                }
+
+                // Read sample data from SoundTouch pipeline
+                numFramesRead = soundTouchProcessor.readSamples( mCurrentSampleBuffer->getArrayOfChannels(),
+                                                                 numChans,
+                                                                 hopSize,
+                                                                 totalNumFramesRead );
+                totalNumFramesRead += numFramesRead;
+            }
+            while ( totalNumFramesRead < newBufferSize );
+
+            mCurrentSampleBuffer->setSize( numChans, newBufferSize, true );
+
+            mUI->waveGraphicsView->stretch( newBufferSize );
+
+            mSamplerAudioSource->setSample( mCurrentSampleBuffer, mCurrentSampleHeader->sampleRate );
+
+            if ( ! mSampleRangeList.isEmpty() )
+            {
+                // Update mSampleRangeList without losing its current ordering
+                QList<SharedSampleRange> newList;
+                getSampleRanges( newList );
+
+                QList<SharedSampleRange> currentList( mSampleRangeList );
+                qSort( currentList.begin(), currentList.end(), SampleRange::isLessThan );
+
+                for ( int i = 0; i < newList.size(); i++ )
+                {
+                    currentList.at( i )->startFrame = newList.at( i )->startFrame;
+                    currentList.at( i )->numFrames = newList.at( i )->numFrames;
+                }
+
+                // Pass modified sample ranges to the sampler
+                mSamplerAudioSource->setSampleRanges( mSampleRangeList );
+            }
+
+            QApplication::restoreOverrideCursor();
+        }
+        else // Failed to read audio file
+        {
+            QApplication::restoreOverrideCursor();
+            showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+        }
+    }
 }

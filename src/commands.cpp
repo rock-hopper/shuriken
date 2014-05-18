@@ -225,7 +225,7 @@ void CreateSlicesCommand::redo()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    mMainWindow->calcPlayRanges();
+    mMainWindow->getSampleRanges( mMainWindow->mSampleRangeList );
 
     Q_ASSERT( mMainWindow->mSampleRangeList.size() > 0 );
 
@@ -289,4 +289,28 @@ void MoveWaveformItemCommand::redo()
         mGraphicsView->moveWaveformItem( mStartOrderPos, mDestOrderPos );
     }
     mIsFirstRedoCall = false;
+}
+
+
+
+//==================================================================================================
+
+ApplyTimeStretchCommand::ApplyTimeStretchCommand( QUndoCommand* parent ) :
+    QUndoCommand( parent )
+{
+    ;
+}
+
+
+
+void ApplyTimeStretchCommand::undo()
+{
+    ;
+}
+
+
+
+void ApplyTimeStretchCommand::redo()
+{
+    ;
 }

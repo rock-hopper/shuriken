@@ -148,4 +148,15 @@ private:
     bool mIsFirstRedoCall;
 };
 
+
+
+class ApplyTimeStretchCommand : public QUndoCommand
+{
+    ApplyTimeStretchCommand( QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+};
+
+
 #endif // COMMANDS_H

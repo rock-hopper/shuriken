@@ -70,13 +70,16 @@ SharedWaveformItem WaveGraphicsView::createWaveformItem( const SharedSampleBuffe
 QList<SharedWaveformItem> WaveGraphicsView::createWaveformItems( const SharedSampleBuffer sampleBuffer,
                                                                  const QList<SharedSampleRange> sampleRangeList )
 {
-    const int totalNumFrames = sampleBuffer->getNumFrames();
+    mNumFrames = sampleBuffer->getNumFrames();
+
+    Q_ASSERT( mNumFrames > 0 );
+
     qreal scenePosX = 0.0;
     int orderPos = 0;
 
     foreach ( SharedSampleRange sampleRange, sampleRangeList )
     {
-        const qreal sliceWidth = sampleRange->numFrames * ( scene()->width() / totalNumFrames );
+        const qreal sliceWidth = sampleRange->numFrames * ( scene()->width() / mNumFrames );
 
         WaveformItem* waveformItem = new WaveformItem( sampleBuffer,
                                                        sampleRange,
@@ -251,6 +254,41 @@ QList<int> WaveGraphicsView::getSlicePointFrameNumList()
     qSort( slicePointFrameNumList );
 
     return slicePointFrameNumList;
+}
+
+
+
+void WaveGraphicsView::stretch( const int totalNumFrames )
+{
+    const int oldTotalNumFrames = mNumFrames;
+    mNumFrames = totalNumFrames;
+
+    const qreal ratio = (qreal) mNumFrames / (qreal) oldTotalNumFrames;
+
+    QList<SharedWaveformItem> tempList( mWaveformItemList );
+
+    qSort( tempList.begin(), tempList.end(), WaveformItem::isLessThan );
+
+    foreach ( SharedWaveformItem item, tempList )
+    {
+        const int newStartFrame = item->getStartFrame() * ratio;
+        item->setStartFrame( newStartFrame );
+    }
+
+    for ( int i = 0; i < tempList.size(); i++ )
+    {
+        const int newNumFrames = i + 1 < tempList.size() ?
+                                 tempList.at( i + 1 )->getStartFrame() - tempList.at( i )->getStartFrame() :
+                                 mNumFrames - tempList.at( i )->getStartFrame();
+
+        tempList.at( i )->setNumFrames( newNumFrames );
+    }
+
+    foreach ( SharedSlicePointItem item, mSlicePointItemList )
+    {
+        const int newFrameNum = (int) floor( (item->getFrameNum() * ratio) + 0.5 );
+        moveSlicePoint( item, newFrameNum );
+    }
 }
 
 

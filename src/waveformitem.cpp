@@ -223,6 +223,16 @@ void WaveformItem::setRect( const qreal x, const qreal y, const qreal width, con
 
 
 //==================================================================================================
+// Public Static:
+
+bool WaveformItem::isLessThan( const SharedWaveformItem item1, const SharedWaveformItem item2 )
+{
+    return item1->getStartFrame() < item2->getStartFrame();
+}
+
+
+
+//==================================================================================================
 // Protected:
 
 QVariant WaveformItem::itemChange( GraphicsItemChange change, const QVariant &value )

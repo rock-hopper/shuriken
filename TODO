@@ -5,8 +5,6 @@ Release Critical
 
 Code Improvements
 -----------------
-Change sndlib code from float** to OwnedArray< Array<float> >
-
 JUCE_MIDI/JUCE_JACK - class members public to private, getGlobalJackClient
 
 

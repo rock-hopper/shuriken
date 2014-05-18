@@ -97,7 +97,7 @@ public:
         space in the buffer will be slienced. As the processor takes a certain ammount of
         samples to calculate an output there is a latency of around 100ms involved in the process.
      */
-    void readSamples (float** destinationChannelData, int numChannels, int numSamples, int startSampleOffset = 0);
+    int readSamples (float** destinationChannelData, int numChannels, int numSamples, int startSampleOffset = 0);
     
     /** Clears the pipeline of all samples, ready for new processing. */
     void clear()                                                {   soundTouch.clear();             }

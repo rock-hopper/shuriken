@@ -68,7 +68,7 @@ private:
     void enableUI();
     void disableUI();
     DetectionSettings getDetectionSettings();
-    void calcPlayRanges();
+    void getSampleRanges( QList<SharedSampleRange>& sampleRangeList );
 
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
@@ -89,10 +89,9 @@ private:
 
     QString mLastOpenedImportDir;
     QString mLastOpenedProjDir;
+    QString mCurrentAudioFilePath;
 
     QUndoStack mUndoStack;
-
-    int mSoundTouchBufferSize;
 
 private:
     enum AubioRoutine { ONSET_DETECTION, BEAT_DETECTION };
@@ -113,6 +112,7 @@ private:
     static const qreal MIN_INTER_ONSET_SECS = 0.03;
 
 private slots:
+    void on_pushButton_Apply_clicked();
     void on_actionZoom_Original_triggered();
     void on_actionZoom_Out_triggered();
     void on_actionZoom_In_triggered();
