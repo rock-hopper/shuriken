@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'audiosetupdialog.ui'
 **
-** Created: Sun May 18 11:18:04 2014
+** Created: Sun May 18 14:35:53 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -56,8 +56,6 @@ public:
     QLabel *label_2;
     QRadioButton *radioButton_Offline;
     QRadioButton *radioButton_RealTime;
-    QLabel *label;
-    QComboBox *comboBox_STBufferSize;
     QDialogButtonBox *buttonBox;
 
     void setupUi(QDialog *AudioSetupDialog)
@@ -174,17 +172,6 @@ public:
 
         formLayout_2->setWidget(1, QFormLayout::FieldRole, radioButton_RealTime);
 
-        label = new QLabel(tab_TimeStretch);
-        label->setObjectName(QString::fromUtf8("label"));
-
-        formLayout_2->setWidget(2, QFormLayout::LabelRole, label);
-
-        comboBox_STBufferSize = new QComboBox(tab_TimeStretch);
-        comboBox_STBufferSize->setObjectName(QString::fromUtf8("comboBox_STBufferSize"));
-        comboBox_STBufferSize->setEnabled(false);
-
-        formLayout_2->setWidget(2, QFormLayout::FieldRole, comboBox_STBufferSize);
-
         tabWidget->addTab(tab_TimeStretch, QString());
 
         verticalLayout->addWidget(tabWidget);
@@ -219,11 +206,10 @@ public:
         label_MidiInput->setText(QApplication::translate("AudioSetupDialog", "MIDI Input:", 0, QApplication::UnicodeUTF8));
         checkBox_MidiInputTestTone->setText(QApplication::translate("AudioSetupDialog", "Enable MIDI Input Test Tone", 0, QApplication::UnicodeUTF8));
         tabWidget->setTabText(tabWidget->indexOf(tab_AudioSetup), QApplication::translate("AudioSetupDialog", "Audio Setup", 0, QApplication::UnicodeUTF8));
-        label_2->setText(QApplication::translate("AudioSetupDialog", "Time Stretch Mode:", 0, QApplication::UnicodeUTF8));
+        label_2->setText(QApplication::translate("AudioSetupDialog", "TimeStretch Mode:", 0, QApplication::UnicodeUTF8));
         radioButton_Offline->setText(QApplication::translate("AudioSetupDialog", "Offline", 0, QApplication::UnicodeUTF8));
         radioButton_RealTime->setText(QApplication::translate("AudioSetupDialog", "Real Time (experimental)", 0, QApplication::UnicodeUTF8));
-        label->setText(QApplication::translate("AudioSetupDialog", "SoundTouch Buffer Size:", 0, QApplication::UnicodeUTF8));
-        tabWidget->setTabText(tabWidget->indexOf(tab_TimeStretch), QApplication::translate("AudioSetupDialog", "Time Stretch", 0, QApplication::UnicodeUTF8));
+        tabWidget->setTabText(tabWidget->indexOf(tab_TimeStretch), QApplication::translate("AudioSetupDialog", "TimeStretch", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

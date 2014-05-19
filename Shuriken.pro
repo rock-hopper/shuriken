@@ -377,6 +377,7 @@ INCLUDEPATH += src \
 LIBS += -Llib \
     -lsndlib_shuriken \
     -laubio \
+    -lrubberband \
     -L/usr/X11R6/lib \
     -lX11 \
     -lasound \

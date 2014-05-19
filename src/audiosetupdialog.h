@@ -45,8 +45,7 @@ public:
     AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* parent = NULL );
     ~AudioSetupDialog();
 
-    int getSoundTouchBufferSize() const                     { return mSoundTouchBufferSize; }
-    bool isRTTimeStretchModeEnabled() const;
+    bool isRealTimeModeEnabled() const;
 
 protected:
     void changeEvent( QEvent* event );
@@ -69,7 +68,6 @@ private:
     AudioDeviceManager::AudioDeviceSetup mOriginalConfig;
     ScopedPointer<SynthAudioSource> mSynthAudioSource;
     AudioSourcePlayer mAudioSourcePlayer;
-    int mSoundTouchBufferSize;
 
 private:
     static void showWarningBox( const QString text, const QString infoText );
@@ -77,7 +75,6 @@ private:
     static QString getNoDeviceString() { return "<< " + tr("none") + " >>"; }
 
 private slots:
-    void on_comboBox_STBufferSize_currentIndexChanged( const int index );
     void on_radioButton_Offline_clicked();
     void on_radioButton_RealTime_clicked();
     void on_checkBox_MidiInputTestTone_clicked( const bool isChecked );

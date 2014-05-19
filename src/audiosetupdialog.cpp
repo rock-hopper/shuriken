@@ -40,21 +40,6 @@ AudioSetupDialog::AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* 
     mUI->setupUi( this );
 
 
-    // Populate "SoundTouch Buffer Size" combo box
-    QStringList bufferSizeTextList;
-    QList<int> bufferSizeDataList;
-
-    bufferSizeTextList << "64" << "128" << "256" << "512" << "1024";
-    bufferSizeDataList << 64 << 128 << 256 << 512 << 1024;
-
-    for ( int i = 0; i < bufferSizeTextList.size(); i++ )
-    {
-        mUI->comboBox_STBufferSize->addItem( bufferSizeTextList[ i ], bufferSizeDataList[ i ] );
-    }
-
-    mUI->comboBox_STBufferSize->setCurrentIndex( 3 ); // "512"
-
-
     // Get available audio backends (ALSA, JACK, etc.)
     const OwnedArray<AudioIODeviceType>& audioBackendTypes = mDeviceManager.getAvailableDeviceTypes();
 
@@ -81,7 +66,7 @@ AudioSetupDialog::~AudioSetupDialog()
 
 
 
-bool AudioSetupDialog::isRTTimeStretchModeEnabled() const
+bool AudioSetupDialog::isRealTimeModeEnabled() const
 {
     return mUI->radioButton_RealTime->isChecked();
 }
@@ -702,19 +687,12 @@ void AudioSetupDialog::on_checkBox_MidiInputTestTone_clicked( const bool isCheck
 
 void AudioSetupDialog::on_radioButton_RealTime_clicked()
 {
-    mUI->comboBox_STBufferSize->setEnabled( true );
+
 }
 
 
 
 void AudioSetupDialog::on_radioButton_Offline_clicked()
 {
-    mUI->comboBox_STBufferSize->setEnabled( false );
-}
 
-
-
-void AudioSetupDialog::on_comboBox_STBufferSize_currentIndexChanged( const int index )
-{
-    mSoundTouchBufferSize = mUI->comboBox_STBufferSize->itemData( index ).toInt();
 }

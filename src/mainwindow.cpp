@@ -25,9 +25,12 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <aubio/aubio.h>
+#include "rubberband/RubberBandStretcher.h"
 #include "commands.h"
 #include "globals.h"
 #include <QDebug>
+
+using namespace RubberBand;
 
 
 //==================================================================================================
@@ -182,9 +185,8 @@ void MainWindow::setUpSampler( const int numChans )
 {
     if ( mIsAudioInitialised )
     {
-        if ( mAudioSetupDialog->isRTTimeStretchModeEnabled() ) // Realtime timestretch mode
+        if ( mAudioSetupDialog->isRealTimeModeEnabled() ) // Realtime timestretch mode
         {
-            const int bufferSize = mAudioSetupDialog->getSoundTouchBufferSize();
             //mAudioSourcePlayer.setSource(  );
         }
         else // Offline timestretch mode
@@ -1350,47 +1352,131 @@ void MainWindow::on_pushButton_Apply_clicked()
     {
         QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-        const float rate = 1.0f;
-        const float tempo = newBPM / originalBPM;
-        const float pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
-
-
+        const qreal timeRatio = originalBPM / newBPM;
+        const qreal pitchRatio = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
         const int numChans = mCurrentSampleHeader->numChans;
-        const int hopSize = 1024;
-        int startFrameOffset = 0;
-        int numFramesRead = 0;
-        int totalNumFramesRead = 0;
 
-        SharedSampleBuffer tempSampleBuffer;
+        AudioIODevice* const currentAudioDevice = mDeviceManager.getCurrentAudioDevice();
+
+        if ( currentAudioDevice == NULL )
+            return;
+
+        const int sampleRate = roundToInt( currentAudioDevice->getCurrentSampleRate() );
+
+        RubberBandStretcher stretcher( sampleRate, numChans, RubberBandStretcher::DefaultOptions,
+                                       timeRatio, pitchRatio );
 
         // Get original, unmodified sample data
-        tempSampleBuffer = mFileHandler.getSampleData( mCurrentAudioFilePath );
+        SharedSampleBuffer tempSampleBuffer = mFileHandler.getSampleData( mCurrentAudioFilePath );
 
         if ( ! tempSampleBuffer.isNull() )
         {
             const int origNumFrames = tempSampleBuffer->getNumFrames();
+            const int newBufferSize = (qreal) origNumFrames * timeRatio;
+            const int hopSize = 1024;
+            float** inFloatBuffer = new float*[ numChans ];
+            float** outFloatBuffer = new float*[ numChans ];
+            int inFrameNum = 0;
+            int totalNumFramesRetrieved = 0;
 
-            // Calculate new sample buffer size
-            const int newBufferSize = (qreal) origNumFrames / tempo;
+            stretcher.setExpectedInputDuration( origNumFrames );
+
             mCurrentSampleBuffer->setSize( numChans, newBufferSize );
 
+            for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+            {
+                inFloatBuffer[ chanNum ] = tempSampleBuffer->getArrayOfChannels()[ chanNum ];
+                outFloatBuffer[ chanNum ] = mCurrentSampleBuffer->getArrayOfChannels()[ chanNum ];
+            }
 
+            stretcher.study( inFloatBuffer, origNumFrames, true );
 
-//            // Ensure enough space to store output from pipeline
-//            if ( mCurrentSampleBuffer->getNumFrames() < totalNumFramesRead + hopSize )
-//            {
-//                mCurrentSampleBuffer->setSize( numChans,                        // No. of channels
-//                                               totalNumFramesRead + hopSize,    // New no. of frames
-//                                               true,                            // Keep existing content
-//                                               false,                           // Clear extra space
-//                                               true );                          // Avoid reallocating
-//            }
+            while ( inFrameNum < origNumFrames )
+            {
+                const int numFramesToProcess = inFrameNum + hopSize <= origNumFrames ?
+                                               hopSize : origNumFrames - inFrameNum;
+                const bool isFinal = (inFrameNum + hopSize >= origNumFrames);
 
+                stretcher.process( inFloatBuffer, numFramesToProcess, isFinal );
 
+                const int numAvailable = stretcher.available();
 
-            mCurrentSampleBuffer->setSize( numChans, newBufferSize, true );
+                if ( numAvailable > 0 )
+                {
+                    // Ensure enough space to store output
+                    if ( mCurrentSampleBuffer->getNumFrames() < totalNumFramesRetrieved + numAvailable )
+                    {
+                        mCurrentSampleBuffer->setSize( numChans,                                  // No. of channels
+                                                       totalNumFramesRetrieved + numAvailable,    // New no. of frames
+                                                       true,                                      // Keep existing content
+                                                       false,                                     // Clear extra space
+                                                       true );                                    // Avoid reallocating
 
-            mUI->waveGraphicsView->stretch( newBufferSize );
+                        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                        {
+                            outFloatBuffer[ chanNum ] = mCurrentSampleBuffer->getArrayOfChannels()[ chanNum ];
+                            outFloatBuffer[ chanNum ] += totalNumFramesRetrieved;
+                        }
+                    }
+
+                    const int numRetrieved = stretcher.retrieve( outFloatBuffer, numAvailable );
+
+                    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                    {
+                        outFloatBuffer[ chanNum ] += numRetrieved;
+                    }
+                    totalNumFramesRetrieved += numRetrieved;
+                }
+
+                for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                {
+                    inFloatBuffer[ chanNum ] += numFramesToProcess;
+                }
+                inFrameNum += numFramesToProcess;
+            }
+
+            int numAvailable;
+
+            while ( (numAvailable = stretcher.available()) >= 0 )
+            {
+                if ( numAvailable > 0 )
+                {
+                    // Ensure enough space to store output
+                    if ( mCurrentSampleBuffer->getNumFrames() < totalNumFramesRetrieved + numAvailable )
+                    {
+                        mCurrentSampleBuffer->setSize( numChans,                                  // No. of channels
+                                                       totalNumFramesRetrieved + numAvailable,    // New no. of frames
+                                                       true,                                      // Keep existing content
+                                                       false,                                     // Clear extra space
+                                                       true );                                    // Avoid reallocating
+
+                        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                        {
+                            outFloatBuffer[ chanNum ] = mCurrentSampleBuffer->getArrayOfChannels()[ chanNum ];
+                            outFloatBuffer[ chanNum ] += totalNumFramesRetrieved;
+                        }
+                    }
+
+                    const int numRetrieved = stretcher.retrieve( outFloatBuffer, numAvailable );
+
+                    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                    {
+                        outFloatBuffer[ chanNum ] += numRetrieved;
+                    }
+                    totalNumFramesRetrieved += numRetrieved;
+                }
+                else
+                {
+                    usleep( 10000 );
+                }
+            }
+
+            if ( mCurrentSampleBuffer->getNumFrames() != totalNumFramesRetrieved )
+            {
+                mCurrentSampleBuffer->setSize( numChans, totalNumFramesRetrieved, true );
+            }
+
+            mUI->waveGraphicsView->stretch( totalNumFramesRetrieved );
 
             mSamplerAudioSource->setSample( mCurrentSampleBuffer, mCurrentSampleHeader->sampleRate );
 
@@ -1412,6 +1498,9 @@ void MainWindow::on_pushButton_Apply_clicked()
                 // Pass modified sample ranges to the sampler
                 mSamplerAudioSource->setSampleRanges( mSampleRangeList );
             }
+
+            delete[] inFloatBuffer;
+            delete[] outFloatBuffer;
 
             QApplication::restoreOverrideCursor();
         }
