@@ -21,13 +21,16 @@
 */
 
 #include "wavegraphicsview.h"
+#include <QDebug>
 //#include <QGLWidget>
 
 
 //==================================================================================================
 // Public:
 
-WaveGraphicsView::WaveGraphicsView( QWidget* parent ) : QGraphicsView( parent )
+WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
+    QGraphicsView( parent ),
+    mCurrentStretchRatio( 1.0 )
 {
     // Set up view
 //    setViewport( new QGLWidget( QGLFormat(QGL::SampleBuffers) ) );
@@ -258,20 +261,20 @@ QList<int> WaveGraphicsView::getSlicePointFrameNumList()
 
 
 
-void WaveGraphicsView::stretch( const int totalNumFrames )
+void WaveGraphicsView::stretch( const qreal ratio, const int newTotalNumFrames )
 {
-    const int oldTotalNumFrames = mNumFrames;
-    mNumFrames = totalNumFrames;
+    mNumFrames = newTotalNumFrames;
 
-    const qreal ratio = (qreal) mNumFrames / (qreal) oldTotalNumFrames;
 
+    // Update start frame and length of every waveform item, preserve current ordering of waveform item list
     QList<SharedWaveformItem> tempList( mWaveformItemList );
 
     qSort( tempList.begin(), tempList.end(), WaveformItem::isLessThan );
 
     foreach ( SharedWaveformItem item, tempList )
     {
-        const int newStartFrame = item->getStartFrame() * ratio;
+        const int origStartFrame = roundToInt( item->getStartFrame() / mCurrentStretchRatio );
+        const int newStartFrame = roundToInt( origStartFrame * ratio );
         item->setStartFrame( newStartFrame );
     }
 
@@ -284,11 +287,17 @@ void WaveGraphicsView::stretch( const int totalNumFrames )
         tempList.at( i )->setNumFrames( newNumFrames );
     }
 
+
+    // Update frame nos. of all slice point items
     foreach ( SharedSlicePointItem item, mSlicePointItemList )
     {
-        const int newFrameNum = (int) floor( (item->getFrameNum() * ratio) + 0.5 );
+        const int origFrameNum = roundToInt( item->getFrameNum() / mCurrentStretchRatio );
+        const int newFrameNum = roundToInt( origFrameNum * ratio );
         moveSlicePoint( item, newFrameNum );
     }
+
+
+    mCurrentStretchRatio = ratio;
 }
 
 
@@ -303,6 +312,8 @@ void WaveGraphicsView::clearAll()
 
     mWaveformItemList.clear();
     mSlicePointItemList.clear();
+
+    mCurrentStretchRatio = 1.0;
 }
 
 

@@ -52,7 +52,7 @@ public:
     void showSlicePoints();
     QList<int> getSlicePointFrameNumList();
 
-    void stretch( const int totalNumFrames );
+    void stretch( const qreal ratio, const int newTotalNumFrames );
 
     void clearAll();
     void clearWaveform();
@@ -73,6 +73,7 @@ private:
     QList<SharedWaveformItem> mWaveformItemList;
     QList<SharedSlicePointItem> mSlicePointItemList;
     int mNumFrames;
+    qreal mCurrentStretchRatio;
 
 signals:
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );

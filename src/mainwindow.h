@@ -92,6 +92,8 @@ private:
 
     QUndoStack mUndoStack;
 
+    qreal mCurrentTimeStretchRatio;
+
 private:
     enum AubioRoutine { ONSET_DETECTION, BEAT_DETECTION };
 

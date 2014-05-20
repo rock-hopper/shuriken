@@ -25,7 +25,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <aubio/aubio.h>
-#include "rubberband/RubberBandStretcher.h"
+#include <rubberband/RubberBandStretcher.h>
 #include "commands.h"
 #include "globals.h"
 #include <QDebug>
@@ -40,7 +40,8 @@ MainWindow::MainWindow( QWidget* parent ) :
     QMainWindow( parent ),
     mUI( new Ui::MainWindow ),
     mLastOpenedImportDir( QDir::homePath() ),
-    mLastOpenedProjDir( QDir::homePath() )
+    mLastOpenedProjDir( QDir::homePath() ),
+    mCurrentTimeStretchRatio( 1.0 )
 {
     // Set up user interface
     mUI->setupUi( this );
@@ -900,6 +901,7 @@ void MainWindow::on_actionClose_Project_triggered()
     mCurrentSampleHeader.clear();
     mSampleRangeList.clear();
     tearDownSampler();
+    mCurrentTimeStretchRatio = 1.0;
 
     mUI->waveGraphicsView->clearAll();
     on_actionZoom_Original_triggered();
@@ -1355,13 +1357,7 @@ void MainWindow::on_pushButton_Apply_clicked()
         const qreal timeRatio = originalBPM / newBPM;
         const qreal pitchRatio = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
         const int numChans = mCurrentSampleHeader->numChans;
-
-        AudioIODevice* const currentAudioDevice = mDeviceManager.getCurrentAudioDevice();
-
-        if ( currentAudioDevice == NULL )
-            return;
-
-        const int sampleRate = roundToInt( currentAudioDevice->getCurrentSampleRate() );
+        const int sampleRate = mCurrentSampleHeader->sampleRate;
 
         RubberBandStretcher stretcher( sampleRate, numChans, RubberBandStretcher::DefaultOptions,
                                        timeRatio, pitchRatio );
@@ -1372,12 +1368,20 @@ void MainWindow::on_pushButton_Apply_clicked()
         if ( ! tempSampleBuffer.isNull() )
         {
             const int origNumFrames = tempSampleBuffer->getNumFrames();
-            const int newBufferSize = (qreal) origNumFrames * timeRatio;
-            const int hopSize = 1024;
+            const int newBufferSize = roundToInt( origNumFrames * timeRatio );
             float** inFloatBuffer = new float*[ numChans ];
             float** outFloatBuffer = new float*[ numChans ];
             int inFrameNum = 0;
             int totalNumFramesRetrieved = 0;
+//            std::map<size_t, size_t> mapping;
+//
+//            if ( ! mSampleRangeList.isEmpty() )
+//            {
+//                foreach ( SharedSampleRange range, mSampleRangeList )
+//                {
+//                    mapping[ range->startFrame ] = roundToInt( range->startFrame * timeRatio );
+//                }
+//            }
 
             stretcher.setExpectedInputDuration( origNumFrames );
 
@@ -1391,11 +1395,18 @@ void MainWindow::on_pushButton_Apply_clicked()
 
             stretcher.study( inFloatBuffer, origNumFrames, true );
 
+//            if ( ! mapping.empty() )
+//            {
+//                stretcher.setKeyFrameMap( mapping );
+//            }
+
             while ( inFrameNum < origNumFrames )
             {
-                const int numFramesToProcess = inFrameNum + hopSize <= origNumFrames ?
-                                               hopSize : origNumFrames - inFrameNum;
-                const bool isFinal = (inFrameNum + hopSize >= origNumFrames);
+                const int numRequired = stretcher.getSamplesRequired();
+
+                const int numFramesToProcess = inFrameNum + numRequired <= origNumFrames ?
+                                               numRequired : origNumFrames - inFrameNum;
+                const bool isFinal = (inFrameNum + numRequired >= origNumFrames);
 
                 stretcher.process( inFloatBuffer, numFramesToProcess, isFinal );
 
@@ -1408,9 +1419,7 @@ void MainWindow::on_pushButton_Apply_clicked()
                     {
                         mCurrentSampleBuffer->setSize( numChans,                                  // No. of channels
                                                        totalNumFramesRetrieved + numAvailable,    // New no. of frames
-                                                       true,                                      // Keep existing content
-                                                       false,                                     // Clear extra space
-                                                       true );                                    // Avoid reallocating
+                                                       true );                                    // Keep existing content
 
                         for ( int chanNum = 0; chanNum < numChans; chanNum++ )
                         {
@@ -1446,9 +1455,7 @@ void MainWindow::on_pushButton_Apply_clicked()
                     {
                         mCurrentSampleBuffer->setSize( numChans,                                  // No. of channels
                                                        totalNumFramesRetrieved + numAvailable,    // New no. of frames
-                                                       true,                                      // Keep existing content
-                                                       false,                                     // Clear extra space
-                                                       true );                                    // Avoid reallocating
+                                                       true );                                    // Keep existing content
 
                         for ( int chanNum = 0; chanNum < numChans; chanNum++ )
                         {
@@ -1476,28 +1483,38 @@ void MainWindow::on_pushButton_Apply_clicked()
                 mCurrentSampleBuffer->setSize( numChans, totalNumFramesRetrieved, true );
             }
 
-            mUI->waveGraphicsView->stretch( totalNumFramesRetrieved );
+            mUI->waveGraphicsView->stretch( timeRatio, totalNumFramesRetrieved );
 
             mSamplerAudioSource->setSample( mCurrentSampleBuffer, mCurrentSampleHeader->sampleRate );
 
             if ( ! mSampleRangeList.isEmpty() )
             {
-                // Update mSampleRangeList without losing its current ordering
-                QList<SharedSampleRange> newList;
-                getSampleRanges( newList );
+                // Update start frame and length of all sample ranges while preserving current ordering of list
+                QList<SharedSampleRange> tempList( mSampleRangeList );
 
-                QList<SharedSampleRange> currentList( mSampleRangeList );
-                qSort( currentList.begin(), currentList.end(), SampleRange::isLessThan );
+                qSort( tempList.begin(), tempList.end(), SampleRange::isLessThan );
 
-                for ( int i = 0; i < newList.size(); i++ )
+                foreach ( SharedSampleRange range, tempList )
                 {
-                    currentList.at( i )->startFrame = newList.at( i )->startFrame;
-                    currentList.at( i )->numFrames = newList.at( i )->numFrames;
+                    const int origStartFrame = roundToInt( range->startFrame / mCurrentTimeStretchRatio );
+                    const int newStartFrame = roundToInt( origStartFrame * timeRatio );
+                    range->startFrame = newStartFrame;
+                }
+
+                for ( int i = 0; i < tempList.size(); i++ )
+                {
+                    const int newNumFrames = i + 1 < tempList.size() ?
+                                             tempList.at( i + 1 )->startFrame - tempList.at( i )->startFrame :
+                                             totalNumFramesRetrieved - tempList.at( i )->startFrame;
+
+                    tempList.at( i )->numFrames = newNumFrames;
                 }
 
                 // Pass modified sample ranges to the sampler
                 mSamplerAudioSource->setSampleRanges( mSampleRangeList );
             }
+
+            mCurrentTimeStretchRatio = timeRatio;
 
             delete[] inFloatBuffer;
             delete[] outFloatBuffer;
