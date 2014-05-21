@@ -21,8 +21,11 @@
 */
 
 #include "commands.h"
+#include <rubberband/RubberBandStretcher.h>
 #include <QApplication>
 //#include <QDebug>
+
+using namespace RubberBand;
 
 
 AddSlicePointItemCommand::AddSlicePointItemCommand( const int frameNum,
@@ -295,22 +298,300 @@ void MoveWaveformItemCommand::redo()
 
 //==================================================================================================
 
-ApplyTimeStretchCommand::ApplyTimeStretchCommand( QUndoCommand* parent ) :
-    QUndoCommand( parent )
+ApplyTimeStretchCommand::ApplyTimeStretchCommand( MainWindow* const mainWindow,
+                                                  WaveGraphicsView* const graphicsView,
+                                                  QDoubleSpinBox* const spinBoxOriginalBPM,
+                                                  QDoubleSpinBox* const spinBoxNewBPM,
+                                                  QCheckBox* const checkBoxPitchCorrection,
+                                                  QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    mMainWindow( mainWindow ),
+    mGraphicsView( graphicsView ),
+    mSpinBoxOriginalBPM( spinBoxOriginalBPM ),
+    mSpinBoxNewBPM( spinBoxNewBPM ),
+    mCheckBoxPitchCorrection( checkBoxPitchCorrection ),
+    mOriginalBPM( mSpinBoxOriginalBPM->value() ),
+    mNewBPM( mSpinBoxNewBPM->value() ),
+    mIsPitchCorrectionEnabled( mCheckBoxPitchCorrection->isChecked() )
 {
-    ;
+    setText( "Apply Timestretch" );
+
+    // Search undo stack for previous timestretch command
+    int index = mMainWindow->mUndoStack.index();
+    bool isPrevTimeStretchCommandFound = false;
+
+    while ( index >= 0 && ! isPrevTimeStretchCommandFound )
+    {
+        const QUndoCommand* command = mMainWindow->mUndoStack.command( index );
+        const ApplyTimeStretchCommand* tsCommand = dynamic_cast<const ApplyTimeStretchCommand*>( command );
+
+        if ( tsCommand != NULL )
+        {
+            mPrevOriginalBPM = tsCommand->getOriginalBPM();
+            mPrevNewBPM = tsCommand->getNewBPM();
+            mPrevIsPitchCorrectionEnabled = tsCommand->isPitchCorrectionEnabled();
+
+            isPrevTimeStretchCommandFound = true;
+        }
+
+        --index;
+    }
+
+    // If no previous timestretch command was found then set default values
+    if ( ! isPrevTimeStretchCommandFound )
+    {
+        mPrevOriginalBPM = 0.0;
+        mPrevNewBPM = 0.0;
+        mPrevIsPitchCorrectionEnabled = true;
+    }
 }
 
 
 
 void ApplyTimeStretchCommand::undo()
 {
-    ;
+    if ( mPrevOriginalBPM > 0.0 && mPrevNewBPM > 0.0 )
+    {
+        const qreal timeRatio = mPrevOriginalBPM / mPrevNewBPM;
+        const qreal pitchRatio = mPrevIsPitchCorrectionEnabled ? 1.0 : mPrevNewBPM / mPrevOriginalBPM;
+
+        stretch( timeRatio, pitchRatio );
+    }
+    else // Original, unstretched audio
+    {
+        stretch( 1.0, 1.0 );
+    }
+
+    mSpinBoxOriginalBPM->setValue( mPrevOriginalBPM );
+    mSpinBoxNewBPM->setValue( mPrevNewBPM );
+    mCheckBoxPitchCorrection->setChecked( mPrevIsPitchCorrectionEnabled );
 }
 
 
 
 void ApplyTimeStretchCommand::redo()
+{    
+    const qreal timeRatio = mOriginalBPM / mNewBPM;
+    const qreal pitchRatio = mIsPitchCorrectionEnabled ? 1.0 : mNewBPM / mOriginalBPM;
+
+    stretch( timeRatio, pitchRatio );
+
+    mSpinBoxOriginalBPM->setValue( mOriginalBPM );
+    mSpinBoxNewBPM->setValue( mNewBPM );
+    mCheckBoxPitchCorrection->setChecked( mIsPitchCorrectionEnabled );
+}
+
+
+void ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchRatio )
 {
-    ;
+    if ( timeRatio == 1.0 )
+    {
+        QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+        // Get original, unmodified sample data
+        mMainWindow->mCurrentSampleBuffer = mMainWindow->mFileHandler.getSampleData( mMainWindow->mCurrentAudioFilePath );
+
+        if ( ! mMainWindow->mCurrentSampleBuffer.isNull() )
+        {
+            updateAll( timeRatio, mMainWindow->mCurrentSampleBuffer->getNumFrames() );
+            QApplication::restoreOverrideCursor();
+        }
+        else // Failed to read audio file
+        {
+            QApplication::restoreOverrideCursor();
+            MainWindow::showWarningBox( mMainWindow->mFileHandler.getLastErrorTitle(),
+                                        mMainWindow->mFileHandler.getLastErrorInfo() );
+        }
+    }
+    else
+    {
+        applyTimeStretch( timeRatio, pitchRatio );
+    }
+}
+
+
+
+void ApplyTimeStretchCommand::applyTimeStretch( const qreal timeRatio, const qreal pitchRatio )
+{
+    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+    const int numChans = mMainWindow->mCurrentSampleHeader->numChans;
+    const int sampleRate = mMainWindow->mCurrentSampleHeader->sampleRate;
+
+    RubberBandStretcher stretcher( sampleRate, numChans, RubberBandStretcher::DefaultOptions,
+                                   timeRatio, pitchRatio );
+
+    // Get original, unmodified sample data
+    SharedSampleBuffer tempSampleBuffer = mMainWindow->mFileHandler.getSampleData( mMainWindow->mCurrentAudioFilePath );
+
+    if ( ! tempSampleBuffer.isNull() )
+    {
+        const int origNumFrames = tempSampleBuffer->getNumFrames();
+        const int newBufferSize = roundToInt( origNumFrames * timeRatio );
+        float** inFloatBuffer = new float*[ numChans ];
+        float** outFloatBuffer = new float*[ numChans ];
+        int inFrameNum = 0;
+        int totalNumFramesRetrieved = 0;
+//            std::map<size_t, size_t> mapping;
+//
+//            if ( ! mMainWindow->mSampleRangeList.isEmpty() )
+//            {
+//                foreach ( SharedSampleRange range, mMainWindow->mSampleRangeList )
+//                {
+//                    mapping[ range->startFrame ] = roundToInt( range->startFrame * timeRatio );
+//                }
+//            }
+
+        stretcher.setExpectedInputDuration( origNumFrames );
+
+        mMainWindow->mCurrentSampleBuffer->setSize( numChans, newBufferSize );
+
+        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+        {
+            inFloatBuffer[ chanNum ] = tempSampleBuffer->getArrayOfChannels()[ chanNum ];
+            outFloatBuffer[ chanNum ] = mMainWindow->mCurrentSampleBuffer->getArrayOfChannels()[ chanNum ];
+        }
+
+        stretcher.study( inFloatBuffer, origNumFrames, true );
+
+//            if ( ! mapping.empty() )
+//            {
+//                stretcher.setKeyFrameMap( mapping );
+//            }
+
+        while ( inFrameNum < origNumFrames )
+        {
+            const int numRequired = stretcher.getSamplesRequired();
+
+            const int numFramesToProcess = inFrameNum + numRequired <= origNumFrames ?
+                                           numRequired : origNumFrames - inFrameNum;
+            const bool isFinal = (inFrameNum + numRequired >= origNumFrames);
+
+            stretcher.process( inFloatBuffer, numFramesToProcess, isFinal );
+
+            const int numAvailable = stretcher.available();
+
+            if ( numAvailable > 0 )
+            {
+                // Ensure enough space to store output
+                if ( mMainWindow->mCurrentSampleBuffer->getNumFrames() < totalNumFramesRetrieved + numAvailable )
+                {
+                    mMainWindow->mCurrentSampleBuffer->setSize( numChans,                                  // No. of channels
+                                                                totalNumFramesRetrieved + numAvailable,    // New no. of frames
+                                                                true );                                    // Keep existing content
+
+                    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                    {
+                        outFloatBuffer[ chanNum ] = mMainWindow->mCurrentSampleBuffer->getArrayOfChannels()[ chanNum ];
+                        outFloatBuffer[ chanNum ] += totalNumFramesRetrieved;
+                    }
+                }
+
+                const int numRetrieved = stretcher.retrieve( outFloatBuffer, numAvailable );
+
+                for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                {
+                    outFloatBuffer[ chanNum ] += numRetrieved;
+                }
+                totalNumFramesRetrieved += numRetrieved;
+            }
+
+            for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+            {
+                inFloatBuffer[ chanNum ] += numFramesToProcess;
+            }
+            inFrameNum += numFramesToProcess;
+        }
+
+        int numAvailable;
+
+        while ( (numAvailable = stretcher.available()) >= 0 )
+        {
+            if ( numAvailable > 0 )
+            {
+                // Ensure enough space to store output
+                if ( mMainWindow->mCurrentSampleBuffer->getNumFrames() < totalNumFramesRetrieved + numAvailable )
+                {
+                    mMainWindow->mCurrentSampleBuffer->setSize( numChans,                                  // No. of channels
+                                                                totalNumFramesRetrieved + numAvailable,    // New no. of frames
+                                                                true );                                    // Keep existing content
+
+                    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                    {
+                        outFloatBuffer[ chanNum ] = mMainWindow->mCurrentSampleBuffer->getArrayOfChannels()[ chanNum ];
+                        outFloatBuffer[ chanNum ] += totalNumFramesRetrieved;
+                    }
+                }
+
+                const int numRetrieved = stretcher.retrieve( outFloatBuffer, numAvailable );
+
+                for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                {
+                    outFloatBuffer[ chanNum ] += numRetrieved;
+                }
+                totalNumFramesRetrieved += numRetrieved;
+            }
+            else
+            {
+                usleep( 10000 );
+            }
+        }
+
+        if ( mMainWindow->mCurrentSampleBuffer->getNumFrames() != totalNumFramesRetrieved )
+        {
+            mMainWindow->mCurrentSampleBuffer->setSize( numChans, totalNumFramesRetrieved, true );
+        }
+
+        updateAll( timeRatio, totalNumFramesRetrieved );
+
+        delete[] inFloatBuffer;
+        delete[] outFloatBuffer;
+
+        QApplication::restoreOverrideCursor();
+    }
+    else // Failed to read audio file
+    {
+        QApplication::restoreOverrideCursor();
+        MainWindow::showWarningBox( mMainWindow->mFileHandler.getLastErrorTitle(),
+                                    mMainWindow->mFileHandler.getLastErrorInfo() );
+    }
+}
+
+
+
+void ApplyTimeStretchCommand::updateAll( const qreal timeRatio, const int newTotalNumFrames )
+{
+    mGraphicsView->stretch( timeRatio, newTotalNumFrames );
+
+    mMainWindow->mSamplerAudioSource->setSample( mMainWindow->mCurrentSampleBuffer,
+                                                 mMainWindow->mCurrentSampleHeader->sampleRate );
+
+    if ( ! mMainWindow->mSampleRangeList.isEmpty() )
+    {
+        // Update start frame and length of all sample ranges while preserving current ordering of list
+        QList<SharedSampleRange> tempList( mMainWindow->mSampleRangeList );
+
+        qSort( tempList.begin(), tempList.end(), SampleRange::isLessThan );
+
+        foreach ( SharedSampleRange range, tempList )
+        {
+            const int origStartFrame = roundToInt( range->startFrame / mMainWindow->mCurrentTimeStretchRatio );
+            const int newStartFrame = roundToInt( origStartFrame * timeRatio );
+            range->startFrame = newStartFrame;
+        }
+
+        for ( int i = 0; i < tempList.size(); i++ )
+        {
+            const int newNumFrames = i + 1 < tempList.size() ?
+                                     tempList.at( i + 1 )->startFrame - tempList.at( i )->startFrame :
+                                     newTotalNumFrames - tempList.at( i )->startFrame;
+
+            tempList.at( i )->numFrames = newNumFrames;
+        }
+
+        // Pass modified sample ranges to the sampler
+        mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
+    }
+
+    mMainWindow->mCurrentTimeStretchRatio = timeRatio;
 }

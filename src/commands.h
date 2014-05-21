@@ -26,6 +26,8 @@
 #include <QUndoCommand>
 #include <QPushButton>
 #include <QAction>
+#include <QDoubleSpinBox>
+#include <QCheckBox>
 #include "wavegraphicsview.h"
 #include "slicepointitem.h"
 #include "mainwindow.h"
@@ -152,10 +154,37 @@ private:
 
 class ApplyTimeStretchCommand : public QUndoCommand
 {
-    ApplyTimeStretchCommand( QUndoCommand* parent = NULL );
+public:
+    ApplyTimeStretchCommand( MainWindow* const mainWindow,
+                             WaveGraphicsView* const graphicsView,
+                             QDoubleSpinBox* const spinBoxOriginalBPM,
+                             QDoubleSpinBox* const spinBoxNewBPM,
+                             QCheckBox* const checkBoxPitchCorrection,
+                             QUndoCommand* parent = NULL );
 
     void undo();
     void redo();
+
+    qreal getOriginalBPM() const            { return mOriginalBPM; }
+    qreal getNewBPM() const                 { return mNewBPM; }
+    bool isPitchCorrectionEnabled() const   { return mIsPitchCorrectionEnabled; }
+
+private:
+    void stretch( const qreal timeRatio, const qreal pitchRatio );
+    void applyTimeStretch( const qreal timeRatio, const qreal pitchRatio );
+    void updateAll( const qreal timeRatio, const int newTotalNumFrames );
+
+    MainWindow* const mMainWindow;
+    WaveGraphicsView* const mGraphicsView;
+    QDoubleSpinBox* const mSpinBoxOriginalBPM;
+    QDoubleSpinBox* const mSpinBoxNewBPM;
+    QCheckBox* const mCheckBoxPitchCorrection;
+    const qreal mOriginalBPM;
+    const qreal mNewBPM;
+    const bool mIsPitchCorrectionEnabled;
+    qreal mPrevOriginalBPM;
+    qreal mPrevNewBPM;
+    bool mPrevIsPitchCorrectionEnabled;
 };
 
 

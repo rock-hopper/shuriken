@@ -45,6 +45,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     friend class CreateSlicesCommand;
+    friend class ApplyTimeStretchCommand;
 
 public:
     MainWindow( QWidget* parent = NULL );
