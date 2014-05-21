@@ -298,6 +298,13 @@ void WaveGraphicsView::stretch( const qreal ratio, const int newTotalNumFrames )
 
 
     mCurrentStretchRatio = ratio;
+
+
+    // Hack to force redraw of scene
+    QSize size( sceneRect().width(), sceneRect().height() );
+    QSize oldSize( sceneRect().width(), sceneRect().height() );
+    QResizeEvent event( size, oldSize );
+    resizeEvent( &event );
 }
 
 
