@@ -389,11 +389,21 @@ void ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchR
         QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
         // Get original, unmodified sample data
-        mMainWindow->mCurrentSampleBuffer = mMainWindow->mFileHandler.getSampleData( mMainWindow->mCurrentAudioFilePath );
+        SharedSampleBuffer tempSampleBuffer = mMainWindow->mFileHandler.getSampleData( mMainWindow->mCurrentAudioFilePath );
 
-        if ( ! mMainWindow->mCurrentSampleBuffer.isNull() )
+        if ( ! tempSampleBuffer.isNull() )
         {
-            updateAll( timeRatio, mMainWindow->mCurrentSampleBuffer->getNumFrames() );
+            const int numChans = mMainWindow->mCurrentSampleHeader->numChans;
+            const int numFrames = tempSampleBuffer->getNumFrames();
+
+            mMainWindow->mCurrentSampleBuffer->setSize( numChans, numFrames );
+
+            for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+            {
+                mMainWindow->mCurrentSampleBuffer->copyFrom( chanNum, 0, *tempSampleBuffer.data(), chanNum, 0, numFrames );
+            }
+
+            updateAll( timeRatio, numFrames );
             QApplication::restoreOverrideCursor();
         }
         else // Failed to read audio file
