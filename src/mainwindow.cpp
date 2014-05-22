@@ -37,8 +37,7 @@ MainWindow::MainWindow( QWidget* parent ) :
     QMainWindow( parent ),
     mUI( new Ui::MainWindow ),
     mLastOpenedImportDir( QDir::homePath() ),
-    mLastOpenedProjDir( QDir::homePath() ),
-    mCurrentTimeStretchRatio( 1.0 )
+    mLastOpenedProjDir( QDir::homePath() )
 {
     // Set up user interface
     mUI->setupUi( this );
@@ -526,7 +525,7 @@ void MainWindow::fillAubioInputBuffer( fvec_t* inputBuffer, const SharedSampleBu
 
 
 //==================================================================================================
-// Private Slots:
+// Public Slots:
 
 void MainWindow::reorderSampleRangeList( const int startOrderPos, const int destOrderPos )
 {
@@ -536,9 +535,12 @@ void MainWindow::reorderSampleRangeList( const int startOrderPos, const int dest
 
 
 
+//==================================================================================================
+// Private Slots:
+
 void MainWindow::recordWaveformItemMove( const int startOrderPos, const int destOrderPos )
 {
-    QUndoCommand* command = new MoveWaveformItemCommand( startOrderPos, destOrderPos, mUI->waveGraphicsView );
+    QUndoCommand* command = new MoveWaveformItemCommand( startOrderPos, destOrderPos, mUI->waveGraphicsView, this );
     mUndoStack.push( command );
 }
 
@@ -898,7 +900,6 @@ void MainWindow::on_actionClose_Project_triggered()
     mCurrentSampleHeader.clear();
     mSampleRangeList.clear();
     tearDownSampler();
-    mCurrentTimeStretchRatio = 1.0;
 
     mUI->waveGraphicsView->clearAll();
     on_actionZoom_Original_triggered();

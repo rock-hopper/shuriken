@@ -93,8 +93,6 @@ private:
 
     QUndoStack mUndoStack;
 
-    qreal mCurrentTimeStretchRatio;
-
 private:
     enum AubioRoutine { ONSET_DETECTION, BEAT_DETECTION };
 
@@ -112,6 +110,9 @@ private:
                                       const int sampleOffset );
 
     static const qreal MIN_INTER_ONSET_SECS = 0.03;
+
+public slots:
+    void reorderSampleRangeList( const int startOrderPos, const int destOrderPos );
 
 private slots:
     void on_pushButton_Apply_clicked();
@@ -152,7 +153,7 @@ private slots:
     void on_actionSave_Project_triggered();
     void on_actionOpen_Project_triggered();
 
-    void reorderSampleRangeList( const int startOrderPos, const int destOrderPos );
+
     void recordWaveformItemMove( const int startOrderPos, const int destOrderPos );
     void recordSlicePointItemMove( const SharedSlicePointItem slicePointItem,
                                    const int oldFrameNum,

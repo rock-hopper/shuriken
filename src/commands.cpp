@@ -266,11 +266,13 @@ void CreateSlicesCommand::redo()
 MoveWaveformItemCommand::MoveWaveformItemCommand( const int startOrderPos,
                                                   const int destOrderPos,
                                                   WaveGraphicsView* const graphicsView,
+                                                  MainWindow* const mainWindow,
                                                   QUndoCommand* parent ) :
     QUndoCommand( parent ),
     mStartOrderPos( startOrderPos ),
     mDestOrderPos( destOrderPos ),
-    mGraphicsView( graphicsView )
+    mGraphicsView( graphicsView ),
+    mMainWindow( mainWindow )
 {
     setText( "Move Waveform Item" );
     mIsFirstRedoCall = true;
@@ -281,6 +283,7 @@ MoveWaveformItemCommand::MoveWaveformItemCommand( const int startOrderPos,
 void MoveWaveformItemCommand::undo()
 {
     mGraphicsView->moveWaveformItem( mDestOrderPos, mStartOrderPos );
+    mMainWindow->reorderSampleRangeList( mDestOrderPos, mStartOrderPos );
 }
 
 
@@ -290,6 +293,7 @@ void MoveWaveformItemCommand::redo()
     if ( ! mIsFirstRedoCall )
     {
         mGraphicsView->moveWaveformItem( mStartOrderPos, mDestOrderPos );
+        mMainWindow->reorderSampleRangeList( mStartOrderPos, mDestOrderPos );
     }
     mIsFirstRedoCall = false;
 }
@@ -330,10 +334,10 @@ ApplyTimeStretchCommand::ApplyTimeStretchCommand( MainWindow* const mainWindow,
             mPrevOriginalBPM = tsCommand->getOriginalBPM();
             mPrevNewBPM = tsCommand->getNewBPM();
             mPrevIsPitchCorrectionEnabled = tsCommand->isPitchCorrectionEnabled();
+            mPrevTimeRatio = mPrevOriginalBPM / mPrevNewBPM;
 
             isPrevTimeStretchCommandFound = true;
         }
-
         --index;
     }
 
@@ -343,6 +347,7 @@ ApplyTimeStretchCommand::ApplyTimeStretchCommand( MainWindow* const mainWindow,
         mPrevOriginalBPM = 0.0;
         mPrevNewBPM = 0.0;
         mPrevIsPitchCorrectionEnabled = true;
+        mPrevTimeRatio = 1.0;
     }
 }
 
@@ -350,6 +355,8 @@ ApplyTimeStretchCommand::ApplyTimeStretchCommand( MainWindow* const mainWindow,
 
 void ApplyTimeStretchCommand::undo()
 {
+    mPrevTimeRatio = mOriginalBPM / mNewBPM;
+
     if ( mPrevOriginalBPM > 0.0 && mPrevNewBPM > 0.0 )
     {
         const qreal timeRatio = mPrevOriginalBPM / mPrevNewBPM;
@@ -360,6 +367,15 @@ void ApplyTimeStretchCommand::undo()
     else // Original, unstretched audio
     {
         stretch( 1.0, 1.0 );
+    }
+
+    if ( mPrevOriginalBPM > 0.0 && mPrevNewBPM > 0.0 )
+    {
+        mPrevTimeRatio = mPrevOriginalBPM / mPrevNewBPM;
+    }
+    else
+    {
+        mPrevTimeRatio = 1.0;
     }
 
     mSpinBoxOriginalBPM->setValue( mPrevOriginalBPM );
@@ -380,6 +396,7 @@ void ApplyTimeStretchCommand::redo()
     mSpinBoxNewBPM->setValue( mNewBPM );
     mCheckBoxPitchCorrection->setChecked( mIsPitchCorrectionEnabled );
 }
+
 
 
 void ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchRatio )
@@ -585,7 +602,7 @@ void ApplyTimeStretchCommand::updateAll( const qreal timeRatio, const int newTot
 
         foreach ( SharedSampleRange range, tempList )
         {
-            const int origStartFrame = roundToInt( range->startFrame / mMainWindow->mCurrentTimeStretchRatio );
+            const int origStartFrame = roundToInt( range->startFrame / mPrevTimeRatio );
             const int newStartFrame = roundToInt( origStartFrame * timeRatio );
             range->startFrame = newStartFrame;
         }
@@ -602,6 +619,4 @@ void ApplyTimeStretchCommand::updateAll( const qreal timeRatio, const int newTot
         // Pass modified sample ranges to the sampler
         mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
     }
-
-    mMainWindow->mCurrentTimeStretchRatio = timeRatio;
 }

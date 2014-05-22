@@ -138,6 +138,7 @@ public:
     MoveWaveformItemCommand( const int startOrderPos,
                              const int destOrderPos,
                              WaveGraphicsView* const graphicsView,
+                             MainWindow* const mainWindow,
                              QUndoCommand* parent = NULL );
 
     void undo();
@@ -147,6 +148,7 @@ private:
     const int mStartOrderPos;
     const int mDestOrderPos;
     WaveGraphicsView* const mGraphicsView;
+    MainWindow* const mMainWindow;
     bool mIsFirstRedoCall;
 };
 
@@ -185,6 +187,7 @@ private:
     qreal mPrevOriginalBPM;
     qreal mPrevNewBPM;
     bool mPrevIsPitchCorrectionEnabled;
+    qreal mPrevTimeRatio;
 };
 
 
