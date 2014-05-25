@@ -27,7 +27,7 @@
 #include "samplebuffer.h"
 
 
-class SamplerAudioSource : public PositionableAudioSource
+class SamplerAudioSource : public AudioSource
 {
 public:
     SamplerAudioSource();
@@ -46,11 +46,6 @@ public:
     void releaseResources() override {};
     void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill ) override;
 
-    void setNextReadPosition( int64 newPosition ) override      {}
-    int64 getNextReadPosition() const override                  { return 0; }
-    int64 getTotalLength() const override                       { return mTotalLength; }
-    bool isLooping() const override                             { return false; }
-
     MidiMessageCollector* getMidiMessageCollector()             { return &mMidiCollector; }
 
 private:
@@ -65,7 +60,6 @@ private:
     Synthesiser mSynth;
     int mNextFreeKey;
     int mStartKey;
-    int64 mTotalLength;
     QList<int> mNoteOnFrameNumList;
     volatile bool mIsPlaySampleSeqEnabled;
     volatile int mNoteCounter;

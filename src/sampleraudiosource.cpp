@@ -28,11 +28,10 @@
 //==================================================================================================
 // Public:
 
-SamplerAudioSource::SamplerAudioSource() : PositionableAudioSource()
+SamplerAudioSource::SamplerAudioSource() : AudioSource()
 {
     mNextFreeKey = DEFAULT_KEY;
     mStartKey = DEFAULT_KEY;
-    mTotalLength = 0;
     mIsPlaySampleSeqEnabled = false;
 }
 
@@ -48,7 +47,6 @@ void SamplerAudioSource::setSample( const SharedSampleBuffer sampleBuffer, const
     addNewSample( sampleBuffer, sampleRange, sampleRate );
     mSampleBuffer = sampleBuffer;
     mSampleRate = sampleRate;
-    mTotalLength = sampleBuffer->getNumFrames();
     mNoteOnFrameNumList.append( 0 );
 }
 
@@ -227,5 +225,4 @@ void SamplerAudioSource::clearSampleRanges()
     mSynth.clearSounds();
     mNextFreeKey = DEFAULT_KEY;
     mStartKey = DEFAULT_KEY;
-    mTotalLength = 0;
 }
