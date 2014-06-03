@@ -46,7 +46,7 @@ void SamplerAudioSource::setSample( const SharedSampleBuffer sampleBuffer, const
     clearSample();
     addNewSample( sampleBuffer, sampleRange, sampleRate );
     mSampleBuffer = sampleBuffer;
-    mSampleRate = sampleRate;
+    mFileSampleRate = sampleRate;
     mNoteOnFrameNumList.append( 0 );
 }
 
@@ -70,7 +70,7 @@ bool SamplerAudioSource::setSampleRanges( const QList<SharedSampleRange> sampleR
 
         foreach ( SharedSampleRange sampleRange, sampleRangeList )
         {
-            isSuccessful = addNewSample( mSampleBuffer, sampleRange, mSampleRate );
+            isSuccessful = addNewSample( mSampleBuffer, sampleRange, mFileSampleRate );
 
             if ( isSuccessful )
             {
@@ -99,7 +99,7 @@ void SamplerAudioSource::playRange( const SharedSampleRange sampleRange )
     const int midiNoteNum = mStartKey;
     const float velocity = 1.0;
 
-    SynthesiserSound* sound = mSynth.getSound( 0 );
+    SynthesiserSound* sound = mSampler.getSound( 0 );
 
     ShurikenSamplerSound* const samplerSound = dynamic_cast<ShurikenSamplerSound*>( sound );
 
@@ -107,7 +107,7 @@ void SamplerAudioSource::playRange( const SharedSampleRange sampleRange )
     {
         stop();
         samplerSound->setTempSampleRange( sampleRange );
-        mSynth.noteOn( midiChannel, midiNoteNum, velocity );
+        mSampler.noteOn( midiChannel, midiNoteNum, velocity );
     }
 }
 
@@ -128,7 +128,7 @@ void SamplerAudioSource::stop()
     const bool allowTailOff = false;
     mIsPlaySampleSeqEnabled = false;
 
-    mSynth.allNotesOff( midiChannel, allowTailOff );
+    mSampler.allNotesOff( midiChannel, allowTailOff );
 }
 
 
@@ -136,8 +136,13 @@ void SamplerAudioSource::stop()
 void SamplerAudioSource::prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate )
 {
     mMidiCollector.reset( sampleRate );
+    mSampler.setCurrentPlaybackSampleRate( sampleRate );
+}
 
-    mSynth.setCurrentPlaybackSampleRate( sampleRate );
+
+
+void SamplerAudioSource::releaseResources()
+{
 }
 
 
@@ -158,10 +163,10 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
         while ( noteOnFrameNum >= mFrameCounter &&
                 noteOnFrameNum < mFrameCounter + bufferToFill.numSamples )
         {
-            MidiMessage message = MidiMessage( MidiMessage::noteOn( 1, // MIDI channel
-                                                                    mStartKey + mNoteCounter, // MIDI note no.
-                                                                    1.0f // Velocity
-                                                                    ));
+            MidiMessage message = MidiMessage( MidiMessage::noteOn( 1,                          // MIDI channel
+                                                                    mStartKey + mNoteCounter,   // MIDI note no.
+                                                                    1.0f ));                    // Velocity
+
             incomingMidi.addEvent( message, noteOnFrameNum % bufferToFill.numSamples );
 
             mNoteCounter++;
@@ -178,8 +183,8 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
         mFrameCounter += bufferToFill.numSamples;
     }
 
-    // Tell the synth to process the MIDI events and generate its output
-    mSynth.renderNextBlock( *bufferToFill.buffer, incomingMidi, 0, bufferToFill.numSamples );
+    // Tell the sampler to process the MIDI events and generate its output
+    mSampler.renderNextBlock( *bufferToFill.buffer, incomingMidi, 0, bufferToFill.numSamples );
 }
 
 
@@ -195,18 +200,17 @@ bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer,
 
     if ( mNextFreeKey < MAX_POLYPHONY )
     {
-        mSynth.addVoice( new ShurikenSamplerVoice() );
+        mSampler.addVoice( new ShurikenSamplerVoice() );
 
         BigInteger keyNum;
         keyNum.clear();
         keyNum.setBit( mNextFreeKey );
 
-        mSynth.addSound( new ShurikenSamplerSound( sampleBuffer,
-                                                   sampleRange,
-                                                   sampleRate,
-                                                   keyNum,              // MIDI key this sample should be mapped to
-                                                   mNextFreeKey         // Root/pitch-centre MIDI key
-                                                   ));
+        mSampler.addSound( new ShurikenSamplerSound( sampleBuffer,
+                                                     sampleRange,
+                                                     sampleRate,
+                                                     keyNum,              // MIDI key this sample should be mapped to
+                                                     mNextFreeKey ));     // Root/pitch-centre MIDI key
 
         mNextFreeKey++;
         isSampleAssignedToKey = true;
@@ -221,8 +225,8 @@ void SamplerAudioSource::clearSampleRanges()
 {
     mIsPlaySampleSeqEnabled = false;
     mNoteOnFrameNumList.clear();
-    mSynth.clearVoices();
-    mSynth.clearSounds();
+    mSampler.clearVoices();
+    mSampler.clearSounds();
     mNextFreeKey = DEFAULT_KEY;
     mStartKey = DEFAULT_KEY;
 }

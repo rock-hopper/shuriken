@@ -25,7 +25,7 @@
 #include "simplesynth.h"
 #include "globals.h"
 #include <QMessageBox>
-#include <QDebug>
+//#include <QDebug>
 
 
 //==================================================================================================
@@ -687,12 +687,12 @@ void AudioSetupDialog::on_checkBox_MidiInputTestTone_clicked( const bool isCheck
 
 void AudioSetupDialog::on_radioButton_RealTime_clicked()
 {
-
+    emit realtimeModeEnabled( true );
 }
 
 
 
 void AudioSetupDialog::on_radioButton_Offline_clicked()
 {
-
+    emit realtimeModeEnabled( false );
 }

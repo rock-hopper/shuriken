@@ -27,7 +27,7 @@
 #include <aubio/aubio.h>
 #include "commands.h"
 #include "globals.h"
-#include <QDebug>
+//#include <QDebug>
 
 
 //==================================================================================================
@@ -135,6 +135,10 @@ MainWindow::MainWindow( QWidget* parent ) :
     else
     {
         mAudioSetupDialog = new AudioSetupDialog( mDeviceManager, this );
+
+        QObject::connect( mAudioSetupDialog.get(), SIGNAL( realtimeModeEnabled(bool) ),
+                          this, SLOT( enableRealtimeMode(bool) ) );
+
         mSamplerAudioSource = new SamplerAudioSource();
         mIsAudioInitialised = true;
     }
@@ -182,9 +186,10 @@ void MainWindow::setUpSampler( const int numChans )
 {
     if ( mIsAudioInitialised )
     {
-        if ( mAudioSetupDialog->isRealTimeModeEnabled() ) // Realtime timestretch mode
+        if ( mAudioSetupDialog->isRealTimeModeEnabled() ) // Timestretch mode
         {
-            //mAudioSourcePlayer.setSource(  );
+            mRubberbandAudioSource = new RubberbandAudioSource( mSamplerAudioSource, numChans );
+            mAudioSourcePlayer.setSource( mRubberbandAudioSource );
         }
         else // Offline timestretch mode
         {
@@ -198,14 +203,17 @@ void MainWindow::setUpSampler( const int numChans )
 
 
 
-void MainWindow::tearDownSampler()
+void MainWindow::tearDownSampler( const bool isSampleToBeCleared )
 {
     if ( mIsAudioInitialised )
     {
         mAudioSourcePlayer.setSource( NULL );
+        mRubberbandAudioSource = NULL;
         mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
         mDeviceManager.removeMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
-        mSamplerAudioSource->clearSample();
+
+        if ( isSampleToBeCleared )
+            mSamplerAudioSource->clearSample();
     }
 }
 
@@ -605,6 +613,25 @@ void MainWindow::disableZoomOut()
 
 
 
+void MainWindow::enableRealtimeMode( const bool isEnabled )
+{
+    if ( isEnabled )
+    {
+        mUI->pushButton_Apply->setEnabled( false );
+    }
+    else
+    {
+        mUI->pushButton_Apply->setEnabled( true );
+    }
+
+    const bool isSampleToBeCleared = false;
+
+    tearDownSampler( isSampleToBeCleared );
+    setUpSampler( mCurrentSampleBuffer->getNumChannels() );
+}
+
+
+
 //====================
 // "File" menu:
 
@@ -899,7 +926,7 @@ void MainWindow::on_actionClose_Project_triggered()
     mCurrentSampleBuffer.clear();
     mCurrentSampleHeader.clear();
     mSampleRangeList.clear();
-    tearDownSampler();
+    tearDownSampler( true );
 
     mUI->waveGraphicsView->clearAll();
     on_actionZoom_Original_triggered();
@@ -1235,19 +1262,18 @@ void MainWindow::on_checkBox_AdvancedOptions_toggled( const bool isChecked )
 
 void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
 {
-    const double originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
+    const qreal originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
     const bool isTimeStretchEnabled = mUI->checkBox_TimeStretch->isChecked();
     const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
 
-    if ( isTimeStretchEnabled )
+    if ( isTimeStretchEnabled && mRubberbandAudioSource != NULL )
     {
         if ( newBPM > 0.0 && originalBPM > 0.0 )
         {
-            const float rate = 1.0f;
-            const float tempo = newBPM / originalBPM;
-            const float pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
+            const qreal timeRatio = originalBPM / newBPM;
+            const qreal pitchRatio = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
 
-
+            mRubberbandAudioSource->setTimeRatio( timeRatio );
         }
     }
 }
@@ -1256,24 +1282,23 @@ void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
 
 void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
 {
-    const double originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
-    const double newBPM = mUI->doubleSpinBox_NewBPM->value();
+    const qreal originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
+    const qreal newBPM = mUI->doubleSpinBox_NewBPM->value();
     const bool isTimeStretchEnabled = isChecked;
     const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
 
-    if ( newBPM > 0.0 && originalBPM > 0.0 )
+    if ( newBPM > 0.0 && originalBPM > 0.0 && mRubberbandAudioSource != NULL )
     {
-        const float rate = 1.0f;
-        float tempo = 1.0f;
-        float pitch = 1.0f;
+        qreal timeRatio = 1.0;
+        qreal pitchRatio = 1.0;
 
         if ( isTimeStretchEnabled )
         {
-            tempo = newBPM / originalBPM;
-            pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
+            timeRatio = originalBPM / newBPM;
+            pitchRatio = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
         }
 
-
+        mRubberbandAudioSource->setTimeRatio( timeRatio );
     }
 }
 
@@ -1281,18 +1306,17 @@ void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
 
 void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
 {
-    const double originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
-    const double newBPM = mUI->doubleSpinBox_NewBPM->value();
+    const qreal originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
+    const qreal newBPM = mUI->doubleSpinBox_NewBPM->value();
     const bool isTimeStretchEnabled = mUI->checkBox_TimeStretch->isChecked();
     const bool isPitchCorrectionEnabled = isChecked;
 
-    if ( isTimeStretchEnabled )
+    if ( isTimeStretchEnabled && mRubberbandAudioSource != NULL )
     {
         if ( newBPM > 0.0 && originalBPM > 0.0 )
         {
-            const float rate = 1.0f;
-            const float tempo = newBPM / originalBPM;
-            const float pitch = isPitchCorrectionEnabled ? 1.0f : newBPM / originalBPM;
+            const qreal timeRatio = originalBPM / newBPM;
+            const qreal pitchRatio = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
 
 
         }

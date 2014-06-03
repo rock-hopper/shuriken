@@ -74,6 +74,9 @@ private:
     static String getNameForChannelPair( const String& name1, const String& name2 );
     static QString getNoDeviceString() { return "<< " + tr("none") + " >>"; }
 
+signals:
+    void realtimeModeEnabled( const bool isEnabled );
+
 private slots:
     void on_radioButton_Offline_clicked();
     void on_radioButton_RealTime_clicked();

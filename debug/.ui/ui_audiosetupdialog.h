@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'audiosetupdialog.ui'
 **
-** Created: Sun May 18 14:35:53 2014
+** Created: Tue Jun 3 13:06:05 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -208,7 +208,7 @@ public:
         tabWidget->setTabText(tabWidget->indexOf(tab_AudioSetup), QApplication::translate("AudioSetupDialog", "Audio Setup", 0, QApplication::UnicodeUTF8));
         label_2->setText(QApplication::translate("AudioSetupDialog", "TimeStretch Mode:", 0, QApplication::UnicodeUTF8));
         radioButton_Offline->setText(QApplication::translate("AudioSetupDialog", "Offline", 0, QApplication::UnicodeUTF8));
-        radioButton_RealTime->setText(QApplication::translate("AudioSetupDialog", "Real Time (experimental)", 0, QApplication::UnicodeUTF8));
+        radioButton_RealTime->setText(QApplication::translate("AudioSetupDialog", "RealTime", 0, QApplication::UnicodeUTF8));
         tabWidget->setTabText(tabWidget->indexOf(tab_TimeStretch), QApplication::translate("AudioSetupDialog", "TimeStretch", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 

@@ -32,6 +32,7 @@
 #include "audiosetupdialog.h"
 #include "audiofilehandler.h"
 #include "sampleraudiosource.h"
+#include "rubberbandaudiosource.h"
 #include "slicepointitem.h"
 
 
@@ -65,7 +66,7 @@ private:
     };
 
     void setUpSampler( const int numChans );
-    void tearDownSampler();
+    void tearDownSampler( const bool isSampleToBeCleared );
     void enableUI();
     void disableUI();
     DetectionSettings getDetectionSettings();
@@ -83,6 +84,7 @@ private:
     QList<SharedSampleRange> mSampleRangeList;
 
     ScopedPointer<SamplerAudioSource> mSamplerAudioSource;
+    ScopedPointer<RubberbandAudioSource> mRubberbandAudioSource;
     AudioSourcePlayer mAudioSourcePlayer;
 
     bool mIsAudioInitialised;
@@ -105,7 +107,7 @@ private:
     static qreal calcBPM( const SharedSampleBuffer sampleBuffer,
                           const DetectionSettings settings );
 
-    static void fillAubioInputBuffer( fvec_t* pInputBuffer,
+    static void fillAubioInputBuffer( fvec_t* inputBuffer,
                                       const SharedSampleBuffer sampleBuffer,
                                       const int sampleOffset );
 
@@ -163,6 +165,8 @@ private slots:
                           const QPointF mouseScenePos );
     void disableZoomIn();
     void disableZoomOut();
+
+    void enableRealtimeMode( const bool isEnabled );
 };
 
 #endif // MAINWINDOW_H

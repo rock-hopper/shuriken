@@ -153,7 +153,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/sampleraudiosource.cpp \
     src/shurikensampler.cpp \
     src/slicepointitem.cpp \
-    src/commands.cpp
+    src/commands.cpp \
+    src/rubberbandaudiosource.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -368,7 +369,8 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/slicepointitem.h \
     src/commands.h \
     src/simplesynth.h \
-    src/globals.h
+    src/globals.h \
+    src/rubberbandaudiosource.h
 FORMS += src/mainwindow.ui \
     src/audiosetupdialog.ui
 INCLUDEPATH += src \

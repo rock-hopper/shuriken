@@ -43,7 +43,7 @@ public:
     void stop();
 
     void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;
-    void releaseResources() override {};
+    void releaseResources() override;
     void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill ) override;
 
     MidiMessageCollector* getMidiMessageCollector()             { return &mMidiCollector; }
@@ -55,9 +55,9 @@ private:
     void clearSampleRanges();
 
     SharedSampleBuffer mSampleBuffer;
-    int mSampleRate;
+    int mFileSampleRate;
     MidiMessageCollector mMidiCollector;
-    Synthesiser mSynth;
+    Synthesiser mSampler;
     int mNextFreeKey;
     int mStartKey;
     QList<int> mNoteOnFrameNumList;
