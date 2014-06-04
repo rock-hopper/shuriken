@@ -388,9 +388,9 @@ void ApplyTimeStretchCommand::undo()
 void ApplyTimeStretchCommand::redo()
 {    
     const qreal timeRatio = mOriginalBPM / mNewBPM;
-    const qreal pitchRatio = mIsPitchCorrectionEnabled ? 1.0 : mNewBPM / mOriginalBPM;
+    const qreal pitchScale = mIsPitchCorrectionEnabled ? 1.0 : mNewBPM / mOriginalBPM;
 
-    stretch( timeRatio, pitchRatio );
+    stretch( timeRatio, pitchScale );
 
     mSpinBoxOriginalBPM->setValue( mOriginalBPM );
     mSpinBoxNewBPM->setValue( mNewBPM );
@@ -399,7 +399,7 @@ void ApplyTimeStretchCommand::redo()
 
 
 
-void ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchRatio )
+void ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchScale )
 {
     if ( timeRatio == 1.0 )
     {
@@ -432,13 +432,13 @@ void ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchR
     }
     else
     {
-        applyTimeStretch( timeRatio, pitchRatio );
+        applyTimeStretch( timeRatio, pitchScale );
     }
 }
 
 
 
-void ApplyTimeStretchCommand::applyTimeStretch( const qreal timeRatio, const qreal pitchRatio )
+void ApplyTimeStretchCommand::applyTimeStretch( const qreal timeRatio, const qreal pitchScale )
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
@@ -446,7 +446,7 @@ void ApplyTimeStretchCommand::applyTimeStretch( const qreal timeRatio, const qre
     const int sampleRate = mMainWindow->mCurrentSampleHeader->sampleRate;
 
     RubberBandStretcher stretcher( sampleRate, numChans, RubberBandStretcher::DefaultOptions,
-                                   timeRatio, pitchRatio );
+                                   timeRatio, pitchScale );
 
     // Get original, unmodified sample data
     SharedSampleBuffer tempSampleBuffer = mMainWindow->mFileHandler.getSampleData( mMainWindow->mCurrentAudioFilePath );

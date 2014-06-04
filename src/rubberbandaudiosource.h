@@ -41,6 +41,7 @@ public:
     RubberBandStretcher::Options getRubberbandOptions() const                   { return mOptions; }
 
     void setTimeRatio( const qreal ratio )                                      { mTimeRatio = ratio; }
+    void setPitchScale( const qreal scale )                                     { mPitchScale = scale; }
 
     void prepareToPlay( int samplesPerBlockExpected, double sampleRate ) override;
     void releaseResources() override;
@@ -60,6 +61,9 @@ private:
 
     volatile qreal mTimeRatio;
     qreal mPrevTimeRatio;
+
+    volatile qreal mPitchScale;
+    qreal mPrevPitchScale;
 
     int mTotalNumRetrieved;
 

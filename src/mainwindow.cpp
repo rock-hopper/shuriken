@@ -1308,9 +1308,10 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
         if ( newBPM > 0.0 && originalBPM > 0.0 )
         {
             const qreal timeRatio = originalBPM / newBPM;
-            const qreal pitchRatio = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
+            const qreal pitchScale = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
 
             mRubberbandAudioSource->setTimeRatio( timeRatio );
+            mRubberbandAudioSource->setPitchScale( pitchScale );
         }
     }
 }
@@ -1328,9 +1329,10 @@ void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
         if ( newBPM > 0.0 && originalBPM > 0.0 )
         {
             const qreal timeRatio = originalBPM / newBPM;
-            const qreal pitchRatio = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
+            const qreal pitchScale = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
 
             mRubberbandAudioSource->setTimeRatio( timeRatio );
+            mRubberbandAudioSource->setPitchScale( pitchScale );
         }
     }
 }
@@ -1347,15 +1349,16 @@ void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
     if ( newBPM > 0.0 && originalBPM > 0.0 && mRubberbandAudioSource != NULL )
     {
         qreal timeRatio = 1.0;
-        qreal pitchRatio = 1.0;
+        qreal pitchScale = 1.0;
 
         if ( isTimeStretchEnabled )
         {
             timeRatio = originalBPM / newBPM;
-            pitchRatio = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
+            pitchScale = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
         }
 
         mRubberbandAudioSource->setTimeRatio( timeRatio );
+        mRubberbandAudioSource->setPitchScale( pitchScale );
     }
 }
 
@@ -1372,10 +1375,9 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
     {
         if ( newBPM > 0.0 && originalBPM > 0.0 )
         {
-            const qreal timeRatio = originalBPM / newBPM;
-            const qreal pitchRatio = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
+            const qreal pitchScale = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
 
-
+            mRubberbandAudioSource->setPitchScale( pitchScale );
         }
     }
 }

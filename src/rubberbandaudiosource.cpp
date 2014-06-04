@@ -83,6 +83,12 @@ void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buf
         mPrevTimeRatio = mTimeRatio;
     }
 
+    if ( mPitchScale != mPrevPitchScale)
+    {
+        mStretcher->setPitchScale( mPitchScale );
+        mPrevPitchScale = mPitchScale;
+    }
+
 //    const int latency = mStretcher->getLatency() + mReserveSize;
 //    std::cerr << "latency = " << latency << std::endl;
 

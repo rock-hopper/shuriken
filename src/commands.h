@@ -172,8 +172,8 @@ public:
     bool isPitchCorrectionEnabled() const   { return mIsPitchCorrectionEnabled; }
 
 private:
-    void stretch( const qreal timeRatio, const qreal pitchRatio );
-    void applyTimeStretch( const qreal timeRatio, const qreal pitchRatio );
+    void stretch( const qreal timeRatio, const qreal pitchScale );
+    void applyTimeStretch( const qreal timeRatio, const qreal pitchScale );
     void updateAll( const qreal timeRatio, const int newTotalNumFrames );
 
     MainWindow* const mMainWindow;
