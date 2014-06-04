@@ -37,7 +37,9 @@ MainWindow::MainWindow( QWidget* parent ) :
     QMainWindow( parent ),
     mUI( new Ui::MainWindow ),
     mLastOpenedImportDir( QDir::homePath() ),
-    mLastOpenedProjDir( QDir::homePath() )
+    mLastOpenedProjDir( QDir::homePath() ),
+    mOfflineOriginalBPM( 0.0 ),
+    mOfflineNewBPM( 0.0 )
 {
     // Set up user interface
     mUI->setupUi( this );
@@ -618,11 +620,8 @@ void MainWindow::enableRealtimeMode( const bool isEnabled )
     if ( isEnabled )
     {
         mUI->pushButton_Apply->setEnabled( false );
-
-        mOfflineOriginalBPM = mUI->doubleSpinBox_OriginalBPM->value();
-        mOfflineNewBPM = mUI->doubleSpinBox_NewBPM->value();
-
         mUI->doubleSpinBox_OriginalBPM->setValue( mOfflineNewBPM );
+        mUI->doubleSpinBox_NewBPM->setValue( mOfflineNewBPM );
     }
     else
     {
@@ -941,6 +940,9 @@ void MainWindow::on_actionClose_Project_triggered()
     mUI->statusBar->clearMessage();
 
     mUndoStack.clear();
+
+    mOfflineOriginalBPM = 0.0;
+    mOfflineNewBPM = 0.0;
 }
 
 
@@ -1406,6 +1408,9 @@ void MainWindow::on_pushButton_Apply_clicked()
                                                              mUI->doubleSpinBox_NewBPM,
                                                              mUI->checkBox_PitchCorrection );
         mUndoStack.push( command );
+
+        mOfflineOriginalBPM = originalBPM;
+        mOfflineNewBPM = newBPM;
     }
 }
 
