@@ -618,10 +618,17 @@ void MainWindow::enableRealtimeMode( const bool isEnabled )
     if ( isEnabled )
     {
         mUI->pushButton_Apply->setEnabled( false );
+
+        mOfflineOriginalBPM = mUI->doubleSpinBox_OriginalBPM->value();
+        mOfflineNewBPM = mUI->doubleSpinBox_NewBPM->value();
+
+        mUI->doubleSpinBox_OriginalBPM->setValue( mOfflineNewBPM );
     }
     else
     {
         mUI->pushButton_Apply->setEnabled( true );
+        mUI->doubleSpinBox_OriginalBPM->setValue( mOfflineOriginalBPM );
+        mUI->doubleSpinBox_NewBPM->setValue( mOfflineNewBPM );
     }
 
     const bool isSampleToBeCleared = false;
@@ -1260,6 +1267,26 @@ void MainWindow::on_checkBox_AdvancedOptions_toggled( const bool isChecked )
 
 
 
+void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double originalBPM )
+{
+    const qreal newBPM = mUI->doubleSpinBox_NewBPM->value();
+    const bool isTimeStretchEnabled = mUI->checkBox_TimeStretch->isChecked();
+    const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
+
+    if ( isTimeStretchEnabled && mRubberbandAudioSource != NULL )
+    {
+        if ( newBPM > 0.0 && originalBPM > 0.0 )
+        {
+            const qreal timeRatio = originalBPM / newBPM;
+            const qreal pitchRatio = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
+
+            mRubberbandAudioSource->setTimeRatio( timeRatio );
+        }
+    }
+}
+
+
+
 void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
 {
     const qreal originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
@@ -1381,3 +1408,5 @@ void MainWindow::on_pushButton_Apply_clicked()
         mUndoStack.push( command );
     }
 }
+
+

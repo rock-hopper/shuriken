@@ -95,6 +95,9 @@ private:
 
     QUndoStack mUndoStack;
 
+    qreal mOfflineOriginalBPM;
+    qreal mOfflineNewBPM;
+
 private:
     enum AubioRoutine { ONSET_DETECTION, BEAT_DETECTION };
 
@@ -126,6 +129,7 @@ private slots:
     void on_checkBox_PitchCorrection_toggled( const bool isChecked );
     void on_checkBox_TimeStretch_toggled( const bool isChecked );
     void on_doubleSpinBox_NewBPM_valueChanged( const double newBPM );
+    void on_doubleSpinBox_OriginalBPM_valueChanged( const double originalBPM );
     void on_pushButton_CalcBPM_clicked();
     void on_pushButton_FindBeats_clicked();
     void on_checkBox_AdvancedOptions_toggled( const bool isChecked );
