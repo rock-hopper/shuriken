@@ -95,8 +95,8 @@ private:
 
     QUndoStack mUndoStack;
 
-    qreal mOfflineOriginalBPM;
-    qreal mOfflineNewBPM;
+    qreal mAppliedOriginalBPM;
+    qreal mAppliedNewBPM;
 
 private:
     enum AubioRoutine { ONSET_DETECTION, BEAT_DETECTION };

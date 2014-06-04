@@ -66,9 +66,17 @@ AudioSetupDialog::~AudioSetupDialog()
 
 
 
-bool AudioSetupDialog::isRealTimeModeEnabled() const
+bool AudioSetupDialog::isRealtimeModeEnabled() const
 {
     return mUI->radioButton_RealTime->isChecked();
+}
+
+
+
+void AudioSetupDialog::enableRealtimeMode( const bool isEnabled )
+{
+    mUI->radioButton_RealTime->setChecked( isEnabled );
+    emit realtimeModeEnabled( isEnabled );
 }
 
 

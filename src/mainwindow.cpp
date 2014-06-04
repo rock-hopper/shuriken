@@ -38,8 +38,8 @@ MainWindow::MainWindow( QWidget* parent ) :
     mUI( new Ui::MainWindow ),
     mLastOpenedImportDir( QDir::homePath() ),
     mLastOpenedProjDir( QDir::homePath() ),
-    mOfflineOriginalBPM( 0.0 ),
-    mOfflineNewBPM( 0.0 )
+    mAppliedOriginalBPM( 0.0 ),
+    mAppliedNewBPM( 0.0 )
 {
     // Set up user interface
     mUI->setupUi( this );
@@ -188,7 +188,7 @@ void MainWindow::setUpSampler( const int numChans )
 {
     if ( mIsAudioInitialised )
     {
-        if ( mAudioSetupDialog->isRealTimeModeEnabled() ) // Timestretch mode
+        if ( mAudioSetupDialog->isRealtimeModeEnabled() ) // Timestretch mode
         {
             mRubberbandAudioSource = new RubberbandAudioSource( mSamplerAudioSource, numChans );
             mAudioSourcePlayer.setSource( mRubberbandAudioSource );
@@ -617,23 +617,26 @@ void MainWindow::disableZoomOut()
 
 void MainWindow::enableRealtimeMode( const bool isEnabled )
 {
-    if ( isEnabled )
+    if ( ! mCurrentSampleBuffer.isNull() )
     {
-        mUI->pushButton_Apply->setEnabled( false );
-        mUI->doubleSpinBox_OriginalBPM->setValue( mOfflineNewBPM );
-        mUI->doubleSpinBox_NewBPM->setValue( mOfflineNewBPM );
-    }
-    else
-    {
-        mUI->pushButton_Apply->setEnabled( true );
-        mUI->doubleSpinBox_OriginalBPM->setValue( mOfflineOriginalBPM );
-        mUI->doubleSpinBox_NewBPM->setValue( mOfflineNewBPM );
-    }
+        if ( isEnabled )
+        {
+            mUI->pushButton_Apply->setEnabled( false );
+            mUI->doubleSpinBox_OriginalBPM->setValue( mAppliedNewBPM );
+            mUI->doubleSpinBox_NewBPM->setValue( mAppliedNewBPM );
+        }
+        else
+        {
+            mUI->pushButton_Apply->setEnabled( true );
+            mUI->doubleSpinBox_OriginalBPM->setValue( mAppliedOriginalBPM );
+            mUI->doubleSpinBox_NewBPM->setValue( mAppliedNewBPM );
+        }
 
-    const bool isSampleToBeCleared = false;
+        const bool isSampleToBeCleared = false;
 
-    tearDownSampler( isSampleToBeCleared );
-    setUpSampler( mCurrentSampleBuffer->getNumChannels() );
+        tearDownSampler( isSampleToBeCleared );
+        setUpSampler( mCurrentSampleBuffer->getNumChannels() );
+    }
 }
 
 
@@ -668,10 +671,11 @@ void MainWindow::on_actionOpen_Project_triggered()
             {
                 QString projectName = docElement->getStringAttribute( "name" ).toRawUTF8();
                 QString audioFileName;
-                qreal originalBpm;
-                qreal newBpm;
-                bool isTimeStretchChecked;
-                bool isPitchCorrectionChecked;
+                qreal originalBpm = 0.0;
+                qreal newBpm = 0.0;
+                bool isTimeStretchChecked = false;
+                bool isPitchCorrectionChecked = false;
+                bool isRealtimeModeEnabled = false;
 
                 QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
@@ -707,6 +711,10 @@ void MainWindow::on_actionOpen_Project_triggered()
                     else if ( elem->hasTagName( "pitch_correction" ) )
                     {
                         isPitchCorrectionChecked = elem->getBoolAttribute( "checked" );
+                    }
+                    else if ( elem->hasTagName( "realtime_mode" ) )
+                    {
+                        isRealtimeModeEnabled = elem->getBoolAttribute( "enabled" );
                     }
                 }
 
@@ -762,6 +770,15 @@ void MainWindow::on_actionOpen_Project_triggered()
                             mUI->pushButton_FindOnsets->setEnabled( false );
                         }
 
+                        mAppliedOriginalBPM = originalBpm;
+                        mAppliedNewBPM = originalBpm;
+
+                        if ( mAudioSetupDialog != NULL )
+                            mAudioSetupDialog->enableRealtimeMode( isRealtimeModeEnabled );
+
+                        mUI->checkBox_TimeStretch->setChecked( isTimeStretchChecked );
+                        mUI->checkBox_PitchCorrection->setChecked( isPitchCorrectionChecked );
+
                         if ( originalBpm > 0.0 )
                         {
                             mUI->doubleSpinBox_OriginalBPM->setValue( originalBpm );
@@ -770,8 +787,6 @@ void MainWindow::on_actionOpen_Project_triggered()
                         {
                             mUI->doubleSpinBox_NewBPM->setValue( newBpm );
                         }
-                        mUI->checkBox_TimeStretch->setChecked( isTimeStretchChecked );
-                        mUI->checkBox_PitchCorrection->setChecked( isPitchCorrectionChecked );
 
                         mUI->statusBar->showMessage( tr("Project: ") + projectName );
 
@@ -863,23 +878,36 @@ void MainWindow::on_actionSave_Project_triggered()
         if ( isOkToSave )
         {
             const QString filePath = projectDir.absoluteFilePath( "audio.wav" );
-            bool isSuccessful;
 
             QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-            isSuccessful = mFileHandler.saveAudioFile( filePath, mCurrentSampleBuffer, mCurrentSampleHeader );
+            const bool isSuccessful = mFileHandler.saveAudioFile( filePath, mCurrentSampleBuffer, mCurrentSampleHeader );
 
             if ( isSuccessful )
             {
+                const bool isRealtimeModeEnabled = mAudioSetupDialog->isRealtimeModeEnabled();
+
                 XmlElement docElement( "project" );
                 docElement.setAttribute( "name", projDirName.toUtf8().data() );
 
-                XmlElement* origBpmElement = new XmlElement( "original_bpm" );
-                origBpmElement->setAttribute( "value", mUI->doubleSpinBox_OriginalBPM->value() );
-                docElement.addChildElement( origBpmElement );
+                XmlElement* realtimeModeElement = new XmlElement( "realtime_mode" );
+                realtimeModeElement->setAttribute( "enabled", isRealtimeModeEnabled );
+                docElement.addChildElement( realtimeModeElement );
 
+                XmlElement* origBpmElement = new XmlElement( "original_bpm" );
                 XmlElement* newBpmElement = new XmlElement( "new_bpm" );
-                newBpmElement->setAttribute( "value", mUI->doubleSpinBox_NewBPM->value() );
+
+                if ( isRealtimeModeEnabled )
+                {
+                    origBpmElement->setAttribute( "value", mUI->doubleSpinBox_OriginalBPM->value() );
+                    newBpmElement->setAttribute( "value", mUI->doubleSpinBox_NewBPM->value() );
+                }
+                else
+                {
+                    origBpmElement->setAttribute( "value", mAppliedNewBPM );
+                    newBpmElement->setAttribute( "value", mAppliedNewBPM );
+                }
+                docElement.addChildElement( origBpmElement );
                 docElement.addChildElement( newBpmElement );
 
                 XmlElement* timeStretchElement = new XmlElement( "time_stretch" );
@@ -941,8 +969,8 @@ void MainWindow::on_actionClose_Project_triggered()
 
     mUndoStack.clear();
 
-    mOfflineOriginalBPM = 0.0;
-    mOfflineNewBPM = 0.0;
+    mAppliedOriginalBPM = 0.0;
+    mAppliedNewBPM = 0.0;
 }
 
 
@@ -1409,8 +1437,8 @@ void MainWindow::on_pushButton_Apply_clicked()
                                                              mUI->checkBox_PitchCorrection );
         mUndoStack.push( command );
 
-        mOfflineOriginalBPM = originalBPM;
-        mOfflineNewBPM = newBPM;
+        mAppliedOriginalBPM = originalBPM;
+        mAppliedNewBPM = newBPM;
     }
 }
 

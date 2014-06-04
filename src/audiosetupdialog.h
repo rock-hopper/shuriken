@@ -45,7 +45,8 @@ public:
     AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* parent = NULL );
     ~AudioSetupDialog();
 
-    bool isRealTimeModeEnabled() const;
+    bool isRealtimeModeEnabled() const;
+    void enableRealtimeMode( const bool isEnabled );
 
 protected:
     void changeEvent( QEvent* event );
