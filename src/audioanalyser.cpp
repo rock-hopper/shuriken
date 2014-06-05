@@ -195,7 +195,7 @@ qreal AudioAnalyser::calcBPM( const SharedSampleBuffer sampleBuffer, const Detec
 
     if ( numDetections > 0 )
     {
-         averageBPM = floor( (summedBPMs / numDetections) + 0.5 );
+         averageBPM = summedBPMs / numDetections;
     }
 
     return averageBPM;
