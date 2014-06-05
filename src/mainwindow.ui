@@ -41,6 +41,9 @@
         <property name="text">
          <string>Stop</string>
         </property>
+        <property name="shortcut">
+         <string>Space</string>
+        </property>
        </widget>
       </item>
       <item>

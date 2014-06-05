@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Thu Jun 5 12:05:11 2014
+** Created: Thu Jun 5 16:35:38 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -550,6 +550,7 @@ public:
         actionZoom_Original->setShortcut(QApplication::translate("MainWindow", "Ctrl+0", 0, QApplication::UnicodeUTF8));
         pushButton_Play->setText(QApplication::translate("MainWindow", "Play", 0, QApplication::UnicodeUTF8));
         pushButton_Stop->setText(QApplication::translate("MainWindow", "Stop", 0, QApplication::UnicodeUTF8));
+        pushButton_Stop->setShortcut(QApplication::translate("MainWindow", "Space", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("MainWindow", "Original BPM:", 0, QApplication::UnicodeUTF8));
         pushButton_CalcBPM->setText(QApplication::translate("MainWindow", "Calc", 0, QApplication::UnicodeUTF8));
         label_2->setText(QApplication::translate("MainWindow", "New BPM:", 0, QApplication::UnicodeUTF8));
