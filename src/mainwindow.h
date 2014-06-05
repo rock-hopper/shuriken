@@ -26,7 +26,6 @@
 #include <QMainWindow>
 #include <QList>
 #include <QUndoStack>
-#include <aubio/aubio.h>
 #include "JuceHeader.h"
 #include "samplebuffer.h"
 #include "audiosetupdialog.h"
@@ -34,6 +33,7 @@
 #include "sampleraudiosource.h"
 #include "rubberbandaudiosource.h"
 #include "slicepointitem.h"
+#include "audioanalyser.h"
 
 
 namespace Ui
@@ -53,23 +53,14 @@ public:
     ~MainWindow();
 
 protected:
-    void changeEvent( QEvent* e );
+    void changeEvent( QEvent* event );
 
 private:
-    struct DetectionSettings
-    {
-        QByteArray detectionMethod;
-        smpl_t threshold;
-        uint_t windowSize;
-        uint_t hopSize;
-        uint_t sampleRate;
-    };
-
     void setUpSampler( const int numChans );
     void tearDownSampler( const bool isSampleToBeCleared );
     void enableUI();
     void disableUI();
-    DetectionSettings getDetectionSettings();
+    AudioAnalyser::DetectionSettings getDetectionSettings();
     void getSampleRanges( QList<SharedSampleRange>& sampleRangeList );
 
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
@@ -99,22 +90,7 @@ private:
     qreal mAppliedNewBPM;
 
 private:
-    enum AubioRoutine { ONSET_DETECTION, BEAT_DETECTION };
-
     static void showWarningBox( const QString text, const QString infoText );
-
-    static QList<int> calcSlicePointFrameNums( const SharedSampleBuffer sampleBuffer,
-                                               const AubioRoutine routine,
-                                               const DetectionSettings settings );
-
-    static qreal calcBPM( const SharedSampleBuffer sampleBuffer,
-                          const DetectionSettings settings );
-
-    static void fillAubioInputBuffer( fvec_t* inputBuffer,
-                                      const SharedSampleBuffer sampleBuffer,
-                                      const int sampleOffset );
-
-    static const qreal MIN_INTER_ONSET_SECS = 0.03;
 
 public slots:
     void reorderSampleRangeList( const int startOrderPos, const int destOrderPos );
