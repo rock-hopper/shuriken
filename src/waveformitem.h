@@ -105,7 +105,7 @@ private:
     static const int NOT_SET = -1;
     static const qreal DETAIL_LEVEL_MAX_CUTOFF = 0.05;
     static const qreal DETAIL_LEVEL_VERY_HIGH_CUTOFF = 1.0;
-    static const qreal DETAIL_LEVEL_HIGH_CUTOFF = 5.0;
+    static const qreal DETAIL_LEVEL_HIGH_CUTOFF = 10.0;
 
 signals:
     // As waveform items are being dragged their old and new order positions are emitted,

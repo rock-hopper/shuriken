@@ -361,8 +361,8 @@ void WaveformItem::init()
     setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges | ItemUsesExtendedStyleOption );
 
     setBackgroundGradient();
-    mWavePen = QPen( QColor(0, 0, 127, 127) );
-    mCentreLinePen = QPen( QColor(127, 127, 127, 127) );
+    mWavePen = QPen( QColor(0, 0, 127, 191) );
+    mCentreLinePen = QPen( QColor(127, 127, 127, 191) );
 
     // Don't draw rect border
     setPen( QPen( QColor(0, 0, 0, 0) ) );
@@ -382,10 +382,10 @@ void WaveformItem::setBackgroundGradient()
 {
     QLinearGradient gradient( 0.0, 0.0, rect().width(), 0.0 );
 
-    gradient.setColorAt( 0, QColor::fromRgbF(1.0, 1.0, 1.0, 1.0) );
+    gradient.setColorAt( 0,     QColor::fromRgbF(1.0,   1.0,   1.0,   1.0) );
     gradient.setColorAt( 0.125, QColor::fromRgbF(0.925, 0.925, 0.975, 1.0) );
     gradient.setColorAt( 0.875, QColor::fromRgbF(0.925, 0.925, 0.975, 1.0) );
-    gradient.setColorAt( 1, QColor::fromRgbF(0.8, 0.8, 0.9, 1.0) );
+    gradient.setColorAt( 1,     QColor::fromRgbF(0.8,   0.8,   0.9,   1.0) );
 
     setBrush( QBrush( gradient ) );
 }
