@@ -49,7 +49,7 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
 
 
 
-SharedWaveformItem WaveGraphicsView::createWaveformItem( const SharedSampleBuffer sampleBuffer )
+SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sampleBuffer )
 {
     mNumFrames = sampleBuffer->getNumFrames();
 
@@ -71,7 +71,7 @@ SharedWaveformItem WaveGraphicsView::createWaveformItem( const SharedSampleBuffe
 
 
 
-QList<SharedWaveformItem> WaveGraphicsView::createWaveformItems( const SharedSampleBuffer sampleBuffer,
+QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const SharedSampleBuffer sampleBuffer,
                                                                  const QList<SharedSampleRange> sampleRangeList )
 {
     mNumFrames = sampleBuffer->getNumFrames();
@@ -115,12 +115,40 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveformItems( const SharedSam
 
 
 
-void WaveGraphicsView::moveWaveformItem( const int oldOrderPos, const int newOrderPos )
+void WaveGraphicsView::moveWaveform( const int oldOrderPos, const int newOrderPos )
 {
     Q_ASSERT_X( ! mWaveformItemList.isEmpty(), "WaveGraphicsView::moveWaveformSlice", "mWaveformItemList is empty" );
 
     reorderWaveformItems( oldOrderPos, newOrderPos );
     slideWaveformItemIntoPlace( newOrderPos );
+}
+
+
+
+SharedWaveformItem WaveGraphicsView::getSelectedWaveform()
+{
+    const QList<QGraphicsItem*> selectedItems = scene()->selectedItems();
+    SharedWaveformItem selectedWaveformItem;
+
+    if ( ! selectedItems.isEmpty() )
+    {
+        QGraphicsItem* const item = selectedItems.first();
+
+        if ( item->type() == WaveformItem::Type )
+        {
+            WaveformItem* const waveformItem = qgraphicsitem_cast<WaveformItem*>( item );
+
+            foreach ( SharedWaveformItem sharedWaveformItem, mWaveformItemList )
+            {
+                if ( sharedWaveformItem == waveformItem )
+                {
+                    selectedWaveformItem = sharedWaveformItem;
+                }
+            }
+        }
+    }
+
+    return selectedWaveformItem;
 }
 
 
@@ -300,12 +328,7 @@ void WaveGraphicsView::stretch( const qreal ratio, const int newTotalNumFrames )
 
     mCurrentStretchRatio = ratio;
 
-
-    // Hack to force redraw of scene
-    QSize size( sceneRect().width(), sceneRect().height() );
-    QSize oldSize( sceneRect().width(), sceneRect().height() );
-    QResizeEvent event( size, oldSize );
-    resizeEvent( &event );
+    forceRedraw();
 }
 
 
@@ -397,6 +420,17 @@ void WaveGraphicsView::zoomOriginal()
 {
     resetTransform();
     scaleSlicePointItems( 1.0 );
+}
+
+
+
+void WaveGraphicsView::forceRedraw()
+{
+    // Hack to force redraw of scene
+    QSize size( sceneRect().width(), sceneRect().height() );
+    QSize oldSize( sceneRect().width(), sceneRect().height() );
+    QResizeEvent event( size, oldSize );
+    resizeEvent( &event );
 }
 
 

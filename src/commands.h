@@ -154,6 +154,25 @@ private:
 
 
 
+class ReverseCommand : public QUndoCommand
+{
+public:
+    ReverseCommand( const SharedSampleBuffer sampleBuffer,
+                    const SharedWaveformItem waveformItem,
+                    WaveGraphicsView* const graphicsView,
+                    QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    const SharedSampleBuffer mSampleBuffer;
+    const SharedWaveformItem mWaveformItem;
+    WaveGraphicsView* const mGraphicsView;
+};
+
+
+
 class ApplyTimeStretchCommand : public QUndoCommand
 {
 public:

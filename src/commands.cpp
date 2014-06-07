@@ -147,7 +147,7 @@ void MoveSlicePointItemCommand::redo()
 
 //==================================================================================================
 
-DeleteSlicePointItemCommand::DeleteSlicePointItemCommand( SharedSlicePointItem slicePoint,
+DeleteSlicePointItemCommand::DeleteSlicePointItemCommand( const SharedSlicePointItem slicePoint,
                                                           WaveGraphicsView* const graphicsView,
                                                           QPushButton* const sliceButton,
                                                           QUndoCommand* parent ) :
@@ -209,7 +209,7 @@ void CreateSlicesCommand::undo()
 
     mGraphicsView->clearWaveform();
 
-    SharedWaveformItem item = mGraphicsView->createWaveformItem( mMainWindow->mCurrentSampleBuffer );
+    SharedWaveformItem item = mGraphicsView->createWaveform( mMainWindow->mCurrentSampleBuffer );
 
     QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
                       mMainWindow, SLOT( playSampleRange(int,int,QPointF) ) );
@@ -238,7 +238,7 @@ void CreateSlicesCommand::redo()
     mGraphicsView->clearWaveform();
 
     const QList<SharedWaveformItem> waveformItemList =
-            mGraphicsView->createWaveformItems( mMainWindow->mCurrentSampleBuffer,
+            mGraphicsView->createWaveforms( mMainWindow->mCurrentSampleBuffer,
                                                 mMainWindow->mSampleRangeList );
 
     foreach ( SharedWaveformItem item, waveformItemList )
@@ -282,7 +282,7 @@ MoveWaveformItemCommand::MoveWaveformItemCommand( const int startOrderPos,
 
 void MoveWaveformItemCommand::undo()
 {
-    mGraphicsView->moveWaveformItem( mDestOrderPos, mStartOrderPos );
+    mGraphicsView->moveWaveform( mDestOrderPos, mStartOrderPos );
     mMainWindow->reorderSampleRangeList( mDestOrderPos, mStartOrderPos );
 }
 
@@ -292,10 +292,41 @@ void MoveWaveformItemCommand::redo()
 {
     if ( ! mIsFirstRedoCall )
     {
-        mGraphicsView->moveWaveformItem( mStartOrderPos, mDestOrderPos );
+        mGraphicsView->moveWaveform( mStartOrderPos, mDestOrderPos );
         mMainWindow->reorderSampleRangeList( mStartOrderPos, mDestOrderPos );
     }
     mIsFirstRedoCall = false;
+}
+
+
+
+//==================================================================================================
+
+ReverseCommand::ReverseCommand( const SharedSampleBuffer sampleBuffer,
+                                const SharedWaveformItem waveformItem,
+                                WaveGraphicsView* const graphicsView,
+                                QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    mSampleBuffer( sampleBuffer ),
+    mWaveformItem( waveformItem ),
+    mGraphicsView( graphicsView )
+{
+    setText( "Reverse" );
+}
+
+
+
+void ReverseCommand::undo()
+{
+    redo();
+}
+
+
+
+void ReverseCommand::redo()
+{
+    mSampleBuffer->reverse( mWaveformItem->getStartFrame(), mWaveformItem->getNumFrames() );
+    mGraphicsView->forceRedraw();
 }
 
 

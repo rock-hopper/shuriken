@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Thu Jun 5 16:35:38 2014
+** Created: Sat Jun 7 17:57:42 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -522,6 +522,7 @@ public:
         actionDelete->setText(QApplication::translate("MainWindow", "Delete", 0, QApplication::UnicodeUTF8));
         actionDelete->setShortcut(QApplication::translate("MainWindow", "Del", 0, QApplication::UnicodeUTF8));
         actionReverse->setText(QApplication::translate("MainWindow", "Reverse", 0, QApplication::UnicodeUTF8));
+        actionReverse->setShortcut(QApplication::translate("MainWindow", "R", 0, QApplication::UnicodeUTF8));
         actionEnvelope->setText(QApplication::translate("MainWindow", "Envelope", 0, QApplication::UnicodeUTF8));
         actionUser_Interface->setText(QApplication::translate("MainWindow", "User Interface", 0, QApplication::UnicodeUTF8));
         actionHelp->setText(QApplication::translate("MainWindow", "Help", 0, QApplication::UnicodeUTF8));

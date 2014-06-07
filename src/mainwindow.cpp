@@ -239,6 +239,7 @@ void MainWindow::enableUI()
     mUI->actionClose_Project->setEnabled( true );
     mUI->actionAdd_Slice_Point->setEnabled( true );
     mUI->actionDelete->setEnabled( true );
+    mUI->actionReverse->setEnabled( true );
     mUI->actionZoom_Original->setEnabled( true );
     mUI->actionZoom_In->setEnabled( true );
 }
@@ -263,6 +264,7 @@ void MainWindow::disableUI()
     mUI->actionClose_Project->setEnabled( false );
     mUI->actionAdd_Slice_Point->setEnabled( false );
     mUI->actionDelete->setEnabled( false );
+    mUI->actionReverse->setEnabled( false );
     mUI->actionZoom_Original->setEnabled( false );
     mUI->actionZoom_Out->setEnabled( false );
     mUI->actionZoom_In->setEnabled( false );
@@ -554,7 +556,7 @@ void MainWindow::on_actionOpen_Project_triggered()
                         // If no sample ranges are defined
                         if ( mSampleRangeList.isEmpty() )
                         {
-                            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveformItem( sampleBuffer );
+                            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer );
 
                             QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
                                               this, SLOT( playSampleRange(int,int,QPointF) ) );
@@ -567,7 +569,7 @@ void MainWindow::on_actionOpen_Project_triggered()
                         else // Sample ranges are defined
                         {
                             const QList<SharedWaveformItem> waveformItemList =
-                                    mUI->waveGraphicsView->createWaveformItems( sampleBuffer, mSampleRangeList );
+                                    mUI->waveGraphicsView->createWaveforms( sampleBuffer, mSampleRangeList );
 
                             foreach ( SharedWaveformItem item, waveformItemList )
                             {
@@ -827,7 +829,7 @@ void MainWindow::on_actionImport_Audio_File_triggered()
             mCurrentSampleBuffer = sampleBuffer;
             mCurrentSampleHeader = sampleHeader;
 
-            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveformItem( sampleBuffer );
+            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer );
 
             QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
                               this, SLOT( playSampleRange(int,int,QPointF) ) );
@@ -966,7 +968,15 @@ void MainWindow::on_actionJoin_triggered()
 
 void MainWindow::on_actionReverse_triggered()
 {
+    const SharedWaveformItem selectedWaveform = mUI->waveGraphicsView->getSelectedWaveform();
 
+    if ( ! selectedWaveform.isNull() )
+    {
+        QUndoCommand* command = new ReverseCommand( mCurrentSampleBuffer,
+                                                    selectedWaveform,
+                                                    mUI->waveGraphicsView );
+        mUndoStack.push( command );
+    }
 }
 
 

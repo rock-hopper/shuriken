@@ -574,6 +574,9 @@
    <property name="text">
     <string>Reverse</string>
    </property>
+   <property name="shortcut">
+    <string>R</string>
+   </property>
   </action>
   <action name="actionEnvelope">
    <property name="enabled">

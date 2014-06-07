@@ -38,10 +38,10 @@ class WaveGraphicsView : public QGraphicsView
 public:
     WaveGraphicsView( QWidget* parent = NULL );
 
-    SharedWaveformItem createWaveformItem( const SharedSampleBuffer sampleBuffer );
-    QList<SharedWaveformItem> createWaveformItems( const SharedSampleBuffer sampleBuffer,
-                                                   const QList<SharedSampleRange> sampleRangeList );
-    void moveWaveformItem( const int oldOrderPos, const int newOrderPos );
+    SharedWaveformItem createWaveform( const SharedSampleBuffer sampleBuffer );
+    QList<SharedWaveformItem> createWaveforms( const SharedSampleBuffer sampleBuffer, const QList<SharedSampleRange> sampleRangeList );
+    void moveWaveform( const int oldOrderPos, const int newOrderPos );
+    SharedWaveformItem getSelectedWaveform();
 
     SharedSlicePointItem createSlicePoint( const int frameNum );
     void addSlicePoint( const SharedSlicePointItem slicePoint );
@@ -63,6 +63,8 @@ public:
     void zoomIn();
     void zoomOut();
     void zoomOriginal();
+
+    void forceRedraw();
 
 protected:
     void resizeEvent( QResizeEvent* event );
