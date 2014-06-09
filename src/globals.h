@@ -10,5 +10,7 @@
 
 #define AUDIO_CONFIG_FILE_PATH      "~/.shuriken/audioconfig.xml"
 
+extern volatile double gCurrentJackBPM;
+
 
 #endif // GLOBALS_H

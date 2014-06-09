@@ -27,6 +27,7 @@
 #include <jack/jack.h>
 #include <jack/midiport.h>
 #include <jack/session.h>
+#include <jack/transport.h>
 
 #include <cassert>
 #include <iostream>
@@ -126,3 +127,10 @@ DECL_FUNCTION(int, jack_set_session_callback, (jack_client_t *client, JackSessio
               (client, session_callback, arg));
 DECL_VOID_FUNCTION(jack_session_event_free, (jack_session_event_t *event), (event));
 
+typedef jack_transport_state_t (*jack_transport_query_ptr_t)(const jack_client_t *client, jack_position_t *pos);
+jack_transport_state_t jack_transport_query(const jack_client_t *client, jack_position_t *pos) {
+  static jack_transport_query_ptr_t fn = 0;
+  if (fn == 0) { fn = (jack_transport_query_ptr_t)load_jack_function("jack_transport_query"); }
+  if (fn) return (*fn)(client, pos);
+  else return JackTransportStopped;
+}

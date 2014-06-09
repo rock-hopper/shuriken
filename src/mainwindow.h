@@ -102,6 +102,7 @@ private slots:
     void on_actionZoom_In_triggered();
     void on_pushButton_Stop_clicked();
     void on_pushButton_Play_clicked();
+    void on_checkBox_JackSync_toggled( const bool isChecked );
     void on_checkBox_PitchCorrection_toggled( const bool isChecked );
     void on_checkBox_TimeStretch_toggled( const bool isChecked );
     void on_doubleSpinBox_NewBPM_valueChanged( const double newBPM );
@@ -147,6 +148,7 @@ private slots:
     void disableZoomOut();
 
     void enableRealtimeMode( const bool isEnabled );
+    void enableJackSyncCheckBox( const bool isEnabled );
 };
 
 #endif // MAINWINDOW_H

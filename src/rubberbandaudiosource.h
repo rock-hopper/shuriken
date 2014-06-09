@@ -34,6 +34,7 @@ using namespace RubberBand;
 class RubberbandAudioSource : public AudioSource
 {
 public:
+    // Caller is responsible for deleting 'source' after RubberbandAudioSource has been deleted
     RubberbandAudioSource( AudioSource* const source, const int numChans );
     ~RubberbandAudioSource();
 
@@ -42,6 +43,11 @@ public:
 
     void setTimeRatio( const qreal ratio )                                      { mTimeRatio = ratio; }
     void setPitchScale( const qreal scale )                                     { mPitchScale = scale; }
+    void enablePitchCorrection( const bool isEnabled )                          { mIsPitchCorrectionEnabled = isEnabled; }
+
+    // Only has an effect when JACK Sync is enabled
+    void setOriginalBPM( const qreal bpm )                                      { mOriginalBPM = bpm; }
+    void enableJackSync( const bool isEnabled )                                 { mIsJackSyncEnabled = isEnabled; }
 
     void prepareToPlay( int samplesPerBlockExpected, double sampleRate ) override;
     void releaseResources() override;
@@ -64,6 +70,12 @@ private:
 
     volatile qreal mPitchScale;
     qreal mPrevPitchScale;
+
+    volatile bool mIsPitchCorrectionEnabled;
+
+    volatile qreal mOriginalBPM;
+
+    volatile bool mIsJackSyncEnabled;
 
     int mTotalNumRetrieved;
 

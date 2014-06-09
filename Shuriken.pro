@@ -155,7 +155,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/slicepointitem.cpp \
     src/commands.cpp \
     src/rubberbandaudiosource.cpp \
-    src/audioanalyser.cpp
+    src/audioanalyser.cpp \
+    src/globals.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \

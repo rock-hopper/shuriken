@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sat Jun 7 17:57:42 2014
+** Created: Sun Jun 8 19:48:51 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -76,6 +76,7 @@ public:
     QPushButton *pushButton_Apply;
     QCheckBox *checkBox_TimeStretch;
     QCheckBox *checkBox_PitchCorrection;
+    QCheckBox *checkBox_JackSync;
     QSpacerItem *horizontalSpacer;
     QHBoxLayout *horizontalLayout_4;
     QPushButton *pushButton_Slice;
@@ -234,12 +235,18 @@ public:
         sizePolicy.setVerticalStretch(0);
         sizePolicy.setHeightForWidth(pushButton_Play->sizePolicy().hasHeightForWidth());
         pushButton_Play->setSizePolicy(sizePolicy);
+        QIcon icon13;
+        icon13.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/media-playback-start.png"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_Play->setIcon(icon13);
 
         horizontalLayout_2->addWidget(pushButton_Play);
 
         pushButton_Stop = new QPushButton(centralWidget);
         pushButton_Stop->setObjectName(QString::fromUtf8("pushButton_Stop"));
         pushButton_Stop->setEnabled(false);
+        QIcon icon14;
+        icon14.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/media-playback-stop.png"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_Stop->setIcon(icon14);
 
         horizontalLayout_2->addWidget(pushButton_Stop);
 
@@ -287,6 +294,7 @@ public:
 
         checkBox_TimeStretch = new QCheckBox(centralWidget);
         checkBox_TimeStretch->setObjectName(QString::fromUtf8("checkBox_TimeStretch"));
+        checkBox_TimeStretch->setEnabled(false);
         checkBox_TimeStretch->setLayoutDirection(Qt::LeftToRight);
         checkBox_TimeStretch->setChecked(true);
 
@@ -294,10 +302,17 @@ public:
 
         checkBox_PitchCorrection = new QCheckBox(centralWidget);
         checkBox_PitchCorrection->setObjectName(QString::fromUtf8("checkBox_PitchCorrection"));
+        checkBox_PitchCorrection->setEnabled(false);
         checkBox_PitchCorrection->setLayoutDirection(Qt::LeftToRight);
         checkBox_PitchCorrection->setChecked(true);
 
         horizontalLayout_2->addWidget(checkBox_PitchCorrection);
+
+        checkBox_JackSync = new QCheckBox(centralWidget);
+        checkBox_JackSync->setObjectName(QString::fromUtf8("checkBox_JackSync"));
+        checkBox_JackSync->setEnabled(false);
+
+        horizontalLayout_2->addWidget(checkBox_JackSync);
 
         horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
@@ -549,8 +564,6 @@ public:
         actionZoom_Original->setToolTip(QApplication::translate("MainWindow", "Zoom Original (Ctrl+0)", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP
         actionZoom_Original->setShortcut(QApplication::translate("MainWindow", "Ctrl+0", 0, QApplication::UnicodeUTF8));
-        pushButton_Play->setText(QApplication::translate("MainWindow", "Play", 0, QApplication::UnicodeUTF8));
-        pushButton_Stop->setText(QApplication::translate("MainWindow", "Stop", 0, QApplication::UnicodeUTF8));
         pushButton_Stop->setShortcut(QApplication::translate("MainWindow", "Space", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("MainWindow", "Original BPM:", 0, QApplication::UnicodeUTF8));
         pushButton_CalcBPM->setText(QApplication::translate("MainWindow", "Calc", 0, QApplication::UnicodeUTF8));
@@ -558,6 +571,7 @@ public:
         pushButton_Apply->setText(QApplication::translate("MainWindow", "Apply", 0, QApplication::UnicodeUTF8));
         checkBox_TimeStretch->setText(QApplication::translate("MainWindow", "Time Stretch", 0, QApplication::UnicodeUTF8));
         checkBox_PitchCorrection->setText(QApplication::translate("MainWindow", "Pitch Correction", 0, QApplication::UnicodeUTF8));
+        checkBox_JackSync->setText(QApplication::translate("MainWindow", "JACK Sync", 0, QApplication::UnicodeUTF8));
         pushButton_Slice->setText(QApplication::translate("MainWindow", "Slice", 0, QApplication::UnicodeUTF8));
         label->setText(QApplication::translate("MainWindow", "Threshold:", 0, QApplication::UnicodeUTF8));
         pushButton_FindOnsets->setText(QApplication::translate("MainWindow", "Find Onsets", 0, QApplication::UnicodeUTF8));

@@ -21,7 +21,8 @@
 */
 
 #include "rubberbandaudiosource.h"
-//#include <QDebug>
+#include "globals.h"
+#include <QDebug>
 
 
 //==================================================================================================
@@ -35,7 +36,12 @@ RubberbandAudioSource::RubberbandAudioSource( AudioSource* const source, const i
     mStretcher( NULL ),
     mInputBuffer( numChans, 8192 ),
     mTimeRatio( 1.0 ),
-    mPrevTimeRatio( 1.0 )
+    mPrevTimeRatio( 1.0 ),
+    mPitchScale( 1.0 ),
+    mPrevPitchScale( 1.0 ),
+    mIsPitchCorrectionEnabled( true ),
+    mOriginalBPM( 0.0 ),
+    mIsJackSyncEnabled( false )
 {
 }
 
@@ -77,10 +83,24 @@ void RubberbandAudioSource::releaseResources()
 
 void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill )
 {
+    if ( mIsJackSyncEnabled && gCurrentJackBPM > 0.0 && mOriginalBPM > 0.0 )
+    {
+          mTimeRatio = mOriginalBPM / gCurrentJackBPM;
+    }
+
     if ( mTimeRatio != mPrevTimeRatio)
     {
         mStretcher->setTimeRatio( mTimeRatio );
         mPrevTimeRatio = mTimeRatio;
+    }
+
+    if ( mIsPitchCorrectionEnabled )
+    {
+        mPitchScale = 1.0;
+    }
+    else
+    {
+        if ( mTimeRatio > 0.0 ) mPitchScale = 1 / mTimeRatio;
     }
 
     if ( mPitchScale != mPrevPitchScale)

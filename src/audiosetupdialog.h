@@ -45,6 +45,7 @@ public:
     AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* parent = NULL );
     ~AudioSetupDialog();
 
+    bool isJackAudioEnabled() const;
     bool isRealtimeModeEnabled() const;
     void enableRealtimeMode( const bool isEnabled );
 
@@ -77,6 +78,7 @@ private:
 
 signals:
     void realtimeModeEnabled( const bool isEnabled );
+    void jackAudioEnabled( const bool isEnabled );
 
 private slots:
     void on_radioButton_Offline_clicked();

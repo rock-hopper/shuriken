@@ -65,6 +65,12 @@ AudioSetupDialog::~AudioSetupDialog()
 }
 
 
+bool AudioSetupDialog::isJackAudioEnabled() const
+{
+    return ( mDeviceManager.getCurrentAudioDeviceType() == "JACK" );
+}
+
+
 
 bool AudioSetupDialog::isRealtimeModeEnabled() const
 {
@@ -513,6 +519,15 @@ void AudioSetupDialog::on_comboBox_AudioBackend_currentIndexChanged( const int i
     if ( error.isNotEmpty() )
     {
         showWarningBox( tr("Error when trying to open audio device!"), error.toRawUTF8() );
+    }
+
+    if ( audioBackendName == "JACK" )
+    {
+        emit jackAudioEnabled( true );
+    }
+    else
+    {
+        emit jackAudioEnabled( false );
     }
 }
 

@@ -28,8 +28,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="text">
-         <string>Play</string>
+        <property name="icon">
+         <iconset>
+          <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/media-playback-start.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/media-playback-start.png</iconset>
         </property>
        </widget>
       </item>
@@ -38,8 +39,9 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
-        <property name="text">
-         <string>Stop</string>
+        <property name="icon">
+         <iconset>
+          <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/media-playback-stop.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/media-playback-stop.png</iconset>
         </property>
         <property name="shortcut">
          <string>Space</string>
@@ -126,6 +128,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="checkBox_TimeStretch">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="layoutDirection">
          <enum>Qt::LeftToRight</enum>
         </property>
@@ -139,6 +144,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="checkBox_PitchCorrection">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="layoutDirection">
          <enum>Qt::LeftToRight</enum>
         </property>
@@ -147,6 +155,16 @@
         </property>
         <property name="checked">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBox_JackSync">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>JACK Sync</string>
         </property>
        </widget>
       </item>

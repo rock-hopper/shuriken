@@ -140,6 +140,9 @@ MainWindow::MainWindow( QWidget* parent ) :
         QObject::connect( mAudioSetupDialog.get(), SIGNAL( realtimeModeEnabled(bool) ),
                           this, SLOT( enableRealtimeMode(bool) ) );
 
+        QObject::connect( mAudioSetupDialog.get(), SIGNAL( jackAudioEnabled(bool) ),
+                          this, SLOT( enableJackSyncCheckBox(bool) ) );
+
         mSamplerAudioSource = new SamplerAudioSource();
         mIsAudioInitialised = true;
     }
@@ -222,18 +225,28 @@ void MainWindow::tearDownSampler( const bool isSampleToBeCleared )
 
 void MainWindow::enableUI()
 {
-    mUI->doubleSpinBox_OriginalBPM->setEnabled( true );
-    mUI->doubleSpinBox_NewBPM->setEnabled( true );
-    mUI->pushButton_CalcBPM->setEnabled( true );
-    mUI->pushButton_Apply->setEnabled( true );
-    mUI->pushButton_FindOnsets->setEnabled( true );
-    mUI->pushButton_FindBeats->setEnabled( true );
-
     if ( mIsAudioInitialised )
     {
         mUI->pushButton_Play->setEnabled( true );
         mUI->pushButton_Stop->setEnabled( true );
     }
+
+    if ( mAudioSetupDialog->isRealtimeModeEnabled() && mAudioSetupDialog->isJackAudioEnabled() )
+    {
+        mUI->checkBox_JackSync->setEnabled( true );
+    }
+    else
+    {
+        mUI->pushButton_Apply->setEnabled( true );
+    }
+
+    mUI->doubleSpinBox_OriginalBPM->setEnabled( true );
+    mUI->doubleSpinBox_NewBPM->setEnabled( true );
+    mUI->pushButton_CalcBPM->setEnabled( true );
+    mUI->checkBox_TimeStretch->setEnabled( true );
+    mUI->checkBox_PitchCorrection->setEnabled( true );
+    mUI->pushButton_FindOnsets->setEnabled( true );
+    mUI->pushButton_FindBeats->setEnabled( true );
 
     mUI->actionSave_Project->setEnabled( true );
     mUI->actionClose_Project->setEnabled( true );
@@ -248,17 +261,21 @@ void MainWindow::enableUI()
 
 void MainWindow::disableUI()
 {
+    mUI->pushButton_Play->setEnabled( false );
+    mUI->pushButton_Stop->setEnabled( false );
     mUI->doubleSpinBox_OriginalBPM->setValue( 0.0 );
     mUI->doubleSpinBox_OriginalBPM->setEnabled( false );
     mUI->doubleSpinBox_NewBPM->setValue( 0.0 );
     mUI->doubleSpinBox_NewBPM->setEnabled( false );
     mUI->pushButton_CalcBPM->setEnabled( false );
     mUI->pushButton_Apply->setEnabled( false );
+    mUI->checkBox_TimeStretch->setEnabled( false );
+    mUI->checkBox_PitchCorrection->setEnabled( false );
+    mUI->checkBox_JackSync->setEnabled( false );
     mUI->pushButton_Slice->setEnabled( false );
     mUI->pushButton_FindOnsets->setEnabled( false );
     mUI->pushButton_FindBeats->setEnabled( false );
-    mUI->pushButton_Play->setEnabled( false );
-    mUI->pushButton_Stop->setEnabled( false );
+
 
     mUI->actionSave_Project->setEnabled( false );
     mUI->actionClose_Project->setEnabled( false );
@@ -447,18 +464,39 @@ void MainWindow::enableRealtimeMode( const bool isEnabled )
             mUI->pushButton_Apply->setEnabled( false );
             mUI->doubleSpinBox_OriginalBPM->setValue( mAppliedNewBPM );
             mUI->doubleSpinBox_NewBPM->setValue( mAppliedNewBPM );
+
+            if ( mAudioSetupDialog->isJackAudioEnabled() )
+            {
+                mUI->checkBox_JackSync->setEnabled( true );
+            }
         }
         else
         {
             mUI->pushButton_Apply->setEnabled( true );
             mUI->doubleSpinBox_OriginalBPM->setValue( mAppliedOriginalBPM );
             mUI->doubleSpinBox_NewBPM->setValue( mAppliedNewBPM );
+            mUI->checkBox_JackSync->setEnabled( false );
         }
 
         const bool isSampleToBeCleared = false;
 
         tearDownSampler( isSampleToBeCleared );
         setUpSampler( mCurrentSampleBuffer->getNumChannels() );
+    }
+}
+
+
+
+void MainWindow::enableJackSyncCheckBox( const bool isEnabled )
+{
+    if ( mAudioSetupDialog->isRealtimeModeEnabled() )
+    {
+        mUI->checkBox_JackSync->setEnabled( isEnabled );
+    }
+
+    if ( ! mUI->checkBox_JackSync->isEnabled() )
+    {
+        mUI->checkBox_JackSync->setChecked( false );
     }
 }
 
@@ -1038,8 +1076,14 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
 
     const AudioAnalyser::DetectionSettings settings = getDetectionSettings();
     const qreal bpm = AudioAnalyser::calcBPM( mCurrentSampleBuffer, settings );
+
     mUI->doubleSpinBox_OriginalBPM->setValue( bpm );
     mUI->doubleSpinBox_NewBPM->setValue( bpm );
+
+    if ( mRubberbandAudioSource != NULL )
+    {
+        mRubberbandAudioSource->setOriginalBPM( bpm );
+    }
 
     QApplication::restoreOverrideCursor();
 }
@@ -1132,17 +1176,16 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
 {
     const qreal newBPM = mUI->doubleSpinBox_NewBPM->value();
     const bool isTimeStretchEnabled = mUI->checkBox_TimeStretch->isChecked();
-    const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
 
     if ( isTimeStretchEnabled && mRubberbandAudioSource != NULL )
     {
+        mRubberbandAudioSource->setOriginalBPM( originalBPM );
+
         if ( newBPM > 0.0 && originalBPM > 0.0 )
         {
             const qreal timeRatio = originalBPM / newBPM;
-            const qreal pitchScale = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
 
             mRubberbandAudioSource->setTimeRatio( timeRatio );
-            mRubberbandAudioSource->setPitchScale( pitchScale );
         }
     }
 }
@@ -1153,17 +1196,14 @@ void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
 {
     const qreal originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
     const bool isTimeStretchEnabled = mUI->checkBox_TimeStretch->isChecked();
-    const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
 
     if ( isTimeStretchEnabled && mRubberbandAudioSource != NULL )
     {
         if ( newBPM > 0.0 && originalBPM > 0.0 )
         {
             const qreal timeRatio = originalBPM / newBPM;
-            const qreal pitchScale = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
 
             mRubberbandAudioSource->setTimeRatio( timeRatio );
-            mRubberbandAudioSource->setPitchScale( pitchScale );
         }
     }
 }
@@ -1175,21 +1215,21 @@ void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
     const qreal originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
     const qreal newBPM = mUI->doubleSpinBox_NewBPM->value();
     const bool isTimeStretchEnabled = isChecked;
-    const bool isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
 
-    if ( newBPM > 0.0 && originalBPM > 0.0 && mRubberbandAudioSource != NULL )
+    if ( mRubberbandAudioSource != NULL )
     {
         qreal timeRatio = 1.0;
-        qreal pitchScale = 1.0;
+        bool isPitchCorrectionEnabled = true;
 
         if ( isTimeStretchEnabled )
         {
-            timeRatio = originalBPM / newBPM;
-            pitchScale = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
+            if ( newBPM > 0.0 && originalBPM > 0.0 )
+                timeRatio = originalBPM / newBPM;
+            isPitchCorrectionEnabled = mUI->checkBox_PitchCorrection->isChecked();
         }
 
         mRubberbandAudioSource->setTimeRatio( timeRatio );
-        mRubberbandAudioSource->setPitchScale( pitchScale );
+        mRubberbandAudioSource->enablePitchCorrection( isPitchCorrectionEnabled );
     }
 }
 
@@ -1197,20 +1237,23 @@ void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
 
 void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
 {
-    const qreal originalBPM = mUI->doubleSpinBox_OriginalBPM->value();
-    const qreal newBPM = mUI->doubleSpinBox_NewBPM->value();
     const bool isTimeStretchEnabled = mUI->checkBox_TimeStretch->isChecked();
-    const bool isPitchCorrectionEnabled = isChecked;
 
     if ( isTimeStretchEnabled && mRubberbandAudioSource != NULL )
     {
-        if ( newBPM > 0.0 && originalBPM > 0.0 )
-        {
-            const qreal pitchScale = isPitchCorrectionEnabled ? 1.0 : newBPM / originalBPM;
-
-            mRubberbandAudioSource->setPitchScale( pitchScale );
-        }
+        mRubberbandAudioSource->enablePitchCorrection( isChecked );
     }
+}
+
+
+
+void MainWindow::on_checkBox_JackSync_toggled( const bool isChecked )
+{
+    if ( mRubberbandAudioSource != NULL )
+    {
+        mRubberbandAudioSource->enableJackSync( isChecked );
+    }
+    mUI->doubleSpinBox_NewBPM->setEnabled( ! isChecked );
 }
 
 
@@ -1274,5 +1317,3 @@ void MainWindow::on_pushButton_Apply_clicked()
         mAppliedNewBPM = newBPM;
     }
 }
-
-

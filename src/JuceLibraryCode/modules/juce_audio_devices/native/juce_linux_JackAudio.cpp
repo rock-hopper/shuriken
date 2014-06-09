@@ -54,6 +54,7 @@
 
 #include "jack_device.h"
 #include "linux_midi.h"
+#include "globals.h"
 
 
 extern "C" int libjack_is_present;
@@ -65,16 +66,16 @@ extern "C" int libjack_session_is_supported;
 class JackAudioIODevice : public AudioIODevice
 {
 public:
-
-    JackAudioIODevice (const String& deviceName, const JackClientConfig& config)
-        : AudioIODevice (deviceName, "JACK"),
+    JackAudioIODevice (const String& deviceName, const JackClientConfig& config) :
+        AudioIODevice (deviceName, "JACK"),
         mConfig (config),
         mIsDeviceOpen (false),
         mIsDevicePlaying (false),
         mIsClientActivated (false),
         mAudioIOCallback (nullptr),
         mJackClient (nullptr),
-        mMidiPortIn (nullptr)
+        mMidiPortIn (nullptr),
+        mPositionInfo (new jack_position_t)
     {
         for (int i=0; i < mConfig.inputChannels.size(); ++i)
         {
@@ -259,6 +260,8 @@ public:
             *mConfig.freewheel_flag = -1;
 
         mIsDeviceOpen = false;
+
+        gCurrentJackBPM = 0.0;
     }
 
 
@@ -286,6 +289,9 @@ public:
 
     void process (int numFrames)
     {
+        jack_transport_query (mJackClient, mPositionInfo);
+        gCurrentJackBPM = mPositionInfo->beats_per_minute;
+
         if (mMidiPortIn != nullptr && gJackMidiClient != nullptr)
         {
             void* buf = jack_port_get_buffer (mMidiPortIn, numFrames);
@@ -424,7 +430,6 @@ public:
 
 
 private:
-
     static void threadInitCallback (void* /*callbackArgument*/) {}
 
 
@@ -527,6 +532,8 @@ private:
     Array<jack_port_t*> mInputPorts;
     Array<jack_port_t*> mOutputPorts;
     jack_port_t* mMidiPortIn;
+
+    ScopedPointer<jack_position_t> mPositionInfo;
 };
 
 
