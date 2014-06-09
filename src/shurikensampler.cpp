@@ -42,7 +42,7 @@
 */
 
 #include "shurikensampler.h"
-#include <QDebug>
+//#include <QDebug>
 
 
 ShurikenSamplerSound::ShurikenSamplerSound( const SharedSampleBuffer sampleBuffer,
@@ -128,10 +128,6 @@ void ShurikenSamplerVoice::startNote( const int midiNoteNumber,
     {
         mPitchRatio = pow( 2.0, (midiNoteNumber - sound->mMidiRootNote) / 12.0 )
                         * sound->mSourceSampleRate / getSampleRate();
-
-        qDebug() << "sound->mSourceSampleRate" << sound->mSourceSampleRate;
-        qDebug() << "getSampleRate()" << getSampleRate();
-        qDebug() << "mPitchRatio" << mPitchRatio << "\n";
 
         mSourceSamplePosition = sound->mStartFrame;
         mLeftGain = velocity;

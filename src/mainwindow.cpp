@@ -186,7 +186,7 @@ void MainWindow::changeEvent( QEvent* event )
 //==================================================================================================
 // Private:
 
-void MainWindow::setUpSampler( const int numChans )
+void MainWindow::setUpAudioSourcePlayer( const int numChans )
 {
     if ( mIsAudioInitialised )
     {
@@ -207,7 +207,7 @@ void MainWindow::setUpSampler( const int numChans )
 
 
 
-void MainWindow::tearDownSampler( const bool isSampleToBeCleared )
+void MainWindow::tearDownAudioSourcePlayer( const bool isSampleToBeCleared )
 {
     if ( mIsAudioInitialised )
     {
@@ -479,9 +479,8 @@ void MainWindow::enableRealtimeMode( const bool isEnabled )
         }
 
         const bool isSampleToBeCleared = false;
-
-        tearDownSampler( isSampleToBeCleared );
-        setUpSampler( mCurrentSampleBuffer->getNumChannels() );
+        tearDownAudioSourcePlayer( isSampleToBeCleared );
+        setUpAudioSourcePlayer( mCurrentSampleBuffer->getNumChannels() );
     }
 }
 
@@ -599,8 +598,8 @@ void MainWindow::on_actionOpen_Project_triggered()
                             QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
                                               this, SLOT( playSampleRange(int,int,QPointF) ) );
 
-                            setUpSampler( sampleBuffer->getNumChannels() );
                             mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
+                            setUpAudioSourcePlayer( sampleBuffer->getNumChannels() );
 
                             enableUI();
                         }
@@ -621,9 +620,9 @@ void MainWindow::on_actionOpen_Project_triggered()
                                                   this, SLOT( playSampleRange(int,int,QPointF) ) );
                             }
 
-                            setUpSampler( sampleHeader->numChans );
                             mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
                             mSamplerAudioSource->setSampleRanges( mSampleRangeList );
+                            setUpAudioSourcePlayer( sampleHeader->numChans );
 
                             enableUI();
                             mUI->actionAdd_Slice_Point->setEnabled( false );
@@ -821,7 +820,7 @@ void MainWindow::on_actionClose_Project_triggered()
     mCurrentSampleBuffer.clear();
     mCurrentSampleHeader.clear();
     mSampleRangeList.clear();
-    tearDownSampler( true );
+    tearDownAudioSourcePlayer( true );
 
     mUI->waveGraphicsView->clearAll();
     on_actionZoom_Original_triggered();
@@ -872,8 +871,8 @@ void MainWindow::on_actionImport_Audio_File_triggered()
             QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
                               this, SLOT( playSampleRange(int,int,QPointF) ) );
 
-            setUpSampler( sampleBuffer->getNumChannels() );
             mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
+            setUpAudioSourcePlayer( sampleBuffer->getNumChannels() );
 
             enableUI();
 

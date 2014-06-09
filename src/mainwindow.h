@@ -56,8 +56,8 @@ protected:
     void changeEvent( QEvent* event );
 
 private:
-    void setUpSampler( const int numChans );
-    void tearDownSampler( const bool isSampleToBeCleared );
+    void setUpAudioSourcePlayer( const int numChans );
+    void tearDownAudioSourcePlayer( const bool isSampleToBeCleared );
     void enableUI();
     void disableUI();
     AudioAnalyser::DetectionSettings getDetectionSettings();
