@@ -72,7 +72,7 @@ SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sa
 
 
 QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const SharedSampleBuffer sampleBuffer,
-                                                                 const QList<SharedSampleRange> sampleRangeList )
+                                                             const QList<SharedSampleRange> sampleRangeList )
 {
     mNumFrames = sampleBuffer->getNumFrames();
 
@@ -292,43 +292,46 @@ QList<int> WaveGraphicsView::getSlicePointFrameNumList()
 
 void WaveGraphicsView::stretch( const qreal ratio, const int newTotalNumFrames )
 {
-    mNumFrames = newTotalNumFrames;
-
-
-    // Update start frame and length of every waveform item, preserve current ordering of waveform item list
-    QList<SharedWaveformItem> tempList( mWaveformItemList );
-
-    qSort( tempList.begin(), tempList.end(), WaveformItem::isLessThan );
-
-    foreach ( SharedWaveformItem item, tempList )
+    if ( ratio > 0.0 && newTotalNumFrames > 0 )
     {
-        const int origStartFrame = roundToInt( item->getStartFrame() / mCurrentStretchRatio );
-        const int newStartFrame = roundToInt( origStartFrame * ratio );
-        item->setStartFrame( newStartFrame );
+        mNumFrames = newTotalNumFrames;
+
+
+        // Update start frame and length of every waveform item, preserving current ordering of waveform item list
+        QList<SharedWaveformItem> tempList( mWaveformItemList );
+
+        qSort( tempList.begin(), tempList.end(), WaveformItem::isLessThan );
+
+        foreach ( SharedWaveformItem item, tempList )
+        {
+            const int origStartFrame = roundToInt( item->getStartFrame() / mCurrentStretchRatio );
+            const int newStartFrame = roundToInt( origStartFrame * ratio );
+            item->setStartFrame( newStartFrame );
+        }
+
+        for ( int i = 0; i < tempList.size(); i++ )
+        {
+            const int newNumFrames = i + 1 < tempList.size() ?
+                                     tempList.at( i + 1 )->getStartFrame() - tempList.at( i )->getStartFrame() :
+                                     mNumFrames - tempList.at( i )->getStartFrame();
+
+            tempList.at( i )->setNumFrames( newNumFrames );
+        }
+
+
+        // Update frame nos. of all slice point items
+        foreach ( SharedSlicePointItem item, mSlicePointItemList )
+        {
+            const int origFrameNum = roundToInt( item->getFrameNum() / mCurrentStretchRatio );
+            const int newFrameNum = roundToInt( origFrameNum * ratio );
+            moveSlicePoint( item, newFrameNum );
+        }
+
+
+        mCurrentStretchRatio = ratio;
+
+        forceRedraw();
     }
-
-    for ( int i = 0; i < tempList.size(); i++ )
-    {
-        const int newNumFrames = i + 1 < tempList.size() ?
-                                 tempList.at( i + 1 )->getStartFrame() - tempList.at( i )->getStartFrame() :
-                                 mNumFrames - tempList.at( i )->getStartFrame();
-
-        tempList.at( i )->setNumFrames( newNumFrames );
-    }
-
-
-    // Update frame nos. of all slice point items
-    foreach ( SharedSlicePointItem item, mSlicePointItemList )
-    {
-        const int origFrameNum = roundToInt( item->getFrameNum() / mCurrentStretchRatio );
-        const int newFrameNum = roundToInt( origFrameNum * ratio );
-        moveSlicePoint( item, newFrameNum );
-    }
-
-
-    mCurrentStretchRatio = ratio;
-
-    forceRedraw();
 }
 
 
