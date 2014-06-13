@@ -94,8 +94,8 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const SharedSampleB
 
         mWaveformItemList.append( SharedWaveformItem( waveformItem ) );
 
-        QObject::connect( waveformItem, SIGNAL( orderPosIsChanging(int,int) ),
-                          this, SLOT( reorderWaveformItems(int,int) ) );
+        QObject::connect( waveformItem, SIGNAL( orderPosIsChanging(QList<int>,int) ),
+                          this, SLOT( reorderWaveformItems(QList<int>,int) ) );
 
         QObject::connect( waveformItem, SIGNAL( finishedMoving(int) ),
                           this, SLOT( slideWaveformItemIntoPlace(int) ) );
@@ -114,13 +114,18 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const SharedSampleB
 }
 
 
-
-void WaveGraphicsView::moveWaveform( const int oldOrderPos, const int newOrderPos )
+// TODO
+void WaveGraphicsView::moveWaveforms( const QList<int> oldOrderPositions, const int numPlacesMoved )
 {
     Q_ASSERT_X( ! mWaveformItemList.isEmpty(), "WaveGraphicsView::moveWaveformSlice", "mWaveformItemList is empty" );
 
-    reorderWaveformItems( oldOrderPos, newOrderPos );
-    slideWaveformItemIntoPlace( newOrderPos );
+    reorderWaveformItems( oldOrderPositions, numPlacesMoved );
+
+    foreach ( int orderPos, oldOrderPositions )
+    {
+        const int newOrderPos = orderPos + numPlacesMoved;
+        slideWaveformItemIntoPlace( newOrderPos );
+    }
 }
 
 
@@ -300,7 +305,7 @@ void WaveGraphicsView::stretch( const qreal ratio, const int newTotalNumFrames )
         // Update start frame and length of every waveform item, preserving current ordering of waveform item list
         QList<SharedWaveformItem> tempList( mWaveformItemList );
 
-        qSort( tempList.begin(), tempList.end(), WaveformItem::isLessThan );
+        qSort( tempList.begin(), tempList.end(), WaveformItem::isLessThanStartFrame );
 
         foreach ( SharedWaveformItem item, tempList )
         {
@@ -438,6 +443,31 @@ void WaveGraphicsView::forceRedraw()
 
 
 
+void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
+{
+    switch ( mode )
+    {
+    case MOVE_ITEMS:
+        foreach ( SharedWaveformItem item, mWaveformItemList )
+        {
+            item->setFlag( QGraphicsItem::ItemIsMovable, true );
+        }
+        setDragMode( NoDrag );
+        break;
+    case SELECT_ITEMS:
+        foreach ( SharedWaveformItem item, mWaveformItemList )
+        {
+            item->setFlag( QGraphicsItem::ItemIsMovable, false );
+        }
+        setDragMode( RubberBandDrag );
+        break;
+    default:
+        break;
+    }
+}
+
+
+
 //==================================================================================================
 // Protected:
 
@@ -497,35 +527,72 @@ void WaveGraphicsView::scaleSlicePointItems( const qreal newXScaleFactor )
 //==================================================================================================
 // Private Slots:
 
-void WaveGraphicsView::reorderWaveformItems( const int oldOrderPos, const int newOrderPos )
+void WaveGraphicsView::reorderWaveformItems( QList<int> oldOrderPositions, const int numPlacesMoved )
 {
-    mWaveformItemList[ oldOrderPos ]->setOrderPos( newOrderPos );
+    const int numSelectedItems = oldOrderPositions.size();
 
-    const qreal distanceToMove = mWaveformItemList[ oldOrderPos ]->rect().width();
+    qreal distanceToMove = 0.0;
 
-    // If a waveform item has been dragged to the left
-    if ( newOrderPos < oldOrderPos )
+    foreach ( int orderPos, oldOrderPositions )
     {
-        for ( int orderPos = newOrderPos; orderPos < oldOrderPos; orderPos++ )
-        {
-            const qreal currentScenePosX = mWaveformItemList[ orderPos ]->scenePos().x();
-            mWaveformItemList[ orderPos ]->setPos( currentScenePosX + distanceToMove, 0.0 );
-            mWaveformItemList[ orderPos ]->setOrderPos( orderPos + 1 );
-        }
+        distanceToMove += mWaveformItemList.at( orderPos )->rect().width();
     }
 
-    // If a waveform item has been dragged to the right
-    if ( newOrderPos > oldOrderPos )
+    QList<int> itemsToMoveCurrentOrderPositions;
+
+    // If waveform items have been dragged to the left...
+    if ( numPlacesMoved < 0 )
     {
-        for ( int orderPos = newOrderPos; orderPos > oldOrderPos; orderPos-- )
+        int pos = oldOrderPositions.first() + numPlacesMoved;
+
+        for ( int num = 0; num < abs( numPlacesMoved ); num++ )
         {
-            const qreal currentScenePosX = mWaveformItemList[ orderPos ]->scenePos().x();
-            mWaveformItemList[ orderPos ]->setPos( currentScenePosX - distanceToMove, 0.0 );
-            mWaveformItemList[ orderPos ]->setOrderPos( orderPos - 1 );
+            itemsToMoveCurrentOrderPositions << pos++;
+        }
+
+        foreach ( int orderPos, itemsToMoveCurrentOrderPositions )
+        {
+            const qreal currentScenePosX = mWaveformItemList.at( orderPos )->scenePos().x();
+
+            mWaveformItemList.at( orderPos )->setPos( currentScenePosX + distanceToMove, 0.0 );
+            mWaveformItemList.at( orderPos )->setOrderPos( orderPos + numSelectedItems );
+        }
+
+        for ( int i = 0; i < numSelectedItems; i++ )
+        {
+            const int orderPos = oldOrderPositions.at( i );
+
+            mWaveformItemList.at( orderPos )->setOrderPos( orderPos + numPlacesMoved );
+            mWaveformItemList.move( orderPos, orderPos + numPlacesMoved );
         }
     }
+    else // If waveform items have been dragged to the right...
+    {
+        int pos = oldOrderPositions.last() + 1;
 
-    mWaveformItemList.move( oldOrderPos, newOrderPos );
+        for ( int num = 0; num < numPlacesMoved; num++ )
+        {
+            itemsToMoveCurrentOrderPositions << pos++;
+        }
+
+        foreach ( int orderPos, itemsToMoveCurrentOrderPositions )
+        {
+            const qreal currentScenePosX = mWaveformItemList.at( orderPos )->scenePos().x();
+
+            mWaveformItemList.at( orderPos )->setPos( currentScenePosX - distanceToMove, 0.0 );
+            mWaveformItemList.at( orderPos )->setOrderPos( orderPos - numSelectedItems );
+        }
+
+        const int lastIndex = numSelectedItems - 1;
+
+        for ( int i = lastIndex; i >= 0; i-- )
+        {
+            const int orderPos = oldOrderPositions.at( i );
+
+            mWaveformItemList.at( orderPos )->setOrderPos( orderPos + numPlacesMoved );
+            mWaveformItemList.move( orderPos, orderPos + numPlacesMoved );
+        }
+    }
 }
 
 

@@ -225,9 +225,16 @@ void WaveformItem::setRect( const qreal x, const qreal y, const qreal width, con
 //==================================================================================================
 // Public Static:
 
-bool WaveformItem::isLessThan( const SharedWaveformItem item1, const SharedWaveformItem item2 )
+bool WaveformItem::isLessThanStartFrame( const SharedWaveformItem item1, const SharedWaveformItem item2 )
 {
     return item1->getStartFrame() < item2->getStartFrame();
+}
+
+
+
+bool WaveformItem::isLessThanOrderPos( const WaveformItem* const item1, const WaveformItem* const item2 )
+{
+    return item1->getOrderPos() < item2->getOrderPos();
 }
 
 
@@ -240,16 +247,40 @@ QVariant WaveformItem::itemChange( GraphicsItemChange change, const QVariant &va
     // Keep waveform item within bounds of scene rect
     if ( change == ItemPositionChange && scene() != NULL )
     {
+        qreal minDistanceFromSceneLeftEdge = 0.0;
+        qreal minDistanceFromSceneRightEdge = 0.0;
+
+        // If this item is part of a group of selected items then calculate the
+        // minimum distance it must be from the left and right edges of the scene
+        if ( isSelected() )
+        {
+            QList<WaveformItem*> selectedItems = getSortedListSelectedItems();
+
+            foreach( WaveformItem* item, selectedItems )
+            {
+                if ( getOrderPos() > item->getOrderPos() )
+                {
+                    minDistanceFromSceneLeftEdge += item->rect().width();
+                }
+                else if ( getOrderPos() < item->getOrderPos() )
+                {
+                    minDistanceFromSceneRightEdge += item->rect().width();
+                }
+            }
+        }
+
         QPointF newPos = value.toPointF();
-        const QPointF newPosBottomRight = QPointF( newPos.x() + rect().width(), newPos.y() + rect().height() );
+
+        const qreal newPosRightEdge = newPos.x() + rect().width() - 1;
         const QRectF sceneRect = scene()->sceneRect();
 
-        if ( ! ( sceneRect.contains( newPos ) && sceneRect.contains( newPosBottomRight ) ) )
+        if ( newPos.x() < minDistanceFromSceneLeftEdge )
         {
-            newPos.setX
-            (
-                    qMin( sceneRect.right() - rect().width(), qMax( newPos.x(), sceneRect.left() ) )
-            );
+            newPos.setX( minDistanceFromSceneLeftEdge );
+        }
+        else if ( newPosRightEdge > sceneRect.width() - minDistanceFromSceneRightEdge )
+        {
+            newPos.setX( sceneRect.width() - minDistanceFromSceneRightEdge - rect().width() );
         }
         newPos.setY( 0.0 );
 
@@ -272,14 +303,23 @@ QVariant WaveformItem::itemChange( GraphicsItemChange change, const QVariant &va
 
 void WaveformItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
+    // If the Graphics View has set drag mode to RubberBandDrag then it will additionally have unset
+    // this item's ItemIsMovable flag. The event must then be ignored for RubberBandDrag to work
+
     if ( event->button() == Qt::RightButton )
     {
-        emit rightMousePressed( mStartFrame, mNumFrames, event->scenePos() );
+        if ( flags() & ItemIsMovable )
+            emit rightMousePressed( mStartFrame, mNumFrames, event->scenePos() );
+
         event->ignore();
     }
     else
     {
-        QGraphicsItem::mousePressEvent( event );
+        if ( flags() & ItemIsMovable )
+            QGraphicsItem::mousePressEvent( event );
+        else
+            event->ignore();
+
         mOrderPosBeforeMove = mCurrentOrderPos;
     }
 }
@@ -290,47 +330,76 @@ void WaveformItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseMoveEvent( event );
 
-    // If this item is being dragged to the left
+    QList<WaveformItem*> selectedItems = getSortedListSelectedItems();
+
+    // If this item is being dragged to the left...
     if ( event->screenPos().x() < event->lastScreenPos().x() )
     {
-        // Get item under left edge of this item
-        QGraphicsItem* const item = scene()->items( QPointF(scenePos()) ).last();
+        // Get the order position and scene position of the leftmost selected item
+        const QPointF leftmostSelectedItemScenePos = selectedItems.first()->scenePos();
+        const int leftmostSelectedItemOrderPos = selectedItems.first()->getOrderPos();
 
-        if ( item != this && item->type() == type() ) // If the other item is a WaveformItem
+        // Get item under left edge of the leftmost selected item
+        QGraphicsItem* const otherItem = scene()->items( leftmostSelectedItemScenePos ).last();
+
+        // If the other item is a WaveformItem...
+        if ( otherItem != this && otherItem->type() == WaveformItem::Type )
         {
-            WaveformItem* const otherWaveformItem = qgraphicsitem_cast<WaveformItem*>( item );
+            WaveformItem* const otherWaveformItem = qgraphicsitem_cast<WaveformItem*>( otherItem );
+            const int otherItemOrderPos = otherWaveformItem->getOrderPos();
 
-            if ( otherWaveformItem->getOrderPos() < mCurrentOrderPos )
+            if ( otherItemOrderPos < leftmostSelectedItemOrderPos )
             {
-                // If the left edge of this item is more than halfway across the other item then swap places
-                if ( scenePos().x() < otherWaveformItem->scenePos().x() + otherWaveformItem->rect().center().x() )
+                // If the left edge of the leftmost selected item is more than halfway across the other item
+                // then move the other item out of the way
+                if ( leftmostSelectedItemScenePos.x() < otherWaveformItem->scenePos().x() + otherWaveformItem->rect().center().x() )
                 {
-                    emit orderPosIsChanging( mCurrentOrderPos, otherWaveformItem->getOrderPos() );
+                    const int numPlacesMoved = otherItemOrderPos - leftmostSelectedItemOrderPos;
+                    QList<int> selectedItemsOrderPositions;
+
+                    foreach ( WaveformItem* item, selectedItems )
+                    {
+                        selectedItemsOrderPositions << item->getOrderPos();
+                    }
+
+                    emit orderPosIsChanging( selectedItemsOrderPositions, numPlacesMoved );
                 }
             }
         }
     }
 
-    // If this item is being dragged to the right
+    // If this item is being dragged to the right...
     if ( event->screenPos().x() > event->lastScreenPos().x() )
     {
-        // Get item under right edge of this slice
-        const qreal rightX = scenePos().x() + rect().width() - 1;
-        if ( rightX >= 1.0 )
+        // Get the order position and scene position of the rightmost selected item
+        const int rightmostSelectedItemOrderPos = selectedItems.last()->getOrderPos();
+        const qreal rightmostSelectedItemRightEdge = selectedItems.last()->scenePos().x() +
+                                                     selectedItems.last()->rect().width() - 1;
+
+        // Get item under right edge of the rightmost selected item
+        QGraphicsItem* const otherItem = scene()->items( QPointF(rightmostSelectedItemRightEdge, 0.0) ).last();
+
+        // If the other item is a WaveformItem...
+        if ( otherItem != this && otherItem->type() == WaveformItem::Type )
         {
-            QGraphicsItem* const item = scene()->items( QPointF(rightX, 0.0) ).last();
+            WaveformItem* const otherWaveformItem = qgraphicsitem_cast<WaveformItem*>( otherItem );
+            const int otherItemOrderPos = otherWaveformItem->getOrderPos();
 
-            if ( item != this && item->type() == type() ) // If the other item is a WaveformItem
+            if ( otherItemOrderPos > rightmostSelectedItemOrderPos )
             {
-                WaveformItem* const otherWaveformItem = qgraphicsitem_cast<WaveformItem*>( item );
-
-                if ( otherWaveformItem->getOrderPos() > mCurrentOrderPos )
+                // If the right edge of the rightmost selected item is more than halfway across the other item
+                // then move the other item out of the way
+                if ( rightmostSelectedItemRightEdge > otherWaveformItem->scenePos().x() + otherWaveformItem->rect().center().x() )
                 {
-                    // If the right edge of this item is more than halfway across the other item then swap places
-                    if ( rightX > otherWaveformItem->scenePos().x() + otherWaveformItem->rect().center().x() )
+                    const int numPlacesMoved = otherItemOrderPos - rightmostSelectedItemOrderPos;
+                    QList<int> orderPositions;
+
+                    foreach ( WaveformItem* item, selectedItems )
                     {
-                        emit orderPosIsChanging( mCurrentOrderPos, otherWaveformItem->getOrderPos() );
+                        orderPositions << item->getOrderPos();
                     }
+
+                    emit orderPosIsChanging( orderPositions, numPlacesMoved );
                 }
             }
         }
@@ -343,12 +412,25 @@ void WaveformItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseReleaseEvent( event );
 
+    QList<WaveformItem*> selectedItems = getSortedListSelectedItems();
+
     if ( mOrderPosBeforeMove != mCurrentOrderPos )
     {
-        emit orderPosHasChanged( mOrderPosBeforeMove, mCurrentOrderPos );
+        const int numPlacesMoved = mCurrentOrderPos - mOrderPosBeforeMove;
+        QList<int> oldOrderPositions;
+
+        foreach ( WaveformItem* item, selectedItems )
+        {
+            oldOrderPositions << item->getOrderPos() - numPlacesMoved;
+        }
+
+        emit orderPosHasChanged( oldOrderPositions, numPlacesMoved );
     }
 
-    emit finishedMoving( mCurrentOrderPos );
+    foreach ( WaveformItem* item, selectedItems )
+    {
+        emit finishedMoving( item->getOrderPos() );
+    }
 }
 
 
@@ -435,7 +517,6 @@ void WaveformItem::resetSampleBins()
 
 
 
-// Both `startBin` and `endBin` are inclusive
 void WaveformItem::findMinMaxSamples( const int startBin, const int endBin )
 {
     const int numChans = mSampleBuffer->getNumChannels();
@@ -456,4 +537,22 @@ void WaveformItem::findMinMaxSamples( const int startBin, const int endBin )
             mMaxSampleValues[ chanNum ]->set( binNum, max );
         }
     }
+}
+
+
+
+QList<WaveformItem*> WaveformItem::getSortedListSelectedItems()
+{
+    QList<WaveformItem*> selectedItems;
+
+    foreach ( QGraphicsItem* item, scene()->selectedItems() )
+    {
+        if ( item->type() == WaveformItem::Type )
+        {
+            selectedItems << qgraphicsitem_cast<WaveformItem*>( item );
+        }
+    }
+    qSort( selectedItems.begin(), selectedItems.end(), WaveformItem::isLessThanOrderPos );
+
+    return selectedItems;
 }

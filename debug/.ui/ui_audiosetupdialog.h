@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'audiosetupdialog.ui'
 **
-** Created: Tue Jun 3 13:06:05 2014
+** Created: Fri Jun 13 16:16:14 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!

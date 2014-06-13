@@ -49,6 +49,13 @@
        </widget>
       </item>
       <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>Original BPM:</string>
@@ -81,6 +88,13 @@
         </property>
         <property name="text">
          <string>Calc</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -123,6 +137,13 @@
         </property>
         <property name="flat">
          <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -192,6 +213,10 @@
         </property>
         <property name="text">
          <string>Slice</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../../../../usr/share/icons/oxygen/16x16/actions/transform-move.png</normaloff>../../../../usr/share/icons/oxygen/16x16/actions/transform-move.png</iconset>
         </property>
        </widget>
       </item>
@@ -431,6 +456,8 @@
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
    <addaction name="separator"/>
+   <addaction name="actionMove_Items"/>
+   <addaction name="actionSelect_Items"/>
    <addaction name="actionDelete"/>
    <addaction name="separator"/>
    <addaction name="actionZoom_Original"/>
@@ -736,6 +763,36 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+0</string>
+   </property>
+  </action>
+  <action name="actionMove_Items">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-select.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-select.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Items</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="actionSelect_Items">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/kdenlive-select-all.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/kdenlive-select-all.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select Items</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
    </property>
   </action>
  </widget>

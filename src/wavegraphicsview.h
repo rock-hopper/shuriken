@@ -36,11 +36,13 @@ class WaveGraphicsView : public QGraphicsView
     Q_OBJECT
 
 public:
+    enum InteractionMode { MOVE_ITEMS, SELECT_ITEMS };
+
     WaveGraphicsView( QWidget* parent = NULL );
 
     SharedWaveformItem createWaveform( const SharedSampleBuffer sampleBuffer );
     QList<SharedWaveformItem> createWaveforms( const SharedSampleBuffer sampleBuffer, const QList<SharedSampleRange> sampleRangeList );
-    void moveWaveform( const int oldOrderPos, const int newOrderPos );
+    void moveWaveforms( const QList<int> oldOrderPositions, const int numPlacesMoved );
     SharedWaveformItem getSelectedWaveform();
 
     SharedSlicePointItem createSlicePoint( const int frameNum );
@@ -66,6 +68,8 @@ public:
 
     void forceRedraw();
 
+    void setInteractionMode( const InteractionMode mode );
+
 protected:
     void resizeEvent( QResizeEvent* event );
 
@@ -83,7 +87,10 @@ signals:
     void maxDetailLevelReached();
 
 private slots:
-    void reorderWaveformItems( const int oldOrderPos, const int newOrderPos );
+    // 'oldOrderPositions' is assumed to be sorted
+    // 'numPlacesMoved' should be negative if the items have moved left, or positive if the items have moved right
+    void reorderWaveformItems( QList<int> oldOrderPositions, const int numPlacesMoved );
+
     void slideWaveformItemIntoPlace( const int orderPos );
     void reorderSlicePoints( SlicePointItem* const movedItem );
     void relayMaxDetailLevelReached();

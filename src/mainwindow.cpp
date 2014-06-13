@@ -285,6 +285,9 @@ void MainWindow::disableUI()
     mUI->actionZoom_Original->setEnabled( false );
     mUI->actionZoom_Out->setEnabled( false );
     mUI->actionZoom_In->setEnabled( false );
+    mUI->actionMove_Items->setEnabled( false );
+    mUI->actionSelect_Items->setEnabled( false );
+    mUI->actionMove_Items->trigger();
 }
 
 
@@ -377,9 +380,30 @@ void MainWindow::showWarningBox( const QString text, const QString infoText )
 //==================================================================================================
 // Public Slots:
 
-void MainWindow::reorderSampleRangeList( const int startOrderPos, const int destOrderPos )
+void MainWindow::reorderSampleRangeList( QList<int> oldOrderPositions, const int numPlacesMoved )
 {
-    mSampleRangeList.move( startOrderPos, destOrderPos );
+    const int numSelectedItems = oldOrderPositions.size();
+
+    // If waveform items have been dragged to the left...
+    if ( numPlacesMoved < 0 )
+    {
+        for ( int i = 0; i < numSelectedItems; i++ )
+        {
+            const int orderPos = oldOrderPositions.at( i );
+            mSampleRangeList.move( orderPos, orderPos + numPlacesMoved );
+        }
+    }
+    else // If waveform items have been dragged to the right...
+    {
+        const int lastIndex = numSelectedItems - 1;
+
+        for ( int i = lastIndex; i >= 0; i-- )
+        {
+            const int orderPos = oldOrderPositions.at( i );
+            mSampleRangeList.move( orderPos, orderPos + numPlacesMoved );
+        }
+    }
+
     mSamplerAudioSource->setSampleRanges( mSampleRangeList );
 }
 
@@ -388,9 +412,9 @@ void MainWindow::reorderSampleRangeList( const int startOrderPos, const int dest
 //==================================================================================================
 // Private Slots:
 
-void MainWindow::recordWaveformItemMove( const int startOrderPos, const int destOrderPos )
+void MainWindow::recordWaveformItemMove( QList<int> oldOrderPositions, const int numPlacesMoved )
 {
-    QUndoCommand* command = new MoveWaveformItemCommand( startOrderPos, destOrderPos, mUI->waveGraphicsView, this );
+    QUndoCommand* command = new MoveWaveformItemCommand( oldOrderPositions, numPlacesMoved, mUI->waveGraphicsView, this );
     mUndoStack.push( command );
 }
 
@@ -1091,10 +1115,12 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
 
 void MainWindow::on_pushButton_Slice_clicked()
 {
-    QUndoCommand* command = new CreateSlicesCommand( this,
-                                                     mUI->waveGraphicsView,
-                                                     mUI->pushButton_Slice,
-                                                     mUI->actionAdd_Slice_Point );
+    QUndoCommand* command = new SliceCommand( this,
+                                              mUI->waveGraphicsView,
+                                              mUI->pushButton_Slice,
+                                              mUI->actionAdd_Slice_Point,
+                                              mUI->actionMove_Items,
+                                              mUI->actionSelect_Items );
     mUndoStack.push( command );
 }
 
@@ -1315,4 +1341,18 @@ void MainWindow::on_pushButton_Apply_clicked()
         mAppliedOriginalBPM = originalBPM;
         mAppliedNewBPM = newBPM;
     }
+}
+
+
+
+void MainWindow::on_actionMove_Items_triggered()
+{
+    mUI->waveGraphicsView->setInteractionMode( WaveGraphicsView::MOVE_ITEMS );
+}
+
+
+
+void MainWindow::on_actionSelect_Items_triggered()
+{
+    mUI->waveGraphicsView->setInteractionMode( WaveGraphicsView::SELECT_ITEMS );
 }

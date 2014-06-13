@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sun Jun 8 19:48:51 2014
+** Created: Fri Jun 13 16:58:32 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -17,6 +17,7 @@
 #include <QtGui/QCheckBox>
 #include <QtGui/QComboBox>
 #include <QtGui/QDoubleSpinBox>
+#include <QtGui/QFrame>
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QHeaderView>
 #include <QtGui/QLCDNumber>
@@ -63,17 +64,22 @@ public:
     QAction *actionZoom_In;
     QAction *actionZoom_Out;
     QAction *actionZoom_Original;
+    QAction *actionMove_Items;
+    QAction *actionSelect_Items;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QHBoxLayout *horizontalLayout_2;
     QPushButton *pushButton_Play;
     QPushButton *pushButton_Stop;
+    QFrame *line;
     QLabel *label_3;
     QDoubleSpinBox *doubleSpinBox_OriginalBPM;
     QPushButton *pushButton_CalcBPM;
+    QFrame *line_2;
     QLabel *label_2;
     QDoubleSpinBox *doubleSpinBox_NewBPM;
     QPushButton *pushButton_Apply;
+    QFrame *line_3;
     QCheckBox *checkBox_TimeStretch;
     QCheckBox *checkBox_PitchCorrection;
     QCheckBox *checkBox_JackSync;
@@ -218,6 +224,18 @@ public:
         QIcon icon12;
         icon12.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/zoom-original.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionZoom_Original->setIcon(icon12);
+        actionMove_Items = new QAction(MainWindow);
+        actionMove_Items->setObjectName(QString::fromUtf8("actionMove_Items"));
+        actionMove_Items->setEnabled(false);
+        QIcon icon13;
+        icon13.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/edit-select.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionMove_Items->setIcon(icon13);
+        actionSelect_Items = new QAction(MainWindow);
+        actionSelect_Items->setObjectName(QString::fromUtf8("actionSelect_Items"));
+        actionSelect_Items->setEnabled(false);
+        QIcon icon14;
+        icon14.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/kdenlive-select-all.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionSelect_Items->setIcon(icon14);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -235,20 +253,27 @@ public:
         sizePolicy.setVerticalStretch(0);
         sizePolicy.setHeightForWidth(pushButton_Play->sizePolicy().hasHeightForWidth());
         pushButton_Play->setSizePolicy(sizePolicy);
-        QIcon icon13;
-        icon13.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/media-playback-start.png"), QSize(), QIcon::Normal, QIcon::Off);
-        pushButton_Play->setIcon(icon13);
+        QIcon icon15;
+        icon15.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/media-playback-start.png"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_Play->setIcon(icon15);
 
         horizontalLayout_2->addWidget(pushButton_Play);
 
         pushButton_Stop = new QPushButton(centralWidget);
         pushButton_Stop->setObjectName(QString::fromUtf8("pushButton_Stop"));
         pushButton_Stop->setEnabled(false);
-        QIcon icon14;
-        icon14.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/media-playback-stop.png"), QSize(), QIcon::Normal, QIcon::Off);
-        pushButton_Stop->setIcon(icon14);
+        QIcon icon16;
+        icon16.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/media-playback-stop.png"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_Stop->setIcon(icon16);
 
         horizontalLayout_2->addWidget(pushButton_Stop);
+
+        line = new QFrame(centralWidget);
+        line->setObjectName(QString::fromUtf8("line"));
+        line->setFrameShape(QFrame::VLine);
+        line->setFrameShadow(QFrame::Sunken);
+
+        horizontalLayout_2->addWidget(line);
 
         label_3 = new QLabel(centralWidget);
         label_3->setObjectName(QString::fromUtf8("label_3"));
@@ -269,6 +294,13 @@ public:
         pushButton_CalcBPM->setMaximumSize(QSize(55, 16777215));
 
         horizontalLayout_2->addWidget(pushButton_CalcBPM);
+
+        line_2 = new QFrame(centralWidget);
+        line_2->setObjectName(QString::fromUtf8("line_2"));
+        line_2->setFrameShape(QFrame::VLine);
+        line_2->setFrameShadow(QFrame::Sunken);
+
+        horizontalLayout_2->addWidget(line_2);
 
         label_2 = new QLabel(centralWidget);
         label_2->setObjectName(QString::fromUtf8("label_2"));
@@ -291,6 +323,13 @@ public:
         pushButton_Apply->setFlat(false);
 
         horizontalLayout_2->addWidget(pushButton_Apply);
+
+        line_3 = new QFrame(centralWidget);
+        line_3->setObjectName(QString::fromUtf8("line_3"));
+        line_3->setFrameShape(QFrame::VLine);
+        line_3->setFrameShadow(QFrame::Sunken);
+
+        horizontalLayout_2->addWidget(line_3);
 
         checkBox_TimeStretch = new QCheckBox(centralWidget);
         checkBox_TimeStretch->setObjectName(QString::fromUtf8("checkBox_TimeStretch"));
@@ -327,6 +366,9 @@ public:
         pushButton_Slice = new QPushButton(centralWidget);
         pushButton_Slice->setObjectName(QString::fromUtf8("pushButton_Slice"));
         pushButton_Slice->setEnabled(false);
+        QIcon icon17;
+        icon17.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/16x16/actions/transform-move.png"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_Slice->setIcon(icon17);
 
         horizontalLayout_4->addWidget(pushButton_Slice);
 
@@ -490,6 +532,8 @@ public:
         mainToolBar->addAction(actionUndo);
         mainToolBar->addAction(actionRedo);
         mainToolBar->addSeparator();
+        mainToolBar->addAction(actionMove_Items);
+        mainToolBar->addAction(actionSelect_Items);
         mainToolBar->addAction(actionDelete);
         mainToolBar->addSeparator();
         mainToolBar->addAction(actionZoom_Original);
@@ -564,6 +608,10 @@ public:
         actionZoom_Original->setToolTip(QApplication::translate("MainWindow", "Zoom Original (Ctrl+0)", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP
         actionZoom_Original->setShortcut(QApplication::translate("MainWindow", "Ctrl+0", 0, QApplication::UnicodeUTF8));
+        actionMove_Items->setText(QApplication::translate("MainWindow", "Move Items", 0, QApplication::UnicodeUTF8));
+        actionMove_Items->setShortcut(QApplication::translate("MainWindow", "F1", 0, QApplication::UnicodeUTF8));
+        actionSelect_Items->setText(QApplication::translate("MainWindow", "Select Items", 0, QApplication::UnicodeUTF8));
+        actionSelect_Items->setShortcut(QApplication::translate("MainWindow", "F2", 0, QApplication::UnicodeUTF8));
         pushButton_Stop->setShortcut(QApplication::translate("MainWindow", "Space", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("MainWindow", "Original BPM:", 0, QApplication::UnicodeUTF8));
         pushButton_CalcBPM->setText(QApplication::translate("MainWindow", "Calc", 0, QApplication::UnicodeUTF8));

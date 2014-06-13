@@ -69,7 +69,11 @@ public:
     int type() const                                    { return Type; }
 
 public:
-    static bool isLessThan( const SharedWaveformItem item1, const SharedWaveformItem item2 );
+    // For use with qSort(); sorts by start frame
+    static bool isLessThanStartFrame( const SharedWaveformItem item1, const SharedWaveformItem item2 );
+
+    // For use with qSort(); sorts by order position
+    static bool isLessThanOrderPos( const WaveformItem* const item1, const WaveformItem* const item2 );
 
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
@@ -80,20 +84,31 @@ protected:
 private:
     void init();
     void setBackgroundGradient();
+
     void resetSampleBins();
+
+    // Both 'startBin' and 'endBin' are inclusive
     void findMinMaxSamples( const int startBin, const int endBin );
+
+    // Get list of currently selected waveform items sorted by order position
+    QList<WaveformItem*> getSortedListSelectedItems();
 
     enum DetailLevel { LOW, HIGH, VERY_HIGH };
     DetailLevel mDetailLevel;
 
     const SharedSampleBuffer mSampleBuffer;
+
     int mStartFrame;
     int mNumFrames;
+
     QPen mWavePen;
     QPen mCentreLinePen;
+
     int mCurrentOrderPos;
     int mOrderPosBeforeMove;
+
     qreal mScaleFactor;
+
     int mNumBins;
     qreal mBinSize;
     int mFirstCalculatedBin;
@@ -108,18 +123,24 @@ private:
     static const qreal DETAIL_LEVEL_HIGH_CUTOFF = 10.0;
 
 signals:
-    // As waveform items are being dragged their old and new order positions are emitted,
-    // allowing other waveform items to be reshuffled
-    void orderPosIsChanging( const int oldOrderPos, const int newOrderPos );
+    // As waveform items are being dragged their old order positions are emitted along with
+    // the no. of places which they have moved, allowing other waveform items to be reshuffled.
+    // 'orderPositions' is sorted
+    // 'oldOrderPositions' is negative if the items have moved left, or positive if the items have moved right
+    void orderPosIsChanging( QList<int> oldOrderPositions, const int numPlacesMoved );
 
-    // This signal is emitted when the user has finished moving the waveform item and its
-    // destination order position is different from its starting order position
-    void orderPosHasChanged( const int startOrderPos, const int destOrderPos );
+    // This signal is emitted when the user has finished moving the waveform item(s) and the
+    // final order position(s) is/are different from the starting order position(s)
+    // 'oldOrderPositions' is sorted
+    // 'numPlacesMoved' is negative if the items have moved left, or positive if the items have moved right
+    void orderPosHasChanged( QList<int> oldOrderPositions, const int numPlacesMoved );
 
     void finishedMoving( const int orderPos );
+
     void rightMousePressed( const int waveformItemStartFrame,
                             const int waveformItemNumFrames,
                             const QPointF mouseScenePos );
+
     void maxDetailLevelReached();
 
 };

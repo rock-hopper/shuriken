@@ -111,13 +111,15 @@ private:
 
 
 
-class CreateSlicesCommand : public QUndoCommand
+class SliceCommand : public QUndoCommand
 {
 public:
-    CreateSlicesCommand( MainWindow* const mainWindow,
+    SliceCommand( MainWindow* const mainWindow,
                          WaveGraphicsView* const graphicsView,
                          QPushButton* const sliceButton,
                          QAction* const addSlicePointAction,
+                         QAction* const moveItemsAction,
+                         QAction* const selectItemsAction,
                          QUndoCommand* parent = NULL );
 
     void undo();
@@ -128,6 +130,8 @@ private:
     WaveGraphicsView* const mGraphicsView;
     QPushButton* const mSliceButton;
     QAction* const mAddSlicePointAction;
+    QAction* const mMoveItemsAction;
+    QAction* const mSelectItemsAction;
 };
 
 
@@ -135,8 +139,8 @@ private:
 class MoveWaveformItemCommand : public QUndoCommand
 {
 public:
-    MoveWaveformItemCommand( const int startOrderPos,
-                             const int destOrderPos,
+    MoveWaveformItemCommand( const QList<int> oldOrderPositions,
+                             const int numPlacesMoved,
                              WaveGraphicsView* const graphicsView,
                              MainWindow* const mainWindow,
                              QUndoCommand* parent = NULL );
@@ -145,10 +149,11 @@ public:
     void redo();
 
 private:
-    const int mStartOrderPos;
-    const int mDestOrderPos;
+    const QList<int> mOldOrderPositions;
+    const int mNumPlacesMoved;
     WaveGraphicsView* const mGraphicsView;
     MainWindow* const mMainWindow;
+    QList<int> mNewOrderPositions;
     bool mIsFirstRedoCall;
 };
 

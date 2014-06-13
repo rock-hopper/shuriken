@@ -45,7 +45,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    friend class CreateSlicesCommand;
+    friend class SliceCommand;
     friend class ApplyTimeStretchCommand;
 
 public:
@@ -93,9 +93,11 @@ private:
     static void showWarningBox( const QString text, const QString infoText );
 
 public slots:
-    void reorderSampleRangeList( const int startOrderPos, const int destOrderPos );
+    void reorderSampleRangeList( QList<int> oldOrderPositions, const int numPlacesMoved );
 
 private slots:
+    void on_actionSelect_Items_triggered();
+    void on_actionMove_Items_triggered();
     void on_pushButton_Apply_clicked();
     void on_actionZoom_Original_triggered();
     void on_actionZoom_Out_triggered();
@@ -137,7 +139,7 @@ private slots:
     void on_actionOpen_Project_triggered();
 
 
-    void recordWaveformItemMove( const int startOrderPos, const int destOrderPos );
+    void recordWaveformItemMove( QList<int> oldOrderPositions, const int numPlacesMoved );
     void recordSlicePointItemMove( const SharedSlicePointItem slicePointItem,
                                    const int oldFrameNum,
                                    const int newFrameNum );
