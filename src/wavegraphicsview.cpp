@@ -114,10 +114,89 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const SharedSampleB
 }
 
 
-// TODO
+
+SharedWaveformItem WaveGraphicsView::joinWaveforms( const QList<int> orderPositions )
+{
+    QList<SharedWaveformItem> itemsToJoin;
+
+    foreach( int orderPos, orderPositions )
+    {
+        itemsToJoin << mWaveformItemList.at( orderPos );
+    }
+
+    WaveformItem* waveformItem = new WaveformItem( itemsToJoin );
+
+    foreach ( SharedWaveformItem item, itemsToJoin )
+    {
+        scene()->removeItem( item.data() );
+
+        mWaveformItemList.removeOne( item );
+    }
+
+    const int newItemOrderPos = waveformItem->getOrderPos();
+
+    mWaveformItemList.insert( newItemOrderPos, SharedWaveformItem( waveformItem ) );
+
+    for ( int orderPos = newItemOrderPos + 1; orderPos < mWaveformItemList.size(); orderPos++ )
+    {
+        mWaveformItemList.at( orderPos )->setOrderPos( orderPos );
+    }
+
+    QObject::connect( waveformItem, SIGNAL( orderPosIsChanging(QList<int>,int) ),
+                      this, SLOT( reorderWaveformItems(QList<int>,int) ) );
+
+    QObject::connect( waveformItem, SIGNAL( finishedMoving(int) ),
+                      this, SLOT( slideWaveformItemIntoPlace(int) ) );
+
+    QObject::connect( waveformItem, SIGNAL( maxDetailLevelReached() ),
+                      this, SLOT( relayMaxDetailLevelReached() ) );
+
+    scene()->addItem( waveformItem );
+    scene()->update();
+
+    return mWaveformItemList.at( newItemOrderPos );
+}
+
+
+
+QList<SharedWaveformItem> WaveGraphicsView::splitWaveform( const int orderPos )
+{
+    SharedWaveformItem itemToSplit = mWaveformItemList.at( orderPos );
+
+    if( itemToSplit->isJoined() )
+    {
+        QList<SharedWaveformItem> joinedItems = itemToSplit->getJoinedItems();
+
+        scene()->removeItem( itemToSplit.data() );
+
+        mWaveformItemList.removeOne( itemToSplit );
+
+        int orderPos = itemToSplit->getOrderPos();
+
+        foreach ( SharedWaveformItem item, joinedItems )
+        {
+            mWaveformItemList.insert( orderPos, item );
+            scene()->addItem( item.data() );
+            orderPos++;
+        }
+
+        while ( orderPos < mWaveformItemList.size() )
+        {
+            mWaveformItemList.at( orderPos )->setOrderPos( orderPos );
+            orderPos++;
+        }
+
+        scene()->update();
+    }
+
+    return itemToSplit->getJoinedItems();
+}
+
+
+
 void WaveGraphicsView::moveWaveforms( const QList<int> oldOrderPositions, const int numPlacesMoved )
 {
-    Q_ASSERT_X( ! mWaveformItemList.isEmpty(), "WaveGraphicsView::moveWaveformSlice", "mWaveformItemList is empty" );
+    Q_ASSERT( ! mWaveformItemList.isEmpty() );
 
     reorderWaveformItems( oldOrderPositions, numPlacesMoved );
 
@@ -130,30 +209,24 @@ void WaveGraphicsView::moveWaveforms( const QList<int> oldOrderPositions, const 
 
 
 
-SharedWaveformItem WaveGraphicsView::getSelectedWaveform()
+QList<int> WaveGraphicsView::getSelectedWaveformsOrderPositions() const
 {
-    const QList<QGraphicsItem*> selectedItems = scene()->selectedItems();
-    SharedWaveformItem selectedWaveformItem;
+    const QList<WaveformItem*> selectedItems = WaveformItem::getSortedListSelectedItems( scene() );
+    QList<int> orderPositions;
 
-    if ( ! selectedItems.isEmpty() )
+    foreach ( WaveformItem* item, selectedItems )
     {
-        QGraphicsItem* const item = selectedItems.first();
-
-        if ( item->type() == WaveformItem::Type )
-        {
-            WaveformItem* const waveformItem = qgraphicsitem_cast<WaveformItem*>( item );
-
-            foreach ( SharedWaveformItem sharedWaveformItem, mWaveformItemList )
-            {
-                if ( sharedWaveformItem == waveformItem )
-                {
-                    selectedWaveformItem = sharedWaveformItem;
-                }
-            }
-        }
+        orderPositions << item->getOrderPos();
     }
 
-    return selectedWaveformItem;
+    return orderPositions;
+}
+
+
+
+SharedWaveformItem WaveGraphicsView::getWaveformAt( const int orderPos ) const
+{
+    return mWaveformItemList.at( orderPos );
 }
 
 

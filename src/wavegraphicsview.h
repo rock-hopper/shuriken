@@ -40,10 +40,26 @@ public:
 
     WaveGraphicsView( QWidget* parent = NULL );
 
+    // Creates a new waveform item and returns a shared pointer to it
     SharedWaveformItem createWaveform( const SharedSampleBuffer sampleBuffer );
-    QList<SharedWaveformItem> createWaveforms( const SharedSampleBuffer sampleBuffer, const QList<SharedSampleRange> sampleRangeList );
+
+    // Creates new waveform items and returns a list of shared pointers to them
+    QList<SharedWaveformItem> createWaveforms( const SharedSampleBuffer sampleBuffer,
+                                               const QList<SharedSampleRange> sampleRangeList );
+
+    // Create a new waveform item by joining several waveform items together. The new item's start frame,
+    // order position and scene position will be the same as the first item in the list. The new item's
+    // width and no. of frames will be the sum of the widths and no. of frames of all items in the list
+    SharedWaveformItem joinWaveforms( const QList<int> orderPositions );
+
+    // Splits a waveform item that has been created with 'joinWaveforms()'
+    QList<SharedWaveformItem> splitWaveform( const int orderPos );
+
     void moveWaveforms( const QList<int> oldOrderPositions, const int numPlacesMoved );
-    SharedWaveformItem getSelectedWaveform();
+
+    QList<int> getSelectedWaveformsOrderPositions() const;
+
+    SharedWaveformItem getWaveformAt( const int orderPos ) const;
 
     SharedSlicePointItem createSlicePoint( const int frameNum );
     void addSlicePoint( const SharedSlicePointItem slicePoint );

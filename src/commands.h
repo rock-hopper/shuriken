@@ -115,12 +115,12 @@ class SliceCommand : public QUndoCommand
 {
 public:
     SliceCommand( MainWindow* const mainWindow,
-                         WaveGraphicsView* const graphicsView,
-                         QPushButton* const sliceButton,
-                         QAction* const addSlicePointAction,
-                         QAction* const moveItemsAction,
-                         QAction* const selectItemsAction,
-                         QUndoCommand* parent = NULL );
+                  WaveGraphicsView* const graphicsView,
+                  QPushButton* const sliceButton,
+                  QAction* const addSlicePointAction,
+                  QAction* const moveItemsAction,
+                  QAction* const selectItemsAction,
+                  QUndoCommand* parent = NULL );
 
     void undo();
     void redo();
@@ -159,11 +159,31 @@ private:
 
 
 
+class JoinCommand : public QUndoCommand
+{
+public:
+    JoinCommand( const QList<int> orderPositions,
+                 WaveGraphicsView* const graphicsView,
+                 MainWindow* const mainWindow,
+                 QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    const QList<int> mOrderPositions;
+    WaveGraphicsView* const mGraphicsView;
+    MainWindow* const mMainWindow;
+    int mJoinedItemOrderPos;
+};
+
+
+
 class ReverseCommand : public QUndoCommand
 {
 public:
     ReverseCommand( const SharedSampleBuffer sampleBuffer,
-                    const SharedWaveformItem waveformItem,
+                    const int waveformItemOrderPos,
                     WaveGraphicsView* const graphicsView,
                     QUndoCommand* parent = NULL );
 
@@ -172,7 +192,7 @@ public:
 
 private:
     const SharedSampleBuffer mSampleBuffer;
-    const SharedWaveformItem mWaveformItem;
+    const int mWaveformItemOrderPos;
     WaveGraphicsView* const mGraphicsView;
 };
 

@@ -54,8 +54,15 @@ public:
                   const qreal width, const qreal height,
                   QGraphicsItem* parent = NULL );
 
+    // Create a new waveform item by joining several waveform items together. The new item's start frame,
+    // order position and scene position will be the same as the first item in the list. The new item's
+    // width and no. of frames will be the sum of the widths and no. of frames of all items in the list
+    WaveformItem( const QList<SharedWaveformItem> items, QGraphicsItem* parent = NULL );
+
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
     void setRect( const qreal x, const qreal y, const qreal width, const qreal height );
+
+    int type() const                                    { return Type; }
 
     int getStartFrame() const                           { return mStartFrame; }
     void setStartFrame( const int startFrame )          { mStartFrame = startFrame; }
@@ -66,7 +73,12 @@ public:
     int getOrderPos() const                             { return mCurrentOrderPos; }
     void setOrderPos( const int orderPos )              { mCurrentOrderPos = orderPos; }
 
-    int type() const                                    { return Type; }
+    SharedSampleBuffer getSampleBuffer() const          { return mSampleBuffer; }
+
+    // Returns true if this waveform item has been created by joining several waveform items together
+    bool isJoined() const                               { return ! mJoinedItems.isEmpty(); }
+
+    QList<SharedWaveformItem> getJoinedItems() const    { return mJoinedItems; }
 
 public:
     // For use with qSort(); sorts by start frame
@@ -74,6 +86,9 @@ public:
 
     // For use with qSort(); sorts by order position
     static bool isLessThanOrderPos( const WaveformItem* const item1, const WaveformItem* const item2 );
+
+    // Get list of currently selected waveform items sorted by order position
+    static QList<WaveformItem*> getSortedListSelectedItems( const QGraphicsScene* const scene );
 
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
@@ -90,13 +105,12 @@ private:
     // Both 'startBin' and 'endBin' are inclusive
     void findMinMaxSamples( const int startBin, const int endBin );
 
-    // Get list of currently selected waveform items sorted by order position
-    QList<WaveformItem*> getSortedListSelectedItems();
-
     enum DetailLevel { LOW, HIGH, VERY_HIGH };
     DetailLevel mDetailLevel;
 
     const SharedSampleBuffer mSampleBuffer;
+
+    QList<SharedWaveformItem> mJoinedItems;
 
     int mStartFrame;
     int mNumFrames;

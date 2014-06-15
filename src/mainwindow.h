@@ -46,6 +46,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     friend class SliceCommand;
+    friend class JoinCommand;
     friend class ApplyTimeStretchCommand;
 
 public:
@@ -151,6 +152,8 @@ private slots:
 
     void enableRealtimeMode( const bool isEnabled );
     void enableJackSyncCheckBox( const bool isEnabled );
+
+    void enableGraphicsItemActions();
 };
 
 #endif // MAINWINDOW_H

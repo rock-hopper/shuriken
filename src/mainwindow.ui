@@ -667,6 +667,9 @@
    <property name="text">
     <string>Join</string>
    </property>
+   <property name="shortcut">
+    <string>J</string>
+   </property>
   </action>
   <action name="actionSelect_All">
    <property name="enabled">

@@ -103,6 +103,9 @@ MainWindow::MainWindow( QWidget* parent ) :
     QObject::connect( mUI->waveGraphicsView, SIGNAL( maxDetailLevelReached() ),
                       this, SLOT( disableZoomIn() ) );
 
+    QObject::connect( mUI->waveGraphicsView->scene(), SIGNAL( selectionChanged() ),
+                      this, SLOT( enableGraphicsItemActions() ) );
+
     QObject::connect( &mUndoStack, SIGNAL( canUndoChanged(bool) ),
                       mUI->actionUndo, SLOT( setEnabled(bool) ) );
 
@@ -251,8 +254,6 @@ void MainWindow::enableUI()
     mUI->actionSave_Project->setEnabled( true );
     mUI->actionClose_Project->setEnabled( true );
     mUI->actionAdd_Slice_Point->setEnabled( true );
-    mUI->actionDelete->setEnabled( true );
-    mUI->actionReverse->setEnabled( true );
     mUI->actionZoom_Original->setEnabled( true );
     mUI->actionZoom_In->setEnabled( true );
 }
@@ -281,6 +282,7 @@ void MainWindow::disableUI()
     mUI->actionClose_Project->setEnabled( false );
     mUI->actionAdd_Slice_Point->setEnabled( false );
     mUI->actionDelete->setEnabled( false );
+    mUI->actionJoin->setEnabled( false );
     mUI->actionReverse->setEnabled( false );
     mUI->actionZoom_Original->setEnabled( false );
     mUI->actionZoom_Out->setEnabled( false );
@@ -520,6 +522,42 @@ void MainWindow::enableJackSyncCheckBox( const bool isEnabled )
     if ( ! mUI->checkBox_JackSync->isEnabled() )
     {
         mUI->checkBox_JackSync->setChecked( false );
+    }
+}
+
+
+
+void MainWindow::enableGraphicsItemActions()
+{
+    const SharedSlicePointItem slicePointItem = mUI->waveGraphicsView->getSelectedSlicePoint();
+
+    if ( ! slicePointItem.isNull() )
+    {
+        mUI->actionDelete->setEnabled( true );
+    }
+    else
+    {
+        mUI->actionDelete->setEnabled( false );
+    }
+
+    const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+
+    if ( ! orderPositions.isEmpty() )
+    {
+        mUI->actionReverse->setEnabled( true );
+    }
+    else
+    {
+        mUI->actionReverse->setEnabled( false );
+    }
+
+    if ( orderPositions.size() > 1 )
+    {
+        mUI->actionJoin->setEnabled( true );
+    }
+    else
+    {
+        mUI->actionJoin->setEnabled( false );
     }
 }
 
@@ -1022,20 +1060,21 @@ void MainWindow::on_actionEnvelope_triggered()
 
 void MainWindow::on_actionJoin_triggered()
 {
+    const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
 
+    QUndoCommand* command = new JoinCommand( orderPositions, mUI->waveGraphicsView, this );
+    mUndoStack.push( command );
 }
 
 
 
 void MainWindow::on_actionReverse_triggered()
 {
-    const SharedWaveformItem selectedWaveform = mUI->waveGraphicsView->getSelectedWaveform();
+    const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
 
-    if ( ! selectedWaveform.isNull() )
+    foreach ( int orderPos, orderPositions )
     {
-        QUndoCommand* command = new ReverseCommand( mCurrentSampleBuffer,
-                                                    selectedWaveform,
-                                                    mUI->waveGraphicsView );
+        QUndoCommand* command = new ReverseCommand( mCurrentSampleBuffer, orderPos, mUI->waveGraphicsView );
         mUndoStack.push( command );
     }
 }

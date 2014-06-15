@@ -65,6 +65,40 @@ WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer,
 
 
 
+WaveformItem::WaveformItem( const QList<SharedWaveformItem> items, QGraphicsItem* parent ) :
+    QObject(),
+    QGraphicsRectItem( 0.0, 0.0, 1.0, 1.0, parent ),
+    mSampleBuffer( items.first()->getSampleBuffer() ),
+    mStartFrame( items.first()->getStartFrame() ),
+    mCurrentOrderPos( items.first()->getOrderPos() ),
+    mScaleFactor( NOT_SET ),
+    mFirstCalculatedBin( NOT_SET ),
+    mLastCalculatedBin( NOT_SET )
+{
+    int numFrames = 0;
+    qreal width = 0.0;
+
+    foreach ( SharedWaveformItem item, items )
+    {
+        numFrames += item->getNumFrames();
+        width += item->rect().width();
+
+        mJoinedItems << item;
+    }
+
+    mNumFrames = numFrames;
+
+    QGraphicsRectItem::setRect( 0.0, 0.0, width, items.first()->rect().height() );
+    setPos( items.first()->scenePos() );
+
+    init();
+
+    const bool isMovable = items.first()->flags() & ItemIsMovable;
+    setFlag( ItemIsMovable, isMovable );
+}
+
+
+
 void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget )
 {
     Q_UNUSED( widget );
@@ -239,6 +273,27 @@ bool WaveformItem::isLessThanOrderPos( const WaveformItem* const item1, const Wa
 
 
 
+QList<WaveformItem*> WaveformItem::getSortedListSelectedItems( const QGraphicsScene* const scene )
+{
+    QList<WaveformItem*> selectedItems;
+
+    if ( scene != NULL )
+    {
+        foreach ( QGraphicsItem* item, scene->selectedItems() )
+        {
+            if ( item->type() == WaveformItem::Type )
+            {
+                selectedItems << qgraphicsitem_cast<WaveformItem*>( item );
+            }
+        }
+        qSort( selectedItems.begin(), selectedItems.end(), WaveformItem::isLessThanOrderPos );
+    }
+
+    return selectedItems;
+}
+
+
+
 //==================================================================================================
 // Protected:
 
@@ -254,7 +309,7 @@ QVariant WaveformItem::itemChange( GraphicsItemChange change, const QVariant &va
         // minimum distance it must be from the left and right edges of the scene
         if ( isSelected() )
         {
-            QList<WaveformItem*> selectedItems = getSortedListSelectedItems();
+            QList<WaveformItem*> selectedItems = getSortedListSelectedItems( scene() );
 
             foreach( WaveformItem* item, selectedItems )
             {
@@ -330,7 +385,7 @@ void WaveformItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseMoveEvent( event );
 
-    QList<WaveformItem*> selectedItems = getSortedListSelectedItems();
+    QList<WaveformItem*> selectedItems = getSortedListSelectedItems( scene() );
 
     // If this item is being dragged to the left...
     if ( event->screenPos().x() < event->lastScreenPos().x() )
@@ -412,7 +467,7 @@ void WaveformItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseReleaseEvent( event );
 
-    QList<WaveformItem*> selectedItems = getSortedListSelectedItems();
+    QList<WaveformItem*> selectedItems = getSortedListSelectedItems( scene() );
 
     if ( mOrderPosBeforeMove != mCurrentOrderPos )
     {
@@ -464,10 +519,20 @@ void WaveformItem::setBackgroundGradient()
 {
     QLinearGradient gradient( 0.0, 0.0, rect().width(), 0.0 );
 
-    gradient.setColorAt( 0,     QColor::fromRgbF(1.0,   1.0,   1.0,   1.0) );
-    gradient.setColorAt( 0.125, QColor::fromRgbF(0.925, 0.925, 0.975, 1.0) );
-    gradient.setColorAt( 0.875, QColor::fromRgbF(0.925, 0.925, 0.975, 1.0) );
-    gradient.setColorAt( 1,     QColor::fromRgbF(0.8,   0.8,   0.9,   1.0) );
+    if ( isJoined() )
+    {
+        gradient.setColorAt( 0,     QColor::fromRgbF(1.0,   1.0,   1.0,   1.0) );
+        gradient.setColorAt( 0.125, QColor::fromRgbF(0.975, 0.975, 0.775, 1.0) );
+        gradient.setColorAt( 0.875, QColor::fromRgbF(0.975, 0.975, 0.775, 1.0) );
+        gradient.setColorAt( 1,     QColor::fromRgbF(0.8,   0.8,   0.6,   1.0) );
+    }
+    else
+    {
+        gradient.setColorAt( 0,     QColor::fromRgbF(1.0,   1.0,   1.0,   1.0) );
+        gradient.setColorAt( 0.125, QColor::fromRgbF(0.925, 0.925, 0.975, 1.0) );
+        gradient.setColorAt( 0.875, QColor::fromRgbF(0.925, 0.925, 0.975, 1.0) );
+        gradient.setColorAt( 1,     QColor::fromRgbF(0.8,   0.8,   0.9,   1.0) );
+    }
 
     setBrush( QBrush( gradient ) );
 }
@@ -537,22 +602,4 @@ void WaveformItem::findMinMaxSamples( const int startBin, const int endBin )
             mMaxSampleValues[ chanNum ]->set( binNum, max );
         }
     }
-}
-
-
-
-QList<WaveformItem*> WaveformItem::getSortedListSelectedItems()
-{
-    QList<WaveformItem*> selectedItems;
-
-    foreach ( QGraphicsItem* item, scene()->selectedItems() )
-    {
-        if ( item->type() == WaveformItem::Type )
-        {
-            selectedItems << qgraphicsitem_cast<WaveformItem*>( item );
-        }
-    }
-    qSort( selectedItems.begin(), selectedItems.end(), WaveformItem::isLessThanOrderPos );
-
-    return selectedItems;
 }
