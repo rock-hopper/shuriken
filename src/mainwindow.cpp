@@ -253,6 +253,8 @@ void MainWindow::enableUI()
 
     mUI->actionSave_Project->setEnabled( true );
     mUI->actionClose_Project->setEnabled( true );
+    mUI->actionSelect_All->setEnabled( true );
+    mUI->actionSelect_None->setEnabled( true );
     mUI->actionAdd_Slice_Point->setEnabled( true );
     mUI->actionZoom_Original->setEnabled( true );
     mUI->actionZoom_In->setEnabled( true );
@@ -280,9 +282,12 @@ void MainWindow::disableUI()
 
     mUI->actionSave_Project->setEnabled( false );
     mUI->actionClose_Project->setEnabled( false );
+    mUI->actionSelect_All->setEnabled( false );
+    mUI->actionSelect_None->setEnabled( false );
     mUI->actionAdd_Slice_Point->setEnabled( false );
     mUI->actionDelete->setEnabled( false );
     mUI->actionJoin->setEnabled( false );
+    mUI->actionSplit->setEnabled( false );
     mUI->actionReverse->setEnabled( false );
     mUI->actionZoom_Original->setEnabled( false );
     mUI->actionZoom_Out->setEnabled( false );
@@ -1008,14 +1013,14 @@ void MainWindow::on_actionRedo_triggered()
 
 void MainWindow::on_actionSelect_All_triggered()
 {
-
+    mUI->waveGraphicsView->selectAll();
 }
 
 
 
-void MainWindow::on_actionClear_Selection_triggered()
+void MainWindow::on_actionSelect_None_triggered()
 {
-
+    mUI->waveGraphicsView->selectNone();
 }
 
 

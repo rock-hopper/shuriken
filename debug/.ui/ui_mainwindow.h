@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sun Jun 15 19:19:25 2014
+** Created: Sun Jun 15 19:29:31 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -57,7 +57,7 @@ public:
     QAction *actionAbout;
     QAction *actionJoin;
     QAction *actionSelect_All;
-    QAction *actionClear_Selection;
+    QAction *actionSelect_None;
     QAction *actionApply_Gain;
     QAction *actionNormalise;
     QAction *actionApply_Ramp;
@@ -195,9 +195,9 @@ public:
         actionSelect_All = new QAction(MainWindow);
         actionSelect_All->setObjectName(QString::fromUtf8("actionSelect_All"));
         actionSelect_All->setEnabled(false);
-        actionClear_Selection = new QAction(MainWindow);
-        actionClear_Selection->setObjectName(QString::fromUtf8("actionClear_Selection"));
-        actionClear_Selection->setEnabled(false);
+        actionSelect_None = new QAction(MainWindow);
+        actionSelect_None->setObjectName(QString::fromUtf8("actionSelect_None"));
+        actionSelect_None->setEnabled(false);
         actionApply_Gain = new QAction(MainWindow);
         actionApply_Gain->setObjectName(QString::fromUtf8("actionApply_Gain"));
         actionApply_Gain->setEnabled(false);
@@ -512,7 +512,7 @@ public:
         menuEdit->addAction(actionRedo);
         menuEdit->addSeparator();
         menuEdit->addAction(actionSelect_All);
-        menuEdit->addAction(actionClear_Selection);
+        menuEdit->addAction(actionSelect_None);
         menuEdit->addAction(actionDelete);
         menuEdit->addSeparator();
         menuEdit->addAction(actionAdd_Slice_Point);
@@ -595,7 +595,10 @@ public:
         actionJoin->setShortcut(QApplication::translate("MainWindow", "J", 0, QApplication::UnicodeUTF8));
         actionSelect_All->setText(QApplication::translate("MainWindow", "Select All", 0, QApplication::UnicodeUTF8));
         actionSelect_All->setShortcut(QApplication::translate("MainWindow", "Ctrl+A", 0, QApplication::UnicodeUTF8));
-        actionClear_Selection->setText(QApplication::translate("MainWindow", "Clear Selection", 0, QApplication::UnicodeUTF8));
+        actionSelect_None->setText(QApplication::translate("MainWindow", "Select None", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        actionSelect_None->setToolTip(QApplication::translate("MainWindow", "Select None", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
         actionApply_Gain->setText(QApplication::translate("MainWindow", "Apply Gain", 0, QApplication::UnicodeUTF8));
         actionNormalise->setText(QApplication::translate("MainWindow", "Normalise", 0, QApplication::UnicodeUTF8));
         actionApply_Ramp->setText(QApplication::translate("MainWindow", "Apply Ramp", 0, QApplication::UnicodeUTF8));

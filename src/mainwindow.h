@@ -121,7 +121,7 @@ private slots:
     void on_actionApply_Ramp_triggered();
     void on_actionNormalise_triggered();
     void on_actionApply_Gain_triggered();
-    void on_actionClear_Selection_triggered();
+    void on_actionSelect_None_triggered();
     void on_actionSelect_All_triggered();
     void on_actionJoin_triggered();
     void on_actionAbout_triggered();

@@ -414,7 +414,7 @@
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
     <addaction name="actionSelect_All"/>
-    <addaction name="actionClear_Selection"/>
+    <addaction name="actionSelect_None"/>
     <addaction name="actionDelete"/>
     <addaction name="separator"/>
     <addaction name="actionAdd_Slice_Point"/>
@@ -683,12 +683,15 @@
     <string>Ctrl+A</string>
    </property>
   </action>
-  <action name="actionClear_Selection">
+  <action name="actionSelect_None">
    <property name="enabled">
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Clear Selection</string>
+    <string>Select None</string>
+   </property>
+   <property name="toolTip">
+    <string>Select None</string>
    </property>
   </action>
   <action name="actionApply_Gain">
