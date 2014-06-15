@@ -423,6 +423,7 @@
     <addaction name="actionApply_Ramp"/>
     <addaction name="actionEnvelope"/>
     <addaction name="actionJoin"/>
+    <addaction name="actionSplit"/>
     <addaction name="actionNormalise"/>
     <addaction name="actionReverse"/>
    </widget>
@@ -796,6 +797,17 @@
    </property>
    <property name="shortcut">
     <string>F2</string>
+   </property>
+  </action>
+  <action name="actionSplit">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Split</string>
+   </property>
+   <property name="shortcut">
+    <string>S</string>
    </property>
   </action>
  </widget>

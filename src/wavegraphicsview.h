@@ -70,6 +70,9 @@ public:
     void showSlicePoints();
     QList<int> getSlicePointFrameNumList();
 
+    void selectNone();
+    void selectAll();
+
     void stretch( const qreal ratio, const int newTotalNumFrames );
 
     void clearAll();

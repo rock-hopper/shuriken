@@ -26,7 +26,7 @@
 #include <QFileDialog>
 #include "commands.h"
 #include "globals.h"
-//#include <QDebug>
+#include <QDebug>
 
 
 //==================================================================================================
@@ -540,15 +540,27 @@ void MainWindow::enableGraphicsItemActions()
         mUI->actionDelete->setEnabled( false );
     }
 
+
     const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
 
     if ( ! orderPositions.isEmpty() )
     {
         mUI->actionReverse->setEnabled( true );
+
+        bool isAnySelectedItemJoined = false;
+        foreach ( int orderPos, orderPositions )
+        {
+            if ( mUI->waveGraphicsView->getWaveformAt( orderPos )->isJoined() )
+            {
+                isAnySelectedItemJoined = true;
+            }
+        }
+        mUI->actionSplit->setEnabled( isAnySelectedItemJoined );
     }
     else
     {
         mUI->actionReverse->setEnabled( false );
+        mUI->actionSplit->setEnabled( false );
     }
 
     if ( orderPositions.size() > 1 )
@@ -1064,6 +1076,24 @@ void MainWindow::on_actionJoin_triggered()
 
     QUndoCommand* command = new JoinCommand( orderPositions, mUI->waveGraphicsView, this );
     mUndoStack.push( command );
+}
+
+
+
+void MainWindow::on_actionSplit_triggered()
+{
+    const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+
+    for ( int i = orderPositions.size() - 1; i >= 0; i-- )
+    {
+        const int orderPos = orderPositions.at( i );
+
+        if ( mUI->waveGraphicsView->getWaveformAt( orderPos )->isJoined() )
+        {
+            QUndoCommand* command = new SplitCommand( orderPos, mUI->waveGraphicsView, this );
+            mUndoStack.push( command );
+        }
+    }
 }
 
 

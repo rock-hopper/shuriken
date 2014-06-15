@@ -368,6 +368,31 @@ QList<int> WaveGraphicsView::getSlicePointFrameNumList()
 
 
 
+void WaveGraphicsView::selectNone()
+{
+    foreach ( SharedSlicePointItem item, mSlicePointItemList )
+    {
+        item->setSelected( false );
+    }
+
+    foreach ( SharedWaveformItem item, mWaveformItemList )
+    {
+        item->setSelected( false );
+    }
+}
+
+
+
+void WaveGraphicsView::selectAll()
+{
+    foreach ( SharedWaveformItem item, mWaveformItemList )
+    {
+        item->setSelected( true );
+    }
+}
+
+
+
 void WaveGraphicsView::stretch( const qreal ratio, const int newTotalNumFrames )
 {
     if ( ratio > 0.0 && newTotalNumFrames > 0 )

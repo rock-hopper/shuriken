@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sat Jun 14 17:34:51 2014
+** Created: Sun Jun 15 19:19:25 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -66,6 +66,7 @@ public:
     QAction *actionZoom_Original;
     QAction *actionMove_Items;
     QAction *actionSelect_Items;
+    QAction *actionSplit;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QHBoxLayout *horizontalLayout_2;
@@ -236,6 +237,9 @@ public:
         QIcon icon14;
         icon14.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/kdenlive-select-all.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionSelect_Items->setIcon(icon14);
+        actionSplit = new QAction(MainWindow);
+        actionSplit->setObjectName(QString::fromUtf8("actionSplit"));
+        actionSplit->setEnabled(false);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -517,6 +521,7 @@ public:
         menuEdit->addAction(actionApply_Ramp);
         menuEdit->addAction(actionEnvelope);
         menuEdit->addAction(actionJoin);
+        menuEdit->addAction(actionSplit);
         menuEdit->addAction(actionNormalise);
         menuEdit->addAction(actionReverse);
         menuHelp->addAction(actionHelp);
@@ -613,6 +618,8 @@ public:
         actionMove_Items->setShortcut(QApplication::translate("MainWindow", "F1", 0, QApplication::UnicodeUTF8));
         actionSelect_Items->setText(QApplication::translate("MainWindow", "Select Items", 0, QApplication::UnicodeUTF8));
         actionSelect_Items->setShortcut(QApplication::translate("MainWindow", "F2", 0, QApplication::UnicodeUTF8));
+        actionSplit->setText(QApplication::translate("MainWindow", "Split", 0, QApplication::UnicodeUTF8));
+        actionSplit->setShortcut(QApplication::translate("MainWindow", "S", 0, QApplication::UnicodeUTF8));
         pushButton_Stop->setShortcut(QApplication::translate("MainWindow", "Space", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("MainWindow", "Original BPM:", 0, QApplication::UnicodeUTF8));
         pushButton_CalcBPM->setText(QApplication::translate("MainWindow", "Calc", 0, QApplication::UnicodeUTF8));

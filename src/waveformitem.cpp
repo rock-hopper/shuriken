@@ -524,7 +524,7 @@ void WaveformItem::setBackgroundGradient()
         gradient.setColorAt( 0,     QColor::fromRgbF(1.0,   1.0,   1.0,   1.0) );
         gradient.setColorAt( 0.125, QColor::fromRgbF(0.975, 0.975, 0.775, 1.0) );
         gradient.setColorAt( 0.875, QColor::fromRgbF(0.975, 0.975, 0.775, 1.0) );
-        gradient.setColorAt( 1,     QColor::fromRgbF(0.8,   0.8,   0.6,   1.0) );
+        gradient.setColorAt( 1,     QColor::fromRgbF(0.9,   0.9,   0.6,   1.0) );
     }
     else
     {

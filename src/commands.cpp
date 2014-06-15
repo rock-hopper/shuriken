@@ -332,11 +332,11 @@ JoinCommand::JoinCommand( const QList<int> orderPositions,
 
 void JoinCommand::undo()
 {
+    mGraphicsView->selectNone();
+
     QList<SharedWaveformItem> items = mGraphicsView->splitWaveform( mJoinedItemOrderPos );
 
     mMainWindow->mSampleRangeList.removeAt( mJoinedItemOrderPos );
-
-    int orderPos = mJoinedItemOrderPos;
 
     foreach ( SharedWaveformItem item, items )
     {
@@ -344,9 +344,7 @@ void JoinCommand::undo()
         range->startFrame = item->getStartFrame();
         range->numFrames = item->getNumFrames();
 
-        mMainWindow->mSampleRangeList.insert( orderPos, range );
-
-        orderPos++;
+        mMainWindow->mSampleRangeList.insert( item->getOrderPos(), range );
     }
 
     mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
@@ -356,6 +354,8 @@ void JoinCommand::undo()
 
 void JoinCommand::redo()
 {
+    mGraphicsView->selectNone();
+
     SharedWaveformItem item = mGraphicsView->joinWaveforms( mOrderPositions );
 
     QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
@@ -382,6 +382,83 @@ void JoinCommand::redo()
     range->numFrames = totalNumFrames;
 
     mMainWindow->mSampleRangeList.insert( mJoinedItemOrderPos, range );
+
+    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
+}
+
+
+
+//==================================================================================================
+
+SplitCommand::SplitCommand( const int orderPos,
+                           WaveGraphicsView* const graphicsView,
+                           MainWindow* const mainWindow,
+                           QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    mJoinedItemOrderPos( orderPos ),
+    mGraphicsView( graphicsView ),
+    mMainWindow( mainWindow )
+{
+    setText( "Join" );
+}
+
+
+
+void SplitCommand::undo()
+{
+    mGraphicsView->selectNone();
+
+    SharedWaveformItem item = mGraphicsView->joinWaveforms( mOrderPositions );
+
+    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
+                      mMainWindow, SLOT( recordWaveformItemMove(QList<int>,int) ) );
+
+    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
+                      mMainWindow, SLOT( reorderSampleRangeList(QList<int>,int) ) );
+
+    QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
+                      mMainWindow, SLOT( playSampleRange(int,int,QPointF) ) );
+
+    int totalNumFrames = 0;
+
+    foreach ( int orderPos, mOrderPositions )
+    {
+        totalNumFrames += mMainWindow->mSampleRangeList.at( mJoinedItemOrderPos )->numFrames;
+
+        mMainWindow->mSampleRangeList.removeAt( mJoinedItemOrderPos );
+    }
+
+    SharedSampleRange range( new SampleRange );
+    range->startFrame = item->getStartFrame();
+    range->numFrames = totalNumFrames;
+
+    mMainWindow->mSampleRangeList.insert( mJoinedItemOrderPos, range );
+
+    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
+}
+
+
+
+void SplitCommand::redo()
+{
+    mGraphicsView->selectNone();
+
+    QList<SharedWaveformItem> items = mGraphicsView->splitWaveform( mJoinedItemOrderPos );
+
+    mMainWindow->mSampleRangeList.removeAt( mJoinedItemOrderPos );
+
+    mOrderPositions.clear();
+
+    foreach ( SharedWaveformItem item, items )
+    {
+        mOrderPositions << item->getOrderPos();
+
+        SharedSampleRange range( new SampleRange );
+        range->startFrame = item->getStartFrame();
+        range->numFrames = item->getNumFrames();
+
+        mMainWindow->mSampleRangeList.insert( item->getOrderPos(), range );
+    }
 
     mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
 }

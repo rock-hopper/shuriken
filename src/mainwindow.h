@@ -47,6 +47,7 @@ class MainWindow : public QMainWindow
 
     friend class SliceCommand;
     friend class JoinCommand;
+    friend class SplitCommand;
     friend class ApplyTimeStretchCommand;
 
 public:
@@ -97,6 +98,7 @@ public slots:
     void reorderSampleRangeList( QList<int> oldOrderPositions, const int numPlacesMoved );
 
 private slots:
+    void on_actionSplit_triggered();
     void on_actionSelect_Items_triggered();
     void on_actionMove_Items_triggered();
     void on_pushButton_Apply_clicked();
