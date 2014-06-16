@@ -564,6 +564,7 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
         foreach ( SharedWaveformItem item, mWaveformItemList )
         {
             item->setFlag( QGraphicsItem::ItemIsMovable, true );
+            item->setFlag( QGraphicsItem::ItemIsSelectable, true );
         }
         setDragMode( NoDrag );
         break;
@@ -571,8 +572,17 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
         foreach ( SharedWaveformItem item, mWaveformItemList )
         {
             item->setFlag( QGraphicsItem::ItemIsMovable, false );
+            item->setFlag( QGraphicsItem::ItemIsSelectable, true );
         }
         setDragMode( RubberBandDrag );
+        break;
+    case AUDITION_ITEMS:
+        foreach ( SharedWaveformItem item, mWaveformItemList )
+        {
+            item->setFlag( QGraphicsItem::ItemIsMovable, false );
+            item->setFlag( QGraphicsItem::ItemIsSelectable, false );
+        }
+        setDragMode( NoDrag );
         break;
     default:
         break;

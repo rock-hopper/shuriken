@@ -36,7 +36,7 @@ class WaveGraphicsView : public QGraphicsView
     Q_OBJECT
 
 public:
-    enum InteractionMode { MOVE_ITEMS, SELECT_ITEMS };
+    enum InteractionMode { MOVE_ITEMS, SELECT_ITEMS, AUDITION_ITEMS };
 
     WaveGraphicsView( QWidget* parent = NULL );
 

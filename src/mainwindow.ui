@@ -457,8 +457,9 @@
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
    <addaction name="separator"/>
-   <addaction name="actionMove_Items"/>
-   <addaction name="actionSelect_Items"/>
+   <addaction name="actionMove"/>
+   <addaction name="actionSelect"/>
+   <addaction name="actionAudition"/>
    <addaction name="actionDelete"/>
    <addaction name="separator"/>
    <addaction name="actionZoom_Original"/>
@@ -729,11 +730,8 @@
    <property name="text">
     <string>Zoom In</string>
    </property>
-   <property name="toolTip">
-    <string>Zoom In (Ctrl++)</string>
-   </property>
    <property name="shortcut">
-    <string>Ctrl+=</string>
+    <string>Ctrl++</string>
    </property>
   </action>
   <action name="actionZoom_Out">
@@ -746,9 +744,6 @@
    </property>
    <property name="text">
     <string>Zoom Out</string>
-   </property>
-   <property name="toolTip">
-    <string>Zoom Out (Ctrl+-)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+-</string>
@@ -765,14 +760,11 @@
    <property name="text">
     <string>Zoom Original</string>
    </property>
-   <property name="toolTip">
-    <string>Zoom Original (Ctrl+0)</string>
-   </property>
    <property name="shortcut">
     <string>Ctrl+0</string>
    </property>
   </action>
-  <action name="actionMove_Items">
+  <action name="actionMove">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -781,13 +773,16 @@
      <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-select.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-select.png</iconset>
    </property>
    <property name="text">
-    <string>Move Items</string>
+    <string>Move</string>
+   </property>
+   <property name="toolTip">
+    <string>Move</string>
    </property>
    <property name="shortcut">
-    <string>F1</string>
+    <string>1</string>
    </property>
   </action>
-  <action name="actionSelect_Items">
+  <action name="actionSelect">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -796,10 +791,13 @@
      <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/kdenlive-select-all.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/kdenlive-select-all.png</iconset>
    </property>
    <property name="text">
-    <string>Select Items</string>
+    <string>Select</string>
+   </property>
+   <property name="toolTip">
+    <string>Select</string>
    </property>
    <property name="shortcut">
-    <string>F2</string>
+    <string>2</string>
    </property>
   </action>
   <action name="actionSplit">
@@ -811,6 +809,24 @@
    </property>
    <property name="shortcut">
     <string>S</string>
+   </property>
+  </action>
+  <action name="actionAudition">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/text-speak.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/text-speak.png</iconset>
+   </property>
+   <property name="text">
+    <string>Audition</string>
+   </property>
+   <property name="toolTip">
+    <string>Audition</string>
+   </property>
+   <property name="shortcut">
+    <string>3</string>
    </property>
   </action>
  </widget>

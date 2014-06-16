@@ -151,7 +151,7 @@ signals:
 
     void finishedMoving( const int orderPos );
 
-    void rightMousePressed( const int waveformItemStartFrame,
+    void playSampleRange( const int waveformItemStartFrame,
                             const int waveformItemNumFrames,
                             const QPointF mouseScenePos );
 

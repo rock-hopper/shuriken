@@ -256,7 +256,7 @@ void SliceCommand::redo()
         QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
                           mMainWindow, SLOT( reorderSampleRangeList(QList<int>,int) ) );
 
-        QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
+        QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
                           mMainWindow, SLOT( playSampleRange(int,int,QPointF) ) );
     }
 

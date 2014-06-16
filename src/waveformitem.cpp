@@ -361,23 +361,31 @@ void WaveformItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
     event->setModifiers( modifiers );
 
     // If the Graphics View has set drag mode to RubberBandDrag then it will additionally have unset
-    // this item's ItemIsMovable flag. The event must then be ignored for RubberBandDrag to work
+    // this item's ItemIsMovable flag; the event must then be ignored for RubberBandDrag to work.
 
-    if ( event->button() == Qt::RightButton )
+    if ( flags() & ItemIsSelectable )
     {
         if ( flags() & ItemIsMovable )
-            emit rightMousePressed( mStartFrame, mNumFrames, event->scenePos() );
-
-        event->ignore();
+        {
+            if ( event->button() == Qt::RightButton )
+            {
+                event->ignore();
+            }
+            else
+            {
+                QGraphicsItem::mousePressEvent( event );
+                mOrderPosBeforeMove = mCurrentOrderPos;
+            }
+        }
+        else
+        {
+            event->ignore();
+        }
     }
     else
     {
-        if ( flags() & ItemIsMovable )
-            QGraphicsItem::mousePressEvent( event );
-        else
-            event->ignore();
-
-        mOrderPosBeforeMove = mCurrentOrderPos;
+        emit playSampleRange( mStartFrame, mNumFrames, event->scenePos() );
+        event->ignore();
     }
 }
 

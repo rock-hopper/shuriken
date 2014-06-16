@@ -98,9 +98,9 @@ public slots:
     void reorderSampleRangeList( QList<int> oldOrderPositions, const int numPlacesMoved );
 
 private slots:
-    void on_actionSplit_triggered();
-    void on_actionSelect_Items_triggered();
-    void on_actionMove_Items_triggered();
+    void on_actionAudition_triggered();
+    void on_actionSelect_triggered();
+    void on_actionMove_triggered();
     void on_pushButton_Apply_clicked();
     void on_actionZoom_Original_triggered();
     void on_actionZoom_Out_triggered();
@@ -123,6 +123,7 @@ private slots:
     void on_actionApply_Gain_triggered();
     void on_actionSelect_None_triggered();
     void on_actionSelect_All_triggered();
+    void on_actionSplit_triggered();
     void on_actionJoin_triggered();
     void on_actionAbout_triggered();
     void on_actionHelp_triggered();

@@ -258,6 +258,8 @@ void MainWindow::enableUI()
     mUI->actionAdd_Slice_Point->setEnabled( true );
     mUI->actionZoom_Original->setEnabled( true );
     mUI->actionZoom_In->setEnabled( true );
+    mUI->actionAudition->setEnabled( true );
+    mUI->actionAudition->trigger();
 }
 
 
@@ -292,9 +294,9 @@ void MainWindow::disableUI()
     mUI->actionZoom_Original->setEnabled( false );
     mUI->actionZoom_Out->setEnabled( false );
     mUI->actionZoom_In->setEnabled( false );
-    mUI->actionMove_Items->setEnabled( false );
-    mUI->actionSelect_Items->setEnabled( false );
-    mUI->actionMove_Items->trigger();
+    mUI->actionMove->setEnabled( false );
+    mUI->actionSelect->setEnabled( false );
+    mUI->actionAudition->setEnabled( false );
 }
 
 
@@ -674,7 +676,7 @@ void MainWindow::on_actionOpen_Project_triggered()
                         {
                             const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer );
 
-                            QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
+                            QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
                                               this, SLOT( playSampleRange(int,int,QPointF) ) );
 
                             mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
@@ -695,7 +697,7 @@ void MainWindow::on_actionOpen_Project_triggered()
                                 QObject::connect( item.data(), SIGNAL( orderPosHasChanged(int,int) ),
                                                   this, SLOT( reorderSampleRangeList(int,int) ) );
 
-                                QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
+                                QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
                                                   this, SLOT( playSampleRange(int,int,QPointF) ) );
                             }
 
@@ -947,7 +949,7 @@ void MainWindow::on_actionImport_Audio_File_triggered()
 
             const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer );
 
-            QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
+            QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
                               this, SLOT( playSampleRange(int,int,QPointF) ) );
 
             mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
@@ -1193,8 +1195,8 @@ void MainWindow::on_pushButton_Slice_clicked()
                                               mUI->waveGraphicsView,
                                               mUI->pushButton_Slice,
                                               mUI->actionAdd_Slice_Point,
-                                              mUI->actionMove_Items,
-                                              mUI->actionSelect_Items );
+                                              mUI->actionMove,
+                                              mUI->actionSelect );
     mUndoStack.push( command );
 }
 
@@ -1419,14 +1421,21 @@ void MainWindow::on_pushButton_Apply_clicked()
 
 
 
-void MainWindow::on_actionMove_Items_triggered()
+void MainWindow::on_actionMove_triggered()
 {
     mUI->waveGraphicsView->setInteractionMode( WaveGraphicsView::MOVE_ITEMS );
 }
 
 
 
-void MainWindow::on_actionSelect_Items_triggered()
+void MainWindow::on_actionSelect_triggered()
 {
     mUI->waveGraphicsView->setInteractionMode( WaveGraphicsView::SELECT_ITEMS );
+}
+
+
+
+void MainWindow::on_actionAudition_triggered()
+{
+    mUI->waveGraphicsView->setInteractionMode( WaveGraphicsView::AUDITION_ITEMS );
 }
