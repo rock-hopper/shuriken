@@ -23,6 +23,7 @@
 #include "slicepointitem.h"
 #include <QBrush>
 #include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 //#include <QDebug>
 
 
@@ -106,6 +107,10 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant &
 
 void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
+    // Always unset the Ctrl-key modifier to prevent multiple slice point items from being selected
+    const Qt::KeyboardModifiers modifiers = event->modifiers() & ( ! Qt::ControlModifier );
+    event->setModifiers( modifiers );
+
     QGraphicsItem::mousePressEvent( event );
 
     mScenePosBeforeMove = pos().x();
