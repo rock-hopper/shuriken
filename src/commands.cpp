@@ -214,9 +214,7 @@ void SliceCommand::undo()
     mGraphicsView->clearWaveform();
 
     SharedWaveformItem item = mGraphicsView->createWaveform( mMainWindow->mCurrentSampleBuffer );
-
-    QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
-                      mMainWindow, SLOT( playSampleRange(int,int,QPointF) ) );
+    mMainWindow->connectWaveformToMainWindow( item );
 
     mGraphicsView->showSlicePoints();
 
@@ -250,14 +248,7 @@ void SliceCommand::redo()
 
     foreach ( SharedWaveformItem item, waveformItemList )
     {
-        QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                          mMainWindow, SLOT( recordWaveformItemMove(QList<int>,int) ) );
-
-        QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                          mMainWindow, SLOT( reorderSampleRangeList(QList<int>,int) ) );
-
-        QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
-                          mMainWindow, SLOT( playSampleRange(int,int,QPointF) ) );
+        mMainWindow->connectWaveformToMainWindow( item );
     }
 
     mSliceButton->setEnabled( false );
@@ -357,15 +348,7 @@ void JoinCommand::redo()
     mGraphicsView->selectNone();
 
     SharedWaveformItem item = mGraphicsView->joinWaveforms( mOrderPositions );
-
-    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                      mMainWindow, SLOT( recordWaveformItemMove(QList<int>,int) ) );
-
-    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                      mMainWindow, SLOT( reorderSampleRangeList(QList<int>,int) ) );
-
-    QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
-                      mMainWindow, SLOT( playSampleRange(int,int,QPointF) ) );
+    mMainWindow->connectWaveformToMainWindow( item );
 
     mJoinedItemOrderPos = item->getOrderPos();
     int totalNumFrames = 0;
@@ -409,15 +392,7 @@ void SplitCommand::undo()
     mGraphicsView->selectNone();
 
     SharedWaveformItem item = mGraphicsView->joinWaveforms( mOrderPositions );
-
-    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                      mMainWindow, SLOT( recordWaveformItemMove(QList<int>,int) ) );
-
-    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                      mMainWindow, SLOT( reorderSampleRangeList(QList<int>,int) ) );
-
-    QObject::connect( item.data(), SIGNAL( rightMousePressed(int,int,QPointF) ),
-                      mMainWindow, SLOT( playSampleRange(int,int,QPointF) ) );
+    mMainWindow->connectWaveformToMainWindow( item );
 
     int totalNumFrames = 0;
 

@@ -168,6 +168,20 @@ MainWindow::~MainWindow()
 
 
 
+void MainWindow::connectWaveformToMainWindow( const SharedWaveformItem item )
+{
+    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
+                      this, SLOT( recordWaveformItemMove(QList<int>,int) ) );
+
+    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
+                      this, SLOT( reorderSampleRangeList(QList<int>,int) ) );
+
+    QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
+                      this, SLOT( playSampleRange(int,int,QPointF) ) );
+}
+
+
+
 //==================================================================================================
 // Protected:
 
@@ -189,12 +203,23 @@ void MainWindow::changeEvent( QEvent* event )
 //==================================================================================================
 // Private:
 
-void MainWindow::setUpAudioSourcePlayer( const int numChans )
+void MainWindow::setUpSampler( const SharedSampleBuffer sampleBuffer, const SharedSampleHeader sampleHeader )
 {
     if ( mIsAudioInitialised )
     {
-        if ( mAudioSetupDialog->isRealtimeModeEnabled() ) // Timestretch mode
+        // The SamplerAudioSource must be set up before calling AudioSourcePlayer.setSource()
+        // to ensure that the current playback sample rate is being set for each sampler voice
+
+        mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
+
+        if ( ! mSampleRangeList.isEmpty() )
         {
+            mSamplerAudioSource->setSampleRanges( mSampleRangeList );
+        }
+
+        if ( mAudioSetupDialog->isRealtimeModeEnabled() ) // Realtime timestretch mode
+        {
+            const int numChans = sampleBuffer->getNumChannels();
             mRubberbandAudioSource = new RubberbandAudioSource( mSamplerAudioSource, numChans );
             mAudioSourcePlayer.setSource( mRubberbandAudioSource );
         }
@@ -210,7 +235,7 @@ void MainWindow::setUpAudioSourcePlayer( const int numChans )
 
 
 
-void MainWindow::tearDownAudioSourcePlayer( const bool isSampleToBeCleared )
+void MainWindow::tearDownSampler()
 {
     if ( mIsAudioInitialised )
     {
@@ -218,9 +243,7 @@ void MainWindow::tearDownAudioSourcePlayer( const bool isSampleToBeCleared )
         mRubberbandAudioSource = NULL;
         mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
         mDeviceManager.removeMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
-
-        if ( isSampleToBeCleared )
-            mSamplerAudioSource->clearSample();
+        mSamplerAudioSource->clearSample();
     }
 }
 
@@ -511,9 +534,8 @@ void MainWindow::enableRealtimeMode( const bool isEnabled )
             mUI->checkBox_JackSync->setEnabled( false );
         }
 
-        const bool isSampleToBeCleared = false;
-        tearDownAudioSourcePlayer( isSampleToBeCleared );
-        setUpAudioSourcePlayer( mCurrentSampleBuffer->getNumChannels() );
+        tearDownSampler();
+        setUpSampler( mCurrentSampleBuffer, mCurrentSampleHeader );
     }
 }
 
@@ -675,12 +697,9 @@ void MainWindow::on_actionOpen_Project_triggered()
                         if ( mSampleRangeList.isEmpty() )
                         {
                             const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer );
+                            connectWaveformToMainWindow( item );
 
-                            QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
-                                              this, SLOT( playSampleRange(int,int,QPointF) ) );
-
-                            mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
-                            setUpAudioSourcePlayer( sampleBuffer->getNumChannels() );
+                            setUpSampler( sampleBuffer, sampleHeader );
 
                             enableUI();
                         }
@@ -691,19 +710,10 @@ void MainWindow::on_actionOpen_Project_triggered()
 
                             foreach ( SharedWaveformItem item, waveformItemList )
                             {
-                                QObject::connect( item.data(), SIGNAL( orderPosHasChanged(int,int) ),
-                                                  this, SLOT( recordWaveformItemMove(int,int) ) );
-
-                                QObject::connect( item.data(), SIGNAL( orderPosHasChanged(int,int) ),
-                                                  this, SLOT( reorderSampleRangeList(int,int) ) );
-
-                                QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
-                                                  this, SLOT( playSampleRange(int,int,QPointF) ) );
+                                connectWaveformToMainWindow( item );
                             }
 
-                            mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
-                            mSamplerAudioSource->setSampleRanges( mSampleRangeList );
-                            setUpAudioSourcePlayer( sampleHeader->numChans );
+                            setUpSampler( sampleBuffer, sampleHeader );
 
                             enableUI();
                             mUI->actionAdd_Slice_Point->setEnabled( false );
@@ -901,7 +911,7 @@ void MainWindow::on_actionClose_Project_triggered()
     mCurrentSampleBuffer.clear();
     mCurrentSampleHeader.clear();
     mSampleRangeList.clear();
-    tearDownAudioSourcePlayer( true );
+    tearDownSampler();
 
     mUI->waveGraphicsView->clearAll();
     on_actionZoom_Original_triggered();
@@ -948,12 +958,9 @@ void MainWindow::on_actionImport_Audio_File_triggered()
             mCurrentSampleHeader = sampleHeader;
 
             const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer );
+            connectWaveformToMainWindow( item );
 
-            QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
-                              this, SLOT( playSampleRange(int,int,QPointF) ) );
-
-            mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
-            setUpAudioSourcePlayer( sampleBuffer->getNumChannels() );
+            setUpSampler( sampleBuffer, sampleHeader );
 
             enableUI();
 

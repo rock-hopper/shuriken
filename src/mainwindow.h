@@ -34,6 +34,7 @@
 #include "rubberbandaudiosource.h"
 #include "slicepointitem.h"
 #include "audioanalyser.h"
+#include "waveformitem.h"
 
 
 namespace Ui
@@ -54,14 +55,18 @@ public:
     MainWindow( QWidget* parent = NULL );
     ~MainWindow();
 
+    void connectWaveformToMainWindow( const SharedWaveformItem item );
+
 protected:
     void changeEvent( QEvent* event );
 
 private:
-    void setUpAudioSourcePlayer( const int numChans );
-    void tearDownAudioSourcePlayer( const bool isSampleToBeCleared );
+    void setUpSampler( const SharedSampleBuffer sampleBuffer, const SharedSampleHeader sampleHeader );
+    void tearDownSampler();
+
     void enableUI();
     void disableUI();
+
     AudioAnalyser::DetectionSettings getDetectionSettings();
     void getSampleRanges( QList<SharedSampleRange>& sampleRangeList );
 
