@@ -151,6 +151,11 @@ SharedWaveformItem WaveGraphicsView::joinWaveforms( const QList<int> orderPositi
     QObject::connect( waveformItem, SIGNAL( maxDetailLevelReached() ),
                       this, SLOT( relayMaxDetailLevelReached() ) );
 
+    if ( dragMode() == RubberBandDrag )
+    {
+        waveformItem->setFlag( QGraphicsItem::ItemIsMovable, false );
+    }
+
     scene()->addItem( waveformItem );
     scene()->update();
 
@@ -176,6 +181,16 @@ QList<SharedWaveformItem> WaveGraphicsView::splitWaveform( const int orderPos )
         foreach ( SharedWaveformItem item, joinedItems )
         {
             mWaveformItemList.insert( orderPos, item );
+
+            if ( dragMode() == RubberBandDrag )
+            {
+                item->setFlag( QGraphicsItem::ItemIsMovable, false );
+            }
+            else
+            {
+                item->setFlag( QGraphicsItem::ItemIsMovable, true );
+            }
+
             scene()->addItem( item.data() );
             orderPos++;
         }

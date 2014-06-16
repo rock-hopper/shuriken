@@ -92,9 +92,6 @@ WaveformItem::WaveformItem( const QList<SharedWaveformItem> items, QGraphicsItem
     setPos( items.first()->scenePos() );
 
     init();
-
-    const bool isMovable = items.first()->flags() & ItemIsMovable;
-    setFlag( ItemIsMovable, isMovable );
 }
 
 
