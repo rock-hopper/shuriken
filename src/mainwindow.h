@@ -61,13 +61,15 @@ protected:
     void changeEvent( QEvent* event );
 
 private:
+    void initialiseAudio();
     void setUpSampler( const SharedSampleBuffer sampleBuffer, const SharedSampleHeader sampleHeader );
     void tearDownSampler();
 
+    void setupUI();
     void enableUI();
     void disableUI();
 
-    AudioAnalyser::DetectionSettings getDetectionSettings();
+    void getDetectionSettings( AudioAnalyser::DetectionSettings& settings );
     void getSampleRanges( QList<SharedSampleRange>& sampleRangeList );
 
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>

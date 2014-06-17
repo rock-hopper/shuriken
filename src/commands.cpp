@@ -184,19 +184,21 @@ void DeleteSlicePointItemCommand::redo()
 //==================================================================================================
 
 SliceCommand::SliceCommand( MainWindow* const mainWindow,
-                                          WaveGraphicsView* const graphicsView,
-                                          QPushButton* const sliceButton,
-                                          QAction* const addSlicePointAction,
-                                          QAction* const moveItemsAction,
-                                          QAction* const selectItemsAction,
-                                          QUndoCommand* parent ) :
+                            WaveGraphicsView* const graphicsView,
+                            QPushButton* const sliceButton,
+                            QAction* const addSlicePointAction,
+                            QAction* const moveItemsAction,
+                            QAction* const selectItemsAction,
+                            QAction* const auditionItemsAction,
+                            QUndoCommand* parent ) :
     QUndoCommand( parent ),
     mMainWindow( mainWindow ),
     mGraphicsView( graphicsView ),
     mSliceButton( sliceButton ),
     mAddSlicePointAction( addSlicePointAction ),
     mMoveItemsAction( moveItemsAction ),
-    mSelectItemsAction( selectItemsAction )
+    mSelectItemsAction( selectItemsAction ),
+    mAuditionItemsAction( auditionItemsAction )
 {
     setText( "Slice" );
 }
@@ -222,7 +224,8 @@ void SliceCommand::undo()
     mAddSlicePointAction->setEnabled( true );
     mMoveItemsAction->setEnabled( false );
     mSelectItemsAction->setEnabled( false );
-    mMoveItemsAction->trigger();
+    mAuditionItemsAction->setEnabled( false );
+    mAuditionItemsAction->trigger();
 
     QApplication::restoreOverrideCursor();
 }
@@ -255,6 +258,7 @@ void SliceCommand::redo()
     mAddSlicePointAction->setEnabled( false );
     mMoveItemsAction->setEnabled( true );
     mSelectItemsAction->setEnabled( true );
+    mAuditionItemsAction->setEnabled( true );
 
     QApplication::restoreOverrideCursor();
 }

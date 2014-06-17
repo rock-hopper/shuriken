@@ -120,6 +120,7 @@ public:
                   QAction* const addSlicePointAction,
                   QAction* const moveItemsAction,
                   QAction* const selectItemsAction,
+                  QAction* const auditionItemsAction,
                   QUndoCommand* parent = NULL );
 
     void undo();
@@ -132,6 +133,7 @@ private:
     QAction* const mAddSlicePointAction;
     QAction* const mMoveItemsAction;
     QAction* const mSelectItemsAction;
+    QAction* const mAuditionItemsAction;
 };
 
 

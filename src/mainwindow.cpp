@@ -40,122 +40,8 @@ MainWindow::MainWindow( QWidget* parent ) :
     mAppliedOriginalBPM( 0.0 ),
     mAppliedNewBPM( 0.0 )
 {
-    // Set up user interface
-    mUI->setupUi( this );
-
-
-    // Populate "Detection Method" combo box
-    QStringList detectMethodTextList, detectMethodDataList;
-
-    detectMethodTextList << "Broadband Energy" << "High Frequency Content" << "Complex Domain"
-            << "Phase Based" << "Spectral Difference" << "Kullback-Liebler"
-            << "Modified Kullback-Liebler" << "Spectral Flux";
-
-    detectMethodDataList << "energy" << "hfc" << "complex" << "phase" << "specdiff"
-            << "kl" << "mkl" << "specflux";
-
-    for ( int i = 0; i < detectMethodTextList.size(); i++ )
-    {
-        mUI->comboBox_DetectMethod->addItem( detectMethodTextList[ i ], detectMethodDataList[ i ] );
-    }
-
-
-    // Populate "Window Size" combo box
-    QStringList windowSizeTextList;
-    QList<int> windowSizeDataList;
-
-    windowSizeTextList << "128" << "256" << "512" << "1024" << "2048" << "4096" << "8192";
-    windowSizeDataList << 128 << 256 << 512 << 1024 << 2048 << 4096 << 8192;
-
-    for ( int i = 0; i < windowSizeTextList.size(); i++ )
-    {
-        mUI->comboBox_WindowSize->addItem( windowSizeTextList[ i ], windowSizeDataList[ i ] );
-    }
-
-    mUI->comboBox_WindowSize->setCurrentIndex( 3 ); // "1024"
-
-
-    // Populate "Hop Size" combo box
-    QStringList hopSizeTextList;
-    QList<qreal> hopSizeDataList;
-
-    hopSizeTextList << "50%" << "25%" << "12.5%" << "6.25%";
-    hopSizeDataList << 50.0 << 25.0 << 12.5 << 6.25;
-
-    for ( int i = 0; i < hopSizeTextList.size(); i++ )
-    {
-        mUI->comboBox_HopSize->addItem( hopSizeTextList[ i ], hopSizeDataList[ i ] );
-    }
-
-    mUI->comboBox_HopSize->setCurrentIndex( 0 ); // "50%"
-
-
-    mUI->checkBox_AdvancedOptions->setChecked( false );
-
-
-    // Connect signals to slots
-    QObject::connect( mUI->waveGraphicsView, SIGNAL( slicePointOrderChanged(SharedSlicePointItem,int,int) ),
-                      this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int) ) );
-
-    QObject::connect( mUI->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
-                      this, SLOT( disableZoomOut() ) );
-
-    QObject::connect( mUI->waveGraphicsView, SIGNAL( maxDetailLevelReached() ),
-                      this, SLOT( disableZoomIn() ) );
-
-    QObject::connect( mUI->waveGraphicsView->scene(), SIGNAL( selectionChanged() ),
-                      this, SLOT( enableGraphicsItemActions() ) );
-
-    QObject::connect( &mUndoStack, SIGNAL( canUndoChanged(bool) ),
-                      mUI->actionUndo, SLOT( setEnabled(bool) ) );
-
-    QObject::connect( &mUndoStack, SIGNAL( canRedoChanged(bool) ),
-                      mUI->actionRedo, SLOT( setEnabled(bool) ) );
-
-    QObject::connect( mUI->actionUndo, SIGNAL( triggered() ),
-                      &mUndoStack, SLOT( undo() ) );
-
-    QObject::connect( mUI->actionRedo, SIGNAL( triggered() ),
-                      &mUndoStack, SLOT( redo() ) );
-
-
-    // Initialise the audio device manager
-    ScopedPointer<XmlElement> stateXml;
-
-    File configFile( AUDIO_CONFIG_FILE_PATH );
-    if ( configFile.existsAsFile() )
-    {
-        stateXml = XmlDocument::parse( configFile );
-    }
-
-    const String error = mDeviceManager.initialise( NUM_INPUT_CHANS, NUM_OUTPUT_CHANS, stateXml, true );
-
-    if ( error.isNotEmpty() )
-    {
-        showWarningBox( tr("Error initialising audio device manager!"), error.toRawUTF8() );
-        mUI->actionAudio_Setup->setDisabled( true );
-        mIsAudioInitialised = false;
-    }
-    else
-    {
-        mAudioSetupDialog = new AudioSetupDialog( mDeviceManager, this );
-
-        QObject::connect( mAudioSetupDialog.get(), SIGNAL( realtimeModeEnabled(bool) ),
-                          this, SLOT( enableRealtimeMode(bool) ) );
-
-        QObject::connect( mAudioSetupDialog.get(), SIGNAL( jackAudioEnabled(bool) ),
-                          this, SLOT( enableJackSyncCheckBox(bool) ) );
-
-        mSamplerAudioSource = new SamplerAudioSource();
-        mIsAudioInitialised = true;
-    }
-
-
-    // Check there were no errors while initialising the audio file handler
-    if ( ! mFileHandler.getLastErrorTitle().isEmpty() )
-    {
-        showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
-    }
+    setupUI();
+    initialiseAudio();
 }
 
 
@@ -203,6 +89,49 @@ void MainWindow::changeEvent( QEvent* event )
 //==================================================================================================
 // Private:
 
+void MainWindow::initialiseAudio()
+{
+    // Read audio config file
+    ScopedPointer<XmlElement> stateXml;
+
+    File configFile( AUDIO_CONFIG_FILE_PATH );
+    if ( configFile.existsAsFile() )
+    {
+        stateXml = XmlDocument::parse( configFile );
+    }
+
+    // Initialise the audio device manager
+    const String error = mDeviceManager.initialise( NUM_INPUT_CHANS, NUM_OUTPUT_CHANS, stateXml, true );
+
+    if ( error.isNotEmpty() )
+    {
+        showWarningBox( tr("Error initialising audio device manager!"), error.toRawUTF8() );
+        mUI->actionAudio_Setup->setDisabled( true );
+        mIsAudioInitialised = false;
+    }
+    else
+    {
+        mAudioSetupDialog = new AudioSetupDialog( mDeviceManager, this );
+
+        QObject::connect( mAudioSetupDialog.get(), SIGNAL( realtimeModeEnabled(bool) ),
+                          this, SLOT( enableRealtimeMode(bool) ) );
+
+        QObject::connect( mAudioSetupDialog.get(), SIGNAL( jackAudioEnabled(bool) ),
+                          this, SLOT( enableJackSyncCheckBox(bool) ) );
+
+        mSamplerAudioSource = new SamplerAudioSource();
+        mIsAudioInitialised = true;
+    }
+
+    // Check there were no errors while the audio file handler was being initialised
+    if ( ! mFileHandler.getLastErrorTitle().isEmpty() )
+    {
+        showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+    }
+}
+
+
+
 void MainWindow::setUpSampler( const SharedSampleBuffer sampleBuffer, const SharedSampleHeader sampleHeader )
 {
     if ( mIsAudioInitialised )
@@ -249,6 +178,87 @@ void MainWindow::tearDownSampler()
 
 
 
+void MainWindow::setupUI()
+{
+    // Initialise user interface
+    mUI->setupUi( this );
+
+
+    // Populate "Detection Method" combo box
+    QStringList detectMethodTextList, detectMethodDataList;
+
+    detectMethodTextList << "Broadband Energy" << "High Frequency Content" << "Complex Domain"
+            << "Phase Based" << "Spectral Difference" << "Kullback-Liebler"
+            << "Modified Kullback-Liebler" << "Spectral Flux";
+
+    detectMethodDataList << "energy" << "hfc" << "complex" << "phase" << "specdiff"
+            << "kl" << "mkl" << "specflux";
+
+    for ( int i = 0; i < detectMethodTextList.size(); i++ )
+    {
+        mUI->comboBox_DetectMethod->addItem( detectMethodTextList[ i ], detectMethodDataList[ i ] );
+    }
+
+
+    // Populate "Window Size" combo box
+    QStringList windowSizeTextList;
+    QList<int> windowSizeDataList;
+
+    windowSizeTextList << "128" << "256" << "512" << "1024" << "2048" << "4096" << "8192";
+    windowSizeDataList << 128 << 256 << 512 << 1024 << 2048 << 4096 << 8192;
+
+    for ( int i = 0; i < windowSizeTextList.size(); i++ )
+    {
+        mUI->comboBox_WindowSize->addItem( windowSizeTextList[ i ], windowSizeDataList[ i ] );
+    }
+    mUI->comboBox_WindowSize->setCurrentIndex( 3 ); // "1024"
+
+
+    // Populate "Hop Size" combo box
+    QStringList hopSizeTextList;
+    QList<qreal> hopSizeDataList;
+
+    hopSizeTextList << "50%" << "25%" << "12.5%" << "6.25%";
+    hopSizeDataList << 50.0 << 25.0 << 12.5 << 6.25;
+
+    for ( int i = 0; i < hopSizeTextList.size(); i++ )
+    {
+        mUI->comboBox_HopSize->addItem( hopSizeTextList[ i ], hopSizeDataList[ i ] );
+    }
+    mUI->comboBox_HopSize->setCurrentIndex( 0 ); // "50%"
+
+
+    mUI->checkBox_AdvancedOptions->setChecked( false );
+
+
+    // Connect signals to slots
+    QObject::connect( mUI->waveGraphicsView, SIGNAL( slicePointOrderChanged(SharedSlicePointItem,int,int) ),
+                      this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int) ) );
+
+    QObject::connect( mUI->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
+                      this, SLOT( disableZoomOut() ) );
+
+    QObject::connect( mUI->waveGraphicsView, SIGNAL( maxDetailLevelReached() ),
+                      this, SLOT( disableZoomIn() ) );
+
+    QObject::connect( mUI->waveGraphicsView->scene(), SIGNAL( selectionChanged() ),
+                      this, SLOT( enableGraphicsItemActions() ) );
+
+    QObject::connect( &mUndoStack, SIGNAL( canUndoChanged(bool) ),
+                      mUI->actionUndo, SLOT( setEnabled(bool) ) );
+
+    QObject::connect( &mUndoStack, SIGNAL( canRedoChanged(bool) ),
+                      mUI->actionRedo, SLOT( setEnabled(bool) ) );
+
+    QObject::connect( mUI->actionUndo, SIGNAL( triggered() ),
+                      &mUndoStack, SLOT( undo() ) );
+
+    QObject::connect( mUI->actionRedo, SIGNAL( triggered() ),
+                      &mUndoStack, SLOT( redo() ) );
+}
+
+
+
 void MainWindow::enableUI()
 {
     if ( mIsAudioInitialised )
@@ -281,7 +291,7 @@ void MainWindow::enableUI()
     mUI->actionAdd_Slice_Point->setEnabled( true );
     mUI->actionZoom_Original->setEnabled( true );
     mUI->actionZoom_In->setEnabled( true );
-    mUI->actionAudition->setEnabled( true );
+
     mUI->actionAudition->trigger();
 }
 
@@ -324,9 +334,8 @@ void MainWindow::disableUI()
 
 
 
-AudioAnalyser::DetectionSettings MainWindow::getDetectionSettings()
+void MainWindow::getDetectionSettings( AudioAnalyser::DetectionSettings& settings )
 {
-    AudioAnalyser::DetectionSettings settings;
     int currentIndex;
 
     // From aubio website: "Typical threshold values are within 0.001 and 0.900." Default is 0.3 in aubio-0.4.0
@@ -343,8 +352,6 @@ AudioAnalyser::DetectionSettings MainWindow::getDetectionSettings()
     settings.hopSize = (uint_t) ( settings.windowSize * ( percentage / 100.0 ) );
 
     settings.sampleRate = (uint_t) mCurrentSampleHeader->sampleRate;
-
-    return settings;
 }
 
 
@@ -1180,7 +1187,9 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    const AudioAnalyser::DetectionSettings settings = getDetectionSettings();
+    AudioAnalyser::DetectionSettings settings;
+    getDetectionSettings( settings );
+
     const qreal bpm = AudioAnalyser::calcBPM( mCurrentSampleBuffer, settings );
 
     mUI->doubleSpinBox_OriginalBPM->setValue( bpm );
@@ -1203,7 +1212,8 @@ void MainWindow::on_pushButton_Slice_clicked()
                                               mUI->pushButton_Slice,
                                               mUI->actionAdd_Slice_Point,
                                               mUI->actionMove,
-                                              mUI->actionSelect );
+                                              mUI->actionSelect,
+                                              mUI->actionAudition );
     mUndoStack.push( command );
 }
 
@@ -1220,7 +1230,9 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    const AudioAnalyser::DetectionSettings settings = getDetectionSettings();
+    AudioAnalyser::DetectionSettings settings;
+    getDetectionSettings( settings );
+
     const QList<int> slicePointFrameNumList = AudioAnalyser::findOnsetFrameNums( mCurrentSampleBuffer, settings );
 
     QUndoCommand* command = new AddSlicePointItemsCommand( mUI->pushButton_FindOnsets, mUI->pushButton_FindBeats );
@@ -1240,7 +1252,9 @@ void MainWindow::on_pushButton_FindBeats_clicked()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    const AudioAnalyser::DetectionSettings settings = getDetectionSettings();
+    AudioAnalyser::DetectionSettings settings;
+    getDetectionSettings( settings );
+
     const QList<int> slicePointFrameNumList = AudioAnalyser::findBeatFrameNums( mCurrentSampleBuffer, settings );
 
     QUndoCommand* command = new AddSlicePointItemsCommand( mUI->pushButton_FindOnsets, mUI->pushButton_FindBeats );
