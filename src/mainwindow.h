@@ -72,6 +72,11 @@ private:
     void getDetectionSettings( AudioAnalyser::DetectionSettings& settings );
     void getSampleRanges( QList<SharedSampleRange>& sampleRangeList );
 
+    void importAudioFile();
+    void closeProject();
+    void saveProject();
+    void openProject();
+
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
     ScopedPointer<AudioSetupDialog> mAudioSetupDialog;
@@ -100,6 +105,7 @@ private:
 
 private:
     static void showWarningBox( const QString text, const QString infoText );
+    static int showUnsavedChangesBox();
 
 public slots:
     void reorderSampleRangeList( QList<int> oldOrderPositions, const int numPlacesMoved );
