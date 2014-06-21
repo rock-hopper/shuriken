@@ -27,7 +27,10 @@
 #include <QListWidgetItem>
 #include <QCloseEvent>
 #include <QAbstractButton>
+#include <rubberband/RubberBandStretcher.h>
 #include "JuceHeader.h"
+
+using namespace RubberBand;
 
 
 class SynthAudioSource;
@@ -42,12 +45,20 @@ class AudioSetupDialog : public QDialog
     Q_OBJECT
 
 public:
+    enum Tab { AUDIO_SETUP = 0, TIMESTRETCH = 1 };
+    
     AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* parent = NULL );
     ~AudioSetupDialog();
 
-    bool isJackAudioEnabled() const;
+    void setCurrentTab( const Tab tab );
+
     bool isRealtimeModeEnabled() const;
     void enableRealtimeMode( const bool isEnabled );
+
+    bool isJackSyncEnabled() const;
+
+    RubberBandStretcher::Options getStretcherOptions() const                    { return mStretcherOptions; }
+
 
 protected:
     void changeEvent( QEvent* event );
@@ -55,6 +66,7 @@ protected:
     void closeEvent( QCloseEvent* event );
 
 private:
+    bool isJackAudioEnabled() const;
     void updateAudioDeviceComboBox();
     void updateOutputChannelComboBox();
     void updateSampleRateComboBox();
@@ -65,11 +77,15 @@ private:
     void tearDownMidiInputTestSynth();
     void setJackMidiInput( const String deviceName );
 
+    void enableStretcherOptions( const RubberBandStretcher::Options options );
+    void disableStretcherOptions( const RubberBandStretcher::Options options );
+
     Ui::AudioSetupDialog* mUI;
     AudioDeviceManager& mDeviceManager;
     AudioDeviceManager::AudioDeviceSetup mOriginalConfig;
     ScopedPointer<SynthAudioSource> mSynthAudioSource;
     AudioSourcePlayer mAudioSourcePlayer;
+    RubberBandStretcher::Options mStretcherOptions;
 
 private:
     static void showWarningBox( const QString text, const QString infoText );
@@ -77,10 +93,32 @@ private:
     static QString getNoDeviceString() { return "<< " + tr("none") + " >>"; }
 
 signals:
-    void realtimeModeEnabled( const bool isEnabled );
-    void jackAudioEnabled( const bool isEnabled );
+    void realtimeModeToggled( const bool isEnabled );
+    void stretchOptionChanged( const RubberBandStretcher::Options option );
+    void transientsOptionChanged( const RubberBandStretcher::Options option );
+    void phaseOptionChanged( const RubberBandStretcher::Options option );
+    void windowOptionChanged();
+    void formantOptionChanged( const RubberBandStretcher::Options option );
+    void pitchOptionChanged( const RubberBandStretcher::Options option );
+    void jackSyncToggled( const bool isEnabled );
 
 private slots:
+    void on_checkBox_JackSync_toggled( const bool isChecked );
+    void on_radioButton_HighConsistency_clicked();
+    void on_radioButton_HighQuality_clicked();
+    void on_radioButton_HighSpeed_clicked();
+    void on_radioButton_Preserved_clicked();
+    void on_radioButton_Shifted_clicked();
+    void on_radioButton_Long_clicked();
+    void on_radioButton_Short_clicked();
+    void on_radioButton_Standard_clicked();
+    void on_radioButton_Independent_clicked();
+    void on_radioButton_Laminar_clicked();
+    void on_radioButton_Smooth_clicked();
+    void on_radioButton_Mixed_clicked();
+    void on_radioButton_Crisp_clicked();
+    void on_radioButton_Precise_clicked();
+    void on_radioButton_Elastic_clicked();
     void on_radioButton_Offline_clicked();
     void on_radioButton_RealTime_clicked();
     void on_checkBox_MidiInputTestTone_clicked( const bool isChecked );

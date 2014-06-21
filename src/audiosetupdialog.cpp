@@ -25,7 +25,7 @@
 #include "simplesynth.h"
 #include "globals.h"
 #include <QMessageBox>
-//#include <QDebug>
+#include <QDebug>
 
 
 //==================================================================================================
@@ -34,7 +34,8 @@
 AudioSetupDialog::AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* parent ) :
     QDialog( parent ),
     mUI( new Ui::AudioSetupDialog ),
-    mDeviceManager( deviceManager )
+    mDeviceManager( deviceManager ),
+    mStretcherOptions( RubberBandStretcher::DefaultOptions )
 {
     // Setup user interface
     mUI->setupUi( this );
@@ -65,9 +66,10 @@ AudioSetupDialog::~AudioSetupDialog()
 }
 
 
-bool AudioSetupDialog::isJackAudioEnabled() const
+
+void AudioSetupDialog::setCurrentTab( const Tab tab )
 {
-    return ( mDeviceManager.getCurrentAudioDeviceType() == "JACK" );
+    mUI->tabWidget->setCurrentIndex( tab );
 }
 
 
@@ -82,7 +84,14 @@ bool AudioSetupDialog::isRealtimeModeEnabled() const
 void AudioSetupDialog::enableRealtimeMode( const bool isEnabled )
 {
     mUI->radioButton_RealTime->setChecked( isEnabled );
-    emit realtimeModeEnabled( isEnabled );
+    emit realtimeModeToggled( isEnabled );
+}
+
+
+
+bool AudioSetupDialog::isJackSyncEnabled() const
+{
+    return mUI->checkBox_JackSync->isChecked();
 }
 
 
@@ -137,6 +146,13 @@ void AudioSetupDialog::closeEvent( QCloseEvent* event )
 //==================================================================================================
 // Private:
 
+bool AudioSetupDialog::isJackAudioEnabled() const
+{
+    return ( mDeviceManager.getCurrentAudioDeviceType() == "JACK" );
+}
+
+
+
 void AudioSetupDialog::updateAudioDeviceComboBox()
 {
     AudioIODeviceType* const audioBackendType = mDeviceManager.getCurrentDeviceTypeObject();
@@ -174,7 +190,7 @@ void AudioSetupDialog::updateOutputChannelComboBox()
 {
     mUI->comboBox_OutputChannels->clear();
 
-    if ( mDeviceManager.getCurrentAudioDeviceType() == "JACK" )
+    if ( isJackAudioEnabled() )
     {
         mUI->comboBox_OutputChannels->setVisible( false );
         mUI->label_OutputChannels->setVisible( false );
@@ -259,7 +275,7 @@ void AudioSetupDialog::updateSampleRateComboBox()
         mUI->comboBox_SampleRate->setEnabled( false );
     }
 
-    if ( mDeviceManager.getCurrentAudioDeviceType() == "JACK" )
+    if ( isJackAudioEnabled() )
     {
         mUI->comboBox_SampleRate->setEnabled( false );
     }
@@ -306,7 +322,7 @@ void AudioSetupDialog::updateBufferSizeComboBox()
         mUI->comboBox_BufferSize->setEnabled( false );
     }
 
-    if ( mDeviceManager.getCurrentAudioDeviceType() == "JACK" )
+    if ( isJackAudioEnabled() )
     {
         mUI->comboBox_BufferSize->setEnabled( false );
     }
@@ -428,6 +444,20 @@ void AudioSetupDialog::setJackMidiInput( const String deviceName )
 
 
 
+void AudioSetupDialog::enableStretcherOptions( const RubberBandStretcher::Options options )
+{
+    mStretcherOptions |= options;
+}
+
+
+
+void AudioSetupDialog::disableStretcherOptions( const RubberBandStretcher::Options options )
+{
+    mStretcherOptions &= ~options;
+}
+
+
+
 //==================================================================================================
 // Private Static:
 
@@ -492,6 +522,9 @@ void AudioSetupDialog::reject()
 
 
 
+//====================
+// "Audio Setup" tab:
+
 void AudioSetupDialog::on_comboBox_AudioBackend_currentIndexChanged( const int index )
 {
     // Set audio backend
@@ -503,7 +536,7 @@ void AudioSetupDialog::on_comboBox_AudioBackend_currentIndexChanged( const int i
     AudioDeviceManager::AudioDeviceSetup config;
     mDeviceManager.getAudioDeviceSetup( config );
 
-    // Set audio settings and get any error message produced
+    // Set current settings again simply to get any error message that may be produced
     String error = mDeviceManager.setAudioDeviceSetup( config, true );
 
     // If this is a JACK audio device then also enable JACK MIDI if required
@@ -516,18 +549,19 @@ void AudioSetupDialog::on_comboBox_AudioBackend_currentIndexChanged( const int i
     updateBufferSizeComboBox();
     updateMidiInputListWidget();
 
-    if ( error.isNotEmpty() )
+    if ( isJackAudioEnabled() && isRealtimeModeEnabled() )
     {
-        showWarningBox( tr("Error when trying to open audio device!"), error.toRawUTF8() );
-    }
-
-    if ( audioBackendName == "JACK" )
-    {
-        emit jackAudioEnabled( true );
+        mUI->checkBox_JackSync->setEnabled( true );
     }
     else
     {
-        emit jackAudioEnabled( false );
+        mUI->checkBox_JackSync->setEnabled( false );
+        mUI->checkBox_JackSync->setChecked( false );
+    }
+
+    if ( error.isNotEmpty() )
+    {
+        showWarningBox( tr("Error when trying to open audio device!"), error.toRawUTF8() );
     }
 }
 
@@ -708,14 +742,195 @@ void AudioSetupDialog::on_checkBox_MidiInputTestTone_clicked( const bool isCheck
 
 
 
-void AudioSetupDialog::on_radioButton_RealTime_clicked()
+//====================
+// "Timestretch" tab:
+
+void AudioSetupDialog::on_radioButton_Offline_clicked()
 {
-    emit realtimeModeEnabled( true );
+    foreach ( QAbstractButton* button, mUI->buttonGroup_Timestretch->buttons() )
+    {
+        button->setEnabled( true );
+    }
+    mUI->radioButton_Elastic->setChecked( true );
+
+    foreach ( QAbstractButton* button, mUI->buttonGroup_PitchShifting->buttons() )
+    {
+        button->setEnabled( false );
+    }
+    mUI->radioButton_HighSpeed->setChecked( true );
+
+    mUI->checkBox_JackSync->setEnabled( false );
+    mUI->checkBox_JackSync->setChecked( false );
+
+    disableStretcherOptions( RubberBandStretcher::OptionProcessRealTime );
+    disableStretcherOptions( RubberBandStretcher::OptionStretchPrecise );
+    disableStretcherOptions( RubberBandStretcher::OptionPitchHighConsistency );
+
+    emit realtimeModeToggled( false );
 }
 
 
 
-void AudioSetupDialog::on_radioButton_Offline_clicked()
+void AudioSetupDialog::on_radioButton_RealTime_clicked()
 {
-    emit realtimeModeEnabled( false );
+    foreach ( QAbstractButton* button, mUI->buttonGroup_Timestretch->buttons() )
+    {
+        button->setEnabled( false );
+    }
+    mUI->radioButton_Precise->setChecked( true );
+
+    foreach ( QAbstractButton* button, mUI->buttonGroup_PitchShifting->buttons() )
+    {
+        button->setEnabled( true );
+    }
+    mUI->radioButton_HighConsistency->setChecked( true );
+
+    if ( isJackAudioEnabled() )
+    {
+        mUI->checkBox_JackSync->setEnabled( true );
+    }
+    else
+    {
+        mUI->checkBox_JackSync->setEnabled( false );
+        mUI->checkBox_JackSync->setChecked( false );
+    }
+
+    enableStretcherOptions( RubberBandStretcher::OptionProcessRealTime );
+    enableStretcherOptions( RubberBandStretcher::OptionStretchPrecise );
+    enableStretcherOptions( RubberBandStretcher::OptionPitchHighConsistency );
+
+    emit realtimeModeToggled( true );
+}
+
+
+
+void AudioSetupDialog::on_radioButton_Elastic_clicked()
+{
+    disableStretcherOptions( RubberBandStretcher::OptionStretchPrecise );
+    emit stretchOptionChanged( RubberBandStretcher::OptionStretchElastic );
+}
+
+
+
+void AudioSetupDialog::on_radioButton_Precise_clicked()
+{
+    enableStretcherOptions( RubberBandStretcher::OptionStretchPrecise );
+    emit stretchOptionChanged( RubberBandStretcher::OptionStretchPrecise );
+}
+
+
+
+void AudioSetupDialog::on_radioButton_Crisp_clicked()
+{
+    disableStretcherOptions( RubberBandStretcher::OptionTransientsMixed | RubberBandStretcher::OptionTransientsSmooth );
+    emit transientsOptionChanged( RubberBandStretcher::OptionTransientsCrisp );
+}
+
+
+
+void AudioSetupDialog::on_radioButton_Mixed_clicked()
+{
+    disableStretcherOptions( RubberBandStretcher::OptionTransientsSmooth );
+    enableStretcherOptions( RubberBandStretcher::OptionTransientsMixed );
+    emit transientsOptionChanged( RubberBandStretcher::OptionTransientsMixed );
+}
+
+
+
+void AudioSetupDialog::on_radioButton_Smooth_clicked()
+{
+    disableStretcherOptions( RubberBandStretcher::OptionTransientsMixed );
+    enableStretcherOptions( RubberBandStretcher::OptionTransientsSmooth );
+    emit transientsOptionChanged( RubberBandStretcher::OptionTransientsSmooth );
+}
+
+
+
+void AudioSetupDialog::on_radioButton_Laminar_clicked()
+{
+    disableStretcherOptions( RubberBandStretcher::OptionPhaseIndependent );
+    emit phaseOptionChanged( RubberBandStretcher::OptionPhaseLaminar );
+}
+
+
+
+void AudioSetupDialog::on_radioButton_Independent_clicked()
+{
+    enableStretcherOptions( RubberBandStretcher::OptionPhaseIndependent );
+    emit phaseOptionChanged( RubberBandStretcher::OptionPhaseIndependent );
+}
+
+
+
+void AudioSetupDialog::on_radioButton_Standard_clicked()
+{
+    disableStretcherOptions( RubberBandStretcher::OptionWindowShort | RubberBandStretcher::OptionWindowLong );
+    emit windowOptionChanged();
+}
+
+
+
+void AudioSetupDialog::on_radioButton_Short_clicked()
+{
+    disableStretcherOptions( RubberBandStretcher::OptionWindowLong );
+    enableStretcherOptions( RubberBandStretcher::OptionWindowShort );
+    emit windowOptionChanged();
+}
+
+
+
+void AudioSetupDialog::on_radioButton_Long_clicked()
+{
+    disableStretcherOptions( RubberBandStretcher::OptionWindowShort );
+    enableStretcherOptions( RubberBandStretcher::OptionWindowLong );
+    emit windowOptionChanged();
+}
+
+
+
+void AudioSetupDialog::on_radioButton_Shifted_clicked()
+{
+    disableStretcherOptions( RubberBandStretcher::OptionFormantPreserved );
+    emit formantOptionChanged( RubberBandStretcher::OptionFormantShifted );
+}
+
+
+
+void AudioSetupDialog::on_radioButton_Preserved_clicked()
+{
+    enableStretcherOptions( RubberBandStretcher::OptionFormantPreserved );
+    emit formantOptionChanged( RubberBandStretcher::OptionFormantPreserved );
+}
+
+
+
+void AudioSetupDialog::on_radioButton_HighSpeed_clicked()
+{
+    disableStretcherOptions( RubberBandStretcher::OptionPitchHighQuality | RubberBandStretcher::OptionPitchHighConsistency );
+    emit pitchOptionChanged( RubberBandStretcher::OptionPitchHighSpeed );
+}
+
+
+
+void AudioSetupDialog::on_radioButton_HighQuality_clicked()
+{
+    disableStretcherOptions( RubberBandStretcher::OptionPitchHighConsistency );
+    enableStretcherOptions( RubberBandStretcher::OptionPitchHighQuality );
+    emit pitchOptionChanged( RubberBandStretcher::OptionPitchHighQuality );
+}
+
+
+
+void AudioSetupDialog::on_radioButton_HighConsistency_clicked()
+{
+    disableStretcherOptions( RubberBandStretcher::OptionPitchHighQuality );
+    enableStretcherOptions( RubberBandStretcher::OptionPitchHighConsistency );
+    emit pitchOptionChanged( RubberBandStretcher::OptionPitchHighConsistency );
+}
+
+
+
+void AudioSetupDialog::on_checkBox_JackSync_toggled( const bool isChecked )
+{
+    emit jackSyncToggled( isChecked );
 }

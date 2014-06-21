@@ -23,7 +23,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab_AudioSetup">
       <attribute name="title">
@@ -142,22 +142,13 @@
      </widget>
      <widget class="QWidget" name="tab_TimeStretch">
       <attribute name="title">
-       <string>TimeStretch</string>
+       <string>Timestretch</string>
       </attribute>
-      <layout class="QFormLayout" name="formLayout_2">
-       <property name="fieldGrowthPolicy">
-        <enum>QFormLayout::FieldsStayAtSizeHint</enum>
-       </property>
-       <property name="labelAlignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="formAlignment">
-        <set>Qt::AlignCenter</set>
-       </property>
+      <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="label">
          <property name="text">
-          <string>TimeStretch Mode:</string>
+          <string>Processing:</string>
          </property>
         </widget>
        </item>
@@ -169,12 +160,261 @@
          <property name="checked">
           <bool>true</bool>
          </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_Processing</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QRadioButton" name="radioButton_RealTime">
+         <property name="text">
+          <string>Realtime</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_Processing</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Timestretch:</string>
+         </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QRadioButton" name="radioButton_RealTime">
+        <widget class="QRadioButton" name="radioButton_Elastic">
          <property name="text">
-          <string>RealTime</string>
+          <string>Elastic</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_Timestretch</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QRadioButton" name="radioButton_Precise">
+         <property name="text">
+          <string>Precise</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_Timestretch</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Transients:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QRadioButton" name="radioButton_Crisp">
+         <property name="text">
+          <string>Crisp</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_Transients</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QRadioButton" name="radioButton_Mixed">
+         <property name="text">
+          <string>Mixed</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_Transients</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QRadioButton" name="radioButton_Smooth">
+         <property name="text">
+          <string>Smooth</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_Transients</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Phase:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QRadioButton" name="radioButton_Laminar">
+         <property name="text">
+          <string>Laminar</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_Phase</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QRadioButton" name="radioButton_Independent">
+         <property name="text">
+          <string>Independent</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_Phase</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Window Size:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QRadioButton" name="radioButton_Standard">
+         <property name="text">
+          <string>Standard</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_WindowSize</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QRadioButton" name="radioButton_Short">
+         <property name="text">
+          <string>Short</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_WindowSize</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="4" column="3">
+        <widget class="QRadioButton" name="radioButton_Long">
+         <property name="text">
+          <string>Long</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_WindowSize</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Formants:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QRadioButton" name="radioButton_Shifted">
+         <property name="text">
+          <string>Shifted</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_Formants</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QRadioButton" name="radioButton_Preserved">
+         <property name="text">
+          <string>Preserved</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_Formants</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Pitch Shifting:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QRadioButton" name="radioButton_HighSpeed">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>High Speed</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_PitchShifting</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="6" column="2">
+        <widget class="QRadioButton" name="radioButton_HighQuality">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>High Quality</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_PitchShifting</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="6" column="3">
+        <widget class="QRadioButton" name="radioButton_HighConsistency">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>High Consistency</string>
+         </property>
+         <attribute name="buttonGroup">
+          <string>buttonGroup_PitchShifting</string>
+         </attribute>
+        </widget>
+       </item>
+       <item row="7" column="0" colspan="4">
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="label_15">
+         <property name="text">
+          <string>JACK Sync:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QCheckBox" name="checkBox_JackSync">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Enable</string>
          </property>
         </widget>
        </item>
@@ -229,4 +469,13 @@
    </hints>
   </connection>
  </connections>
+ <buttongroups>
+  <buttongroup name="buttonGroup_Phase"/>
+  <buttongroup name="buttonGroup_Transients"/>
+  <buttongroup name="buttonGroup_Timestretch"/>
+  <buttongroup name="buttonGroup_WindowSize"/>
+  <buttongroup name="buttonGroup_Processing"/>
+  <buttongroup name="buttonGroup_Formants"/>
+  <buttongroup name="buttonGroup_PitchShifting"/>
+ </buttongroups>
 </ui>

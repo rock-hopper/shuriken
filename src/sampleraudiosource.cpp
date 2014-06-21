@@ -22,7 +22,7 @@
 
 #include "sampleraudiosource.h"
 #include "shurikensampler.h"
-//#include <QDebug>
+#include <QDebug>
 
 
 //==================================================================================================
@@ -37,13 +37,23 @@ SamplerAudioSource::SamplerAudioSource() : AudioSource()
 
 
 
+SamplerAudioSource::~SamplerAudioSource()
+{
+    mSampler.clearVoices();
+    mSampler.clearSounds();
+}
+
+
+
 void SamplerAudioSource::setSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate )
 {
+    clearSampleRanges();
+    mSampleBuffer.clear();
+
     SharedSampleRange sampleRange( new SampleRange );
     sampleRange->startFrame = 0;
     sampleRange->numFrames = sampleBuffer->getNumFrames();
 
-    clearSample();
     addNewSample( sampleBuffer, sampleRange, sampleRate );
     mSampleBuffer = sampleBuffer;
     mFileSampleRate = sampleRate;
@@ -81,14 +91,6 @@ bool SamplerAudioSource::setSampleRanges( const QList<SharedSampleRange> sampleR
     }
 
     return isSuccessful;
-}
-
-
-
-void SamplerAudioSource::clearSample()
-{
-    clearSampleRanges();
-    mSampleBuffer.clear();
 }
 
 
@@ -143,6 +145,8 @@ void SamplerAudioSource::prepareToPlay( int /*samplesPerBlockExpected*/, double 
 
 void SamplerAudioSource::releaseResources()
 {
+    // Do not clear the voices, sample ranges or sample buffer here as 'releaseResources()' could be
+    // called when the user is simply changing the playback sample rate in the settings dialog
 }
 
 

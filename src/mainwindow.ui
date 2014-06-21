@@ -106,6 +106,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="label_JackSync">
+        <property name="text">
+         <string>JACK Sync</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QDoubleSpinBox" name="doubleSpinBox_NewBPM">
         <property name="enabled">
          <bool>false</bool>
@@ -156,7 +163,7 @@
          <enum>Qt::LeftToRight</enum>
         </property>
         <property name="text">
-         <string>Time Stretch</string>
+         <string>Timestretch</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -180,12 +187,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBox_JackSync">
+       <widget class="QPushButton" name="pushButton_TimestretchOptions">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>JACK Sync</string>
+         <string>Options</string>
         </property>
        </widget>
       </item>

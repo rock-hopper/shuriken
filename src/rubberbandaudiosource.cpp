@@ -28,11 +28,15 @@
 //==================================================================================================
 // Public:
 
-RubberbandAudioSource::RubberbandAudioSource( AudioSource* const source, const int numChans ) :
+RubberbandAudioSource::RubberbandAudioSource( AudioSource* const source,
+                                              const int numChans,
+                                              const RubberBandStretcher::Options options,
+                                              const bool isJackSyncEnabled ) :
+    QObject(),
     AudioSource(),
     mSource( source ),
     mNumChans( numChans ),
-    mOptions( RubberBandStretcher::OptionProcessRealTime | RubberBandStretcher::OptionPitchHighConsistency ),
+    mOptions( RubberBandStretcher::OptionProcessRealTime | options ),
     mStretcher( NULL ),
     mInputBuffer( numChans, 8192 ),
     mTimeRatio( 1.0 ),
@@ -40,8 +44,16 @@ RubberbandAudioSource::RubberbandAudioSource( AudioSource* const source, const i
     mPitchScale( 1.0 ),
     mPrevPitchScale( 1.0 ),
     mIsPitchCorrectionEnabled( true ),
+    mTransientsOption( 0 ),
+    mPrevTransientsOption( 0 ),
+    mPhaseOption( 0 ),
+    mPrevPhaseOption( 0 ),
+    mFormantOption( 0 ),
+    mPrevFormantOption( 0 ),
+    mPitchOption( 0 ),
+    mPrevPitchOption( 0 ),
     mOriginalBPM( 0.0 ),
-    mIsJackSyncEnabled( false )
+    mIsJackSyncEnabled( isJackSyncEnabled )
 {
 }
 
@@ -59,9 +71,15 @@ void RubberbandAudioSource::prepareToPlay( int samplesPerBlockExpected, double s
     if ( mStretcher == NULL )
     {
         mStretcher = new RubberBandStretcher( sampleRate, mNumChans, mOptions );
-    }
+        mStretcher->reset();
 
-    mStretcher->reset();
+        mPrevTimeRatio = 1.0;
+        mPrevPitchScale = 1.0;
+        mPrevTransientsOption = 0;
+        mPrevPhaseOption = 0;
+        mPrevFormantOption = 0;
+        mPrevPitchOption = 0;
+    }
 
     mSource->prepareToPlay( samplesPerBlockExpected, sampleRate );
 }
@@ -83,17 +101,20 @@ void RubberbandAudioSource::releaseResources()
 
 void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill )
 {
+    // JACK Sync
     if ( mIsJackSyncEnabled && gCurrentJackBPM > 0.0 && mOriginalBPM > 0.0 )
     {
           mTimeRatio = mOriginalBPM / gCurrentJackBPM;
     }
 
+    // Time ratio
     if ( mTimeRatio != mPrevTimeRatio)
     {
         mStretcher->setTimeRatio( mTimeRatio );
         mPrevTimeRatio = mTimeRatio;
     }
 
+    // Pitch scale
     if ( mIsPitchCorrectionEnabled )
     {
         mPitchScale = 1.0;
@@ -109,6 +130,31 @@ void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buf
         mPrevPitchScale = mPitchScale;
     }
 
+    // Options
+    if ( mTransientsOption != mPrevTransientsOption )
+    {
+        mStretcher->setTransientsOption( mTransientsOption );
+        mPrevTransientsOption = mTransientsOption;
+    }
+
+    if ( mPhaseOption != mPrevPhaseOption )
+    {
+        mStretcher->setPhaseOption( mPhaseOption );
+        mPrevPhaseOption = mPhaseOption;
+    }
+
+    if ( mFormantOption != mPrevFormantOption )
+    {
+        mStretcher->setFormantOption( mFormantOption );
+        mPrevFormantOption = mFormantOption;
+    }
+
+    if ( mPitchOption != mPrevPitchOption )
+    {
+        mStretcher->setPitchOption( mPitchOption );
+        mPrevPitchOption = mPitchOption;
+    }
+
 //    const int latency = mStretcher->getLatency() + mReserveSize;
 //    std::cerr << "latency = " << latency << std::endl;
 
@@ -121,6 +167,9 @@ void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buf
 }
 
 
+
+//==================================================================================================
+// Private:
 
 void RubberbandAudioSource::readNextBufferChunk()
 {

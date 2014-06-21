@@ -357,7 +357,7 @@ void WaveformItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
     // Always unset the Ctrl-key modifier to prevent non-contiguous waveform items from being selected
 
-    const Qt::KeyboardModifiers modifiers = event->modifiers() & ( ! Qt::ControlModifier );
+    const Qt::KeyboardModifiers modifiers = event->modifiers() & ~Qt::ControlModifier;
     event->setModifiers( modifiers );
 
     // If the Graphics View has set drag mode to RubberBandDrag then it will additionally have unset

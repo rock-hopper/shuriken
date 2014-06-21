@@ -23,23 +23,25 @@
 #ifndef RUBBERBANDAUDIOSOURCE_H
 #define RUBBERBANDAUDIOSOURCE_H
 
+#include <QObject>
 #include "samplebuffer.h"
 #include "JuceHeader.h"
 #include <rubberband/RubberBandStretcher.h>
-#include <QtGlobal>
 
 using namespace RubberBand;
 
 
-class RubberbandAudioSource : public AudioSource
+class RubberbandAudioSource : public QObject, public AudioSource
 {
+    Q_OBJECT
+
 public:
     // Caller is responsible for deleting 'source' after RubberbandAudioSource has been deleted
-    RubberbandAudioSource( AudioSource* const source, const int numChans );
+    RubberbandAudioSource( AudioSource* const source,
+                           const int numChans,
+                           const RubberBandStretcher::Options options,
+                           const bool isJackSyncEnabled = false );
     ~RubberbandAudioSource();
-
-    void setRubberbandOptions( const RubberBandStretcher::Options options )     { mOptions = options; }
-    RubberBandStretcher::Options getRubberbandOptions() const                   { return mOptions; }
 
     void setTimeRatio( const qreal ratio )                                      { mTimeRatio = ratio; }
     void setPitchScale( const qreal scale )                                     { mPitchScale = scale; }
@@ -47,7 +49,6 @@ public:
 
     // Only has an effect when JACK Sync is enabled
     void setOriginalBPM( const qreal bpm )                                      { mOriginalBPM = bpm; }
-    void enableJackSync( const bool isEnabled )                                 { mIsJackSyncEnabled = isEnabled; }
 
     void prepareToPlay( int samplesPerBlockExpected, double sampleRate ) override;
     void releaseResources() override;
@@ -56,11 +57,10 @@ public:
 private:
     void readNextBufferChunk();
 
-    AudioSource* mSource;
+    AudioSource* const mSource;
+    const int mNumChans;
+    const RubberBandStretcher::Options mOptions;
 
-    int mNumChans;
-
-    RubberBandStretcher::Options mOptions;
     RubberBandStretcher* mStretcher;
 
     SampleBuffer mInputBuffer;
@@ -73,12 +73,32 @@ private:
 
     volatile bool mIsPitchCorrectionEnabled;
 
+    volatile RubberBandStretcher::Options mTransientsOption;
+    RubberBandStretcher::Options mPrevTransientsOption;
+
+    volatile RubberBandStretcher::Options mPhaseOption;
+    RubberBandStretcher::Options mPrevPhaseOption;
+
+    volatile RubberBandStretcher::Options mFormantOption;
+    RubberBandStretcher::Options mPrevFormantOption;
+
+    volatile RubberBandStretcher::Options mPitchOption;
+    RubberBandStretcher::Options mPrevPitchOption;
+
     volatile qreal mOriginalBPM;
 
     volatile bool mIsJackSyncEnabled;
 
     int mTotalNumRetrieved;
 
+public slots:
+    void setTransientsOption( const RubberBandStretcher::Options option )       { mTransientsOption = option; }
+    void setPhaseOption( const RubberBandStretcher::Options option )            { mPhaseOption = option; }
+    void setFormantOption( const RubberBandStretcher::Options option )          { mFormantOption = option; }
+    void setPitchOption( const RubberBandStretcher::Options option )            { mPitchOption = option; }
+    void enableJackSync( const bool isEnabled )                                 { mIsJackSyncEnabled = isEnabled; }
+
+private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( RubberbandAudioSource );
 };
 

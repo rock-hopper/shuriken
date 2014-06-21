@@ -497,10 +497,10 @@ ApplyTimeStretchCommand::ApplyTimeStretchCommand( MainWindow* const mainWindow,
     setText( "Apply Timestretch" );
 
     // Search undo stack for previous timestretch command
-    int index = mMainWindow->mUndoStack.index();
-    bool isPrevTimeStretchCommandFound = false;
+    int index = mMainWindow->mUndoStack.index() - 1;
+    bool isFound = false;
 
-    while ( index >= 0 && ! isPrevTimeStretchCommandFound )
+    while ( index >= 0 && ! isFound )
     {
         const QUndoCommand* command = mMainWindow->mUndoStack.command( index );
         const ApplyTimeStretchCommand* tsCommand = dynamic_cast<const ApplyTimeStretchCommand*>( command );
@@ -512,13 +512,13 @@ ApplyTimeStretchCommand::ApplyTimeStretchCommand( MainWindow* const mainWindow,
             mPrevIsPitchCorrectionEnabled = tsCommand->isPitchCorrectionEnabled();
             mPrevTimeRatio = mPrevOriginalBPM / mPrevNewBPM;
 
-            isPrevTimeStretchCommandFound = true;
+            isFound = true;
         }
         --index;
     }
 
     // If no previous timestretch command was found then set default values
-    if ( ! isPrevTimeStretchCommandFound )
+    if ( ! isFound )
     {
         mPrevOriginalBPM = 0.0;
         mPrevNewBPM = 0.0;
@@ -540,7 +540,7 @@ void ApplyTimeStretchCommand::undo()
 
         stretch( timeRatio, pitchRatio );
     }
-    else // Original, unstretched audio
+    else
     {
         stretch( 1.0, 1.0 );
     }
@@ -557,6 +557,9 @@ void ApplyTimeStretchCommand::undo()
     mSpinBoxOriginalBPM->setValue( mPrevOriginalBPM );
     mSpinBoxNewBPM->setValue( mPrevNewBPM );
     mCheckBoxPitchCorrection->setChecked( mPrevIsPitchCorrectionEnabled );
+
+    mMainWindow->mAppliedOriginalBPM = mPrevOriginalBPM;
+    mMainWindow->mAppliedNewBPM = mPrevNewBPM;
 }
 
 
@@ -571,17 +574,22 @@ void ApplyTimeStretchCommand::redo()
     mSpinBoxOriginalBPM->setValue( mOriginalBPM );
     mSpinBoxNewBPM->setValue( mNewBPM );
     mCheckBoxPitchCorrection->setChecked( mIsPitchCorrectionEnabled );
+
+    mMainWindow->mAppliedOriginalBPM = mOriginalBPM;
+    mMainWindow->mAppliedNewBPM = mNewBPM;
 }
 
 
 
 void ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchScale )
 {
+    // If 'timeRatio' is 1.0 then simply reload the original audio file,
+    // otherwise apply the time stretch
+
     if ( timeRatio == 1.0 )
     {
         QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-        // Get original, unmodified sample data
         SharedSampleBuffer tempSampleBuffer = mMainWindow->mFileHandler.getSampleData( mMainWindow->mCurrentAudioFilePath );
 
         if ( ! tempSampleBuffer.isNull() )
@@ -608,21 +616,21 @@ void ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchS
     }
     else
     {
-        applyTimeStretch( timeRatio, pitchScale );
+        stretchImpl( timeRatio, pitchScale );
     }
 }
 
 
 
-void ApplyTimeStretchCommand::applyTimeStretch( const qreal timeRatio, const qreal pitchScale )
+void ApplyTimeStretchCommand::stretchImpl( const qreal timeRatio, const qreal pitchScale )
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    const int numChans = mMainWindow->mCurrentSampleHeader->numChans;
     const int sampleRate = mMainWindow->mCurrentSampleHeader->sampleRate;
+    const int numChans = mMainWindow->mCurrentSampleHeader->numChans;
+    const RubberBandStretcher::Options options = mMainWindow->mAudioSetupDialog->getStretcherOptions();
 
-    RubberBandStretcher stretcher( sampleRate, numChans, RubberBandStretcher::DefaultOptions,
-                                   timeRatio, pitchScale );
+    RubberBandStretcher stretcher( sampleRate, numChans, options, timeRatio, pitchScale );
 
     // Get original, unmodified sample data
     SharedSampleBuffer tempSampleBuffer = mMainWindow->mFileHandler.getSampleData( mMainWindow->mCurrentAudioFilePath );
@@ -766,9 +774,6 @@ void ApplyTimeStretchCommand::updateAll( const qreal timeRatio, const int newTot
 {
     mGraphicsView->stretch( timeRatio, newTotalNumFrames );
 
-    mMainWindow->mSamplerAudioSource->setSample( mMainWindow->mCurrentSampleBuffer,
-                                                 mMainWindow->mCurrentSampleHeader->sampleRate );
-
     if ( ! mMainWindow->mSampleRangeList.isEmpty() )
     {
         // Update start frame and length of all sample ranges while preserving current ordering of list
@@ -791,8 +796,7 @@ void ApplyTimeStretchCommand::updateAll( const qreal timeRatio, const int newTot
 
             tempList.at( i )->numFrames = newNumFrames;
         }
-
-        // Pass modified sample ranges to the sampler
-        mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
     }
+
+    mMainWindow->resetSampler();
 }
