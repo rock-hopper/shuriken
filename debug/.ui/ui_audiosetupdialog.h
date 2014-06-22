@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'audiosetupdialog.ui'
 **
-** Created: Thu Jun 19 12:05:17 2014
+** Created: Sun Jun 22 16:07:02 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -425,7 +425,7 @@ public:
         radioButton_HighConsistency->setText(QApplication::translate("AudioSetupDialog", "High Consistency", 0, QApplication::UnicodeUTF8));
         label_15->setText(QApplication::translate("AudioSetupDialog", "JACK Sync:", 0, QApplication::UnicodeUTF8));
         checkBox_JackSync->setText(QApplication::translate("AudioSetupDialog", "Enable", 0, QApplication::UnicodeUTF8));
-        tabWidget->setTabText(tabWidget->indexOf(tab_TimeStretch), QApplication::translate("AudioSetupDialog", "Timestretch", 0, QApplication::UnicodeUTF8));
+        tabWidget->setTabText(tabWidget->indexOf(tab_TimeStretch), QApplication::translate("AudioSetupDialog", "Time Stretch", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

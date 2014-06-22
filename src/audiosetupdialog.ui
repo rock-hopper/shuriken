@@ -142,7 +142,7 @@
      </widget>
      <widget class="QWidget" name="tab_TimeStretch">
       <attribute name="title">
-       <string>Timestretch</string>
+       <string>Time Stretch</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">

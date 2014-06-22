@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>934</width>
+    <width>971</width>
     <height>600</height>
    </rect>
   </property>
@@ -163,7 +163,7 @@
          <enum>Qt::LeftToRight</enum>
         </property>
         <property name="text">
-         <string>Timestretch</string>
+         <string>Time Stretch</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -192,7 +192,7 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Options</string>
+         <string>Stretch Options</string>
         </property>
        </widget>
       </item>
@@ -301,7 +301,7 @@
       <item>
        <widget class="QCheckBox" name="checkBox_AdvancedOptions">
         <property name="text">
-         <string>Show Advanced Options</string>
+         <string>Show More Options</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -389,7 +389,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>934</width>
+     <width>971</width>
      <height>24</height>
     </rect>
    </property>

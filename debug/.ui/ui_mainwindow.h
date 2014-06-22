@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Fri Jun 20 16:18:53 2014
+** Created: Sun Jun 22 16:07:02 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -117,7 +117,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(934, 600);
+        MainWindow->resize(971, 600);
         actionImport_Audio_File = new QAction(MainWindow);
         actionImport_Audio_File->setObjectName(QString::fromUtf8("actionImport_Audio_File"));
         QIcon icon;
@@ -490,7 +490,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 934, 24));
+        menuBar->setGeometry(QRect(0, 0, 971, 24));
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
         menuOptions = new QMenu(menuBar);
@@ -645,14 +645,14 @@ public:
         label_2->setText(QApplication::translate("MainWindow", "New BPM:", 0, QApplication::UnicodeUTF8));
         label_JackSync->setText(QApplication::translate("MainWindow", "JACK Sync", 0, QApplication::UnicodeUTF8));
         pushButton_Apply->setText(QApplication::translate("MainWindow", "Apply", 0, QApplication::UnicodeUTF8));
-        checkBox_TimeStretch->setText(QApplication::translate("MainWindow", "Timestretch", 0, QApplication::UnicodeUTF8));
+        checkBox_TimeStretch->setText(QApplication::translate("MainWindow", "Time Stretch", 0, QApplication::UnicodeUTF8));
         checkBox_PitchCorrection->setText(QApplication::translate("MainWindow", "Pitch Correction", 0, QApplication::UnicodeUTF8));
-        pushButton_TimestretchOptions->setText(QApplication::translate("MainWindow", "Options", 0, QApplication::UnicodeUTF8));
+        pushButton_TimestretchOptions->setText(QApplication::translate("MainWindow", "Stretch Options", 0, QApplication::UnicodeUTF8));
         pushButton_Slice->setText(QApplication::translate("MainWindow", "Slice", 0, QApplication::UnicodeUTF8));
         label->setText(QApplication::translate("MainWindow", "Threshold:", 0, QApplication::UnicodeUTF8));
         pushButton_FindOnsets->setText(QApplication::translate("MainWindow", "Find Onsets", 0, QApplication::UnicodeUTF8));
         pushButton_FindBeats->setText(QApplication::translate("MainWindow", "Find Beats", 0, QApplication::UnicodeUTF8));
-        checkBox_AdvancedOptions->setText(QApplication::translate("MainWindow", "Show Advanced Options", 0, QApplication::UnicodeUTF8));
+        checkBox_AdvancedOptions->setText(QApplication::translate("MainWindow", "Show More Options", 0, QApplication::UnicodeUTF8));
         label_7->setText(QApplication::translate("MainWindow", "Detection Method:", 0, QApplication::UnicodeUTF8));
         label_4->setText(QApplication::translate("MainWindow", "Window Size:", 0, QApplication::UnicodeUTF8));
         label_5->setText(QApplication::translate("MainWindow", "Hop Size:", 0, QApplication::UnicodeUTF8));
