@@ -177,7 +177,7 @@ qreal AudioAnalyser::calcBPM( const SharedSampleBuffer sampleBuffer, const Detec
             currentBPM = aubio_tempo_get_bpm( beatDetector );
             confidence = aubio_tempo_get_confidence( beatDetector );
 
-            if ( currentBPM > 0.0 && confidence > 0.1 )
+            if ( currentBPM > 0.0 && confidence > 0.4 )
             {
                 summedBPMs += currentBPM;
                 numDetections++;
@@ -198,7 +198,7 @@ qreal AudioAnalyser::calcBPM( const SharedSampleBuffer sampleBuffer, const Detec
          averageBPM = summedBPMs / numDetections;
     }
 
-    return averageBPM;
+    return floor( averageBPM );
 }
 
 
