@@ -43,9 +43,6 @@
          <iconset>
           <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/media-playback-stop.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/media-playback-stop.png</iconset>
         </property>
-        <property name="shortcut">
-         <string>Space</string>
-        </property>
        </widget>
       </item>
       <item>

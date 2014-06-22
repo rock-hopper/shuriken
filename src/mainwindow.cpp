@@ -89,6 +89,20 @@ void MainWindow::changeEvent( QEvent* event )
 
 
 
+//void MainWindow::keyPressEvent( QKeyEvent* event )
+//{
+//    if ( event->key() == Qt::Key_Space )
+//    {
+//        mSamplerAudioSource->playAll();
+//    }
+//    else
+//    {
+//        QMainWindow::keyPressEvent( event );
+//    }
+//}
+
+
+
 //==================================================================================================
 // Private:
 

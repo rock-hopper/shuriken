@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sun Jun 22 20:07:06 2014
+** Created: Sun Jun 22 20:48:12 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -656,7 +656,6 @@ public:
         actionAudition->setToolTip(QApplication::translate("MainWindow", "Audition", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP
         actionAudition->setShortcut(QApplication::translate("MainWindow", "3", 0, QApplication::UnicodeUTF8));
-        pushButton_Stop->setShortcut(QApplication::translate("MainWindow", "Space", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("MainWindow", "Original BPM:", 0, QApplication::UnicodeUTF8));
         pushButton_CalcBPM->setText(QApplication::translate("MainWindow", "Calc", 0, QApplication::UnicodeUTF8));
         label_2->setText(QApplication::translate("MainWindow", "New BPM:", 0, QApplication::UnicodeUTF8));
