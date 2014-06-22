@@ -604,7 +604,9 @@ void ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchS
                 mMainWindow->mCurrentSampleBuffer->copyFrom( chanNum, 0, *tempSampleBuffer.data(), chanNum, 0, numFrames );
             }
 
-            updateAll( timeRatio, numFrames );
+            mGraphicsView->stretch( timeRatio, numFrames );
+            updateSampler( timeRatio, numFrames );
+
             QApplication::restoreOverrideCursor();
         }
         else // Failed to read audio file
@@ -753,7 +755,8 @@ void ApplyTimeStretchCommand::stretchImpl( const qreal timeRatio, const qreal pi
             mMainWindow->mCurrentSampleBuffer->setSize( numChans, totalNumFramesRetrieved, true );
         }
 
-        updateAll( timeRatio, totalNumFramesRetrieved );
+        mGraphicsView->stretch( timeRatio, totalNumFramesRetrieved );
+        updateSampler( timeRatio, totalNumFramesRetrieved );
 
         delete[] inFloatBuffer;
         delete[] outFloatBuffer;
@@ -770,10 +773,8 @@ void ApplyTimeStretchCommand::stretchImpl( const qreal timeRatio, const qreal pi
 
 
 
-void ApplyTimeStretchCommand::updateAll( const qreal timeRatio, const int newTotalNumFrames )
+void ApplyTimeStretchCommand::updateSampler( const qreal timeRatio, const int newTotalNumFrames )
 {
-    mGraphicsView->stretch( timeRatio, newTotalNumFrames );
-
     if ( ! mMainWindow->mSampleRangeList.isEmpty() )
     {
         // Update start frame and length of all sample ranges while preserving current ordering of list
