@@ -26,6 +26,7 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QResizeEvent>
+#include "JuceHeader.h"
 #include "waveformitem.h"
 #include "slicepointitem.h"
 #include "samplebuffer.h"
@@ -113,6 +114,9 @@ private slots:
     void slideWaveformItemIntoPlace( const int orderPos );
     void reorderSlicePoints( SlicePointItem* const movedItem );
     void relayMaxDetailLevelReached();
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( WaveGraphicsView );
 };
 
 

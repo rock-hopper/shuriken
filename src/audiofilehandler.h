@@ -54,6 +54,9 @@ private:
 
     static SharedSampleBuffer sndlibLoadFile( const char* filePath );
     static SharedSampleBuffer aubioLoadFile( const char* filePath );
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( AudioFileHandler );
 };
 
 #endif // AUDIOFILEHANDLER_H

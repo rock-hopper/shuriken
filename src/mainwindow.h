@@ -169,6 +169,9 @@ private slots:
     void resetSampler();
 
     void enableGraphicsItemActions();
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( MainWindow );
 };
 
 #endif // MAINWINDOW_H

@@ -83,8 +83,6 @@ private:
     int mAttackSamples, mReleaseSamples;
 
     volatile int mStartFrame, mEndFrame;
-
-    JUCE_LEAK_DETECTOR( ShurikenSamplerSound )
 };
 
 
@@ -114,8 +112,6 @@ private:
     qreal mSourceSamplePosition;
     float mLeftGain, mRightGain, mAttackReleaseLevel, mAttackDelta, mReleaseDelta;
     bool mIsInAttack, mIsInRelease;
-
-    JUCE_LEAK_DETECTOR( ShurikenSamplerVoice )
 };
 
 #endif // SHURIKENSAMPLER_H

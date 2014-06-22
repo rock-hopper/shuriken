@@ -67,6 +67,8 @@ struct SampleHeader
     int numChans;
     int bitsPerSample;
     qreal sampleRate;
+
+    JUCE_LEAK_DETECTOR( SampleHeader )
 };
 
 typedef QSharedPointer<SampleHeader> SharedSampleHeader;
@@ -87,6 +89,8 @@ struct SampleRange
     {
         return range1->startFrame < range2->startFrame;
     }
+
+    JUCE_LEAK_DETECTOR( SampleRange )
 };
 
 

@@ -27,6 +27,7 @@
 #include <QGraphicsPolygonItem>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include "JuceHeader.h"
 
 
 class SlicePointItem;
@@ -59,6 +60,9 @@ private:
 
 signals:
     void scenePosChanged( SlicePointItem* const item );
+
+private:
+    JUCE_LEAK_DETECTOR( SlicePointItem );
 };
 
 

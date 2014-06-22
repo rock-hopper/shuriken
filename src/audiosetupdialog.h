@@ -133,6 +133,9 @@ private slots:
 
     void accept();
     void reject();
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( AudioSetupDialog );
 };
 
 #endif // AUDIOSETUPDIALOG_H

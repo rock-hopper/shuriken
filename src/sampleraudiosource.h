@@ -70,6 +70,9 @@ private:
 private:
     static const int DEFAULT_KEY = 60;      // MIDI key C4
     static const int MAX_POLYPHONY = 128;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( SamplerAudioSource );
 };
 
 #endif // SAMPLERAUDIOSOURCE_H

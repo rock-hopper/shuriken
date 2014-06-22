@@ -30,6 +30,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QList>
+#include "JuceHeader.h"
 #include "samplebuffer.h"
 
 
@@ -157,6 +158,8 @@ signals:
 
     void maxDetailLevelReached();
 
+private:
+    JUCE_LEAK_DETECTOR( WaveformItem );
 };
 
 #endif // WAVEFORMITEM_H

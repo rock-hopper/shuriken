@@ -210,6 +210,9 @@ public:
         // Tell the synth to process the MIDI events and generate its output
         synth.renderNextBlock( *bufferToFill.buffer, incomingMidi, 0, bufferToFill.numSamples );
     }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( SynthAudioSource );
 };
 
 #endif // SIMPLESYNTH_H
