@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sun Jun 22 16:07:02 2014
+** Created: Sun Jun 22 19:28:31 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -69,7 +69,7 @@ public:
     QAction *actionSplit;
     QAction *actionAudition;
     QWidget *centralWidget;
-    QVBoxLayout *verticalLayout;
+    QVBoxLayout *verticalLayout_3;
     QHBoxLayout *horizontalLayout_2;
     QPushButton *pushButton_Play;
     QPushButton *pushButton_Stop;
@@ -87,16 +87,10 @@ public:
     QCheckBox *checkBox_PitchCorrection;
     QPushButton *pushButton_TimestretchOptions;
     QSpacerItem *horizontalSpacer;
-    QHBoxLayout *horizontalLayout_4;
+    QHBoxLayout *horizontalLayout;
     QPushButton *pushButton_Slice;
-    QLabel *label;
-    QLCDNumber *lcdNumber_Threshold;
-    QSlider *horizontalSlider_Threshold;
-    QPushButton *pushButton_FindOnsets;
-    QPushButton *pushButton_FindBeats;
-    QCheckBox *checkBox_AdvancedOptions;
-    QSpacerItem *horizontalSpacer_3;
-    QHBoxLayout *horizontalLayout_AdvancedOptions;
+    QVBoxLayout *verticalLayout;
+    QHBoxLayout *horizontalLayout_3;
     QLabel *label_7;
     QComboBox *comboBox_DetectMethod;
     QLabel *label_4;
@@ -104,6 +98,13 @@ public:
     QLabel *label_5;
     QComboBox *comboBox_HopSize;
     QSpacerItem *horizontalSpacer_2;
+    QHBoxLayout *horizontalLayout_4;
+    QLabel *label;
+    QLCDNumber *lcdNumber_Threshold;
+    QSlider *horizontalSlider_Threshold;
+    QPushButton *pushButton_FindOnsets;
+    QPushButton *pushButton_FindBeats;
+    QSpacerItem *horizontalSpacer_3;
     WaveGraphicsView *waveGraphicsView;
     QMenuBar *menuBar;
     QMenu *menuFile;
@@ -117,7 +118,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(971, 600);
+        MainWindow->resize(1042, 618);
         actionImport_Audio_File = new QAction(MainWindow);
         actionImport_Audio_File->setObjectName(QString::fromUtf8("actionImport_Audio_File"));
         QIcon icon;
@@ -250,10 +251,10 @@ public:
         actionAudition->setIcon(icon15);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
-        verticalLayout = new QVBoxLayout(centralWidget);
-        verticalLayout->setSpacing(6);
-        verticalLayout->setContentsMargins(11, 11, 11, 11);
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        verticalLayout_3 = new QVBoxLayout(centralWidget);
+        verticalLayout_3->setSpacing(6);
+        verticalLayout_3->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setSpacing(6);
         horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
@@ -375,20 +376,76 @@ public:
         horizontalLayout_2->addItem(horizontalSpacer);
 
 
-        verticalLayout->addLayout(horizontalLayout_2);
+        verticalLayout_3->addLayout(horizontalLayout_2);
+
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setSpacing(6);
+        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+        pushButton_Slice = new QPushButton(centralWidget);
+        pushButton_Slice->setObjectName(QString::fromUtf8("pushButton_Slice"));
+        pushButton_Slice->setEnabled(false);
+        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Minimum);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(pushButton_Slice->sizePolicy().hasHeightForWidth());
+        pushButton_Slice->setSizePolicy(sizePolicy1);
+        QIcon icon18;
+        icon18.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/transform-move.png"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_Slice->setIcon(icon18);
+
+        horizontalLayout->addWidget(pushButton_Slice);
+
+        verticalLayout = new QVBoxLayout();
+        verticalLayout->setSpacing(6);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        horizontalLayout_3 = new QHBoxLayout();
+        horizontalLayout_3->setSpacing(6);
+        horizontalLayout_3->setObjectName(QString::fromUtf8("horizontalLayout_3"));
+        horizontalLayout_3->setSizeConstraint(QLayout::SetDefaultConstraint);
+        label_7 = new QLabel(centralWidget);
+        label_7->setObjectName(QString::fromUtf8("label_7"));
+        label_7->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
+
+        horizontalLayout_3->addWidget(label_7);
+
+        comboBox_DetectMethod = new QComboBox(centralWidget);
+        comboBox_DetectMethod->setObjectName(QString::fromUtf8("comboBox_DetectMethod"));
+        comboBox_DetectMethod->setEnabled(false);
+
+        horizontalLayout_3->addWidget(comboBox_DetectMethod);
+
+        label_4 = new QLabel(centralWidget);
+        label_4->setObjectName(QString::fromUtf8("label_4"));
+
+        horizontalLayout_3->addWidget(label_4);
+
+        comboBox_WindowSize = new QComboBox(centralWidget);
+        comboBox_WindowSize->setObjectName(QString::fromUtf8("comboBox_WindowSize"));
+        comboBox_WindowSize->setEnabled(false);
+
+        horizontalLayout_3->addWidget(comboBox_WindowSize);
+
+        label_5 = new QLabel(centralWidget);
+        label_5->setObjectName(QString::fromUtf8("label_5"));
+
+        horizontalLayout_3->addWidget(label_5);
+
+        comboBox_HopSize = new QComboBox(centralWidget);
+        comboBox_HopSize->setObjectName(QString::fromUtf8("comboBox_HopSize"));
+        comboBox_HopSize->setEnabled(false);
+
+        horizontalLayout_3->addWidget(comboBox_HopSize);
+
+        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        horizontalLayout_3->addItem(horizontalSpacer_2);
+
+
+        verticalLayout->addLayout(horizontalLayout_3);
 
         horizontalLayout_4 = new QHBoxLayout();
         horizontalLayout_4->setSpacing(6);
         horizontalLayout_4->setObjectName(QString::fromUtf8("horizontalLayout_4"));
-        pushButton_Slice = new QPushButton(centralWidget);
-        pushButton_Slice->setObjectName(QString::fromUtf8("pushButton_Slice"));
-        pushButton_Slice->setEnabled(false);
-        QIcon icon18;
-        icon18.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/16x16/actions/transform-move.png"), QSize(), QIcon::Normal, QIcon::Off);
-        pushButton_Slice->setIcon(icon18);
-
-        horizontalLayout_4->addWidget(pushButton_Slice);
-
         label = new QLabel(centralWidget);
         label->setObjectName(QString::fromUtf8("label"));
         label->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
@@ -397,6 +454,7 @@ public:
 
         lcdNumber_Threshold = new QLCDNumber(centralWidget);
         lcdNumber_Threshold->setObjectName(QString::fromUtf8("lcdNumber_Threshold"));
+        lcdNumber_Threshold->setEnabled(false);
         lcdNumber_Threshold->setMaximumSize(QSize(16777215, 40));
         lcdNumber_Threshold->setFrameShadow(QFrame::Sunken);
         lcdNumber_Threshold->setSmallDecimalPoint(true);
@@ -408,6 +466,7 @@ public:
 
         horizontalSlider_Threshold = new QSlider(centralWidget);
         horizontalSlider_Threshold->setObjectName(QString::fromUtf8("horizontalSlider_Threshold"));
+        horizontalSlider_Threshold->setEnabled(false);
         horizontalSlider_Threshold->setMinimum(1);
         horizontalSlider_Threshold->setMaximum(1000);
         horizontalSlider_Threshold->setValue(300);
@@ -427,12 +486,6 @@ public:
 
         horizontalLayout_4->addWidget(pushButton_FindBeats);
 
-        checkBox_AdvancedOptions = new QCheckBox(centralWidget);
-        checkBox_AdvancedOptions->setObjectName(QString::fromUtf8("checkBox_AdvancedOptions"));
-        checkBox_AdvancedOptions->setChecked(true);
-
-        horizontalLayout_4->addWidget(checkBox_AdvancedOptions);
-
         horizontalSpacer_3 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         horizontalLayout_4->addItem(horizontalSpacer_3);
@@ -440,57 +493,21 @@ public:
 
         verticalLayout->addLayout(horizontalLayout_4);
 
-        horizontalLayout_AdvancedOptions = new QHBoxLayout();
-        horizontalLayout_AdvancedOptions->setSpacing(6);
-        horizontalLayout_AdvancedOptions->setObjectName(QString::fromUtf8("horizontalLayout_AdvancedOptions"));
-        horizontalLayout_AdvancedOptions->setSizeConstraint(QLayout::SetDefaultConstraint);
-        label_7 = new QLabel(centralWidget);
-        label_7->setObjectName(QString::fromUtf8("label_7"));
-        label_7->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
 
-        horizontalLayout_AdvancedOptions->addWidget(label_7);
-
-        comboBox_DetectMethod = new QComboBox(centralWidget);
-        comboBox_DetectMethod->setObjectName(QString::fromUtf8("comboBox_DetectMethod"));
-
-        horizontalLayout_AdvancedOptions->addWidget(comboBox_DetectMethod);
-
-        label_4 = new QLabel(centralWidget);
-        label_4->setObjectName(QString::fromUtf8("label_4"));
-
-        horizontalLayout_AdvancedOptions->addWidget(label_4);
-
-        comboBox_WindowSize = new QComboBox(centralWidget);
-        comboBox_WindowSize->setObjectName(QString::fromUtf8("comboBox_WindowSize"));
-
-        horizontalLayout_AdvancedOptions->addWidget(comboBox_WindowSize);
-
-        label_5 = new QLabel(centralWidget);
-        label_5->setObjectName(QString::fromUtf8("label_5"));
-
-        horizontalLayout_AdvancedOptions->addWidget(label_5);
-
-        comboBox_HopSize = new QComboBox(centralWidget);
-        comboBox_HopSize->setObjectName(QString::fromUtf8("comboBox_HopSize"));
-
-        horizontalLayout_AdvancedOptions->addWidget(comboBox_HopSize);
-
-        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        horizontalLayout_AdvancedOptions->addItem(horizontalSpacer_2);
+        horizontalLayout->addLayout(verticalLayout);
 
 
-        verticalLayout->addLayout(horizontalLayout_AdvancedOptions);
+        verticalLayout_3->addLayout(horizontalLayout);
 
         waveGraphicsView = new WaveGraphicsView(centralWidget);
         waveGraphicsView->setObjectName(QString::fromUtf8("waveGraphicsView"));
 
-        verticalLayout->addWidget(waveGraphicsView);
+        verticalLayout_3->addWidget(waveGraphicsView);
 
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 971, 24));
+        menuBar->setGeometry(QRect(0, 0, 1042, 24));
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
         menuOptions = new QMenu(menuBar);
@@ -502,7 +519,7 @@ public:
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
-        MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
+        MainWindow->addToolBar(Qt::RightToolBarArea, mainToolBar);
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));
         MainWindow->setStatusBar(statusBar);
@@ -649,13 +666,12 @@ public:
         checkBox_PitchCorrection->setText(QApplication::translate("MainWindow", "Pitch Correction", 0, QApplication::UnicodeUTF8));
         pushButton_TimestretchOptions->setText(QApplication::translate("MainWindow", "Stretch Options", 0, QApplication::UnicodeUTF8));
         pushButton_Slice->setText(QApplication::translate("MainWindow", "Slice", 0, QApplication::UnicodeUTF8));
-        label->setText(QApplication::translate("MainWindow", "Threshold:", 0, QApplication::UnicodeUTF8));
-        pushButton_FindOnsets->setText(QApplication::translate("MainWindow", "Find Onsets", 0, QApplication::UnicodeUTF8));
-        pushButton_FindBeats->setText(QApplication::translate("MainWindow", "Find Beats", 0, QApplication::UnicodeUTF8));
-        checkBox_AdvancedOptions->setText(QApplication::translate("MainWindow", "Show More Options", 0, QApplication::UnicodeUTF8));
         label_7->setText(QApplication::translate("MainWindow", "Detection Method:", 0, QApplication::UnicodeUTF8));
         label_4->setText(QApplication::translate("MainWindow", "Window Size:", 0, QApplication::UnicodeUTF8));
         label_5->setText(QApplication::translate("MainWindow", "Hop Size:", 0, QApplication::UnicodeUTF8));
+        label->setText(QApplication::translate("MainWindow", "Threshold:", 0, QApplication::UnicodeUTF8));
+        pushButton_FindOnsets->setText(QApplication::translate("MainWindow", "Find Onsets", 0, QApplication::UnicodeUTF8));
+        pushButton_FindBeats->setText(QApplication::translate("MainWindow", "Find Beats", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0, QApplication::UnicodeUTF8));
         menuOptions->setTitle(QApplication::translate("MainWindow", "Options", 0, QApplication::UnicodeUTF8));
         menuEdit->setTitle(QApplication::translate("MainWindow", "Edit", 0, QApplication::UnicodeUTF8));

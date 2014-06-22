@@ -251,10 +251,9 @@ void MainWindow::setupUI()
     mUI->comboBox_HopSize->setCurrentIndex( 0 ); // "50%"
 
 
-    // Misc.
+    // Hide widgets
     mUI->label_JackSync->setVisible( false );
     mUI->checkBox_TimeStretch->setVisible( false );
-    mUI->checkBox_AdvancedOptions->setChecked( false );
 
 
     // Connect signals to slots
@@ -309,6 +308,11 @@ void MainWindow::enableUI()
     mUI->pushButton_CalcBPM->setEnabled( true );
     mUI->checkBox_TimeStretch->setEnabled( true );
     mUI->checkBox_PitchCorrection->setEnabled( true );
+    mUI->comboBox_DetectMethod->setEnabled( true );
+    mUI->comboBox_WindowSize->setEnabled( true );
+    mUI->comboBox_HopSize->setEnabled( true );
+    mUI->lcdNumber_Threshold->setEnabled( true );
+    mUI->horizontalSlider_Threshold->setEnabled( true );
     mUI->pushButton_FindOnsets->setEnabled( true );
     mUI->pushButton_FindBeats->setEnabled( true );
 
@@ -339,6 +343,11 @@ void MainWindow::disableUI()
     mUI->checkBox_PitchCorrection->setEnabled( false );
     mUI->pushButton_TimestretchOptions->setEnabled( false );
     mUI->pushButton_Slice->setEnabled( false );
+    mUI->comboBox_DetectMethod->setEnabled( false );
+    mUI->comboBox_WindowSize->setEnabled( false );
+    mUI->comboBox_HopSize->setEnabled( false );
+    mUI->lcdNumber_Threshold->setEnabled( false );
+    mUI->horizontalSlider_Threshold->setEnabled( false );
     mUI->pushButton_FindOnsets->setEnabled( false );
     mUI->pushButton_FindBeats->setEnabled( false );
 
@@ -1412,30 +1421,6 @@ void MainWindow::on_pushButton_FindBeats_clicked()
     mUndoStack.push( command );
 
     QApplication::restoreOverrideCursor();
-}
-
-
-
-void MainWindow::on_checkBox_AdvancedOptions_toggled( const bool isChecked )
-{
-    if ( isChecked ) // Show advanced options
-    {
-        const int numWidgets = mUI->horizontalLayout_AdvancedOptions->count();
-        for ( int i = 0; i < numWidgets; i++ )
-            mUI->horizontalLayout_AdvancedOptions->itemAt( i )->widget()->setVisible( true );
-
-        mUI->horizontalLayout_AdvancedOptions->addSpacerItem( new QSpacerItem( 40, 20, QSizePolicy::Expanding ) );
-    }
-    else // Hide advanced options
-    {
-        const int numWidgets = mUI->horizontalLayout_AdvancedOptions->count() - 1; // Don't include spacer
-        for ( int i = 0; i < numWidgets; i++ )
-            mUI->horizontalLayout_AdvancedOptions->itemAt( i )->widget()->setVisible( false );
-
-        QLayoutItem* spacerItem = mUI->horizontalLayout_AdvancedOptions->itemAt( numWidgets );
-        mUI->horizontalLayout_AdvancedOptions->removeItem( spacerItem );
-        delete spacerItem;
-    }
 }
 
 

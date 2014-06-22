@@ -127,7 +127,6 @@ private slots:
     void on_doubleSpinBox_OriginalBPM_valueChanged( const double originalBPM );
     void on_pushButton_CalcBPM_clicked();
     void on_pushButton_FindBeats_clicked();
-    void on_checkBox_AdvancedOptions_toggled( const bool isChecked );
     void on_horizontalSlider_Threshold_valueChanged( const int value );
     void on_pushButton_FindOnsets_clicked();
     void on_pushButton_Slice_clicked();
