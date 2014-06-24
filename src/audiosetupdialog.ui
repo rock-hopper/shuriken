@@ -23,7 +23,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_AudioSetup">
       <attribute name="title">
@@ -39,7 +39,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label_AudioBackend">
          <property name="text">
-          <string>Audio Backend:</string>
+          <string>Audio Back-end:</string>
          </property>
         </widget>
        </item>
@@ -168,7 +168,7 @@
        <item row="0" column="2">
         <widget class="QRadioButton" name="radioButton_RealTime">
          <property name="text">
-          <string>Realtime</string>
+          <string>Real-time</string>
          </property>
          <attribute name="buttonGroup">
           <string>buttonGroup_Processing</string>
@@ -178,7 +178,7 @@
        <item row="1" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Timestretch:</string>
+          <string>Stretch Profile:</string>
          </property>
         </widget>
        </item>

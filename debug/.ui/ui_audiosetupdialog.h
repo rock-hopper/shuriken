@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'audiosetupdialog.ui'
 **
-** Created: Sun Jun 22 20:43:38 2014
+** Created: Tue Jun 24 15:29:51 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -381,7 +381,7 @@ public:
         QObject::connect(buttonBox, SIGNAL(accepted()), AudioSetupDialog, SLOT(accept()));
         QObject::connect(buttonBox, SIGNAL(rejected()), AudioSetupDialog, SLOT(reject()));
 
-        tabWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(AudioSetupDialog);
@@ -390,7 +390,7 @@ public:
     void retranslateUi(QDialog *AudioSetupDialog)
     {
         AudioSetupDialog->setWindowTitle(QApplication::translate("AudioSetupDialog", "Audio Setup", 0, QApplication::UnicodeUTF8));
-        label_AudioBackend->setText(QApplication::translate("AudioSetupDialog", "Audio Backend:", 0, QApplication::UnicodeUTF8));
+        label_AudioBackend->setText(QApplication::translate("AudioSetupDialog", "Audio Back-end:", 0, QApplication::UnicodeUTF8));
         label_AudioDevice->setText(QApplication::translate("AudioSetupDialog", "Audio Device:", 0, QApplication::UnicodeUTF8));
         pushButton_TestTone->setText(QApplication::translate("AudioSetupDialog", "Test Tone", 0, QApplication::UnicodeUTF8));
         label_OutputChannels->setText(QApplication::translate("AudioSetupDialog", "Output Channels:", 0, QApplication::UnicodeUTF8));
@@ -401,8 +401,8 @@ public:
         tabWidget->setTabText(tabWidget->indexOf(tab_AudioSetup), QApplication::translate("AudioSetupDialog", "Audio Setup", 0, QApplication::UnicodeUTF8));
         label->setText(QApplication::translate("AudioSetupDialog", "Processing:", 0, QApplication::UnicodeUTF8));
         radioButton_Offline->setText(QApplication::translate("AudioSetupDialog", "Offline", 0, QApplication::UnicodeUTF8));
-        radioButton_RealTime->setText(QApplication::translate("AudioSetupDialog", "Realtime", 0, QApplication::UnicodeUTF8));
-        label_2->setText(QApplication::translate("AudioSetupDialog", "Timestretch:", 0, QApplication::UnicodeUTF8));
+        radioButton_RealTime->setText(QApplication::translate("AudioSetupDialog", "Real-time", 0, QApplication::UnicodeUTF8));
+        label_2->setText(QApplication::translate("AudioSetupDialog", "Stretch Profile:", 0, QApplication::UnicodeUTF8));
         radioButton_Elastic->setText(QApplication::translate("AudioSetupDialog", "Elastic", 0, QApplication::UnicodeUTF8));
         radioButton_Precise->setText(QApplication::translate("AudioSetupDialog", "Precise", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("AudioSetupDialog", "Transients:", 0, QApplication::UnicodeUTF8));
