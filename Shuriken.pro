@@ -156,7 +156,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/commands.cpp \
     src/rubberbandaudiosource.cpp \
     src/audioanalyser.cpp \
-    src/globals.cpp
+    src/globals.cpp \
+    src/helpform.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -373,9 +374,11 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/simplesynth.h \
     src/globals.h \
     src/rubberbandaudiosource.h \
-    src/audioanalyser.h
+    src/audioanalyser.h \
+    src/helpform.h
 FORMS += src/mainwindow.ui \
-    src/audiosetupdialog.ui
+    src/audiosetupdialog.ui \
+    src/helpform.ui
 INCLUDEPATH += src \
     src/SndLibShuriken \
     src/JuceLibraryCode
@@ -403,3 +406,4 @@ OBJECTS_DIR = $${DESTDIR}/.obj
 MOC_DIR = $${DESTDIR}/.moc
 RCC_DIR = $${DESTDIR}/.rcc
 UI_DIR = $${DESTDIR}/.ui
+RESOURCES = resources.qrc

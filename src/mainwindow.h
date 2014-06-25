@@ -35,6 +35,7 @@
 #include "slicepointitem.h"
 #include "audioanalyser.h"
 #include "waveformitem.h"
+#include "helpform.h"
 
 
 namespace Ui
@@ -81,6 +82,7 @@ private:
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
     ScopedPointer<AudioSetupDialog> mAudioSetupDialog;
+    ScopedPointer<HelpForm> mHelpForm;
 
     AudioDeviceManager mDeviceManager;
     AudioFileHandler mFileHandler;

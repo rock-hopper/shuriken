@@ -294,6 +294,15 @@ void MainWindow::setupUI()
 
     QObject::connect( mUI->actionRedo, SIGNAL( triggered() ),
                       &mUndoStack, SLOT( redo() ) );
+
+
+    // Create help form
+    mHelpForm = new HelpForm();
+
+    if ( mHelpForm != NULL )
+    {
+        mUI->actionHelp->setEnabled( true );
+    }
 }
 
 
@@ -1337,7 +1346,14 @@ void MainWindow::on_actionUser_Interface_triggered()
 
 void MainWindow::on_actionHelp_triggered()
 {
+    QPoint pos = mHelpForm->pos();
+    if ( pos.x() < 0 )
+        pos.setX( 0 );
+    if ( pos.y() < 0 )
+        pos.setY( 0 );
 
+    mHelpForm->move( pos );
+    mHelpForm->show();
 }
 
 
