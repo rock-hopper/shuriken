@@ -158,7 +158,7 @@ void MainWindow::setUpSampler( const SharedSampleBuffer sampleBuffer, const Shar
         mSamplerAudioSource = new SamplerAudioSource();
         mSamplerAudioSource->setSample( sampleBuffer, sampleHeader->sampleRate );
 
-        if ( ! mSampleRangeList.isEmpty() )
+        if ( mSampleRangeList.size() > 1 )
         {
             mSamplerAudioSource->setSampleRanges( mSampleRangeList );
         }
@@ -492,6 +492,11 @@ void MainWindow::importAudioFile()
             mCurrentSampleBuffer = sampleBuffer;
             mCurrentSampleHeader = sampleHeader;
 
+            SharedSampleRange sampleRange( new SampleRange );
+            sampleRange->startFrame = 0;
+            sampleRange->numFrames = sampleBuffer->getNumFrames();
+            mSampleRangeList << sampleRange;
+
             const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer );
             connectWaveformToMainWindow( item );
 
@@ -647,15 +652,12 @@ void MainWindow::saveProject()
                 sampleElement->setAttribute( "filename", "audio.wav" );
                 docElement.addChildElement( sampleElement );
 
-                if ( ! mSampleRangeList.isEmpty() )
+                foreach ( SharedSampleRange sampleRange, mSampleRangeList )
                 {
-                    foreach ( SharedSampleRange sampleRange, mSampleRangeList )
-                    {
-                        XmlElement* rangeElement = new XmlElement( "sample_range" );
-                        rangeElement->setAttribute( "start_frame", sampleRange->startFrame );
-                        rangeElement->setAttribute( "num_frames", sampleRange->numFrames );
-                        docElement.addChildElement( rangeElement );
-                    }
+                    XmlElement* rangeElement = new XmlElement( "sample_range" );
+                    rangeElement->setAttribute( "start_frame", sampleRange->startFrame );
+                    rangeElement->setAttribute( "num_frames", sampleRange->numFrames );
+                    docElement.addChildElement( rangeElement );
                 }
 
                 File file( projectDir.absoluteFilePath( "shuriken.xml" ).toUtf8().data() );
@@ -724,7 +726,7 @@ void MainWindow::openProject()
                 {
                     if ( elem->hasTagName( "sample_range" ) )
                     {
-                        SharedSampleRange sampleRange( new SampleRange() );
+                        SharedSampleRange sampleRange( new SampleRange );
 
                         sampleRange->startFrame = elem->getIntAttribute( "start_frame" );
                         sampleRange->numFrames = elem->getIntAttribute( "num_frames" );
@@ -769,8 +771,8 @@ void MainWindow::openProject()
                         mCurrentSampleBuffer = sampleBuffer;
                         mCurrentSampleHeader = sampleHeader;
 
-                        // If no sample ranges are defined
-                        if ( mSampleRangeList.isEmpty() )
+                        // Only one sample range is defined - waveform has not been sliced
+                        if ( mSampleRangeList.size() == 1 )
                         {
                             const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer );
                             connectWaveformToMainWindow( item );
@@ -779,7 +781,7 @@ void MainWindow::openProject()
 
                             enableUI();
                         }
-                        else // Sample ranges are defined
+                        else // Multiple sample ranges are defined - waveform has been sliced
                         {
                             const QList<SharedWaveformItem> waveformItemList =
                                     mUI->waveGraphicsView->createWaveforms( sampleBuffer, mSampleRangeList );
@@ -941,7 +943,7 @@ void MainWindow::playSampleRange( const int waveformItemStartFrame, const int wa
     const QList<int> slicePointFrameNumList = mUI->waveGraphicsView->getSlicePointFrameNumList();
 
     // If slice points are present and the waveform has not yet been sliced...
-    if ( slicePointFrameNumList.size() > 0 && mSampleRangeList.isEmpty() )
+    if ( slicePointFrameNumList.size() > 0 && mSampleRangeList.size() == 1 )
     {
         const int mousePosFrameNum = mUI->waveGraphicsView->getFrameNum( mouseScenePos.x() );
 

@@ -213,6 +213,11 @@ void SliceCommand::undo()
                                                  mMainWindow->mCurrentSampleHeader->sampleRate );
     mMainWindow->mSampleRangeList.clear();
 
+    SharedSampleRange sampleRange( new SampleRange );
+    sampleRange->startFrame = 0;
+    sampleRange->numFrames = mMainWindow->mCurrentSampleBuffer->getNumFrames();
+    mMainWindow->mSampleRangeList << sampleRange;
+
     mGraphicsView->clearWaveform();
 
     SharedWaveformItem item = mGraphicsView->createWaveform( mMainWindow->mCurrentSampleBuffer );
@@ -238,7 +243,7 @@ void SliceCommand::redo()
 
     mMainWindow->getSampleRanges( mMainWindow->mSampleRangeList );
 
-    Q_ASSERT( mMainWindow->mSampleRangeList.size() > 0 );
+    Q_ASSERT( mMainWindow->mSampleRangeList.size() > 1 );
 
     mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
 
@@ -775,7 +780,7 @@ void ApplyTimeStretchCommand::stretchImpl( const qreal timeRatio, const qreal pi
 
 void ApplyTimeStretchCommand::updateSampler( const qreal timeRatio, const int newTotalNumFrames )
 {
-    if ( ! mMainWindow->mSampleRangeList.isEmpty() )
+    if ( mMainWindow->mSampleRangeList.size() > 1 )
     {
         // Update start frame and length of all sample ranges while preserving current ordering of list
         QList<SharedSampleRange> tempList( mMainWindow->mSampleRangeList );
