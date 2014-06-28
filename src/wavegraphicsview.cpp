@@ -29,8 +29,7 @@
 // Public:
 
 WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
-    QGraphicsView( parent ),
-    mCurrentStretchRatio( 1.0 )
+    QGraphicsView( parent )
 {
     // Set up view
 //    setViewport( new QGLWidget( QGLFormat(QGL::SampleBuffers) ) );
@@ -49,13 +48,14 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
 
 
 
-SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sampleBuffer )
+SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sampleBuffer,
+                                                     const SharedSampleRange sampleRange )
 {
     mNumFrames = sampleBuffer->getNumFrames();
 
     Q_ASSERT( mNumFrames > 0 );
 
-    WaveformItem* waveformItem = new WaveformItem( sampleBuffer, scene()->width(), scene()->height() );
+    WaveformItem* waveformItem = new WaveformItem( sampleBuffer, sampleRange, scene()->width(), scene()->height() );
     waveformItem->setPos( 0.0, 0.0 );
 
     mWaveformItemList.append( SharedWaveformItem( waveformItem ) );
@@ -408,52 +408,6 @@ void WaveGraphicsView::selectAll()
 
 
 
-void WaveGraphicsView::stretch( const qreal ratio, const int newTotalNumFrames )
-{
-    if ( ratio > 0.0 && newTotalNumFrames > 0 )
-    {
-        mNumFrames = newTotalNumFrames;
-
-
-        // Update start frame and length of every waveform item, preserving current ordering of waveform item list
-        QList<SharedWaveformItem> tempList( mWaveformItemList );
-
-        qSort( tempList.begin(), tempList.end(), WaveformItem::isLessThanStartFrame );
-
-        foreach ( SharedWaveformItem item, tempList )
-        {
-            const int origStartFrame = roundToInt( item->getStartFrame() / mCurrentStretchRatio );
-            const int newStartFrame = roundToInt( origStartFrame * ratio );
-            item->setStartFrame( newStartFrame );
-        }
-
-        for ( int i = 0; i < tempList.size(); i++ )
-        {
-            const int newNumFrames = i + 1 < tempList.size() ?
-                                     tempList.at( i + 1 )->getStartFrame() - tempList.at( i )->getStartFrame() :
-                                     mNumFrames - tempList.at( i )->getStartFrame();
-
-            tempList.at( i )->setNumFrames( newNumFrames );
-        }
-
-
-        // Update frame nos. of all slice point items
-        foreach ( SharedSlicePointItem item, mSlicePointItemList )
-        {
-            const int origFrameNum = roundToInt( item->getFrameNum() / mCurrentStretchRatio );
-            const int newFrameNum = roundToInt( origFrameNum * ratio );
-            moveSlicePoint( item, newFrameNum );
-        }
-
-
-        mCurrentStretchRatio = ratio;
-
-        forceRedraw();
-    }
-}
-
-
-
 void WaveGraphicsView::clearAll()
 {
     foreach ( QGraphicsItem* item, items() )
@@ -464,8 +418,6 @@ void WaveGraphicsView::clearAll()
 
     mWaveformItemList.clear();
     mSlicePointItemList.clear();
-
-    mCurrentStretchRatio = 1.0;
 }
 
 

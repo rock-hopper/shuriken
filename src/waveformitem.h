@@ -46,6 +46,7 @@ public:
     enum { Type = UserType + 1 };
 
     WaveformItem( const SharedSampleBuffer sampleBuffer,
+                  const SharedSampleRange sampleRange,
                   const qreal width, const qreal height,
                   QGraphicsItem* parent = NULL );
 
@@ -55,9 +56,9 @@ public:
                   const qreal width, const qreal height,
                   QGraphicsItem* parent = NULL );
 
-    // Create a new waveform item by joining several waveform items together. The new item's start frame,
-    // order position and scene position will be the same as the first item in the list. The new item's
-    // width and no. of frames will be the sum of the widths and no. of frames of all items in the list
+    // Create a new waveform item by joining several waveform items together. The new item's order position
+    // and scene position will be the same as the first item in the list and the new item's width will be
+    // the sum of the widths of all items in the list. A new SampleRange will also be created.
     WaveformItem( const QList<SharedWaveformItem> items, QGraphicsItem* parent = NULL );
 
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
@@ -65,16 +66,11 @@ public:
 
     int type() const                                    { return Type; }
 
-    int getStartFrame() const                           { return mStartFrame; }
-    void setStartFrame( const int startFrame )          { mStartFrame = startFrame; }
-
-    int getNumFrames() const                            { return mNumFrames; }
-    void setNumFrames( const int numFrames )            { mNumFrames = numFrames; }
+    SharedSampleBuffer getSampleBuffer() const          { return mSampleBuffer; }
+    SharedSampleRange getSampleRange() const            { return mSampleRange; }
 
     int getOrderPos() const                             { return mCurrentOrderPos; }
     void setOrderPos( const int orderPos )              { mCurrentOrderPos = orderPos; }
-
-    SharedSampleBuffer getSampleBuffer() const          { return mSampleBuffer; }
 
     // Returns true if this waveform item has been created by joining several waveform items together
     bool isJoined() const                               { return ! mJoinedItems.isEmpty(); }
@@ -110,11 +106,9 @@ private:
     DetailLevel mDetailLevel;
 
     const SharedSampleBuffer mSampleBuffer;
+    const SharedSampleRange mSampleRange;
 
     QList<SharedWaveformItem> mJoinedItems;
-
-    int mStartFrame;
-    int mNumFrames;
 
     QPen mWavePen;
     QPen mCentreLinePen;

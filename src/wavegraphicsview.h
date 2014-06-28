@@ -42,7 +42,8 @@ public:
     WaveGraphicsView( QWidget* parent = NULL );
 
     // Creates a new waveform item and returns a shared pointer to it
-    SharedWaveformItem createWaveform( const SharedSampleBuffer sampleBuffer );
+    SharedWaveformItem createWaveform( const SharedSampleBuffer sampleBuffer,
+                                       const SharedSampleRange sampleRange);
 
     // Creates new waveform items and returns a list of shared pointers to them
     QList<SharedWaveformItem> createWaveforms( const SharedSampleBuffer sampleBuffer,
@@ -74,8 +75,6 @@ public:
     void selectNone();
     void selectAll();
 
-    void stretch( const qreal ratio, const int newTotalNumFrames );
-
     void clearAll();
     void clearWaveform();
 
@@ -99,7 +98,6 @@ private:
     QList<SharedWaveformItem> mWaveformItemList;
     QList<SharedSlicePointItem> mSlicePointItemList;
     int mNumFrames;
-    qreal mCurrentStretchRatio;
 
 signals:
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );

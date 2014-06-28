@@ -497,7 +497,7 @@ void MainWindow::importAudioFile()
             sampleRange->numFrames = sampleBuffer->getNumFrames();
             mSampleRangeList << sampleRange;
 
-            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer );
+            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer, sampleRange );
             connectWaveformToMainWindow( item );
 
             setUpSampler( sampleBuffer, sampleHeader );
@@ -774,7 +774,8 @@ void MainWindow::openProject()
                         // Only one sample range is defined - waveform has not been sliced
                         if ( mSampleRangeList.size() == 1 )
                         {
-                            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer );
+                            const SharedWaveformItem item =
+                                    mUI->waveGraphicsView->createWaveform( sampleBuffer, mSampleRangeList.first() );
                             connectWaveformToMainWindow( item );
 
                             setUpSampler( sampleBuffer, sampleHeader );

@@ -28,13 +28,13 @@
 // Public:
 
 WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer,
+                            const SharedSampleRange sampleRange,
                             const qreal width, const qreal height,
                             QGraphicsItem* parent ) :
     QObject(),
     QGraphicsRectItem( 0.0, 0.0, width, height, parent ),
     mSampleBuffer( sampleBuffer ),
-    mStartFrame( 0 ),
-    mNumFrames( sampleBuffer->getNumFrames() ),
+    mSampleRange( sampleRange ),
     mCurrentOrderPos( 0 ),
     mScaleFactor( NOT_SET ),
     mFirstCalculatedBin( NOT_SET ),
@@ -53,8 +53,7 @@ WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer,
     QObject(),
     QGraphicsRectItem( 0.0, 0.0, width, height, parent ),
     mSampleBuffer( sampleBuffer ),
-    mStartFrame( sampleRange->startFrame ),
-    mNumFrames( sampleRange->numFrames ),
+    mSampleRange( sampleRange ),
     mCurrentOrderPos( orderPos ),
     mScaleFactor( NOT_SET ),
     mFirstCalculatedBin( NOT_SET ),
@@ -69,24 +68,26 @@ WaveformItem::WaveformItem( const QList<SharedWaveformItem> items, QGraphicsItem
     QObject(),
     QGraphicsRectItem( 0.0, 0.0, 1.0, 1.0, parent ),
     mSampleBuffer( items.first()->getSampleBuffer() ),
-    mStartFrame( items.first()->getStartFrame() ),
+    mSampleRange( new SampleRange ),
     mCurrentOrderPos( items.first()->getOrderPos() ),
     mScaleFactor( NOT_SET ),
     mFirstCalculatedBin( NOT_SET ),
     mLastCalculatedBin( NOT_SET )
 {
-    int numFrames = 0;
+    mSampleRange->startFrame = items.first()->getSampleRange()->startFrame;
+
     qreal width = 0.0;
+    int numFrames = 0;
 
     foreach ( SharedWaveformItem item, items )
     {
-        numFrames += item->getNumFrames();
         width += item->rect().width();
+        numFrames += item->getSampleRange()->numFrames;
 
         mJoinedItems << item;
     }
 
-    mNumFrames = numFrames;
+    mSampleRange->numFrames = numFrames;
 
     QGraphicsRectItem::setRect( 0.0, 0.0, width, items.first()->rect().height() );
     setPos( items.first()->scenePos() );
@@ -147,12 +148,12 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
     }
     else // mDetailLevel == VERY_HIGH
     {
-        distanceBetweenFrames = rect().width() / mNumFrames;
+        distanceBetweenFrames = rect().width() / mSampleRange->numFrames;
 
-        firstVisibleFrame = mStartFrame + (int) floor( option->exposedRect.left() / distanceBetweenFrames );
+        firstVisibleFrame = mSampleRange->startFrame + (int) floor( option->exposedRect.left() / distanceBetweenFrames );
 
-        lastVisibleFrame = mStartFrame + qMin( (int) ceil( option->exposedRect.right() / distanceBetweenFrames ),
-                                               mNumFrames - 1 );
+        lastVisibleFrame = mSampleRange->startFrame + qMin( (int) ceil( option->exposedRect.right() / distanceBetweenFrames ),
+                                               mSampleRange->numFrames - 1 );
 
         numVisibleFrames = lastVisibleFrame - firstVisibleFrame + 1;
     }
@@ -258,7 +259,7 @@ void WaveformItem::setRect( const qreal x, const qreal y, const qreal width, con
 
 bool WaveformItem::isLessThanStartFrame( const SharedWaveformItem item1, const SharedWaveformItem item2 )
 {
-    return item1->getStartFrame() < item2->getStartFrame();
+    return item1->getSampleRange()->startFrame < item2->getSampleRange()->startFrame;
 }
 
 
@@ -384,7 +385,7 @@ void WaveformItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
     }
     else
     {
-        emit playSampleRange( mStartFrame, mNumFrames, event->scenePos() );
+        emit playSampleRange( mSampleRange->startFrame, mSampleRange->numFrames, event->scenePos() );
         event->ignore();
     }
 }
@@ -557,7 +558,7 @@ void WaveformItem::resetSampleBins()
     mLastCalculatedBin = NOT_SET;
 
     mNumBins = rect().width() * mScaleFactor;
-    mBinSize = (qreal) mNumFrames / ( rect().width() * mScaleFactor );
+    mBinSize = (qreal) mSampleRange->numFrames / ( rect().width() * mScaleFactor );
 
     if ( mBinSize <= DETAIL_LEVEL_VERY_HIGH_CUTOFF )
     {
@@ -603,7 +604,7 @@ void WaveformItem::findMinMaxSamples( const int startBin, const int endBin )
         for ( int binNum = startBin; binNum <= endBin; binNum++ )
         {
             mSampleBuffer->findMinMax( chanNum,
-                                       mStartFrame + int( binNum * mBinSize ),
+                                       mSampleRange->startFrame + int( binNum * mBinSize ),
                                        (int) mBinSize,
                                        min,
                                        max);

@@ -240,7 +240,7 @@ public:
 private:
     void stretch( const qreal timeRatio, const qreal pitchScale );
     void stretchImpl( const qreal timeRatio, const qreal pitchScale );
-    void updateSampler( const qreal timeRatio, const int newTotalNumFrames );
+    void updateSampleRanges( const qreal timeRatio, const int newTotalNumFrames );
 
     MainWindow* const mMainWindow;
     WaveGraphicsView* const mGraphicsView;

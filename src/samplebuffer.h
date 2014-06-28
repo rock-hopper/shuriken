@@ -82,8 +82,20 @@ typedef ScopedPointer<SampleRange> ScopedSampleRange;
 
 struct SampleRange
 {
+    SampleRange() :
+        startFrame( 0 ),
+        numFrames( 0 ),
+        gain( 0.0 ),
+        isNormalised( false ),
+        isReversed( false )
+    {
+    }
+
     int startFrame;
     int numFrames;
+    qreal gain;
+    bool isNormalised;
+    bool isReversed;
 
     static bool isLessThan( const SharedSampleRange range1, const SharedSampleRange range2 )
     {
