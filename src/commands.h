@@ -204,8 +204,7 @@ private:
 class ReverseCommand : public QUndoCommand
 {
 public:
-    ReverseCommand( const SharedSampleBuffer sampleBuffer,
-                    const int waveformItemOrderPos,
+    ReverseCommand( const int waveformItemOrderPos,
                     WaveGraphicsView* const graphicsView,
                     QUndoCommand* parent = NULL );
 
@@ -213,7 +212,6 @@ public:
     void redo();
 
 private:
-    const SharedSampleBuffer mSampleBuffer;
     const int mWaveformItemOrderPos;
     WaveGraphicsView* const mGraphicsView;
 };

@@ -1305,7 +1305,7 @@ void MainWindow::on_actionReverse_triggered()
 
     foreach ( int orderPos, orderPositions )
     {
-        QUndoCommand* command = new ReverseCommand( mCurrentSampleBuffer, orderPos, mUI->waveGraphicsView );
+        QUndoCommand* command = new ReverseCommand( orderPos, mUI->waveGraphicsView );
         mUndoStack.push( command );
     }
 }

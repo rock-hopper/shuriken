@@ -427,12 +427,10 @@ void SplitCommand::redo()
 
 //==================================================================================================
 
-ReverseCommand::ReverseCommand( const SharedSampleBuffer sampleBuffer,
-                                const int waveformItemOrderPos,
+ReverseCommand::ReverseCommand( const int waveformItemOrderPos,
                                 WaveGraphicsView* const graphicsView,
                                 QUndoCommand* parent ) :
     QUndoCommand( parent ),
-    mSampleBuffer( sampleBuffer ),
     mWaveformItemOrderPos( waveformItemOrderPos ),
     mGraphicsView( graphicsView )
 {
@@ -443,7 +441,14 @@ ReverseCommand::ReverseCommand( const SharedSampleBuffer sampleBuffer,
 
 void ReverseCommand::undo()
 {
-    redo();
+    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
+    SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
+    SharedSampleRange sampleRange = item->getSampleRange();
+
+    sampleBuffer->reverse( sampleRange->startFrame, sampleRange->numFrames );
+    sampleRange->isReversed = false;
+
+    mGraphicsView->forceRedraw();
 }
 
 
@@ -451,7 +456,12 @@ void ReverseCommand::undo()
 void ReverseCommand::redo()
 {
     const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
-    mSampleBuffer->reverse( item->getSampleRange()->startFrame, item->getSampleRange()->numFrames );
+    SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
+    SharedSampleRange sampleRange = item->getSampleRange();
+
+    sampleBuffer->reverse( sampleRange->startFrame, sampleRange->numFrames );
+    sampleRange->isReversed = true;
+
     mGraphicsView->forceRedraw();
 }
 
@@ -758,9 +768,9 @@ void ApplyTimeStretchCommand::stretchImpl( const qreal timeRatio, const qreal pi
 
 void ApplyTimeStretchCommand::updateSampleRanges( const qreal timeRatio, const int newTotalNumFrames )
 {
+    // Update start frame and length of all sample ranges while preserving current ordering of list
     if ( mMainWindow->mSampleRangeList.size() > 1 )
     {
-        // Update start frame and length of all sample ranges while preserving current ordering of list
         QList<SharedSampleRange> tempList( mMainWindow->mSampleRangeList );
 
         qSort( tempList.begin(), tempList.end(), SampleRange::isLessThan );
@@ -784,5 +794,14 @@ void ApplyTimeStretchCommand::updateSampleRanges( const qreal timeRatio, const i
     else
     {
         mMainWindow->mSampleRangeList.first()->numFrames = newTotalNumFrames;
+    }
+
+    // Reapply all audio modifications (gain, reverse, etc)
+    foreach ( SharedSampleRange range, mMainWindow->mSampleRangeList )
+    {
+        if ( range->isReversed )
+        {
+            mMainWindow->mCurrentSampleBuffer->reverse( range->startFrame, range->numFrames );
+        }
     }
 }
