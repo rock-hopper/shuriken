@@ -85,7 +85,7 @@ struct SampleRange
     SampleRange() :
         startFrame( 0 ),
         numFrames( 0 ),
-        gain( 0.0 ),
+        gain( 1.0 ),
         isNormalised( false ),
         isReversed( false )
     {
@@ -93,7 +93,7 @@ struct SampleRange
 
     int startFrame;
     int numFrames;
-    qreal gain;
+    float gain;
     bool isNormalised;
     bool isReversed;
 

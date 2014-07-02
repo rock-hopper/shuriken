@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'helpform.ui'
 **
-** Created: Wed Jun 25 17:26:44 2014
+** Created: Sun Jun 29 15:05:55 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!

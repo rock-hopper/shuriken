@@ -201,6 +201,35 @@ private:
 
 
 
+class ApplyGainCommand : public QUndoCommand
+{
+public:
+    ApplyGainCommand( const float gain,
+                      const int waveformItemOrderPos,
+                      WaveGraphicsView* const graphicsView,
+                      const SharedSampleHeader sampleHeader,
+                      AudioFileHandler& fileHandler,
+                      const QString tempDirPath,
+                      const QString fileBaseName,
+                      QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    const float mGain;
+    const int mWaveformItemOrderPos;
+    WaveGraphicsView* const mGraphicsView;
+    const SharedSampleHeader mSampleHeader;
+    AudioFileHandler& mFileHandler;
+    const QString mTempDirPath;
+    const QString mFileBaseName;
+    float mPrevGain;
+    QString mFilePath;
+};
+
+
+
 class ReverseCommand : public QUndoCommand
 {
 public:

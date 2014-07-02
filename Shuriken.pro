@@ -157,7 +157,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/rubberbandaudiosource.cpp \
     src/audioanalyser.cpp \
     src/globals.cpp \
-    src/helpform.cpp
+    src/helpform.cpp \
+    src/applygaindialog.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -375,10 +376,12 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/globals.h \
     src/rubberbandaudiosource.h \
     src/audioanalyser.h \
-    src/helpform.h
+    src/helpform.h \
+    src/applygaindialog.h
 FORMS += src/mainwindow.ui \
     src/audiosetupdialog.ui \
-    src/helpform.ui
+    src/helpform.ui \
+    src/applygaindialog.ui
 INCLUDEPATH += src \
     src/SndLibShuriken \
     src/JuceLibraryCode

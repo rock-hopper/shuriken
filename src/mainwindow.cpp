@@ -26,6 +26,7 @@
 #include <QFileDialog>
 #include "commands.h"
 #include "globals.h"
+#include "applygaindialog.h"
 #include <QDebug>
 #include <rubberband/RubberBandStretcher.h>
 
@@ -67,6 +68,37 @@ void MainWindow::connectWaveformToMainWindow( const SharedWaveformItem item )
 
     QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
                       this, SLOT( playSampleRange(int,int,QPointF) ) );
+}
+
+
+
+//==================================================================================================
+// Public Static:
+
+void MainWindow::showWarningDialog( const QString text, const QString infoText )
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle( "Shuriken Beat Slicer" );
+    msgBox.setIcon( QMessageBox::Warning );
+    msgBox.setText( text );
+    msgBox.setInformativeText( infoText );
+    msgBox.exec();
+}
+
+
+
+int MainWindow::showUnsavedChangesDialog()
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle( "Shuriken Beat Slicer" );
+    msgBox.setIcon( QMessageBox::Question );
+    msgBox.setText( "The project has been modified" );
+    msgBox.setInformativeText( "Do you want to save your changes?" );
+    msgBox.setStandardButtons( QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel) ;
+    msgBox.setDefaultButton( QMessageBox::Save );
+    const int buttonClicked = msgBox.exec();
+
+    return buttonClicked;
 }
 
 
@@ -122,7 +154,7 @@ void MainWindow::initialiseAudio()
 
     if ( error.isNotEmpty() )
     {
-        showWarningBox( tr("Error initialising audio device manager!"), error.toRawUTF8() );
+        showWarningDialog( tr("Error initialising audio device manager!"), error.toRawUTF8() );
         mUI->actionAudio_Setup->setDisabled( true );
         mIsAudioInitialised = false;
     }
@@ -145,7 +177,7 @@ void MainWindow::initialiseAudio()
     // Check there were no errors while the audio file handler was being initialised
     if ( ! mFileHandler.getLastErrorTitle().isEmpty() )
     {
-        showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+        showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
     }
 }
 
@@ -281,7 +313,7 @@ void MainWindow::setupUI()
                       this, SLOT( disableZoomIn() ) );
 
     QObject::connect( mUI->waveGraphicsView->scene(), SIGNAL( selectionChanged() ),
-                      this, SLOT( enableGraphicsItemActions() ) );
+                      this, SLOT( enableEditActions() ) );
 
     QObject::connect( &mUndoStack, SIGNAL( canUndoChanged(bool) ),
                       mUI->actionUndo, SLOT( setEnabled(bool) ) );
@@ -483,7 +515,7 @@ void MainWindow::importAudioFile()
         if ( sampleBuffer.isNull() || sampleHeader.isNull() )
         {
             QApplication::restoreOverrideCursor();
-            showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+            showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
         }
         else
         {
@@ -607,18 +639,18 @@ void MainWindow::saveProject()
 
         if ( isOkToSave )
         {
-            const QString filePath = projectDir.absoluteFilePath( "audio.wav" );
+//            const QString filePath = projectDir.absoluteFilePath( "audio.wav" );
 
             QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-            const bool isSuccessful = mFileHandler.saveAudioFile( filePath, mCurrentSampleBuffer, mCurrentSampleHeader );
+            const QString filePath = mFileHandler.saveAudioFile( projectDir.absolutePath(), "audio",  mCurrentSampleBuffer, mCurrentSampleHeader );
 
-            if ( isSuccessful )
+            if ( ! filePath.isEmpty() )
             {
                 const bool isRealtimeModeEnabled = mAudioSetupDialog->isRealtimeModeEnabled();
 
                 XmlElement docElement( "project" );
-                docElement.setAttribute( "name", projDirName.toUtf8().data() );
+                docElement.setAttribute( "name", projDirName.toLocal8Bit().data() );
 
                 XmlElement* realtimeModeElement = new XmlElement( "realtime_mode" );
                 realtimeModeElement->setAttribute( "enabled", isRealtimeModeEnabled );
@@ -660,7 +692,7 @@ void MainWindow::saveProject()
                     docElement.addChildElement( rangeElement );
                 }
 
-                File file( projectDir.absoluteFilePath( "shuriken.xml" ).toUtf8().data() );
+                File file( projectDir.absoluteFilePath( "shuriken.xml" ).toLocal8Bit().data() );
 
                 docElement.writeToFile( file, String::empty );
 
@@ -671,13 +703,13 @@ void MainWindow::saveProject()
             else // An error occurred while writing the audio file
             {
                 QApplication::restoreOverrideCursor();
-                showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+                showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
             }
         }
         else // It isn't possible to save the project
         {
-            showWarningBox( tr("Could not save project ") + "\"" + projDirName + "\"",
-                            tr("Failed to create directory ") + "\"" + projectDir.absolutePath() + "\"" );
+            showWarningDialog( tr("Could not save project ") + "\"" + projDirName + "\"",
+                               tr("Failed to create directory ") + "\"" + projectDir.absolutePath() + "\"" );
         }
     }
 }
@@ -702,7 +734,7 @@ void MainWindow::openProject()
         mLastOpenedProjDir = parentDir.absolutePath();
 
         ScopedPointer<XmlElement> docElement;
-        docElement = XmlDocument::parse( File( filePath.toUtf8().data() ) );
+        docElement = XmlDocument::parse( File( filePath.toLocal8Bit().data() ) );
 
         // If the xml file was successfully read
         if ( docElement.get() != NULL )
@@ -827,56 +859,25 @@ void MainWindow::openProject()
                     else // Error loading audio file
                     {
                         QApplication::restoreOverrideCursor();
-                        showWarningBox( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+                        showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
                     }
                 }
                 else // The xml file doesn't have a valid "sample" element
                 {
                     QApplication::restoreOverrideCursor();
-                    showWarningBox( tr("Couldn't open project ") + projectName, tr("The project file is invalid") );
+                    showWarningDialog( tr("Couldn't open project ") + projectName, tr("The project file is invalid") );
                 }
             }
             else // The xml file doesn't have a valid "project" tag
             {
-                showWarningBox( tr("Couldn't open project!"), tr("The project file is invalid") );
+                showWarningDialog( tr("Couldn't open project!"), tr("The project file is invalid") );
             }
         }
         else // The xml file couldn't be read
         {
-            showWarningBox( tr("Couldn't open project!"), tr("The project file is unreadable") );
+            showWarningDialog( tr("Couldn't open project!"), tr("The project file is unreadable") );
         }
     }
-}
-
-
-
-//==================================================================================================
-// Private Static:
-
-void MainWindow::showWarningBox( const QString text, const QString infoText )
-{
-    QMessageBox msgBox;
-    msgBox.setWindowTitle( "Shuriken Beat Slicer" );
-    msgBox.setIcon( QMessageBox::Warning );
-    msgBox.setText( text );
-    msgBox.setInformativeText( infoText );
-    msgBox.exec();
-}
-
-
-
-int MainWindow::showUnsavedChangesBox()
-{
-    QMessageBox msgBox;
-    msgBox.setWindowTitle( "Shuriken Beat Slicer" );
-    msgBox.setIcon( QMessageBox::Question );
-    msgBox.setText( "The project has been modified" );
-    msgBox.setInformativeText( "Do you want to save your changes?" );
-    msgBox.setStandardButtons( QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel) ;
-    msgBox.setDefaultButton( QMessageBox::Save );
-    const int buttonClicked = msgBox.exec();
-
-    return buttonClicked;
 }
 
 
@@ -1022,7 +1023,7 @@ void MainWindow::resetSampler()
 
 
 
-void MainWindow::enableGraphicsItemActions()
+void MainWindow::enableEditActions()
 {
     const SharedSlicePointItem slicePointItem = mUI->waveGraphicsView->getSelectedSlicePoint();
 
@@ -1040,6 +1041,7 @@ void MainWindow::enableGraphicsItemActions()
 
     if ( ! orderPositions.isEmpty() )
     {
+        mUI->actionApply_Gain->setEnabled( true );
         mUI->actionReverse->setEnabled( true );
 
         bool isAnySelectedItemJoined = false;
@@ -1054,6 +1056,7 @@ void MainWindow::enableGraphicsItemActions()
     }
     else
     {
+        mUI->actionApply_Gain->setEnabled( false );
         mUI->actionReverse->setEnabled( false );
         mUI->actionSplit->setEnabled( false );
     }
@@ -1082,7 +1085,7 @@ void MainWindow::on_actionOpen_Project_triggered()
     }
     else
     {
-        const int buttonClicked = showUnsavedChangesBox();
+        const int buttonClicked = showUnsavedChangesDialog();
 
         switch ( buttonClicked )
         {
@@ -1121,7 +1124,7 @@ void MainWindow::on_actionClose_Project_triggered()
     }
     else
     {
-        const int buttonClicked = showUnsavedChangesBox();
+        const int buttonClicked = showUnsavedChangesDialog();
 
         switch ( buttonClicked )
         {
@@ -1153,7 +1156,7 @@ void MainWindow::on_actionImport_Audio_File_triggered()
     }
     else
     {
-        const int buttonClicked = showUnsavedChangesBox();
+        const int buttonClicked = showUnsavedChangesDialog();
 
         switch ( buttonClicked )
         {
@@ -1252,7 +1255,27 @@ void MainWindow::on_actionAdd_Slice_Point_triggered()
 
 void MainWindow::on_actionApply_Gain_triggered()
 {
+    ApplyGainDialog dialog;
 
+    if ( dialog.exec() == QDialog::Accepted )
+    {
+        const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+
+        foreach ( int orderPos, orderPositions )
+        {
+            QString fileBaseName;
+            fileBaseName.setNum( mUndoStack.index() );
+
+            QUndoCommand* command = new ApplyGainCommand( dialog.getGainValue(),
+                                                          orderPos,
+                                                          mUI->waveGraphicsView,
+                                                          mCurrentSampleHeader,
+                                                          mFileHandler,
+                                                          "/dev/shm",
+                                                          fileBaseName );
+            mUndoStack.push( command );
+        }
+    }
 }
 
 

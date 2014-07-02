@@ -102,6 +102,7 @@ bool AudioSetupDialog::isJackSyncEnabled() const
 void AudioSetupDialog::changeEvent( QEvent* event )
 {
     QDialog::changeEvent( event );
+
     switch ( event->type() )
     {
     case QEvent::LanguageChange:
@@ -116,7 +117,7 @@ void AudioSetupDialog::changeEvent( QEvent* event )
 
 void AudioSetupDialog::showEvent( QShowEvent* event )
 {
-    // If the dialog is not being maximised after having previoulsy been minimised...
+    // If the dialog is not being maximised, i.e. it has not previoulsy been minimised...
     if ( ! event->spontaneous() )
     {
         // Get current audio settings and store them so that any
@@ -713,7 +714,9 @@ void AudioSetupDialog::on_listWidget_MidiInput_itemClicked( QListWidgetItem* ite
 
 void AudioSetupDialog::on_buttonBox_clicked( QAbstractButton* button )
 {
-    if ( button->text() == "Save" )
+    QDialogButtonBox::StandardButton stdButton = mUI->buttonBox->standardButton( button );
+
+    if ( stdButton == QDialogButtonBox::Save )
     {
         ScopedPointer<XmlElement> stateXml( mDeviceManager.createStateXml() );
 

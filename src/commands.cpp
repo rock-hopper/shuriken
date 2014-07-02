@@ -23,7 +23,8 @@
 #include "commands.h"
 #include <rubberband/RubberBandStretcher.h>
 #include <QApplication>
-//#include <QDebug>
+#include <QDir>
+#include <QDebug>
 
 using namespace RubberBand;
 
@@ -427,6 +428,87 @@ void SplitCommand::redo()
 
 //==================================================================================================
 
+ApplyGainCommand::ApplyGainCommand( const float gain,
+                                    const int waveformItemOrderPos,
+                                    WaveGraphicsView* const graphicsView,
+                                    const SharedSampleHeader sampleHeader,
+                                    AudioFileHandler& fileHandler,
+                                    const QString tempDirPath,
+                                    const QString fileBaseName,
+                                    QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    mGain( gain ),
+    mWaveformItemOrderPos( waveformItemOrderPos ),
+    mGraphicsView( graphicsView ),
+    mSampleHeader( sampleHeader ),
+    mFileHandler( fileHandler ),
+    mTempDirPath( tempDirPath ),
+    mFileBaseName( fileBaseName )
+{
+    setText( "Reverse" );
+}
+
+
+
+void ApplyGainCommand::undo()
+{
+    if ( ! mFilePath.isEmpty() )
+    {
+        const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
+        SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
+        SharedSampleRange sampleRange = item->getSampleRange();
+
+        SharedSampleBuffer tempBuffer = mFileHandler.getSampleData( mFilePath );
+
+        for ( int chanNum = 0; chanNum < sampleBuffer->getNumChannels(); chanNum++ )
+        {
+            sampleBuffer->copyFrom( chanNum, sampleRange->startFrame, *tempBuffer.data(), chanNum, 0, sampleRange->numFrames );
+        }
+
+        sampleRange->gain = mPrevGain;
+
+        mGraphicsView->forceRedraw();
+    }
+}
+
+
+
+void ApplyGainCommand::redo()
+{
+    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
+    SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
+    SharedSampleRange sampleRange = item->getSampleRange();
+
+    const int numChans = mSampleHeader->numChans;
+
+    SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
+
+    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+    {
+        tempBuffer->copyFrom( chanNum, 0, *sampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
+    }
+
+    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleHeader, true );
+
+    if ( ! mFilePath.isEmpty() )
+    {
+        sampleBuffer->applyGain( sampleRange->startFrame, sampleRange->numFrames, mGain );
+
+        mPrevGain = sampleRange->gain;
+        sampleRange->gain = mGain;
+
+        mGraphicsView->forceRedraw();
+    }
+    else
+    {
+        MainWindow::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+    }
+}
+
+
+
+//==================================================================================================
+
 ReverseCommand::ReverseCommand( const int waveformItemOrderPos,
                                 WaveGraphicsView* const graphicsView,
                                 QUndoCommand* parent ) :
@@ -604,8 +686,8 @@ void ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchS
         else // Failed to read audio file
         {
             QApplication::restoreOverrideCursor();
-            MainWindow::showWarningBox( mMainWindow->mFileHandler.getLastErrorTitle(),
-                                        mMainWindow->mFileHandler.getLastErrorInfo() );
+            MainWindow::showWarningDialog( mMainWindow->mFileHandler.getLastErrorTitle(),
+                                           mMainWindow->mFileHandler.getLastErrorInfo() );
         }
     }
     else
@@ -759,8 +841,8 @@ void ApplyTimeStretchCommand::stretchImpl( const qreal timeRatio, const qreal pi
     else // Failed to read audio file
     {
         QApplication::restoreOverrideCursor();
-        MainWindow::showWarningBox( mMainWindow->mFileHandler.getLastErrorTitle(),
-                                    mMainWindow->mFileHandler.getLastErrorInfo() );
+        MainWindow::showWarningDialog( mMainWindow->mFileHandler.getLastErrorTitle(),
+                                       mMainWindow->mFileHandler.getLastErrorInfo() );
     }
 }
 

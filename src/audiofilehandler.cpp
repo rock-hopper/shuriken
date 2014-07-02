@@ -21,18 +21,15 @@
 */
 
 #include "audiofilehandler.h"
-#include "SndLibShuriken/_sndlib.h"
-#include <aubio/aubio.h>
 #include <sndfile.h>
 #include <QDir>
-//#include <QDebug>
+#include <QDebug>
 
 
 //==================================================================================================
 // Public:
 
-AudioFileHandler::AudioFileHandler( QObject* parent ) :
-    QObject( parent )
+AudioFileHandler::AudioFileHandler()
 {
     // Initialise sndlib so we can read header info not available through aubio's API
     // and also open some audio file formats that may not be supported via aubio
@@ -40,16 +37,22 @@ AudioFileHandler::AudioFileHandler( QObject* parent ) :
 
     if ( errorCode == MUS_ERROR )
     {
-        sErrorTitle = tr("Error initialising sndlib!");
-        sErrorInfo = tr("It may not be possible to read some audio files");
+        sErrorTitle = "Error initialising sndlib!";
+        sErrorInfo = "It may not be possible to read some audio files";
     }
 }
 
 
-
 SharedSampleBuffer AudioFileHandler::getSampleData( const QString filePath )
 {
-    Q_ASSERT_X( ! filePath.isEmpty(), "AudioFileHandler::getSampleData", "filePath is empty" );
+    return getSampleData( filePath, 0, 0 );
+}
+
+
+
+SharedSampleBuffer AudioFileHandler::getSampleData( const QString filePath, const int startFrame, const int numFramesToRead )
+{
+    Q_ASSERT( ! filePath.isEmpty() );
 
     QByteArray charArray = filePath.toLocal8Bit();
     const char* path = charArray.data();
@@ -60,11 +63,11 @@ SharedSampleBuffer AudioFileHandler::getSampleData( const QString filePath )
     if ( mus_file_probe( path ) )
     {
         // First try using aubio to load the file; if that fails, try using sndlib
-        sampleBuffer = aubioLoadFile( path );
+        sampleBuffer = aubioLoadFile( path, startFrame, numFramesToRead );
 
         if ( sampleBuffer.isNull() )
         {
-            sampleBuffer = sndlibLoadFile( path );
+            sampleBuffer = sndlibLoadFile( path, startFrame, numFramesToRead );
         }
     }
 
@@ -75,7 +78,7 @@ SharedSampleBuffer AudioFileHandler::getSampleData( const QString filePath )
 
 SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
 {
-    Q_ASSERT_X( ! filePath.isEmpty(), "AudioFileHandler::getSampleHeader", "filePath is empty" );
+    Q_ASSERT( ! filePath.isEmpty() );
 
     QByteArray charArray = filePath.toLocal8Bit();
     const char* path = charArray.data();
@@ -85,7 +88,7 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
     // If `0` is passed as `samplerate` to new_aubio_source, the sample rate of the original file is used.
     aubio_source_t* aubioSource = new_aubio_source( const_cast<char*>(path), 0, 4096 );
 
-    if ( aubioSource != NULL )
+    if ( aubioSource != NULL ) // First try using aubio to read the header
     {
         sampleHeader = SharedSampleHeader( new SampleHeader );
 
@@ -107,7 +110,7 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
             sampleHeader->bitsPerSample = 0;
         }
     }
-    else
+    else // If aubio can't read the header, try using sndlib
     {
         const int headerCode = mus_sound_header_type( path );
 
@@ -130,88 +133,114 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
 
 
 
-bool AudioFileHandler::saveAudioFile( const QString filePath,
+QString AudioFileHandler::saveAudioFile( const QString dirPath,
+                                      const QString fileBaseName,
                                       const SharedSampleBuffer sampleBuffer,
-                                      const SharedSampleHeader sampleHeader )
+                                      const SharedSampleHeader sampleHeader,
+                                      const bool isTempFile )
 {
     const int hopSize = 8192;
     const int numChans = sampleHeader->numChans;
 
-    bool isSuccessful = true;
+    bool isSuccessful = false;
 
-    SF_INFO sfInfo;
-    memset( &sfInfo, 0, sizeof( sfInfo ) );
+    QDir saveDir( dirPath );
+    QString filePath;
 
-    sfInfo.samplerate = sampleHeader->sampleRate;
-    sfInfo.channels   = numChans;
-    sfInfo.format     = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
-
-    Q_ASSERT( sf_format_check( &sfInfo ) );
-
-    SNDFILE* handle = sf_open( filePath.toUtf8().data(), SFM_WRITE, &sfInfo );
-
-    if ( handle != NULL )
+    if ( saveDir.exists() )
     {
-        const int numFrames = sampleBuffer->getNumFrames();
-        int numFramesToWrite = 0;
-        int startFrame = 0;
-        int numSamplesWritten = 0;
+        filePath = saveDir.absoluteFilePath( fileBaseName );
 
-        Array<float> tempBuffer;
-        tempBuffer.resize( hopSize * numChans );
+        SF_INFO sfInfo;
+        memset( &sfInfo, 0, sizeof( sfInfo ) );
 
-        float* sampleData = NULL;
+        sfInfo.samplerate = sampleHeader->sampleRate;
+        sfInfo.channels   = numChans;
 
-        do
+        if ( isTempFile )
         {
-            numFramesToWrite = numFrames - startFrame >= hopSize ? hopSize : numFrames - startFrame;
+            sfInfo.format = SF_ENDIAN_CPU | SF_FORMAT_AU | SF_FORMAT_FLOAT;
+            filePath.append( ".au" );
+        }
+        else
+        {
+            sfInfo.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
+            filePath.append( ".wav" );
+        }
+        Q_ASSERT( sf_format_check( &sfInfo ) );
 
-            // Interleave sample data
-            for ( int chanNum = 0; chanNum < numChans; ++chanNum )
+        SNDFILE* handle = sf_open( filePath.toLocal8Bit().data(), SFM_WRITE, &sfInfo );
+
+        if ( handle != NULL )
+        {
+            const int numFrames = sampleBuffer->getNumFrames();
+            int numFramesToWrite = 0;
+            int startFrame = 0;
+            int numSamplesWritten = 0;
+
+            Array<float> tempBuffer;
+            tempBuffer.resize( hopSize * numChans );
+
+            float* sampleData = NULL;
+
+            isSuccessful = true;
+
+            do
             {
-                sampleData = sampleBuffer->getSampleData( chanNum, startFrame );
+                numFramesToWrite = numFrames - startFrame >= hopSize ? hopSize : numFrames - startFrame;
 
-                for ( int frameNum = 0; frameNum < numFramesToWrite; ++frameNum )
+                // Interleave sample data
+                for ( int chanNum = 0; chanNum < numChans; ++chanNum )
                 {
-                    tempBuffer.set( numChans * frameNum + chanNum,  // Index
-                                    sampleData[ frameNum ] );       // Value
+                    sampleData = sampleBuffer->getSampleData( chanNum, startFrame );
+
+                    for ( int frameNum = 0; frameNum < numFramesToWrite; ++frameNum )
+                    {
+                        tempBuffer.set( numChans * frameNum + chanNum,  // Index
+                                        sampleData[ frameNum ] );       // Value
+                    }
+                }
+
+                // Write sample data to file
+                numSamplesWritten = sf_write_float( handle, tempBuffer.getRawDataPointer(), numFramesToWrite * numChans );
+
+                startFrame += hopSize;
+
+                // If there was a write error
+                if ( numSamplesWritten != numFramesToWrite * numChans)
+                {
+                    QString samplesToWriteStr;
+                    samplesToWriteStr.setNum( numFramesToWrite * numChans );
+
+                    QString samplesWrittenStr;
+                    samplesWrittenStr.setNum( numSamplesWritten );
+
+                    sErrorTitle = "Error while writing to audio file";
+                    sErrorInfo = "no. of samples to write: " + samplesToWriteStr + ", " +
+                                 "no. of samples written: " + samplesWrittenStr;
+
+                    isSuccessful = false;
                 }
             }
+            while ( numFramesToWrite == hopSize && isSuccessful );
 
-            // Write sample data to file
-            numSamplesWritten = sf_write_float( handle, tempBuffer.getRawDataPointer(), numFramesToWrite * numChans );
-
-            startFrame += hopSize;
-
-            // If there was a write error
-            if ( numSamplesWritten != numFramesToWrite * numChans)
-            {
-                QString samplesToWriteStr;
-                samplesToWriteStr.setNum( numFramesToWrite * numChans );
-
-                QString samplesWrittenStr;
-                samplesWrittenStr.setNum( numSamplesWritten );
-
-                sErrorTitle = tr("Error while writing to audio file");
-                sErrorInfo = tr("no. of samples to write: ") + samplesToWriteStr + ", " +
-                             tr("no. of samples written: ") + samplesWrittenStr;
-
-                isSuccessful = false;
-            }
+            sf_write_sync( handle );
+            sf_close( handle );
         }
-        while ( numFramesToWrite == hopSize && isSuccessful );
-
-        sf_write_sync( handle );
-        sf_close( handle );
+        else // Could not open file for writing
+        {
+            sErrorTitle = "Couldn't open file for writing";
+            sErrorInfo = sf_strerror( NULL );
+            isSuccessful = false;
+        }
     }
-    else
+
+    if ( ! isSuccessful )
     {
-        sErrorTitle = tr("Couldn't open file for writing");
-        sErrorInfo = sf_strerror( NULL );
-        isSuccessful = false;
+        filePath.clear();
     }
 
-    return isSuccessful;
+    return filePath;
 }
 
 
@@ -245,15 +274,11 @@ void AudioFileHandler::recordSndLibError( int errorCode, char* errorMessage )
 
 
 
-SharedSampleBuffer AudioFileHandler::sndlibLoadFile( const char* filePath )
+SharedSampleBuffer AudioFileHandler::sndlibLoadFile( const char* filePath, mus_long_t startFrame, mus_long_t numFramesToRead )
 {
-    const int leftChan = 0;
-    const int rightChan = 1;
-
     int fileID = 0;
     int numChans = 0;
-    mus_long_t numFrames = 0;
-    mus_float_t** floatBuffers = NULL;
+    mus_long_t numFramesRead = 0;
     SharedSampleBuffer sampleBuffer;
 
 
@@ -288,65 +313,46 @@ SharedSampleBuffer AudioFileHandler::sndlibLoadFile( const char* filePath )
         goto end;
     }
 
-    numFrames = mus_sound_frames( filePath );
-    if ( numFrames == MUS_ERROR )
+    // If caller has not set `numFramesToRead` assume whole file should be read
+    if ( numFramesToRead < 1 )
     {
-        goto end;
-    }
+        startFrame = 0;
+        numFramesToRead = mus_sound_frames( filePath );
 
-    floatBuffers = (mus_float_t**) calloc( numChans, sizeof(mus_float_t*) );
-    if ( floatBuffers == NULL )
-    {
-        mus_error( MUS_MEMORY_ALLOCATION_FAILED, "Not enough memory to load audio file" );
-        goto end;
-    }
-    for ( int i = 0; i < numChans; i++)
-    {
-        floatBuffers[i] = (mus_float_t*) calloc( numFrames, sizeof(mus_float_t) );
-        if ( floatBuffers[i] == NULL )
+        if ( numFramesToRead == MUS_ERROR )
         {
-            // clean up and bail out!
-            for ( int n = 0; n < i; n++ )
-                free( floatBuffers[n] );
-            free( floatBuffers );
-            mus_error( MUS_MEMORY_ALLOCATION_FAILED, "Not enough memory to load audio file" );
             goto end;
         }
     }
 
     try
     {
-        sampleBuffer = SharedSampleBuffer( new SampleBuffer( numChans, numFrames ) );
+        sampleBuffer = SharedSampleBuffer( new SampleBuffer( numChans, numFramesToRead ) );
 
         fileID = mus_sound_open_input( filePath );
         if ( fileID == MUS_ERROR )
         {
-            // clean up and bail out!
-            for ( int i = 0; i < numChans; i++ )
-                free( floatBuffers[i] );
-            free( floatBuffers );
             goto end;
         }
 
-        if ( mus_file_read( fileID, 0, numFrames - 1, numChans, floatBuffers ) == MUS_ERROR )
+        if ( mus_file_seek_frame( fileID, startFrame ) == MUS_ERROR )
         {
-            // clean up and bail out!
             mus_sound_close_input( fileID );
-            for ( int i = 0; i < numChans; i++ )
-                free( floatBuffers[i] );
-            free( floatBuffers );
             goto end;
         }
-        if ( numChans == 1 )
-        {
-            sampleBuffer->copyFrom( leftChan, 0, floatBuffers[leftChan], numFrames );
-        }
-        else
-        {
-            sampleBuffer->copyFrom( leftChan, 0, floatBuffers[leftChan], numFrames );
-            sampleBuffer->copyFrom( rightChan, 0, floatBuffers[rightChan], numFrames );
-        }
 
+        numFramesRead = mus_file_read( fileID,
+                                       0,
+                                       numFramesToRead - 1,
+                                       numChans,
+                                       sampleBuffer->getArrayOfChannels() );
+
+        if ( numFramesRead == MUS_ERROR )
+        {
+            mus_sound_close_input( fileID );
+            sampleBuffer.clear();
+            goto end;
+        }
         mus_sound_close_input( fileID );
     }
     catch ( std::bad_alloc& )
@@ -354,27 +360,24 @@ SharedSampleBuffer AudioFileHandler::sndlibLoadFile( const char* filePath )
         mus_error( MUS_MEMORY_ALLOCATION_FAILED, "Not enough memory to load audio file" );
     }
 
-    // Clean up
-    for ( int i = 0; i < numChans; i++ )
-        free( floatBuffers[i] );
-    free( floatBuffers );
-
     end:
     return sampleBuffer;
 }
 
 
 
-SharedSampleBuffer AudioFileHandler::aubioLoadFile( const char* filePath )
+SharedSampleBuffer AudioFileHandler::aubioLoadFile( const char* filePath, uint_t startFrame, uint_t numFramesToRead )
 {
-    uint_t sampleRate = 0; // If `0` is passed as `samplerate` to new_aubio_source, the sample rate of the original file is used.
-    uint_t hopSize = 4096;
-    uint_t numFrames = 0;
-    uint_t numFramesRead = 0;
-    uint_t numChans = 0;
+    const uint_t hopSize = 4096;
 
-    int startFrame = 0;
-    int numFramesToCopy = hopSize;
+    uint_t sampleRate = 0; // If `0` is passed as `samplerate` to new_aubio_source, the sample rate of the original file is used.
+
+    uint_t endFrame = 0; // Exclusive
+    uint_t destStartFrame = 0; // Inclusive
+    uint_t numFramesRead = 0;
+    uint_t numFramesToCopy = 0;
+
+    uint_t numChans = 0;
 
     aubio_source_t* aubioSource = new_aubio_source( const_cast<char*>(filePath), sampleRate, hopSize );
     fmat_t* sampleData = NULL;
@@ -396,39 +399,54 @@ SharedSampleBuffer AudioFileHandler::aubioLoadFile( const char* filePath )
 
             if ( sampleData != NULL )
             {
-                numFrames = mus_sound_frames( filePath );
-                if ( numFrames < 1 )
+                // If caller has not set `numFramesToRead` assume whole file should be read
+
+                if ( numFramesToRead < 1 ) // Read whole file
                 {
-                    numFrames = 0;
+                    startFrame = 0;
+                    numFramesToRead = 0;
+
+                    // Work out the no. of frames the long way
                     do
                     {
                         aubio_source_do_multi( aubioSource, sampleData, &numFramesRead );
-                        numFrames += numFramesRead;
+                        numFramesToRead += numFramesRead;
                     }
                     while ( numFramesRead == hopSize );
 
                     aubio_source_seek( aubioSource, 0 );
                     numFramesRead = 0;
-                    fmat_zeros( sampleData );
                 }
+                else // Read part of file
+                {
+                    aubio_source_seek( aubioSource, startFrame );
+                }
+
+                endFrame = startFrame + numFramesToRead;
+
+                fmat_zeros( sampleData );
 
                 try
                 {
-                    sampleBuffer = SharedSampleBuffer( new SampleBuffer( numChans, numFrames ) );
+                    sampleBuffer = SharedSampleBuffer( new SampleBuffer( numChans, numFramesToRead ) );
 
+                    // Read audio data from file
                     do
                     {
                         aubio_source_do_multi( aubioSource, sampleData, &numFramesRead );
 
-                        numFramesToCopy = numFrames - startFrame >= hopSize ? hopSize : numFrames - startFrame;
+                        numFramesToCopy = startFrame + numFramesRead <= endFrame ?
+                                          numFramesRead : endFrame - startFrame;
 
-                        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                        for ( uint_t chanNum = 0; chanNum < numChans; chanNum++ )
                         {
-                            sampleBuffer->copyFrom( chanNum, startFrame, sampleData->data[ chanNum ], numFramesToCopy );
+                            sampleBuffer->copyFrom( chanNum, destStartFrame, sampleData->data[ chanNum ], numFramesToCopy );
                         }
+
                         startFrame += numFramesRead;
+                        destStartFrame += numFramesRead;
                     }
-                    while ( numFramesRead == hopSize );
+                    while ( startFrame < endFrame );
                 }
                 catch ( std::bad_alloc& )
                 {

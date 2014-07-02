@@ -58,6 +58,10 @@ public:
 
     void connectWaveformToMainWindow( const SharedWaveformItem item );
 
+public:
+    static void showWarningDialog( const QString text, const QString infoText );
+    static int showUnsavedChangesDialog();
+
 protected:
     void changeEvent( QEvent* event );
 //    void keyPressEvent( QKeyEvent* event );
@@ -105,10 +109,6 @@ private:
 
     qreal mAppliedOriginalBPM;
     qreal mAppliedNewBPM;
-
-private:
-    static void showWarningBox( const QString text, const QString infoText );
-    static int showUnsavedChangesBox();
 
 public slots:
     void reorderSampleRangeList( QList<int> oldOrderPositions, const int numPlacesMoved );
@@ -171,7 +171,7 @@ private slots:
     void enableRealtimeControls( const bool isEnabled );
     void resetSampler();
 
-    void enableGraphicsItemActions();
+    void enableEditActions();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( MainWindow );

@@ -23,24 +23,26 @@
 #ifndef AUDIOFILEHANDLER_H
 #define AUDIOFILEHANDLER_H
 
-#include <QObject>
 #include "JuceHeader.h"
 #include "samplebuffer.h"
+#include "SndLibShuriken/_sndlib.h"
+#include <aubio/aubio.h>
 
 
-class AudioFileHandler : public QObject
+class AudioFileHandler
 {
-    Q_OBJECT
-
 public:
-    explicit AudioFileHandler( QObject* parent = NULL );
+    AudioFileHandler();
 
     SharedSampleBuffer getSampleData( const QString filePath );
+    SharedSampleBuffer getSampleData( const QString filePath, const int startFrame, const int numFramesToRead );
     SharedSampleHeader getSampleHeader( const QString filePath );
 
-    bool saveAudioFile( const QString filePath,
+    QString saveAudioFile( const QString dirPath,
+                        const QString fileBaseName,
                         const SharedSampleBuffer sampleBuffer,
-                        const SharedSampleHeader sampleHeader );
+                        const SharedSampleHeader sampleHeader,
+                        const bool isTempFile = false );
 
     QString getLastErrorTitle() const   { return sErrorTitle; }
     QString getLastErrorInfo() const    { return sErrorInfo; }
@@ -52,8 +54,8 @@ private:
     static int initSndLib();
     static void recordSndLibError( int errorCode, char* errorMessage );
 
-    static SharedSampleBuffer sndlibLoadFile( const char* filePath );
-    static SharedSampleBuffer aubioLoadFile( const char* filePath );
+    static SharedSampleBuffer sndlibLoadFile( const char* filePath, mus_long_t startFrame, mus_long_t numFramesToRead );
+    static SharedSampleBuffer aubioLoadFile( const char* filePath, uint_t startFrame, uint_t numFramesToRead );
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( AudioFileHandler );
