@@ -25,6 +25,7 @@
 #include "globals.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QProcessEnvironment>
 #include <QDebug>
 
 
@@ -108,22 +109,35 @@ bool AudioSetupDialog::isJackSyncEnabled() const
 
 QString AudioSetupDialog::getTempDirPath() const
 {
-    QDir dir( mUI->lineEdit_TempDir->text() );
+    QDir parentDir( mUI->lineEdit_TempDir->text() );
+
+    // Set a unique name for the temp dir, there may be multiple instances of Shuriken running
+
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    QString userName = env.value( "USER", "user" );
+
+    QString pid;
+    pid.setNum( QCoreApplication::applicationPid() );
+
+    QString tempDirName( "shuriken-" );
+    tempDirName.append( userName );
+    tempDirName.append( "-" );
+    tempDirName.append( pid );
 
     bool isTempDirValid = false;
 
-    if ( dir.exists( "shuriken-username" ) )
+    if ( parentDir.exists( tempDirName ) )
     {
         isTempDirValid = true;
     }
     else
     {
-        isTempDirValid = dir.mkdir( "shuriken-username" );
+        isTempDirValid = parentDir.mkdir( tempDirName );
     }
 
     if ( isTempDirValid )
     {
-        return dir.absoluteFilePath( "shuriken-username" );
+        return parentDir.absoluteFilePath( tempDirName );
     }
     else
     {
