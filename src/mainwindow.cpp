@@ -585,7 +585,7 @@ void MainWindow::saveProject()
 {
     // Save file dialog
     const QString dirPath = QFileDialog::getSaveFileName( this, tr("Save Project"), mLastOpenedProjDir,
-                                                     tr("Shuriken Project (*.*)") );
+                                                          tr("Shuriken Project (*.*)") );
 
     // If user didn't click "Cancel"
     if ( ! dirPath.isEmpty() )
@@ -1255,26 +1255,36 @@ void MainWindow::on_actionAdd_Slice_Point_triggered()
 
 void MainWindow::on_actionApply_Gain_triggered()
 {
-    ApplyGainDialog dialog;
+    const QString tempDirPath = mAudioSetupDialog->getTempDirPath();
 
-    if ( dialog.exec() == QDialog::Accepted )
+    if ( ! tempDirPath.isEmpty() )
     {
-        const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+        ApplyGainDialog dialog;
 
-        foreach ( int orderPos, orderPositions )
+        if ( dialog.exec() == QDialog::Accepted )
         {
-            QString fileBaseName;
-            fileBaseName.setNum( mUndoStack.index() );
+            const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
 
-            QUndoCommand* command = new ApplyGainCommand( dialog.getGainValue(),
-                                                          orderPos,
-                                                          mUI->waveGraphicsView,
-                                                          mCurrentSampleHeader,
-                                                          mFileHandler,
-                                                          "/dev/shm",
-                                                          fileBaseName );
-            mUndoStack.push( command );
+            foreach ( int orderPos, orderPositions )
+            {
+                QString fileBaseName;
+                fileBaseName.setNum( mUndoStack.index() );
+
+                QUndoCommand* command = new ApplyGainCommand( dialog.getGainValue(),
+                                                              orderPos,
+                                                              mUI->waveGraphicsView,
+                                                              mCurrentSampleHeader,
+                                                              mFileHandler,
+                                                              tempDirPath,
+                                                              fileBaseName );
+                mUndoStack.push( command );
+            }
         }
+    }
+    else
+    {
+        showWarningDialog( tr("Temp dir invalid!"),
+                           tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
     }
 }
 

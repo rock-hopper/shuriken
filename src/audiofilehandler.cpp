@@ -134,10 +134,10 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
 
 
 QString AudioFileHandler::saveAudioFile( const QString dirPath,
-                                      const QString fileBaseName,
-                                      const SharedSampleBuffer sampleBuffer,
-                                      const SharedSampleHeader sampleHeader,
-                                      const bool isTempFile )
+                                         const QString fileBaseName,
+                                         const SharedSampleBuffer sampleBuffer,
+                                         const SharedSampleHeader sampleHeader,
+                                         const bool isTempFile )
 {
     const int hopSize = 8192;
     const int numChans = sampleHeader->numChans;

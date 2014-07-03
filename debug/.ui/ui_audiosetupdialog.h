@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'audiosetupdialog.ui'
 **
-** Created: Sun Jun 29 15:05:55 2014
+** Created: Thu Jul 3 10:36:36 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -21,8 +21,10 @@
 #include <QtGui/QFormLayout>
 #include <QtGui/QFrame>
 #include <QtGui/QGridLayout>
+#include <QtGui/QHBoxLayout>
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
+#include <QtGui/QLineEdit>
 #include <QtGui/QListWidget>
 #include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
@@ -82,6 +84,13 @@ public:
     QFrame *line;
     QLabel *label_15;
     QCheckBox *checkBox_JackSync;
+    QWidget *tab;
+    QFormLayout *formLayout_2;
+    QLabel *label_5;
+    QHBoxLayout *horizontalLayout;
+    QLineEdit *lineEdit_TempDir;
+    QPushButton *pushButton_ChooseTempDir;
+    QLabel *label_DirValidity;
     QDialogButtonBox *buttonBox;
     QButtonGroup *buttonGroup_Phase;
     QButtonGroup *buttonGroup_Transients;
@@ -366,6 +375,36 @@ public:
         gridLayout->addWidget(checkBox_JackSync, 8, 1, 1, 1);
 
         tabWidget->addTab(tab_TimeStretch, QString());
+        tab = new QWidget();
+        tab->setObjectName(QString::fromUtf8("tab"));
+        formLayout_2 = new QFormLayout(tab);
+        formLayout_2->setObjectName(QString::fromUtf8("formLayout_2"));
+        label_5 = new QLabel(tab);
+        label_5->setObjectName(QString::fromUtf8("label_5"));
+
+        formLayout_2->setWidget(0, QFormLayout::LabelRole, label_5);
+
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+        lineEdit_TempDir = new QLineEdit(tab);
+        lineEdit_TempDir->setObjectName(QString::fromUtf8("lineEdit_TempDir"));
+
+        horizontalLayout->addWidget(lineEdit_TempDir);
+
+        pushButton_ChooseTempDir = new QPushButton(tab);
+        pushButton_ChooseTempDir->setObjectName(QString::fromUtf8("pushButton_ChooseTempDir"));
+
+        horizontalLayout->addWidget(pushButton_ChooseTempDir);
+
+
+        formLayout_2->setLayout(0, QFormLayout::FieldRole, horizontalLayout);
+
+        label_DirValidity = new QLabel(tab);
+        label_DirValidity->setObjectName(QString::fromUtf8("label_DirValidity"));
+
+        formLayout_2->setWidget(1, QFormLayout::FieldRole, label_DirValidity);
+
+        tabWidget->addTab(tab, QString());
 
         verticalLayout->addWidget(tabWidget);
 
@@ -381,7 +420,7 @@ public:
         QObject::connect(buttonBox, SIGNAL(accepted()), AudioSetupDialog, SLOT(accept()));
         QObject::connect(buttonBox, SIGNAL(rejected()), AudioSetupDialog, SLOT(reject()));
 
-        tabWidget->setCurrentIndex(0);
+        tabWidget->setCurrentIndex(2);
 
 
         QMetaObject::connectSlotsByName(AudioSetupDialog);
@@ -426,6 +465,10 @@ public:
         label_15->setText(QApplication::translate("AudioSetupDialog", "JACK Sync:", 0, QApplication::UnicodeUTF8));
         checkBox_JackSync->setText(QApplication::translate("AudioSetupDialog", "Enable", 0, QApplication::UnicodeUTF8));
         tabWidget->setTabText(tabWidget->indexOf(tab_TimeStretch), QApplication::translate("AudioSetupDialog", "Time Stretch", 0, QApplication::UnicodeUTF8));
+        label_5->setText(QApplication::translate("AudioSetupDialog", "Temp Dir:", 0, QApplication::UnicodeUTF8));
+        pushButton_ChooseTempDir->setText(QApplication::translate("AudioSetupDialog", "Choose...", 0, QApplication::UnicodeUTF8));
+        label_DirValidity->setText(QString());
+        tabWidget->setTabText(tabWidget->indexOf(tab), QApplication::translate("AudioSetupDialog", "Paths", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'applygaindialog.ui'
 **
-** Created: Wed Jul 2 16:42:48 2014
+** Created: Thu Jul 3 10:12:11 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!

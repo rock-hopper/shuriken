@@ -24,6 +24,7 @@
 #define APPLYGAINDIALOG_H
 
 #include <QDialog>
+#include "JuceHeader.h"
 
 
 namespace Ui
@@ -50,6 +51,9 @@ private:
 private slots:
     void on_doubleSpinBox_Gain_valueChanged( const double value );
     void on_dial_Gain_valueChanged( const int value );
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( ApplyGainDialog );
 };
 
 #endif // APPLYGAINDIALOG_H

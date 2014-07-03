@@ -189,7 +189,7 @@
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Stretch Options</string>
+         <string>Stretch Options...</string>
         </property>
        </widget>
       </item>

@@ -158,7 +158,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/audioanalyser.cpp \
     src/globals.cpp \
     src/helpform.cpp \
-    src/applygaindialog.cpp
+    src/applygaindialog.cpp \
+    src/directoryvalidator.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -377,7 +378,8 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/rubberbandaudiosource.h \
     src/audioanalyser.h \
     src/helpform.h \
-    src/applygaindialog.h
+    src/applygaindialog.h \
+    src/directoryvalidator.h
 FORMS += src/mainwindow.ui \
     src/audiosetupdialog.ui \
     src/helpform.ui \

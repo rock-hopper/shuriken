@@ -29,11 +29,11 @@
 #include <QAbstractButton>
 #include <rubberband/RubberBandStretcher.h>
 #include "JuceHeader.h"
+#include "simplesynth.h"
+#include "directoryvalidator.h"
 
 using namespace RubberBand;
 
-
-class SynthAudioSource;
 
 namespace Ui
 {
@@ -55,10 +55,13 @@ public:
     bool isRealtimeModeEnabled() const;
     void enableRealtimeMode( const bool isEnabled );
 
-    bool isJackSyncEnabled() const;
-
     RubberBandStretcher::Options getStretcherOptions() const                    { return mStretcherOptions; }
 
+    bool isJackSyncEnabled() const;
+
+    // Returns the absolute path of the user-defined temp directory
+    // if valid, otherwise returns an empty string
+    QString getTempDirPath() const;
 
 protected:
     void changeEvent( QEvent* event );
@@ -92,6 +95,8 @@ private:
     static String getNameForChannelPair( const String& name1, const String& name2 );
     static QString getNoDeviceString() { return "<< " + tr("none") + " >>"; }
 
+    ScopedPointer<DirectoryValidator> mDirectoryValidator;
+
 signals:
     void realtimeModeToggled( const bool isEnabled );
     void stretchOptionChanged( const RubberBandStretcher::Options option );
@@ -103,6 +108,7 @@ signals:
     void jackSyncToggled( const bool isEnabled );
 
 private slots:
+    void on_pushButton_ChooseTempDir_clicked();
     void on_checkBox_JackSync_toggled( const bool isChecked );
     void on_radioButton_HighConsistency_clicked();
     void on_radioButton_HighQuality_clicked();
@@ -133,6 +139,8 @@ private slots:
 
     void accept();
     void reject();
+
+    void displayDirValidityText( const bool isValid );
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( AudioSetupDialog );

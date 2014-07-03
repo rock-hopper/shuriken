@@ -445,7 +445,7 @@ ApplyGainCommand::ApplyGainCommand( const float gain,
     mTempDirPath( tempDirPath ),
     mFileBaseName( fileBaseName )
 {
-    setText( "Reverse" );
+    setText( "Apply Gain" );
 }
 
 

@@ -22,9 +22,9 @@
 
 #include "audiosetupdialog.h"
 #include "ui_audiosetupdialog.h"
-#include "simplesynth.h"
 #include "globals.h"
 #include <QMessageBox>
+#include <QFileDialog>
 #include <QDebug>
 
 
@@ -56,6 +56,16 @@ AudioSetupDialog::AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* 
     const QString backendName = mDeviceManager.getCurrentAudioDeviceType().toRawUTF8();
     const int index = mUI->comboBox_AudioBackend->findText( backendName );
     mUI->comboBox_AudioBackend->setCurrentIndex( index ); // This will also update all the other widgets
+
+
+    // Paths
+    mDirectoryValidator = new DirectoryValidator();
+    mUI->lineEdit_TempDir->setValidator( mDirectoryValidator );
+
+    QObject::connect( mDirectoryValidator, SIGNAL( isValid(bool) ),
+                      this, SLOT( displayDirValidityText(bool) ) );
+
+    mUI->lineEdit_TempDir->setText( QDir::tempPath() );
 }
 
 
@@ -92,6 +102,33 @@ void AudioSetupDialog::enableRealtimeMode( const bool isEnabled )
 bool AudioSetupDialog::isJackSyncEnabled() const
 {
     return mUI->checkBox_JackSync->isChecked();
+}
+
+
+
+QString AudioSetupDialog::getTempDirPath() const
+{
+    QDir dir( mUI->lineEdit_TempDir->text() );
+
+    bool isTempDirValid = false;
+
+    if ( dir.exists( "shuriken-username" ) )
+    {
+        isTempDirValid = true;
+    }
+    else
+    {
+        isTempDirValid = dir.mkdir( "shuriken-username" );
+    }
+
+    if ( isTempDirValid )
+    {
+        return dir.absoluteFilePath( "shuriken-username" );
+    }
+    else
+    {
+        return QString();
+    }
 }
 
 
@@ -523,6 +560,20 @@ void AudioSetupDialog::reject()
 
 
 
+void AudioSetupDialog::displayDirValidityText( const bool isValid )
+{
+    if ( isValid )
+    {
+        mUI->label_DirValidity->clear();
+    }
+    else
+    {
+        mUI->label_DirValidity->setText( tr("Dir doesn't exist") );
+    }
+}
+
+
+
 //====================
 // "Audio Setup" tab:
 
@@ -746,7 +797,7 @@ void AudioSetupDialog::on_checkBox_MidiInputTestTone_clicked( const bool isCheck
 
 
 //====================
-// "Timestretch" tab:
+// "Time Stretch" tab:
 
 void AudioSetupDialog::on_radioButton_Offline_clicked()
 {
@@ -936,4 +987,17 @@ void AudioSetupDialog::on_radioButton_HighConsistency_clicked()
 void AudioSetupDialog::on_checkBox_JackSync_toggled( const bool isChecked )
 {
     emit jackSyncToggled( isChecked );
+}
+
+
+
+//====================
+// "Paths" tab:
+
+void AudioSetupDialog::on_pushButton_ChooseTempDir_clicked()
+{
+    const QString dir = QFileDialog::getExistingDirectory( this, tr("Choose Directory"), "/",
+                                                           QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+    mUI->lineEdit_TempDir->setText( dir );
 }
