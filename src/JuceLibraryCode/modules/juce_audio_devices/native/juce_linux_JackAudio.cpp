@@ -138,7 +138,7 @@ public:
                 mMidiPortIn = jack_port_register(mJackClient, "midi_in", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
             }
 
-            if (libjack_session_is_supported && mConfig.session_callback)
+            if (libjack_session_is_supported && mConfig.sessionCallback)
             {
                 jack_set_session_callback(mJackClient, sessionCallback, this);
             }
@@ -223,7 +223,6 @@ public:
 
         // activate client !
         jack_set_process_callback (mJackClient, JackAudioIODevice::processCallback, this);
-        jack_set_freewheel_callback (mJackClient, JackAudioIODevice::freewheelCallback, this);
         jack_on_shutdown (mJackClient, JackAudioIODevice::shutdownCallback, this);
 
         jack_activate (mJackClient); mIsClientActivated = true;
@@ -256,9 +255,6 @@ public:
             jack_on_shutdown (mJackClient, JackAudioIODevice::shutdownCallback, nullptr);
         }
 
-        if (mConfig.freewheel_flag)
-            *mConfig.freewheel_flag = -1;
-
         mIsDeviceOpen = false;
 
         gCurrentJackBPM = 0.0;
@@ -277,68 +273,6 @@ public:
             mAudioIOCallback->audioDeviceAboutToStart (this);
 
         mIsDevicePlaying = (mAudioIOCallback != nullptr);
-    }
-
-
-
-    void freewheel (int starting ) {
-        if (mConfig.freewheel_flag) *mConfig.freewheel_flag = starting;
-    }
-
-
-
-    void process (int numFrames)
-    {
-        jack_transport_query (mJackClient, mPositionInfo);
-        gCurrentJackBPM = mPositionInfo->beats_per_minute;
-
-        if (mMidiPortIn != nullptr && gJackMidiClient != nullptr)
-        {
-            void* buf = jack_port_get_buffer (mMidiPortIn, numFrames);
-            jack_nframes_t event_count = jack_midi_get_event_count (buf);
-            jack_midi_event_t in_event;
-
-            for (jack_nframes_t i=0; i < event_count; ++i)
-            {
-                jack_midi_event_get (&in_event, buf, i);
-                //std::cerr << "add event : "<< (void*)*(const uint8_t*)in_event.buffer << ", sz=" << in_event.size << " sample: " << in_event.time << "\n";
-
-                const MidiMessage message ((const uint8*) in_event.buffer, in_event.size, Time::getMillisecondCounter() * 0.001);
-                gJackMidiClient->handleIncomingMidiMessage (message, 0);
-            }
-        }
-
-        int i, numActiveInChans = 0, numActiveOutChans = 0;
-
-        for (i = 0; i < mInputPorts.size(); ++i)
-        {
-            jack_default_audio_sample_t *in =
-                (jack_default_audio_sample_t *) jack_port_get_buffer (mInputPorts.getUnchecked(i), numFrames);
-            jassert (in != nullptr);
-            mInChanBuffers [numActiveInChans++] = (float*) in;
-        }
-
-        for (i = 0; i < mOutputPorts.size(); ++i)
-        {
-            jack_default_audio_sample_t *out =
-                (jack_default_audio_sample_t *) jack_port_get_buffer (mOutputPorts.getUnchecked(i), numFrames);
-            jassert (out != nullptr);
-            mOutChanBuffers [numActiveOutChans++] = (float*) out;
-        }
-
-        if (mAudioIOCallback != nullptr)
-        {
-            mAudioIOCallback->audioDeviceIOCallback ((const float**) mInChanBuffers,
-                                             mInputPorts.size(),
-                                             mOutChanBuffers,
-                                             mOutputPorts.size(),
-                                             numFrames);
-        }
-        else
-        {
-            for (i = 0; i < mOutputPorts.size(); ++i)
-                zeromem (mOutChanBuffers[i], sizeof (float) * numFrames);
-        }
     }
 
 
@@ -430,18 +364,57 @@ public:
 
 
 private:
-    static void threadInitCallback (void* /*callbackArgument*/) {}
-
-
-
-    static void shutdownCallback (void* callbackArgument)
+    void process (int numFrames)
     {
-        JackAudioIODevice* device = (JackAudioIODevice*) callbackArgument;
+        jack_transport_query (mJackClient, mPositionInfo);
+        gCurrentJackBPM = mPositionInfo->beats_per_minute;
 
-        if (device)
+        if (mMidiPortIn != nullptr && gJackMidiClient != nullptr)
         {
-            device->mJackClient = 0;
-            device->close ();
+            void* buf = jack_port_get_buffer (mMidiPortIn, numFrames);
+            jack_nframes_t event_count = jack_midi_get_event_count (buf);
+            jack_midi_event_t in_event;
+
+            for (jack_nframes_t i=0; i < event_count; ++i)
+            {
+                jack_midi_event_get (&in_event, buf, i);
+                //std::cerr << "add event : "<< (void*)*(const uint8_t*)in_event.buffer << ", sz=" << in_event.size << " sample: " << in_event.time << "\n";
+
+                const MidiMessage message ((const uint8*) in_event.buffer, in_event.size, Time::getMillisecondCounter() * 0.001);
+                gJackMidiClient->handleIncomingMidiMessage (message, 0);
+            }
+        }
+
+        int i, numActiveInChans = 0, numActiveOutChans = 0;
+
+        for (i = 0; i < mInputPorts.size(); ++i)
+        {
+            jack_default_audio_sample_t *in =
+                (jack_default_audio_sample_t *) jack_port_get_buffer (mInputPorts.getUnchecked(i), numFrames);
+            jassert (in != nullptr);
+            mInChanBuffers [numActiveInChans++] = (float*) in;
+        }
+
+        for (i = 0; i < mOutputPorts.size(); ++i)
+        {
+            jack_default_audio_sample_t *out =
+                (jack_default_audio_sample_t *) jack_port_get_buffer (mOutputPorts.getUnchecked(i), numFrames);
+            jassert (out != nullptr);
+            mOutChanBuffers [numActiveOutChans++] = (float*) out;
+        }
+
+        if (mAudioIOCallback != nullptr)
+        {
+            mAudioIOCallback->audioDeviceIOCallback ((const float**) mInChanBuffers,
+                                             mInputPorts.size(),
+                                             mOutChanBuffers,
+                                             mOutputPorts.size(),
+                                             numFrames);
+        }
+        else
+        {
+            for (i = 0; i < mOutputPorts.size(); ++i)
+                zeromem (mOutChanBuffers[i], sizeof (float) * numFrames);
         }
     }
 
@@ -459,8 +432,9 @@ private:
 
 
 
-    struct SessionCallbackMessage {
-      jack_session_event_t *event;
+    struct SessionCallbackMessage
+    {
+        jack_session_event_t *event;
     };
 
 
@@ -469,12 +443,12 @@ private:
 //      const SessionCallbackMessage *sm;
 //      //printf("sessionCallback, received message\n");
 //      if ((sm = dynamic_cast<const SessionCallbackMessage*>(&msg))) {
-//        if (config.session_callback) {
+//        if (config.sessionCallback) {
 //          JackSessionCallbackArg arg;
 //          arg.session_directory = sm->event->session_dir;
 //          arg.session_uuid = sm->event->client_uuid;
 //          arg.quit = (sm->event->type == JackSessionSaveAndQuit);
-//          config.session_callback(arg);
+//          config.sessionCallback(arg);
 //
 //          sm->event->command_line = strdup(arg.command_line.toUTF8().getAddress());
 //        }
@@ -495,11 +469,18 @@ private:
 
 
 
-    static void freewheelCallback (int starting, void *callbackArgument)
+    static void threadInitCallback (void* /*callbackArgument*/) {}
+
+
+
+    static void shutdownCallback (void* callbackArgument)
     {
         JackAudioIODevice* device = (JackAudioIODevice*) callbackArgument;
-        if (device) {
-            device->freewheel (starting);
+
+        if (device)
+        {
+            device->mJackClient = 0;
+            device->close ();
         }
     }
 

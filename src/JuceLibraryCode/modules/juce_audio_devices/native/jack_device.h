@@ -37,16 +37,18 @@ struct JackSessionCallbackArg
 struct JackClientConfig
 {
     String clientName;
+
     // size of array = number of input channels. If the strings are empty, default names are chosen (in_1 , in_2 etc)
     StringArray inputChannels;
     StringArray outputChannels;
+
     bool isMidiEnabled;
     bool isAutoConnectEnabled;
-    int* freewheel_flag; // optional flag toggled in freewheel mode
+
     String session_uuid;
 
     typedef void (*SessionCallback)(JackSessionCallbackArg &arg);
-    SessionCallback session_callback;
+    SessionCallback sessionCallback;
 };
 
 
@@ -56,8 +58,7 @@ void getDefaultJackClientConfig (JackClientConfig &conf)
     conf.outputChannels.addTokens (OUTPUT_CHAN_NAMES, false);
     conf.isMidiEnabled = false;
     conf.isAutoConnectEnabled = false;
-    conf.freewheel_flag = nullptr;
-    conf.session_callback = nullptr;
+    conf.sessionCallback = nullptr;
 }
 
 #endif // JACK_DEVICE_H

@@ -3,11 +3,6 @@ TODO
 Release Critical
 ================
 
-Code Improvements
------------------
-JUCE_MIDI/JUCE_JACK - class members public to private, getGlobalJackClient
-
-
 Add Features
 ------------
 LADISH L1
@@ -33,8 +28,6 @@ Export h2drumkit, SFZ
 Dialogs
 -------
 Assign samples to MIDI keys dialog
-
-Help dialog
 
 User interface dialog
 

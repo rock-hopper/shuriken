@@ -185,7 +185,7 @@ private:
 
 //==============================================================================
 
-static JackMidiClient* gJackMidiClient;
+static JackMidiClient* volatile gJackMidiClient;
 
 
 //==============================================================================
