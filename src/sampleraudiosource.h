@@ -37,7 +37,7 @@ public:
     // AudioDeviceManager::addAudioCallback() to ensure that the current playback
     // sample rate is being set for each sampler voice
     void setSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
-    bool setSampleRanges( const QList<SharedSampleRange> sampleRangeList );
+    void setSampleRanges( const QList<SharedSampleRange> sampleRangeList );
 
     void playRange( const SharedSampleRange sampleRange );
     void playAll();
@@ -56,14 +56,22 @@ private:
                        const qreal sampleRate );
     void clearSampleRanges();
 
+    void updateNoteOnFrameNumList();
+
     SharedSampleBuffer mSampleBuffer;
-    int mFileSampleRate;
+    QList<SharedSampleRange> mSampleRangeList;
+
+    qreal mFileSampleRate;
+    volatile qreal mPlaybackSampleRate;
+
     MidiMessageCollector mMidiCollector;
     Synthesiser mSampler;
+
     int mNextFreeKey;
     int mStartKey;
+
     QList<int> mNoteOnFrameNumList;
-    volatile bool mIsPlaySampleSeqEnabled;
+    volatile bool mIsPlaySeqEnabled;
     volatile int mNoteCounter;
     volatile int mFrameCounter;
 

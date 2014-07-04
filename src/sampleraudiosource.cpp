@@ -28,11 +28,16 @@
 //==================================================================================================
 // Public:
 
-SamplerAudioSource::SamplerAudioSource() : AudioSource()
+SamplerAudioSource::SamplerAudioSource() :
+    AudioSource(),
+    mFileSampleRate( 0.0 ),
+    mPlaybackSampleRate( 0.0 ),
+    mNextFreeKey( DEFAULT_KEY ),
+    mStartKey( DEFAULT_KEY ),
+    mIsPlaySeqEnabled( false ),
+    mNoteCounter( 0 ),
+    mFrameCounter( 0 )
 {
-    mNextFreeKey = DEFAULT_KEY;
-    mStartKey = DEFAULT_KEY;
-    mIsPlaySampleSeqEnabled = false;
 }
 
 
@@ -57,19 +62,18 @@ void SamplerAudioSource::setSample( const SharedSampleBuffer sampleBuffer, const
     addNewSample( sampleBuffer, sampleRange, sampleRate );
     mSampleBuffer = sampleBuffer;
     mFileSampleRate = sampleRate;
-    mNoteOnFrameNumList.append( 0 );
+
+    mSampleRangeList << sampleRange;
 }
 
 
 
-bool SamplerAudioSource::setSampleRanges( const QList<SharedSampleRange> sampleRangeList )
+void SamplerAudioSource::setSampleRanges( const QList<SharedSampleRange> sampleRangeList )
 {
-    bool isSuccessful = false;
-    int noteOnFrameNum = 0;
-
     if ( ! mSampleBuffer.isNull() )
     {
         clearSampleRanges();
+        mSampleRangeList = sampleRangeList;
 
         if ( sampleRangeList.size() > MAX_POLYPHONY - DEFAULT_KEY )
         {
@@ -78,19 +82,15 @@ bool SamplerAudioSource::setSampleRanges( const QList<SharedSampleRange> sampleR
 
         mStartKey = mNextFreeKey;
 
-        foreach ( SharedSampleRange sampleRange, sampleRangeList )
+        int i = 0;
+        while (  i < sampleRangeList.size() && i < MAX_POLYPHONY )
         {
-            isSuccessful = addNewSample( mSampleBuffer, sampleRange, mFileSampleRate );
-
-            if ( isSuccessful )
-            {
-                mNoteOnFrameNumList.append( noteOnFrameNum );
-                noteOnFrameNum += sampleRange->numFrames;
-            }
+            addNewSample( mSampleBuffer, sampleRangeList.at( i ), mFileSampleRate );
+            i++;
         }
-    }
 
-    return isSuccessful;
+        updateNoteOnFrameNumList();
+    }
 }
 
 
@@ -117,7 +117,7 @@ void SamplerAudioSource::playRange( const SharedSampleRange sampleRange )
 
 void SamplerAudioSource::playAll()
 {
-    mIsPlaySampleSeqEnabled = true;
+    mIsPlaySeqEnabled = true;
     mNoteCounter = 0;
     mFrameCounter = 0;
 }
@@ -128,7 +128,7 @@ void SamplerAudioSource::stop()
 {
     const int midiChannel = 1;
     const bool allowTailOff = false;
-    mIsPlaySampleSeqEnabled = false;
+    mIsPlaySeqEnabled = false;
 
     mSampler.allNotesOff( midiChannel, allowTailOff );
 }
@@ -137,8 +137,10 @@ void SamplerAudioSource::stop()
 
 void SamplerAudioSource::prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate )
 {
+    mPlaybackSampleRate = sampleRate;
     mMidiCollector.reset( sampleRate );
     mSampler.setCurrentPlaybackSampleRate( sampleRate );
+    updateNoteOnFrameNumList();
 }
 
 
@@ -146,7 +148,7 @@ void SamplerAudioSource::prepareToPlay( int /*samplesPerBlockExpected*/, double 
 void SamplerAudioSource::releaseResources()
 {
     // Do not clear the voices, sample ranges or sample buffer here as 'releaseResources()' could be
-    // called when the user is simply changing the playback sample rate in the settings dialog
+    // called when the user is simply changing the playback sample rate in the options dialog
 }
 
 
@@ -160,7 +162,8 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
     MidiBuffer incomingMidi;
     mMidiCollector.removeNextBlockOfMessages( incomingMidi, bufferToFill.numSamples );
 
-    if ( mIsPlaySampleSeqEnabled )
+    // If requested, play back all sample ranges in sequence by adding appropriate MIDI messages to the buffer
+    if ( mIsPlaySeqEnabled )
     {
         int noteOnFrameNum = mNoteOnFrameNumList.at( mNoteCounter );
 
@@ -174,13 +177,14 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
             incomingMidi.addEvent( message, noteOnFrameNum % bufferToFill.numSamples );
 
             mNoteCounter++;
+
             if ( mNoteCounter < mNoteOnFrameNumList.size() )
             {
                 noteOnFrameNum = mNoteOnFrameNumList.at( mNoteCounter );
             }
             else
             {
-                mIsPlaySampleSeqEnabled = false;
+                mIsPlaySeqEnabled = false;
                 break;
             }
         }
@@ -227,10 +231,30 @@ bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer,
 
 void SamplerAudioSource::clearSampleRanges()
 {
-    mIsPlaySampleSeqEnabled = false;
-    mNoteOnFrameNumList.clear();
+    mIsPlaySeqEnabled = false;
     mSampler.clearVoices();
     mSampler.clearSounds();
+    mNoteOnFrameNumList.clear();
+    mSampleRangeList.clear();
     mNextFreeKey = DEFAULT_KEY;
     mStartKey = DEFAULT_KEY;
+}
+
+
+
+void SamplerAudioSource::updateNoteOnFrameNumList()
+{
+    if ( mFileSampleRate > 0.0 )
+    {
+        mNoteOnFrameNumList.clear();
+        int noteOnFrameNum = 0;
+
+        int i = 0;
+        while (  i < mSampleRangeList.size() && i < MAX_POLYPHONY )
+        {
+            mNoteOnFrameNumList.append( noteOnFrameNum );
+            noteOnFrameNum += mSampleRangeList.at( i )->numFrames * ( mPlaybackSampleRate / mFileSampleRate );
+            i++;
+        }
+    }
 }
