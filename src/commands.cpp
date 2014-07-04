@@ -881,6 +881,10 @@ void ApplyTimeStretchCommand::updateSampleRanges( const qreal timeRatio, const i
     // Reapply all audio modifications (gain, reverse, etc)
     foreach ( SharedSampleRange range, mMainWindow->mSampleRangeList )
     {
+        if ( range->gain != 1.0f )
+        {
+            mMainWindow->mCurrentSampleBuffer->applyGain( range->startFrame, range->numFrames, range->gain );
+        }
         if ( range->isReversed )
         {
             mMainWindow->mCurrentSampleBuffer->reverse( range->startFrame, range->numFrames );
