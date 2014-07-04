@@ -271,10 +271,12 @@ void MainWindow::tearDownSampler()
     if ( mIsAudioInitialised )
     {
         mAudioSourcePlayer.setSource( NULL );
-        mRubberbandAudioSource = NULL;
-        mSamplerAudioSource = NULL;
+
         mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
         mDeviceManager.removeMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
+
+        mRubberbandAudioSource = NULL;
+        mSamplerAudioSource = NULL;
     }
 }
 
