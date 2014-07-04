@@ -155,20 +155,20 @@ void MainWindow::initialiseAudio()
     if ( error.isNotEmpty() )
     {
         showWarningDialog( tr("Error initialising audio device manager!"), error.toRawUTF8() );
-        mUI->actionAudio_Setup->setDisabled( true );
+        mUI->actionOptions->setDisabled( true );
         mIsAudioInitialised = false;
     }
     else
     {
-        mAudioSetupDialog = new AudioSetupDialog( mDeviceManager, this );
+        mOptionsDialog = new AudioSetupDialog( mDeviceManager, this );
 
-        QObject::connect( mAudioSetupDialog.get(), SIGNAL( realtimeModeToggled(bool) ),
+        QObject::connect( mOptionsDialog.get(), SIGNAL( realtimeModeToggled(bool) ),
                           this, SLOT( enableRealtimeControls(bool) ) );
 
-        QObject::connect( mAudioSetupDialog.get(), SIGNAL( jackSyncToggled(bool) ),
+        QObject::connect( mOptionsDialog.get(), SIGNAL( jackSyncToggled(bool) ),
                           mUI->doubleSpinBox_NewBPM, SLOT( setHidden(bool) ) );
 
-        QObject::connect( mAudioSetupDialog.get(), SIGNAL( jackSyncToggled(bool) ),
+        QObject::connect( mOptionsDialog.get(), SIGNAL( jackSyncToggled(bool) ),
                           mUI->label_JackSync, SLOT( setVisible(bool) ) );
 
         mIsAudioInitialised = true;
@@ -195,28 +195,28 @@ void MainWindow::setUpSampler( const SharedSampleBuffer sampleBuffer, const Shar
             mSamplerAudioSource->setSampleRanges( mSampleRangeList );
         }
 
-        if ( mAudioSetupDialog->isRealtimeModeEnabled() ) // Realtime timestretch mode
+        if ( mOptionsDialog->isRealtimeModeEnabled() ) // Realtime timestretch mode
         {
             const int numChans = sampleBuffer->getNumChannels();
-            const RubberBandStretcher::Options options = mAudioSetupDialog->getStretcherOptions();
-            const bool isJackSyncEnabled = mAudioSetupDialog->isJackSyncEnabled();
+            const RubberBandStretcher::Options options = mOptionsDialog->getStretcherOptions();
+            const bool isJackSyncEnabled = mOptionsDialog->isJackSyncEnabled();
 
             mRubberbandAudioSource = new RubberbandAudioSource( mSamplerAudioSource, numChans, options, isJackSyncEnabled );
             mAudioSourcePlayer.setSource( mRubberbandAudioSource );
 
-            QObject::connect( mAudioSetupDialog.get(), SIGNAL( transientsOptionChanged(RubberBandStretcher::Options) ),
+            QObject::connect( mOptionsDialog.get(), SIGNAL( transientsOptionChanged(RubberBandStretcher::Options) ),
                               mRubberbandAudioSource.get(), SLOT( setTransientsOption(RubberBandStretcher::Options) ) );
 
-            QObject::connect( mAudioSetupDialog.get(), SIGNAL( phaseOptionChanged(RubberBandStretcher::Options) ),
+            QObject::connect( mOptionsDialog.get(), SIGNAL( phaseOptionChanged(RubberBandStretcher::Options) ),
                               mRubberbandAudioSource.get(), SLOT( setPhaseOption(RubberBandStretcher::Options) ) );
 
-            QObject::connect( mAudioSetupDialog.get(), SIGNAL( formantOptionChanged(RubberBandStretcher::Options) ),
+            QObject::connect( mOptionsDialog.get(), SIGNAL( formantOptionChanged(RubberBandStretcher::Options) ),
                               mRubberbandAudioSource.get(), SLOT( setFormantOption(RubberBandStretcher::Options) ) );
 
-            QObject::connect( mAudioSetupDialog.get(), SIGNAL( pitchOptionChanged(RubberBandStretcher::Options) ),
+            QObject::connect( mOptionsDialog.get(), SIGNAL( pitchOptionChanged(RubberBandStretcher::Options) ),
                               mRubberbandAudioSource.get(), SLOT( setPitchOption(RubberBandStretcher::Options) ) );
 
-            QObject::connect( mAudioSetupDialog.get(), SIGNAL( jackSyncToggled(bool) ),
+            QObject::connect( mOptionsDialog.get(), SIGNAL( jackSyncToggled(bool) ),
                               mRubberbandAudioSource.get(), SLOT( enableJackSync(bool) ) );
 
             on_checkBox_TimeStretch_toggled( mUI->checkBox_TimeStretch->isChecked() );
@@ -347,7 +347,7 @@ void MainWindow::enableUI()
         mUI->pushButton_Stop->setEnabled( true );
         mUI->pushButton_TimestretchOptions->setEnabled( true );
 
-        if ( mAudioSetupDialog->isRealtimeModeEnabled() )
+        if ( mOptionsDialog->isRealtimeModeEnabled() )
         {
             mUI->checkBox_TimeStretch->setVisible( true );
         }
@@ -639,15 +639,13 @@ void MainWindow::saveProject()
 
         if ( isOkToSave )
         {
-//            const QString filePath = projectDir.absoluteFilePath( "audio.wav" );
-
             QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
             const QString filePath = mFileHandler.saveAudioFile( projectDir.absolutePath(), "audio",  mCurrentSampleBuffer, mCurrentSampleHeader );
 
             if ( ! filePath.isEmpty() )
             {
-                const bool isRealtimeModeEnabled = mAudioSetupDialog->isRealtimeModeEnabled();
+                const bool isRealtimeModeEnabled = mOptionsDialog->isRealtimeModeEnabled();
 
                 XmlElement docElement( "project" );
                 docElement.setAttribute( "name", projDirName.toLocal8Bit().data() );
@@ -737,7 +735,7 @@ void MainWindow::openProject()
         docElement = XmlDocument::parse( File( filePath.toLocal8Bit().data() ) );
 
         // If the xml file was successfully read
-        if ( docElement.get() != NULL )
+        if ( docElement != NULL )
         {
             // If the main document element has a valid "project" tag
             if ( docElement->hasTagName( "project" ) )
@@ -835,8 +833,8 @@ void MainWindow::openProject()
                         mAppliedOriginalBPM = originalBpm;
                         mAppliedNewBPM = originalBpm;
 
-                        if ( mAudioSetupDialog != NULL )
-                            mAudioSetupDialog->enableRealtimeMode( isRealtimeModeEnabled );
+                        if ( mOptionsDialog != NULL )
+                            mOptionsDialog->enableRealtimeMode( isRealtimeModeEnabled );
 
                         mUI->checkBox_TimeStretch->setChecked( isTimeStretchChecked );
                         mUI->checkBox_PitchCorrection->setChecked( isPitchCorrectionChecked );
@@ -993,7 +991,7 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
         mUI->doubleSpinBox_OriginalBPM->setValue( mAppliedNewBPM );
         mUI->doubleSpinBox_NewBPM->setValue( mAppliedNewBPM );
 
-        QObject::connect( mAudioSetupDialog.get(), SIGNAL( windowOptionChanged() ),
+        QObject::connect( mOptionsDialog.get(), SIGNAL( windowOptionChanged() ),
                           this, SLOT( resetSampler() ) );
     }
     else // Offline mode
@@ -1003,7 +1001,7 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
         mUI->doubleSpinBox_OriginalBPM->setValue( mAppliedOriginalBPM );
         mUI->doubleSpinBox_NewBPM->setValue( mAppliedNewBPM );
 
-        QObject::disconnect( mAudioSetupDialog.get(), SIGNAL( windowOptionChanged() ),
+        QObject::disconnect( mOptionsDialog.get(), SIGNAL( windowOptionChanged() ),
                              this, SLOT( resetSampler() ) );
     }
 
@@ -1255,7 +1253,7 @@ void MainWindow::on_actionAdd_Slice_Point_triggered()
 
 void MainWindow::on_actionApply_Gain_triggered()
 {
-    const QString tempDirPath = mAudioSetupDialog->getTempDirPath();
+    const QString tempDirPath = mOptionsDialog->getTempDirPath();
 
     if ( ! tempDirPath.isEmpty() )
     {
@@ -1355,24 +1353,17 @@ void MainWindow::on_actionNormalise_triggered()
 //====================
 // "Options" menu:
 
-void MainWindow::on_actionAudio_Setup_triggered()
+void MainWindow::on_actionOptions_triggered()
 {
-    QPoint pos = mAudioSetupDialog->pos();
+    QPoint pos = mOptionsDialog->pos();
     if ( pos.x() < 0 )
         pos.setX( 0 );
     if ( pos.y() < 0 )
         pos.setY( 0 );
 
-    mAudioSetupDialog->move( pos );
-    mAudioSetupDialog->setCurrentTab( AudioSetupDialog::AUDIO_SETUP );
-    mAudioSetupDialog->show();
-}
-
-
-
-void MainWindow::on_actionUser_Interface_triggered()
-{
-
+    mOptionsDialog->move( pos );
+    mOptionsDialog->setCurrentTab( AudioSetupDialog::AUDIO_SETUP );
+    mOptionsDialog->show();
 }
 
 
@@ -1500,7 +1491,7 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
     {
         mRubberbandAudioSource->setOriginalBPM( originalBPM );
 
-        if ( ! mAudioSetupDialog->isJackSyncEnabled() && newBPM > 0.0 && originalBPM > 0.0 )
+        if ( ! mOptionsDialog->isJackSyncEnabled() && newBPM > 0.0 && originalBPM > 0.0 )
         {
             const qreal timeRatio = originalBPM / newBPM;
 
@@ -1648,13 +1639,13 @@ void MainWindow::on_actionAudition_triggered()
 
 void MainWindow::on_pushButton_TimestretchOptions_clicked()
 {
-    QPoint pos = mAudioSetupDialog->pos();
+    QPoint pos = mOptionsDialog->pos();
     if ( pos.x() < 0 )
         pos.setX( 0 );
     if ( pos.y() < 0 )
         pos.setY( 0 );
 
-    mAudioSetupDialog->move( pos );
-    mAudioSetupDialog->setCurrentTab( AudioSetupDialog::TIMESTRETCH );
-    mAudioSetupDialog->show();
+    mOptionsDialog->move( pos );
+    mOptionsDialog->setCurrentTab( AudioSetupDialog::TIMESTRETCH );
+    mOptionsDialog->show();
 }

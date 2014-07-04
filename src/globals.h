@@ -31,6 +31,7 @@
 #define OUTPUT_CHAN_NAMES           "out_L out_R"   // Names must be separated by whitespace
 
 #define AUDIO_CONFIG_FILE_PATH      "~/.shuriken/audioconfig.xml"
+#define PATHS_CONFIG_FILE_PATH      "~/.shuriken/pathsconfig.xml"
 
 extern volatile double gCurrentJackBPM;
 

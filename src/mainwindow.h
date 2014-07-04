@@ -85,7 +85,7 @@ private:
 
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
-    ScopedPointer<AudioSetupDialog> mAudioSetupDialog;
+    ScopedPointer<AudioSetupDialog> mOptionsDialog;
     ScopedPointer<HelpForm> mHelpForm;
 
     AudioDeviceManager mDeviceManager;
@@ -142,8 +142,7 @@ private slots:
     void on_actionJoin_triggered();
     void on_actionAbout_triggered();
     void on_actionHelp_triggered();
-    void on_actionUser_Interface_triggered();
-    void on_actionAudio_Setup_triggered();
+    void on_actionOptions_triggered();
     void on_actionEnvelope_triggered();
     void on_actionReverse_triggered();
     void on_actionDelete_triggered();

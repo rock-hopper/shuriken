@@ -59,8 +59,8 @@ public:
 
     bool isJackSyncEnabled() const;
 
-    // Returns the absolute path of the user-defined temp directory
-    // if valid, otherwise returns an empty string
+    // Returns the absolute path of the user-defined temp directory if valid,
+    // otherwise returns an empty string
     QString getTempDirPath() const;
 
 protected:

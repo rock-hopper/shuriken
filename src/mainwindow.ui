@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1042</width>
+    <width>1051</width>
     <height>618</height>
    </rect>
   </property>
@@ -408,7 +408,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1042</width>
+     <width>1051</width>
      <height>24</height>
     </rect>
    </property>
@@ -429,8 +429,7 @@
     <property name="title">
      <string>Options</string>
     </property>
-    <addaction name="actionAudio_Setup"/>
-    <addaction name="actionUser_Interface"/>
+    <addaction name="actionOptions"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -516,9 +515,12 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionAudio_Setup">
+  <action name="actionOptions">
    <property name="text">
-    <string>Audio Setup</string>
+    <string>Options</string>
+   </property>
+   <property name="toolTip">
+    <string>Options</string>
    </property>
   </action>
   <action name="actionOpen_Project">
@@ -657,14 +659,6 @@
    </property>
    <property name="text">
     <string>Envelope</string>
-   </property>
-  </action>
-  <action name="actionUser_Interface">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>User Interface</string>
    </property>
   </action>
   <action name="actionHelp">

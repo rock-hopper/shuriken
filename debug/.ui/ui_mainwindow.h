@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Thu Jul 3 10:12:11 2014
+** Created: Fri Jul 4 09:49:11 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -41,7 +41,7 @@ class Ui_MainWindow
 public:
     QAction *actionImport_Audio_File;
     QAction *actionQuit;
-    QAction *actionAudio_Setup;
+    QAction *actionOptions;
     QAction *actionOpen_Project;
     QAction *actionSave_Project;
     QAction *actionClose_Project;
@@ -52,7 +52,6 @@ public:
     QAction *actionDelete;
     QAction *actionReverse;
     QAction *actionEnvelope;
-    QAction *actionUser_Interface;
     QAction *actionHelp;
     QAction *actionAbout;
     QAction *actionJoin;
@@ -118,7 +117,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(1042, 618);
+        MainWindow->resize(1051, 618);
         actionImport_Audio_File = new QAction(MainWindow);
         actionImport_Audio_File->setObjectName(QString::fromUtf8("actionImport_Audio_File"));
         QIcon icon;
@@ -126,8 +125,8 @@ public:
         actionImport_Audio_File->setIcon(icon);
         actionQuit = new QAction(MainWindow);
         actionQuit->setObjectName(QString::fromUtf8("actionQuit"));
-        actionAudio_Setup = new QAction(MainWindow);
-        actionAudio_Setup->setObjectName(QString::fromUtf8("actionAudio_Setup"));
+        actionOptions = new QAction(MainWindow);
+        actionOptions->setObjectName(QString::fromUtf8("actionOptions"));
         actionOpen_Project = new QAction(MainWindow);
         actionOpen_Project->setObjectName(QString::fromUtf8("actionOpen_Project"));
         QIcon icon1;
@@ -178,9 +177,6 @@ public:
         actionEnvelope = new QAction(MainWindow);
         actionEnvelope->setObjectName(QString::fromUtf8("actionEnvelope"));
         actionEnvelope->setEnabled(false);
-        actionUser_Interface = new QAction(MainWindow);
-        actionUser_Interface->setObjectName(QString::fromUtf8("actionUser_Interface"));
-        actionUser_Interface->setEnabled(false);
         actionHelp = new QAction(MainWindow);
         actionHelp->setObjectName(QString::fromUtf8("actionHelp"));
         actionHelp->setEnabled(false);
@@ -507,7 +503,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1042, 24));
+        menuBar->setGeometry(QRect(0, 0, 1051, 24));
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
         menuOptions = new QMenu(menuBar);
@@ -536,8 +532,7 @@ public:
         menuFile->addAction(actionExport_As);
         menuFile->addSeparator();
         menuFile->addAction(actionQuit);
-        menuOptions->addAction(actionAudio_Setup);
-        menuOptions->addAction(actionUser_Interface);
+        menuOptions->addAction(actionOptions);
         menuEdit->addAction(actionUndo);
         menuEdit->addAction(actionRedo);
         menuEdit->addSeparator();
@@ -591,7 +586,10 @@ public:
         actionImport_Audio_File->setShortcut(QApplication::translate("MainWindow", "Ctrl+I", 0, QApplication::UnicodeUTF8));
         actionQuit->setText(QApplication::translate("MainWindow", "Quit", 0, QApplication::UnicodeUTF8));
         actionQuit->setShortcut(QApplication::translate("MainWindow", "Ctrl+Q", 0, QApplication::UnicodeUTF8));
-        actionAudio_Setup->setText(QApplication::translate("MainWindow", "Audio Setup", 0, QApplication::UnicodeUTF8));
+        actionOptions->setText(QApplication::translate("MainWindow", "Options", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        actionOptions->setToolTip(QApplication::translate("MainWindow", "Options", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
         actionOpen_Project->setText(QApplication::translate("MainWindow", "Open Project", 0, QApplication::UnicodeUTF8));
 #ifndef QT_NO_TOOLTIP
         actionOpen_Project->setToolTip(QApplication::translate("MainWindow", "Open Project", 0, QApplication::UnicodeUTF8));
@@ -619,7 +617,6 @@ public:
         actionReverse->setText(QApplication::translate("MainWindow", "Reverse", 0, QApplication::UnicodeUTF8));
         actionReverse->setShortcut(QApplication::translate("MainWindow", "R", 0, QApplication::UnicodeUTF8));
         actionEnvelope->setText(QApplication::translate("MainWindow", "Envelope", 0, QApplication::UnicodeUTF8));
-        actionUser_Interface->setText(QApplication::translate("MainWindow", "User Interface", 0, QApplication::UnicodeUTF8));
         actionHelp->setText(QApplication::translate("MainWindow", "Help", 0, QApplication::UnicodeUTF8));
         actionAbout->setText(QApplication::translate("MainWindow", "About", 0, QApplication::UnicodeUTF8));
         actionJoin->setText(QApplication::translate("MainWindow", "Join", 0, QApplication::UnicodeUTF8));

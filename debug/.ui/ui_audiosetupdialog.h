@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'audiosetupdialog.ui'
 **
-** Created: Thu Jul 3 10:36:36 2014
+** Created: Fri Jul 4 09:59:13 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -420,7 +420,7 @@ public:
         QObject::connect(buttonBox, SIGNAL(accepted()), AudioSetupDialog, SLOT(accept()));
         QObject::connect(buttonBox, SIGNAL(rejected()), AudioSetupDialog, SLOT(reject()));
 
-        tabWidget->setCurrentIndex(2);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(AudioSetupDialog);
@@ -428,7 +428,7 @@ public:
 
     void retranslateUi(QDialog *AudioSetupDialog)
     {
-        AudioSetupDialog->setWindowTitle(QApplication::translate("AudioSetupDialog", "Audio Setup", 0, QApplication::UnicodeUTF8));
+        AudioSetupDialog->setWindowTitle(QApplication::translate("AudioSetupDialog", "Options", 0, QApplication::UnicodeUTF8));
         label_AudioBackend->setText(QApplication::translate("AudioSetupDialog", "Audio Back-end:", 0, QApplication::UnicodeUTF8));
         label_AudioDevice->setText(QApplication::translate("AudioSetupDialog", "Audio Device:", 0, QApplication::UnicodeUTF8));
         pushButton_TestTone->setText(QApplication::translate("AudioSetupDialog", "Test Tone", 0, QApplication::UnicodeUTF8));

@@ -704,7 +704,7 @@ void ApplyTimeStretchCommand::stretchImpl( const qreal timeRatio, const qreal pi
 
     const int sampleRate = mMainWindow->mCurrentSampleHeader->sampleRate;
     const int numChans = mMainWindow->mCurrentSampleHeader->numChans;
-    const RubberBandStretcher::Options options = mMainWindow->mAudioSetupDialog->getStretcherOptions();
+    const RubberBandStretcher::Options options = mMainWindow->mOptionsDialog->getStretcherOptions();
 
     RubberBandStretcher stretcher( sampleRate, numChans, options, timeRatio, pitchScale );
 

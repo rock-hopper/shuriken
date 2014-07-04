@@ -60,13 +60,32 @@ AudioSetupDialog::AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* 
 
 
     // Paths
+    ScopedPointer<XmlElement> docElement;
+    docElement = XmlDocument::parse( File( PATHS_CONFIG_FILE_PATH ) );
+
+    QString tempDirPath = QDir::tempPath();
+
+    if ( docElement != NULL )
+    {
+        if ( docElement->hasTagName( "paths" ) )
+        {
+            forEachXmlChildElement( *docElement, elem )
+            {
+                if ( elem->hasTagName( "temp_dir" ) )
+                {
+                    tempDirPath = elem->getStringAttribute( "path" ).toRawUTF8();
+                }
+            }
+        }
+    }
+
     mDirectoryValidator = new DirectoryValidator();
     mUI->lineEdit_TempDir->setValidator( mDirectoryValidator );
 
     QObject::connect( mDirectoryValidator, SIGNAL( isValid(bool) ),
                       this, SLOT( displayDirValidityText(bool) ) );
 
-    mUI->lineEdit_TempDir->setText( QDir::tempPath() );
+    mUI->lineEdit_TempDir->setText( tempDirPath );
 }
 
 
@@ -783,14 +802,28 @@ void AudioSetupDialog::on_buttonBox_clicked( QAbstractButton* button )
 
     if ( stdButton == QDialogButtonBox::Save )
     {
+        // Save audio setup config
         ScopedPointer<XmlElement> stateXml( mDeviceManager.createStateXml() );
 
         if ( stateXml != NULL )
         {
-            File configFile( AUDIO_CONFIG_FILE_PATH );
-            configFile.create();
-            stateXml->writeToFile( configFile, String::empty );
+            File audioConfigFile( AUDIO_CONFIG_FILE_PATH );
+            audioConfigFile.create();
+            stateXml->writeToFile( audioConfigFile, String::empty );
         }
+
+        // Save paths config
+        XmlElement docElement( "paths" );
+
+        QString tempDir = mUI->lineEdit_TempDir->text();
+
+        XmlElement* tempDirElem = new XmlElement( "temp_dir" );
+        tempDirElem->setAttribute( "path", tempDir.toLocal8Bit().data() );
+        docElement.addChildElement( tempDirElem );
+
+        File pathsConfigFile( PATHS_CONFIG_FILE_PATH );
+        pathsConfigFile.create();
+        docElement.writeToFile( pathsConfigFile, String::empty );
     }
 }
 
