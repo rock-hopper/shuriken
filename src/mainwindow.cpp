@@ -121,6 +121,39 @@ void MainWindow::changeEvent( QEvent* event )
 
 
 
+void MainWindow::closeEvent( QCloseEvent* event )
+{
+    // Check for unsaved changes before continuing
+    if ( mUndoStack.isClean() )
+    {
+        event->accept();
+    }
+    else
+    {
+        const int buttonClicked = showUnsavedChangesDialog();
+
+        switch ( buttonClicked )
+        {
+        case QMessageBox::Save:
+            saveProject();
+            event->accept();
+            break;
+        case QMessageBox::Discard:
+            event->accept();
+            break;
+        case QMessageBox::Cancel:
+            event->ignore();
+            break;
+        default:
+            // Should never be reached
+            event->ignore();
+            break;
+        }
+    }
+}
+
+
+
 //void MainWindow::keyPressEvent( QKeyEvent* event )
 //{
 //    if ( event->key() == Qt::Key_Space )
@@ -1186,7 +1219,32 @@ void MainWindow::on_actionExport_As_triggered()
 
 void MainWindow::on_actionQuit_triggered()
 {
-    QCoreApplication::quit();
+    // Check for unsaved changes before continuing
+    if ( mUndoStack.isClean() )
+    {
+        QCoreApplication::quit();
+    }
+    else
+    {
+        const int buttonClicked = showUnsavedChangesDialog();
+
+        switch ( buttonClicked )
+        {
+        case QMessageBox::Save:
+            saveProject();
+            QCoreApplication::quit();
+            break;
+        case QMessageBox::Discard:
+            QCoreApplication::quit();
+            break;
+        case QMessageBox::Cancel:
+            // Do nothing
+            break;
+        default:
+            // Should never be reached
+            break;
+        }
+    }
 }
 
 
