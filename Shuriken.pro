@@ -159,7 +159,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/globals.cpp \
     src/helpform.cpp \
     src/applygaindialog.cpp \
-    src/directoryvalidator.cpp
+    src/directoryvalidator.cpp \
+    src/signallistener.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -379,7 +380,8 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/audioanalyser.h \
     src/helpform.h \
     src/applygaindialog.h \
-    src/directoryvalidator.h
+    src/directoryvalidator.h \
+    src/signallistener.h
 FORMS += src/mainwindow.ui \
     src/audiosetupdialog.ui \
     src/helpform.ui \
