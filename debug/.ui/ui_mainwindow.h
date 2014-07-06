@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Fri Jul 4 09:49:11 2014
+** Created: Sun Jul 6 17:52:55 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -67,6 +67,7 @@ public:
     QAction *actionSelect;
     QAction *actionSplit;
     QAction *actionAudition;
+    QAction *actionSave_As;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout_3;
     QHBoxLayout *horizontalLayout_2;
@@ -245,6 +246,12 @@ public:
         QIcon icon15;
         icon15.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/text-speak.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionAudition->setIcon(icon15);
+        actionSave_As = new QAction(MainWindow);
+        actionSave_As->setObjectName(QString::fromUtf8("actionSave_As"));
+        actionSave_As->setEnabled(false);
+        QIcon icon16;
+        icon16.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-save-as.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionSave_As->setIcon(icon16);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         verticalLayout_3 = new QVBoxLayout(centralWidget);
@@ -262,18 +269,18 @@ public:
         sizePolicy.setVerticalStretch(0);
         sizePolicy.setHeightForWidth(pushButton_Play->sizePolicy().hasHeightForWidth());
         pushButton_Play->setSizePolicy(sizePolicy);
-        QIcon icon16;
-        icon16.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/media-playback-start.png"), QSize(), QIcon::Normal, QIcon::Off);
-        pushButton_Play->setIcon(icon16);
+        QIcon icon17;
+        icon17.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/media-playback-start.png"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_Play->setIcon(icon17);
 
         horizontalLayout_2->addWidget(pushButton_Play);
 
         pushButton_Stop = new QPushButton(centralWidget);
         pushButton_Stop->setObjectName(QString::fromUtf8("pushButton_Stop"));
         pushButton_Stop->setEnabled(false);
-        QIcon icon17;
-        icon17.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/media-playback-stop.png"), QSize(), QIcon::Normal, QIcon::Off);
-        pushButton_Stop->setIcon(icon17);
+        QIcon icon18;
+        icon18.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/media-playback-stop.png"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_Stop->setIcon(icon18);
 
         horizontalLayout_2->addWidget(pushButton_Stop);
 
@@ -385,9 +392,9 @@ public:
         sizePolicy1.setVerticalStretch(0);
         sizePolicy1.setHeightForWidth(pushButton_Slice->sizePolicy().hasHeightForWidth());
         pushButton_Slice->setSizePolicy(sizePolicy1);
-        QIcon icon18;
-        icon18.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/transform-move.png"), QSize(), QIcon::Normal, QIcon::Off);
-        pushButton_Slice->setIcon(icon18);
+        QIcon icon19;
+        icon19.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/transform-move.png"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_Slice->setIcon(icon19);
 
         horizontalLayout->addWidget(pushButton_Slice);
 
@@ -526,6 +533,7 @@ public:
         menuBar->addAction(menuHelp->menuAction());
         menuFile->addAction(actionOpen_Project);
         menuFile->addAction(actionSave_Project);
+        menuFile->addAction(actionSave_As);
         menuFile->addAction(actionClose_Project);
         menuFile->addSeparator();
         menuFile->addAction(actionImport_Audio_File);
@@ -653,6 +661,7 @@ public:
         actionAudition->setToolTip(QApplication::translate("MainWindow", "Audition", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP
         actionAudition->setShortcut(QApplication::translate("MainWindow", "3", 0, QApplication::UnicodeUTF8));
+        actionSave_As->setText(QApplication::translate("MainWindow", "Save As...", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("MainWindow", "Original BPM:", 0, QApplication::UnicodeUTF8));
         pushButton_CalcBPM->setText(QApplication::translate("MainWindow", "Calc", 0, QApplication::UnicodeUTF8));
         label_2->setText(QApplication::translate("MainWindow", "New BPM:", 0, QApplication::UnicodeUTF8));

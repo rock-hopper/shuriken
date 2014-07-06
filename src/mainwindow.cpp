@@ -72,10 +72,10 @@ void MainWindow::connectWaveformToMainWindow( const SharedWaveformItem item )
 
 
 
-void MainWindow::openProject( const QString filePath )
+void MainWindow::openProject( const QString xmlFilePath )
 {
-    QFileInfo projFileInfo( filePath );
-    QDir projectDir = projFileInfo.absoluteDir();
+    QFileInfo xmlFileInfo( xmlFilePath );
+    QDir projectDir = xmlFileInfo.absoluteDir();
 
     QDir parentDir( projectDir );
     parentDir.cdUp();
@@ -83,7 +83,7 @@ void MainWindow::openProject( const QString filePath )
     mLastOpenedProjDir = parentDir.absolutePath();
 
     ScopedPointer<XmlElement> docElement;
-    docElement = XmlDocument::parse( File( filePath.toLocal8Bit().data() ) );
+    docElement = XmlDocument::parse( File( xmlFilePath.toLocal8Bit().data() ) );
 
     // If the xml file was successfully read
     if ( docElement != NULL )
@@ -199,9 +199,10 @@ void MainWindow::openProject( const QString filePath )
                         mUI->doubleSpinBox_NewBPM->setValue( newBpm );
                     }
 
-                    mUI->statusBar->showMessage( tr("Project: ") + projectName );
+                    mCurrentAudioFilePath = audioFilePath;
+                    mCurrentProjDirPath = projectDir.absolutePath();
 
-                    mCurrentAudioFilePath = filePath;
+                    mUI->statusBar->showMessage( tr("Project: ") + projectName );
 
                     QApplication::restoreOverrideCursor();
                 }
@@ -293,7 +294,7 @@ void MainWindow::closeEvent( QCloseEvent* event )
         switch ( buttonClicked )
         {
         case QMessageBox::Save:
-            saveProject();
+            on_actionSave_Project_triggered();
             event->accept();
             break;
         case QMessageBox::Discard:
@@ -520,6 +521,9 @@ void MainWindow::setupUI()
     QObject::connect( mUI->actionRedo, SIGNAL( triggered() ),
                       &mUndoStack, SLOT( redo() ) );
 
+    QObject::connect( &mUndoStack, SIGNAL( cleanChanged(bool) ),
+                      mUI->actionSave_Project, SLOT( setDisabled(bool) ) );
+
 
     // Create help form
     mHelpForm = new HelpForm();
@@ -564,7 +568,7 @@ void MainWindow::enableUI()
     mUI->pushButton_FindOnsets->setEnabled( true );
     mUI->pushButton_FindBeats->setEnabled( true );
 
-    mUI->actionSave_Project->setEnabled( true );
+    mUI->actionSave_As->setEnabled( true );
     mUI->actionClose_Project->setEnabled( true );
     mUI->actionSelect_All->setEnabled( true );
     mUI->actionSelect_None->setEnabled( true );
@@ -599,8 +603,7 @@ void MainWindow::disableUI()
     mUI->pushButton_FindOnsets->setEnabled( false );
     mUI->pushButton_FindBeats->setEnabled( false );
 
-
-    mUI->actionSave_Project->setEnabled( false );
+    mUI->actionSave_As->setEnabled( false );
     mUI->actionClose_Project->setEnabled( false );
     mUI->actionSelect_All->setEnabled( false );
     mUI->actionSelect_None->setEnabled( false );
@@ -744,7 +747,6 @@ void MainWindow::importAudioFile()
                               ", " + sampleHeader->format;
             mUI->statusBar->showMessage( message );
 
-
             mCurrentAudioFilePath = filePath;
 
             QApplication::restoreOverrideCursor();
@@ -770,51 +772,128 @@ void MainWindow::closeProject()
 
     mAppliedOriginalBPM = 0.0;
     mAppliedNewBPM = 0.0;
+
+    mCurrentAudioFilePath.clear();
+    mCurrentProjDirPath.clear();
 }
 
 
 
-void MainWindow::saveProject()
+void MainWindow::saveProject( const QString projDirPath )
+{
+    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+    QDir projectDir( projDirPath );
+    QString projectName = projectDir.dirName();
+
+    QString xmlFilePath = projectDir.absoluteFilePath( "shuriken.xml" );
+
+    const QString audioFilePath = mFileHandler.saveAudioFile( projDirPath,
+                                                              "audio",
+                                                              mCurrentSampleBuffer,
+                                                              mCurrentSampleHeader );
+
+    if ( ! audioFilePath.isEmpty() )
+    {
+        const bool isRealtimeModeEnabled = mOptionsDialog->isRealtimeModeEnabled();
+
+        XmlElement docElement( "project" );
+        docElement.setAttribute( "name", projectName.toLocal8Bit().data() );
+
+        XmlElement* realtimeModeElement = new XmlElement( "realtime_mode" );
+        realtimeModeElement->setAttribute( "enabled", isRealtimeModeEnabled );
+        docElement.addChildElement( realtimeModeElement );
+
+        XmlElement* origBpmElement = new XmlElement( "original_bpm" );
+        XmlElement* newBpmElement = new XmlElement( "new_bpm" );
+
+        if ( isRealtimeModeEnabled )
+        {
+            origBpmElement->setAttribute( "value", mUI->doubleSpinBox_OriginalBPM->value() );
+            newBpmElement->setAttribute( "value", mUI->doubleSpinBox_NewBPM->value() );
+        }
+        else
+        {
+            origBpmElement->setAttribute( "value", mAppliedNewBPM );
+            newBpmElement->setAttribute( "value", mAppliedNewBPM );
+        }
+        docElement.addChildElement( origBpmElement );
+        docElement.addChildElement( newBpmElement );
+
+        XmlElement* timeStretchElement = new XmlElement( "time_stretch" );
+        timeStretchElement->setAttribute( "checked", mUI->checkBox_TimeStretch->isChecked() );
+        docElement.addChildElement( timeStretchElement );
+
+        XmlElement* pitchCorrectionElement = new XmlElement( "pitch_correction" );
+        pitchCorrectionElement->setAttribute( "checked", mUI->checkBox_PitchCorrection->isChecked() );
+        docElement.addChildElement( pitchCorrectionElement );
+
+        XmlElement* sampleElement = new XmlElement( "sample" );
+        sampleElement->setAttribute( "filename", "audio.wav" );
+        docElement.addChildElement( sampleElement );
+
+        foreach ( SharedSampleRange sampleRange, mSampleRangeList )
+        {
+            XmlElement* rangeElement = new XmlElement( "sample_range" );
+            rangeElement->setAttribute( "start_frame", sampleRange->startFrame );
+            rangeElement->setAttribute( "num_frames", sampleRange->numFrames );
+            docElement.addChildElement( rangeElement );
+        }
+
+        File file( xmlFilePath.toLocal8Bit().data() );
+
+        docElement.writeToFile( file, String::empty );
+
+        mUndoStack.setClean();
+
+        mCurrentProjDirPath = projDirPath;
+
+        QApplication::restoreOverrideCursor();
+    }
+    else // An error occurred while writing the audio file
+    {
+        QApplication::restoreOverrideCursor();
+        showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+    }
+}
+
+
+
+void MainWindow::saveProjectDialog()
 {
     // Save file dialog
-    const QString dirPath = QFileDialog::getSaveFileName( this, tr("Save Project"), mLastOpenedProjDir,
-                                                          tr("Shuriken Project (*.*)") );
+    const QString filePath = QFileDialog::getSaveFileName( this, tr("Save Project"), mLastOpenedProjDir,
+                                                           tr("Shuriken Project (*.*)") );
 
     // If user didn't click "Cancel"
-    if ( ! dirPath.isEmpty() )
+    if ( ! filePath.isEmpty() )
     {
-        QDir projectDir( dirPath );
-        QString projDirName = projectDir.dirName();
+        QDir projectDir( filePath );
 
         QDir parentDir( projectDir );
         parentDir.cdUp();
 
-        mLastOpenedProjDir = parentDir.absolutePath();
+        QString projectName = projectDir.dirName();
 
         bool isOkToSave = true;
 
         // If the directory already exists, ask the user if it should be overwritten
-        if ( parentDir.exists( projDirName ) )
+        if ( projectDir.exists() )
         {
             QMessageBox msgBox;
             msgBox.setWindowTitle( "Shuriken Beat Slicer" );
             msgBox.setIcon( QMessageBox::Question );
-            msgBox.setText( "The directory \"" + projDirName + "\"" + " already exists" );
-            msgBox.setInformativeText( "Do you want to overwrite the contents of " + projDirName + "?" );
+            msgBox.setText( "The directory \"" + projectName + "\"" + " already exists" );
+            msgBox.setInformativeText( "Do you want to overwrite the contents of " + projectName + "?" );
             msgBox.setStandardButtons( QMessageBox::Ok | QMessageBox::Cancel );
             msgBox.setDefaultButton( QMessageBox::Ok );
             const int buttonFlag = msgBox.exec();
 
             if ( buttonFlag == QMessageBox::Ok )
             {
-                bool isSuccessful;
-
-                QStringList nameFilters;
-                nameFilters << "*.wav" << "*.xml";
-
-                foreach ( QString dirEntry, projectDir.entryList( nameFilters ) )
+                foreach ( QString fileName, projectDir.entryList( QDir::NoDotAndDotDot ) )
                 {
-                    isSuccessful = projectDir.remove( dirEntry );
+                    const bool isSuccessful = projectDir.remove( fileName );
 
                     if ( ! isSuccessful )
                         isOkToSave = false;
@@ -827,87 +906,25 @@ void MainWindow::saveProject()
         }
         else // Directory does not yet exist
         {
-            isOkToSave = parentDir.mkdir( projDirName );
+            isOkToSave = parentDir.mkdir( projectName );
         }
 
         if ( isOkToSave )
         {
-            QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
-
-            const QString filePath = mFileHandler.saveAudioFile( projectDir.absolutePath(), "audio",  mCurrentSampleBuffer, mCurrentSampleHeader );
-
-            if ( ! filePath.isEmpty() )
-            {
-                const bool isRealtimeModeEnabled = mOptionsDialog->isRealtimeModeEnabled();
-
-                XmlElement docElement( "project" );
-                docElement.setAttribute( "name", projDirName.toLocal8Bit().data() );
-
-                XmlElement* realtimeModeElement = new XmlElement( "realtime_mode" );
-                realtimeModeElement->setAttribute( "enabled", isRealtimeModeEnabled );
-                docElement.addChildElement( realtimeModeElement );
-
-                XmlElement* origBpmElement = new XmlElement( "original_bpm" );
-                XmlElement* newBpmElement = new XmlElement( "new_bpm" );
-
-                if ( isRealtimeModeEnabled )
-                {
-                    origBpmElement->setAttribute( "value", mUI->doubleSpinBox_OriginalBPM->value() );
-                    newBpmElement->setAttribute( "value", mUI->doubleSpinBox_NewBPM->value() );
-                }
-                else
-                {
-                    origBpmElement->setAttribute( "value", mAppliedNewBPM );
-                    newBpmElement->setAttribute( "value", mAppliedNewBPM );
-                }
-                docElement.addChildElement( origBpmElement );
-                docElement.addChildElement( newBpmElement );
-
-                XmlElement* timeStretchElement = new XmlElement( "time_stretch" );
-                timeStretchElement->setAttribute( "checked", mUI->checkBox_TimeStretch->isChecked() );
-                docElement.addChildElement( timeStretchElement );
-
-                XmlElement* pitchCorrectionElement = new XmlElement( "pitch_correction" );
-                pitchCorrectionElement->setAttribute( "checked", mUI->checkBox_PitchCorrection->isChecked() );
-                docElement.addChildElement( pitchCorrectionElement );
-
-                XmlElement* sampleElement = new XmlElement( "sample" );
-                sampleElement->setAttribute( "filename", "audio.wav" );
-                docElement.addChildElement( sampleElement );
-
-                foreach ( SharedSampleRange sampleRange, mSampleRangeList )
-                {
-                    XmlElement* rangeElement = new XmlElement( "sample_range" );
-                    rangeElement->setAttribute( "start_frame", sampleRange->startFrame );
-                    rangeElement->setAttribute( "num_frames", sampleRange->numFrames );
-                    docElement.addChildElement( rangeElement );
-                }
-
-                File file( projectDir.absoluteFilePath( "shuriken.xml" ).toLocal8Bit().data() );
-
-                docElement.writeToFile( file, String::empty );
-
-                mUndoStack.setClean();
-
-                QApplication::restoreOverrideCursor();
-            }
-            else // An error occurred while writing the audio file
-            {
-                QApplication::restoreOverrideCursor();
-                showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
-            }
+            saveProject( filePath );
+            mLastOpenedProjDir = parentDir.absolutePath();
         }
-        else // It isn't possible to save the project
+        else
         {
-            showWarningDialog( tr("Could not save project ") + "\"" + projDirName + "\"",
-                               tr("Failed to create directory ") + "\"" + projectDir.absolutePath() + "\"" );
+            showWarningDialog( tr("Could not save project ") + "\"" + projectName + "\"",
+                               tr("Failed to create directory ") + "\"" + filePath + "\"" );
         }
     }
 }
 
 
 
-void MainWindow::openProject()
+void MainWindow::openProjectDialog()
 {
     // Open file dialog
     const QString filePath = QFileDialog::getOpenFileName( this, tr("Open Project"), mLastOpenedProjDir,
@@ -1121,7 +1138,7 @@ void MainWindow::on_actionOpen_Project_triggered()
     // Check for unsaved changes before continuing
     if ( mUndoStack.isClean() )
     {
-        openProject();
+        openProjectDialog();
     }
     else
     {
@@ -1130,11 +1147,11 @@ void MainWindow::on_actionOpen_Project_triggered()
         switch ( buttonClicked )
         {
         case QMessageBox::Save:
-            saveProject();
-            openProject();
+            on_actionSave_Project_triggered();
+            openProjectDialog();
             break;
         case QMessageBox::Discard:
-            openProject();
+            openProjectDialog();
             break;
         case QMessageBox::Cancel:
             // Do nothing
@@ -1152,7 +1169,24 @@ void MainWindow::on_actionSave_Project_triggered()
 {
     if ( ! mCurrentSampleBuffer.isNull() )
     {
-        saveProject();
+        if ( mCurrentProjDirPath.isEmpty() )
+        {
+            saveProjectDialog();
+        }
+        else
+        {
+            saveProject( mCurrentProjDirPath );
+        }
+    }
+}
+
+
+
+void MainWindow::on_actionSave_As_triggered()
+{
+    if ( ! mCurrentSampleBuffer.isNull() )
+    {
+        saveProjectDialog();
     }
 }
 
@@ -1172,7 +1206,7 @@ void MainWindow::on_actionClose_Project_triggered()
         switch ( buttonClicked )
         {
         case QMessageBox::Save:
-            saveProject();
+            on_actionSave_Project_triggered();
             closeProject();
             break;
         case QMessageBox::Discard:
@@ -1204,7 +1238,7 @@ void MainWindow::on_actionImport_Audio_File_triggered()
         switch ( buttonClicked )
         {
         case QMessageBox::Save:
-            saveProject();
+            on_actionSave_Project_triggered();
             importAudioFile();
             break;
         case QMessageBox::Discard:
@@ -1243,7 +1277,7 @@ void MainWindow::on_actionQuit_triggered()
         switch ( buttonClicked )
         {
         case QMessageBox::Save:
-            saveProject();
+            on_actionSave_Project_triggered();
             QCoreApplication::quit();
             break;
         case QMessageBox::Discard:

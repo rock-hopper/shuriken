@@ -83,8 +83,9 @@ private:
 
     void importAudioFile();
     void closeProject();
-    void saveProject();
-    void openProject();
+    void saveProject( const QString projDirPath );
+    void saveProjectDialog();
+    void openProjectDialog();
 
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
@@ -107,6 +108,7 @@ private:
     QString mLastOpenedImportDir;
     QString mLastOpenedProjDir;
     QString mCurrentAudioFilePath;
+    QString mCurrentProjDirPath;
 
     QUndoStack mUndoStack;
 
@@ -156,6 +158,7 @@ private slots:
     void on_actionExport_As_triggered();
     void on_actionImport_Audio_File_triggered();
     void on_actionClose_Project_triggered();
+    void on_actionSave_As_triggered();
     void on_actionSave_Project_triggered();
     void on_actionOpen_Project_triggered();
 
