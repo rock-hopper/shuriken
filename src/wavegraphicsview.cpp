@@ -252,26 +252,23 @@ SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
 
     SharedSlicePointItem sharedSlicePoint;
 
-    if ( scenePosX >= 0.0 && scenePosX <= scene()->width() - 1 )
-    {
-        SlicePointItem* slicePointItem = new SlicePointItem( scene()->height() - 1 );
-        slicePointItem->setPos( scenePosX, 0.0 );
-        slicePointItem->setFrameNum( frameNum );
+    SlicePointItem* slicePointItem = new SlicePointItem( scene()->height() - 1 );
+    slicePointItem->setPos( scenePosX, 0.0 );
+    slicePointItem->setFrameNum( frameNum );
 
-        QTransform matrix;
-        const qreal currentScaleFactor = transform().m11(); // m11() returns horizontal scale factor
-        matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // slice point remains same width when view is scaled
-        slicePointItem->setTransform( matrix );
+    QTransform matrix;
+    const qreal currentScaleFactor = transform().m11(); // m11() returns horizontal scale factor
+    matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // slice point remains same width when view is scaled
+    slicePointItem->setTransform( matrix );
 
-        sharedSlicePoint = SharedSlicePointItem( slicePointItem );
-        mSlicePointItemList.append( sharedSlicePoint );
+    sharedSlicePoint = SharedSlicePointItem( slicePointItem );
+    mSlicePointItemList.append( sharedSlicePoint );
 
-        QObject::connect( slicePointItem, SIGNAL( scenePosChanged(SlicePointItem*const) ),
-                          this, SLOT( reorderSlicePoints(SlicePointItem*const) ) );
+    QObject::connect( slicePointItem, SIGNAL( scenePosChanged(SlicePointItem*const) ),
+                      this, SLOT( reorderSlicePoints(SlicePointItem*const) ) );
 
-        scene()->addItem( slicePointItem );
-        scene()->update();
-    }
+    scene()->addItem( slicePointItem );
+    scene()->update();
 
     return sharedSlicePoint;
 }
@@ -440,20 +437,30 @@ void WaveGraphicsView::clearWaveform()
 
 qreal WaveGraphicsView::getScenePosX( const int frameNum ) const
 {
-    return frameNum * ( scene()->width() / mNumFrames );
+    qreal scenePosX = frameNum * ( scene()->width() / mNumFrames );
+
+    if ( scenePosX < 0.0)
+        scenePosX = 0.0;
+
+    if ( scenePosX >= scene()->width() )
+        scenePosX = scene()->width() - 1;
+
+    return scenePosX;
 }
 
 
 
 int WaveGraphicsView::getFrameNum( qreal scenePosX ) const
 {
-    if ( scenePosX < 0.0)
-        scenePosX = 0.0;
+    int frameNum = roundToInt( scenePosX / ( scene()->width() / mNumFrames ) );
 
-    if ( scenePosX > scene()->width() - 1 )
-        scenePosX = scene()->width() - 1;
+    if ( frameNum < 0 )
+        frameNum = 0;
 
-    return scenePosX / ( scene()->width() / mNumFrames );
+    if ( frameNum >= mNumFrames )
+        frameNum = mNumFrames - 1;
+
+    return frameNum;
 }
 
 

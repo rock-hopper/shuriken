@@ -1,12 +1,5 @@
 TODO
 
-
-Bugs
-----
-Combination of certain audio files and detection methods gives the following error when "Find Beats" is clicked:
-QGraphicsScene::removeItem: cannot remove 0-item
-
-
 Add Features
 ------------
 JACK Session, NSM
