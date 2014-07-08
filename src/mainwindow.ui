@@ -446,7 +446,6 @@
     <addaction name="actionAdd_Slice_Point"/>
     <addaction name="separator"/>
     <addaction name="actionApply_Gain"/>
-    <addaction name="actionApply_Ramp"/>
     <addaction name="actionEnvelope"/>
     <addaction name="actionJoin"/>
     <addaction name="actionSplit"/>
@@ -730,14 +729,6 @@
    </property>
    <property name="text">
     <string>Normalise</string>
-   </property>
-  </action>
-  <action name="actionApply_Ramp">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Apply Ramp</string>
    </property>
   </action>
   <action name="actionZoom_In">

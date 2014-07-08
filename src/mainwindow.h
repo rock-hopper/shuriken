@@ -112,8 +112,7 @@ private:
 
     QUndoStack mUndoStack;
 
-    qreal mAppliedOriginalBPM;
-    qreal mAppliedNewBPM;
+    qreal mAppliedBPM;
 
 public slots:
     void reorderSampleRangeList( QList<int> oldOrderPositions, const int numPlacesMoved );
@@ -138,7 +137,6 @@ private slots:
     void on_horizontalSlider_Threshold_valueChanged( const int value );
     void on_pushButton_FindOnsets_clicked();
     void on_pushButton_Slice_clicked();
-    void on_actionApply_Ramp_triggered();
     void on_actionNormalise_triggered();
     void on_actionApply_Gain_triggered();
     void on_actionSelect_None_triggered();

@@ -224,7 +224,6 @@ private:
     AudioFileHandler& mFileHandler;
     const QString mTempDirPath;
     const QString mFileBaseName;
-    float mPrevGain;
     QString mFilePath;
 };
 
@@ -255,18 +254,15 @@ public:
                              QDoubleSpinBox* const spinBoxOriginalBPM,
                              QDoubleSpinBox* const spinBoxNewBPM,
                              QCheckBox* const checkBoxPitchCorrection,
+                             const QString tempDirPath,
+                             const QString fileBaseName,
                              QUndoCommand* parent = NULL );
 
     void undo();
     void redo();
 
-    qreal getOriginalBPM() const            { return mOriginalBPM; }
-    qreal getNewBPM() const                 { return mNewBPM; }
-    bool isPitchCorrectionEnabled() const   { return mIsPitchCorrectionEnabled; }
-
 private:
-    void stretch( const qreal timeRatio, const qreal pitchScale );
-    void stretchImpl( const qreal timeRatio, const qreal pitchScale );
+    int stretch( const qreal timeRatio, const qreal pitchScale );
     void updateSampleRanges( const qreal timeRatio, const int newTotalNumFrames );
 
     MainWindow* const mMainWindow;
@@ -276,11 +272,12 @@ private:
     QCheckBox* const mCheckBoxPitchCorrection;
     const qreal mOriginalBPM;
     const qreal mNewBPM;
+    const qreal mPrevAppliedBPM;
     const bool mIsPitchCorrectionEnabled;
-    qreal mPrevOriginalBPM;
-    qreal mPrevNewBPM;
-    bool mPrevIsPitchCorrectionEnabled;
-    qreal mPrevTimeRatio;
+    const RubberBandStretcher::Options mOptions;
+    const QString mTempDirPath;
+    const QString mFileBaseName;
+    QString mTempFilePath;
 };
 
 

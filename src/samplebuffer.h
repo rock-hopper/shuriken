@@ -84,18 +84,12 @@ struct SampleRange
 {
     SampleRange() :
         startFrame( 0 ),
-        numFrames( 0 ),
-        gain( 1.0 ),
-        isNormalised( false ),
-        isReversed( false )
+        numFrames( 0 )
     {
     }
 
     int startFrame;
     int numFrames;
-    float gain;
-    bool isNormalised;
-    bool isReversed;
 
     static bool isLessThan( const SharedSampleRange range1, const SharedSampleRange range2 )
     {

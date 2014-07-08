@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Mon Jul 7 18:10:59 2014
+** Created: Tue Jul 8 15:20:24 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -59,7 +59,6 @@ public:
     QAction *actionSelect_None;
     QAction *actionApply_Gain;
     QAction *actionNormalise;
-    QAction *actionApply_Ramp;
     QAction *actionZoom_In;
     QAction *actionZoom_Out;
     QAction *actionZoom_Original;
@@ -204,9 +203,6 @@ public:
         actionNormalise = new QAction(MainWindow);
         actionNormalise->setObjectName(QString::fromUtf8("actionNormalise"));
         actionNormalise->setEnabled(false);
-        actionApply_Ramp = new QAction(MainWindow);
-        actionApply_Ramp->setObjectName(QString::fromUtf8("actionApply_Ramp"));
-        actionApply_Ramp->setEnabled(false);
         actionZoom_In = new QAction(MainWindow);
         actionZoom_In->setObjectName(QString::fromUtf8("actionZoom_In"));
         actionZoom_In->setEnabled(false);
@@ -551,7 +547,6 @@ public:
         menuEdit->addAction(actionAdd_Slice_Point);
         menuEdit->addSeparator();
         menuEdit->addAction(actionApply_Gain);
-        menuEdit->addAction(actionApply_Ramp);
         menuEdit->addAction(actionEnvelope);
         menuEdit->addAction(actionJoin);
         menuEdit->addAction(actionSplit);
@@ -637,7 +632,6 @@ public:
 #endif // QT_NO_TOOLTIP
         actionApply_Gain->setText(QApplication::translate("MainWindow", "Apply Gain", 0, QApplication::UnicodeUTF8));
         actionNormalise->setText(QApplication::translate("MainWindow", "Normalise", 0, QApplication::UnicodeUTF8));
-        actionApply_Ramp->setText(QApplication::translate("MainWindow", "Apply Ramp", 0, QApplication::UnicodeUTF8));
         actionZoom_In->setText(QApplication::translate("MainWindow", "Zoom In", 0, QApplication::UnicodeUTF8));
         actionZoom_In->setShortcut(QApplication::translate("MainWindow", "Ctrl++", 0, QApplication::UnicodeUTF8));
         actionZoom_Out->setText(QApplication::translate("MainWindow", "Zoom Out", 0, QApplication::UnicodeUTF8));

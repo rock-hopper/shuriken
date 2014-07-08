@@ -41,8 +41,7 @@ MainWindow::MainWindow( QWidget* parent ) :
     mUI( new Ui::MainWindow ),
     mLastOpenedImportDir( QDir::homePath() ),
     mLastOpenedProjDir( QDir::homePath() ),
-    mAppliedOriginalBPM( 0.0 ),
-    mAppliedNewBPM( 0.0 )
+    mAppliedBPM( 0.0 )
 {
     setupUI();
     initialiseAudio();
@@ -95,6 +94,7 @@ void MainWindow::openProject( const QString xmlFilePath )
             QString audioFileName;
             qreal originalBpm = 0.0;
             qreal newBpm = 0.0;
+            qreal appliedBpm = 0.0;
             bool isTimeStretchChecked = false;
             bool isPitchCorrectionChecked = false;
             bool isRealtimeModeEnabled = false;
@@ -125,6 +125,10 @@ void MainWindow::openProject( const QString xmlFilePath )
                 else if ( elem->hasTagName( "new_bpm" ) )
                 {
                     newBpm = elem->getDoubleAttribute( "value" );
+                }
+                else if ( elem->hasTagName( "applied_bpm" ) )
+                {
+                    appliedBpm = elem->getDoubleAttribute( "value" );
                 }
                 else if ( elem->hasTagName( "time_stretch" ) )
                 {
@@ -181,11 +185,12 @@ void MainWindow::openProject( const QString xmlFilePath )
                         mUI->pushButton_FindOnsets->setEnabled( false );
                     }
 
-                    mAppliedOriginalBPM = originalBpm;
-                    mAppliedNewBPM = originalBpm;
+                    mAppliedBPM = appliedBpm;
 
                     if ( mOptionsDialog != NULL )
+                    {
                         mOptionsDialog->enableRealtimeMode( isRealtimeModeEnabled );
+                    }
 
                     mUI->checkBox_TimeStretch->setChecked( isTimeStretchChecked );
                     mUI->checkBox_PitchCorrection->setChecked( isPitchCorrectionChecked );
@@ -770,8 +775,7 @@ void MainWindow::closeProject()
 
     mUndoStack.clear();
 
-    mAppliedOriginalBPM = 0.0;
-    mAppliedNewBPM = 0.0;
+    mAppliedBPM = 0.0;
 
     mCurrentAudioFilePath.clear();
     mCurrentProjDirPath.clear();
@@ -806,19 +810,23 @@ void MainWindow::saveProject( const QString projDirPath )
 
         XmlElement* origBpmElement = new XmlElement( "original_bpm" );
         XmlElement* newBpmElement = new XmlElement( "new_bpm" );
+        XmlElement* appliedBpmElement = new XmlElement( "applied_bpm" );
 
         if ( isRealtimeModeEnabled )
         {
             origBpmElement->setAttribute( "value", mUI->doubleSpinBox_OriginalBPM->value() );
             newBpmElement->setAttribute( "value", mUI->doubleSpinBox_NewBPM->value() );
+            appliedBpmElement->setAttribute( "value", mAppliedBPM );
         }
         else
         {
-            origBpmElement->setAttribute( "value", mAppliedNewBPM );
-            newBpmElement->setAttribute( "value", mAppliedNewBPM );
+            origBpmElement->setAttribute( "value", mAppliedBPM );
+            newBpmElement->setAttribute( "value", mAppliedBPM );
+            appliedBpmElement->setAttribute( "value", mAppliedBPM );
         }
         docElement.addChildElement( origBpmElement );
         docElement.addChildElement( newBpmElement );
+        docElement.addChildElement( appliedBpmElement );
 
         XmlElement* timeStretchElement = new XmlElement( "time_stretch" );
         timeStretchElement->setAttribute( "checked", mUI->checkBox_TimeStretch->isChecked() );
@@ -1047,8 +1055,6 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
     {
         mUI->checkBox_TimeStretch->setVisible( true );
         mUI->pushButton_Apply->setVisible( false );
-        mUI->doubleSpinBox_OriginalBPM->setValue( mAppliedNewBPM );
-        mUI->doubleSpinBox_NewBPM->setValue( mAppliedNewBPM );
 
         QObject::connect( mOptionsDialog.get(), SIGNAL( windowOptionChanged() ),
                           this, SLOT( resetSampler() ) );
@@ -1057,8 +1063,6 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
     {
         mUI->checkBox_TimeStretch->setVisible( false );
         mUI->pushButton_Apply->setVisible( true );
-        mUI->doubleSpinBox_OriginalBPM->setValue( mAppliedOriginalBPM );
-        mUI->doubleSpinBox_NewBPM->setValue( mAppliedNewBPM );
 
         QObject::disconnect( mOptionsDialog.get(), SIGNAL( windowOptionChanged() ),
                              this, SLOT( resetSampler() ) );
@@ -1392,13 +1396,6 @@ void MainWindow::on_actionApply_Gain_triggered()
 
 
 
-void MainWindow::on_actionApply_Ramp_triggered()
-{
-
-}
-
-
-
 void MainWindow::on_actionEnvelope_triggered()
 {
 
@@ -1709,12 +1706,27 @@ void MainWindow::on_pushButton_Apply_clicked()
 
     if ( newBPM > 0.0 && originalBPM > 0.0 )
     {
-        QUndoCommand* command = new ApplyTimeStretchCommand( this,
-                                                             mUI->waveGraphicsView,
-                                                             mUI->doubleSpinBox_OriginalBPM,
-                                                             mUI->doubleSpinBox_NewBPM,
-                                                             mUI->checkBox_PitchCorrection );
-        mUndoStack.push( command );
+        const QString tempDirPath = mOptionsDialog->getTempDirPath();
+
+        if ( ! tempDirPath.isEmpty() )
+        {
+            QString fileBaseName;
+            fileBaseName.setNum( mUndoStack.index() );
+
+            QUndoCommand* command = new ApplyTimeStretchCommand( this,
+                                                                 mUI->waveGraphicsView,
+                                                                 mUI->doubleSpinBox_OriginalBPM,
+                                                                 mUI->doubleSpinBox_NewBPM,
+                                                                 mUI->checkBox_PitchCorrection,
+                                                                 tempDirPath,
+                                                                 fileBaseName );
+            mUndoStack.push( command );
+        }
+        else
+        {
+            showWarningDialog( tr("Temp dir invalid!"),
+                               tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+        }
     }
 }
 
