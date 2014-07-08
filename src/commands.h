@@ -229,6 +229,32 @@ private:
 
 
 
+class NormaliseCommand : public QUndoCommand
+{
+public:
+    NormaliseCommand( const int waveformItemOrderPos,
+                      WaveGraphicsView* const graphicsView,
+                      const SharedSampleHeader sampleHeader,
+                      AudioFileHandler& fileHandler,
+                      const QString tempDirPath,
+                      const QString fileBaseName,
+                      QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    const int mWaveformItemOrderPos;
+    WaveGraphicsView* const mGraphicsView;
+    const SharedSampleHeader mSampleHeader;
+    AudioFileHandler& mFileHandler;
+    const QString mTempDirPath;
+    const QString mFileBaseName;
+    QString mFilePath;
+};
+
+
+
 class ReverseCommand : public QUndoCommand
 {
 public:

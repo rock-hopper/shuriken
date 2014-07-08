@@ -504,6 +504,84 @@ void ApplyGainCommand::redo()
 
 //==================================================================================================
 
+NormaliseCommand::NormaliseCommand( const int waveformItemOrderPos,
+                                    WaveGraphicsView* const graphicsView,
+                                    const SharedSampleHeader sampleHeader,
+                                    AudioFileHandler& fileHandler,
+                                    const QString tempDirPath,
+                                    const QString fileBaseName,
+                                    QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    mWaveformItemOrderPos( waveformItemOrderPos ),
+    mGraphicsView( graphicsView ),
+    mSampleHeader( sampleHeader ),
+    mFileHandler( fileHandler ),
+    mTempDirPath( tempDirPath ),
+    mFileBaseName( fileBaseName )
+{
+    setText( "Normalise" );
+}
+
+
+
+void NormaliseCommand::undo()
+{
+    if ( ! mFilePath.isEmpty() )
+    {
+        const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
+        SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
+        SharedSampleRange sampleRange = item->getSampleRange();
+
+        SharedSampleBuffer tempBuffer = mFileHandler.getSampleData( mFilePath );
+
+        for ( int chanNum = 0; chanNum < sampleBuffer->getNumChannels(); chanNum++ )
+        {
+            sampleBuffer->copyFrom( chanNum, sampleRange->startFrame, *tempBuffer.data(), chanNum, 0, sampleRange->numFrames );
+        }
+
+        mGraphicsView->forceRedraw();
+    }
+}
+
+
+
+void NormaliseCommand::redo()
+{
+    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
+    SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
+    SharedSampleRange sampleRange = item->getSampleRange();
+
+    const int numChans = mSampleHeader->numChans;
+
+    SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
+
+    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+    {
+        tempBuffer->copyFrom( chanNum, 0, *sampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
+    }
+
+    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleHeader, true );
+
+    if ( ! mFilePath.isEmpty() )
+    {
+        const float magnitude = sampleBuffer->getMagnitude( sampleRange->startFrame, sampleRange->numFrames );
+
+        if ( magnitude > 0.0 )
+        {
+            sampleBuffer->applyGain( sampleRange->startFrame, sampleRange->numFrames, 1.0 / magnitude );
+            mGraphicsView->forceRedraw();
+        }
+    }
+    else
+    {
+        MainWindow::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+    }
+}
+
+
+
+//==================================================================================================
+
 ReverseCommand::ReverseCommand( const int waveformItemOrderPos,
                                 WaveGraphicsView* const graphicsView,
                                 QUndoCommand* parent ) :
