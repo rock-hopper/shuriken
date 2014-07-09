@@ -111,10 +111,88 @@ bool AudioSetupDialog::isRealtimeModeEnabled() const
 
 
 
-void AudioSetupDialog::enableRealtimeMode( const bool isEnabled )
+void AudioSetupDialog::setStretcherOptions( const RubberBandStretcher::Options options )
 {
-    mUI->radioButton_RealTime->setChecked( isEnabled );
-    emit realtimeModeToggled( isEnabled );
+    if ( options & RubberBandStretcher::OptionProcessRealTime )
+    {
+        mUI->radioButton_RealTime->click();
+    }
+    else // RubberBandStretcher::OptionProcessOffline
+    {
+        mUI->radioButton_Offline->click();
+    }
+
+
+    if ( options & RubberBandStretcher::OptionStretchPrecise )
+    {
+        mUI->radioButton_Precise->click();
+    }
+    else // RubberBandStretcher::OptionStretchElastic
+    {
+        mUI->radioButton_Elastic->click();
+    }
+
+
+    if ( options & RubberBandStretcher::OptionTransientsMixed )
+    {
+        mUI->radioButton_Mixed->click();
+    }
+    else if ( options & RubberBandStretcher::OptionTransientsSmooth )
+    {
+        mUI->radioButton_Smooth->click();
+    }
+    else // RubberBandStretcher::OptionTransientsCrisp
+    {
+        mUI->radioButton_Crisp->click();
+    }
+
+
+    if ( options & RubberBandStretcher::OptionPhaseIndependent )
+    {
+        mUI->radioButton_Independent->click();
+    }
+    else // RubberBandStretcher::OptionPhaseLaminar
+    {
+        mUI->radioButton_Laminar->click();
+    }
+
+
+    if ( options & RubberBandStretcher::OptionWindowShort )
+    {
+        mUI->radioButton_Short->click();
+    }
+    else if ( options & RubberBandStretcher::OptionWindowLong )
+    {
+        mUI->radioButton_Long->click();
+    }
+    else // RubberBandStretcher::OptionWindowStandard
+    {
+        mUI->radioButton_Standard->click();
+    }
+
+
+    if ( options & RubberBandStretcher::OptionFormantPreserved )
+    {
+        mUI->radioButton_Preserved->click();
+    }
+    else // RubberBandStretcher::OptionFormantShifted
+    {
+        mUI->radioButton_Shifted->click();
+    }
+
+
+    if ( options & RubberBandStretcher::OptionPitchHighQuality )
+    {
+        mUI->radioButton_HighQuality->click();
+    }
+    else if ( options & RubberBandStretcher::OptionPitchHighConsistency )
+    {
+        mUI->radioButton_HighConsistency->click();
+    }
+    else // RubberBandStretcher::OptionPitchHighSpeed
+    {
+        mUI->radioButton_HighSpeed->click();
+    }
 }
 
 
@@ -122,6 +200,13 @@ void AudioSetupDialog::enableRealtimeMode( const bool isEnabled )
 bool AudioSetupDialog::isJackSyncEnabled() const
 {
     return mUI->checkBox_JackSync->isChecked();
+}
+
+
+
+void AudioSetupDialog::enableJackSync()
+{
+    mUI->checkBox_JackSync->setChecked( true );
 }
 
 
@@ -868,6 +953,7 @@ void AudioSetupDialog::on_radioButton_Offline_clicked()
     disableStretcherOptions( RubberBandStretcher::OptionPitchHighConsistency );
 
     emit realtimeModeToggled( false );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -901,6 +987,7 @@ void AudioSetupDialog::on_radioButton_RealTime_clicked()
     enableStretcherOptions( RubberBandStretcher::OptionPitchHighConsistency );
 
     emit realtimeModeToggled( true );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -909,6 +996,7 @@ void AudioSetupDialog::on_radioButton_Elastic_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionStretchPrecise );
     emit stretchOptionChanged( RubberBandStretcher::OptionStretchElastic );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -917,6 +1005,7 @@ void AudioSetupDialog::on_radioButton_Precise_clicked()
 {
     enableStretcherOptions( RubberBandStretcher::OptionStretchPrecise );
     emit stretchOptionChanged( RubberBandStretcher::OptionStretchPrecise );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -925,6 +1014,7 @@ void AudioSetupDialog::on_radioButton_Crisp_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionTransientsMixed | RubberBandStretcher::OptionTransientsSmooth );
     emit transientsOptionChanged( RubberBandStretcher::OptionTransientsCrisp );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -934,6 +1024,7 @@ void AudioSetupDialog::on_radioButton_Mixed_clicked()
     disableStretcherOptions( RubberBandStretcher::OptionTransientsSmooth );
     enableStretcherOptions( RubberBandStretcher::OptionTransientsMixed );
     emit transientsOptionChanged( RubberBandStretcher::OptionTransientsMixed );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -943,6 +1034,7 @@ void AudioSetupDialog::on_radioButton_Smooth_clicked()
     disableStretcherOptions( RubberBandStretcher::OptionTransientsMixed );
     enableStretcherOptions( RubberBandStretcher::OptionTransientsSmooth );
     emit transientsOptionChanged( RubberBandStretcher::OptionTransientsSmooth );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -951,6 +1043,7 @@ void AudioSetupDialog::on_radioButton_Laminar_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionPhaseIndependent );
     emit phaseOptionChanged( RubberBandStretcher::OptionPhaseLaminar );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -959,6 +1052,7 @@ void AudioSetupDialog::on_radioButton_Independent_clicked()
 {
     enableStretcherOptions( RubberBandStretcher::OptionPhaseIndependent );
     emit phaseOptionChanged( RubberBandStretcher::OptionPhaseIndependent );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -967,6 +1061,7 @@ void AudioSetupDialog::on_radioButton_Standard_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionWindowShort | RubberBandStretcher::OptionWindowLong );
     emit windowOptionChanged();
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -976,6 +1071,7 @@ void AudioSetupDialog::on_radioButton_Short_clicked()
     disableStretcherOptions( RubberBandStretcher::OptionWindowLong );
     enableStretcherOptions( RubberBandStretcher::OptionWindowShort );
     emit windowOptionChanged();
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -985,6 +1081,7 @@ void AudioSetupDialog::on_radioButton_Long_clicked()
     disableStretcherOptions( RubberBandStretcher::OptionWindowShort );
     enableStretcherOptions( RubberBandStretcher::OptionWindowLong );
     emit windowOptionChanged();
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -993,6 +1090,7 @@ void AudioSetupDialog::on_radioButton_Shifted_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionFormantPreserved );
     emit formantOptionChanged( RubberBandStretcher::OptionFormantShifted );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -1001,6 +1099,7 @@ void AudioSetupDialog::on_radioButton_Preserved_clicked()
 {
     enableStretcherOptions( RubberBandStretcher::OptionFormantPreserved );
     emit formantOptionChanged( RubberBandStretcher::OptionFormantPreserved );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -1009,6 +1108,7 @@ void AudioSetupDialog::on_radioButton_HighSpeed_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionPitchHighQuality | RubberBandStretcher::OptionPitchHighConsistency );
     emit pitchOptionChanged( RubberBandStretcher::OptionPitchHighSpeed );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -1018,6 +1118,7 @@ void AudioSetupDialog::on_radioButton_HighQuality_clicked()
     disableStretcherOptions( RubberBandStretcher::OptionPitchHighConsistency );
     enableStretcherOptions( RubberBandStretcher::OptionPitchHighQuality );
     emit pitchOptionChanged( RubberBandStretcher::OptionPitchHighQuality );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -1027,6 +1128,7 @@ void AudioSetupDialog::on_radioButton_HighConsistency_clicked()
     disableStretcherOptions( RubberBandStretcher::OptionPitchHighQuality );
     enableStretcherOptions( RubberBandStretcher::OptionPitchHighConsistency );
     emit pitchOptionChanged( RubberBandStretcher::OptionPitchHighConsistency );
+    emit timeStretchOptionsChanged();
 }
 
 
@@ -1034,6 +1136,7 @@ void AudioSetupDialog::on_radioButton_HighConsistency_clicked()
 void AudioSetupDialog::on_checkBox_JackSync_toggled( const bool isChecked )
 {
     emit jackSyncToggled( isChecked );
+    emit timeStretchOptionsChanged();
 }
 
 

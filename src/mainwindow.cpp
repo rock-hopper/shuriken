@@ -42,7 +42,9 @@ MainWindow::MainWindow( QWidget* parent ) :
     mUI( new Ui::MainWindow ),
     mLastOpenedImportDir( QDir::homePath() ),
     mLastOpenedProjDir( QDir::homePath() ),
-    mAppliedBPM( 0.0 )
+    mAppliedBPM( 0.0 ),
+    mIsProjectOpen( false )
+
 {
     setupUI();
     initialiseAudio();
@@ -98,7 +100,8 @@ void MainWindow::openProject( const QString xmlFilePath )
             qreal appliedBpm = 0.0;
             bool isTimeStretchChecked = false;
             bool isPitchCorrectionChecked = false;
-            bool isRealtimeModeEnabled = false;
+            bool isJackSyncChecked = false;
+            RubberBandStretcher::Options options = 0;
 
             QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
@@ -139,9 +142,13 @@ void MainWindow::openProject( const QString xmlFilePath )
                 {
                     isPitchCorrectionChecked = elem->getBoolAttribute( "checked" );
                 }
-                else if ( elem->hasTagName( "realtime_mode" ) )
+                else if ( elem->hasTagName( "stretch_options" ) )
                 {
-                    isRealtimeModeEnabled = elem->getBoolAttribute( "enabled" );
+                    options = elem->getIntAttribute( "value" );
+                }
+                else if ( elem->hasTagName( "jack_sync" ) )
+                {
+                    isJackSyncChecked = elem->getBoolAttribute( "checked" );
                 }
             }
 
@@ -190,7 +197,10 @@ void MainWindow::openProject( const QString xmlFilePath )
 
                     if ( mOptionsDialog != NULL )
                     {
-                        mOptionsDialog->enableRealtimeMode( isRealtimeModeEnabled );
+                        mOptionsDialog->setStretcherOptions( options );
+
+                        if ( isJackSyncChecked )
+                            mOptionsDialog->enableJackSync();
                     }
 
                     mUI->checkBox_TimeStretch->setChecked( isTimeStretchChecked );
@@ -209,6 +219,8 @@ void MainWindow::openProject( const QString xmlFilePath )
                     mCurrentProjDirPath = projectDir.absolutePath();
 
                     mUI->statusBar->showMessage( tr("Project: ") + projectName );
+
+                    mIsProjectOpen = true;
 
                     QApplication::restoreOverrideCursor();
                 }
@@ -368,6 +380,9 @@ void MainWindow::initialiseAudio()
 
         QObject::connect( mOptionsDialog.get(), SIGNAL( jackSyncToggled(bool) ),
                           mUI->label_JackSync, SLOT( setVisible(bool) ) );
+
+        QObject::connect( mOptionsDialog.get(), SIGNAL( timeStretchOptionsChanged() ),
+                          this, SLOT( enableSaveAction() ) );
 
         mIsAudioInitialised = true;
     }
@@ -609,6 +624,7 @@ void MainWindow::disableUI()
     mUI->pushButton_FindOnsets->setEnabled( false );
     mUI->pushButton_FindBeats->setEnabled( false );
 
+    mUI->actionSave_Project->setEnabled( false );
     mUI->actionSave_As->setEnabled( false );
     mUI->actionClose_Project->setEnabled( false );
     mUI->actionSelect_All->setEnabled( false );
@@ -755,6 +771,8 @@ void MainWindow::importAudioFile()
 
             mCurrentAudioFilePath = filePath;
 
+            mIsProjectOpen = true;
+
             QApplication::restoreOverrideCursor();
         }
     }
@@ -780,6 +798,8 @@ void MainWindow::closeProject()
 
     mCurrentAudioFilePath.clear();
     mCurrentProjDirPath.clear();
+
+    mIsProjectOpen = false;
 }
 
 
@@ -804,10 +824,6 @@ void MainWindow::saveProject( const QString projDirPath )
 
         XmlElement docElement( "project" );
         docElement.setAttribute( "name", projectName.toLocal8Bit().data() );
-
-        XmlElement* realtimeModeElement = new XmlElement( "realtime_mode" );
-        realtimeModeElement->setAttribute( "enabled", isRealtimeModeEnabled );
-        docElement.addChildElement( realtimeModeElement );
 
         XmlElement* origBpmElement = new XmlElement( "original_bpm" );
         XmlElement* newBpmElement = new XmlElement( "new_bpm" );
@@ -836,6 +852,14 @@ void MainWindow::saveProject( const QString projDirPath )
         XmlElement* pitchCorrectionElement = new XmlElement( "pitch_correction" );
         pitchCorrectionElement->setAttribute( "checked", mUI->checkBox_PitchCorrection->isChecked() );
         docElement.addChildElement( pitchCorrectionElement );
+
+        XmlElement* stretchOptionsElement = new XmlElement( "stretch_options" );
+        stretchOptionsElement->setAttribute( "value", mOptionsDialog->getStretcherOptions() );
+        docElement.addChildElement( stretchOptionsElement );
+
+        XmlElement* jackSyncElement = new XmlElement( "jack_sync" );
+        jackSyncElement->setAttribute( "checked", mOptionsDialog->isJackSyncEnabled() );
+        docElement.addChildElement( jackSyncElement );
 
         XmlElement* sampleElement = new XmlElement( "sample" );
         sampleElement->setAttribute( "filename", "audio.wav" );
@@ -1134,6 +1158,16 @@ void MainWindow::enableEditActions()
     else
     {
         mUI->actionJoin->setEnabled( false );
+    }
+}
+
+
+
+void MainWindow::enableSaveAction()
+{
+    if ( mIsProjectOpen )
+    {
+        mUI->actionSave_Project->setEnabled( true );
     }
 }
 

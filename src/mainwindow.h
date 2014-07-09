@@ -114,6 +114,8 @@ private:
 
     qreal mAppliedBPM;
 
+    bool mIsProjectOpen;
+
 public slots:
     void reorderSampleRangeList( QList<int> oldOrderPositions, const int numPlacesMoved );
 
@@ -176,6 +178,7 @@ private slots:
     void resetSampler();
 
     void enableEditActions();
+    void enableSaveAction();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( MainWindow );

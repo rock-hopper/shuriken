@@ -53,11 +53,12 @@ public:
     void setCurrentTab( const Tab tab );
 
     bool isRealtimeModeEnabled() const;
-    void enableRealtimeMode( const bool isEnabled );
 
-    RubberBandStretcher::Options getStretcherOptions() const                    { return mStretcherOptions; }
+    RubberBandStretcher::Options getStretcherOptions() const    { return mStretcherOptions; }
+    void setStretcherOptions( const RubberBandStretcher::Options options );
 
     bool isJackSyncEnabled() const;
+    void enableJackSync();
 
     // Returns the absolute path of the user-defined temp directory if valid,
     // otherwise returns an empty string
@@ -98,6 +99,7 @@ private:
     ScopedPointer<DirectoryValidator> mDirectoryValidator;
 
 signals:
+    void timeStretchOptionsChanged();
     void realtimeModeToggled( const bool isEnabled );
     void stretchOptionChanged( const RubberBandStretcher::Options option );
     void transientsOptionChanged( const RubberBandStretcher::Options option );
