@@ -446,10 +446,11 @@
     <addaction name="actionAdd_Slice_Point"/>
     <addaction name="separator"/>
     <addaction name="actionApply_Gain"/>
+    <addaction name="actionApply_Gain_Ramp"/>
+    <addaction name="actionNormalise"/>
     <addaction name="actionEnvelope"/>
     <addaction name="actionJoin"/>
     <addaction name="actionSplit"/>
-    <addaction name="actionNormalise"/>
     <addaction name="actionReverse"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -722,6 +723,9 @@
    <property name="text">
     <string>Apply Gain</string>
    </property>
+   <property name="shortcut">
+    <string>G</string>
+   </property>
   </action>
   <action name="actionNormalise">
    <property name="enabled">
@@ -729,6 +733,9 @@
    </property>
    <property name="text">
     <string>Normalise</string>
+   </property>
+   <property name="shortcut">
+    <string>N</string>
    </property>
   </action>
   <action name="actionZoom_In">
@@ -851,6 +858,17 @@
    </property>
    <property name="text">
     <string>Save As...</string>
+   </property>
+  </action>
+  <action name="actionApply_Gain_Ramp">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Apply Gain Ramp</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+G</string>
    </property>
   </action>
  </widget>

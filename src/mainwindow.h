@@ -138,6 +138,7 @@ private slots:
     void on_pushButton_FindOnsets_clicked();
     void on_pushButton_Slice_clicked();
     void on_actionNormalise_triggered();
+    void on_actionApply_Gain_Ramp_triggered();
     void on_actionApply_Gain_triggered();
     void on_actionSelect_None_triggered();
     void on_actionSelect_All_triggered();

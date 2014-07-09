@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Tue Jul 8 15:20:24 2014
+** Created: Tue Jul 8 18:08:12 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -67,6 +67,7 @@ public:
     QAction *actionSplit;
     QAction *actionAudition;
     QAction *actionSave_As;
+    QAction *actionApply_Gain_Ramp;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout_3;
     QHBoxLayout *horizontalLayout_2;
@@ -248,6 +249,9 @@ public:
         QIcon icon16;
         icon16.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-save-as.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionSave_As->setIcon(icon16);
+        actionApply_Gain_Ramp = new QAction(MainWindow);
+        actionApply_Gain_Ramp->setObjectName(QString::fromUtf8("actionApply_Gain_Ramp"));
+        actionApply_Gain_Ramp->setEnabled(false);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         verticalLayout_3 = new QVBoxLayout(centralWidget);
@@ -547,10 +551,11 @@ public:
         menuEdit->addAction(actionAdd_Slice_Point);
         menuEdit->addSeparator();
         menuEdit->addAction(actionApply_Gain);
+        menuEdit->addAction(actionApply_Gain_Ramp);
+        menuEdit->addAction(actionNormalise);
         menuEdit->addAction(actionEnvelope);
         menuEdit->addAction(actionJoin);
         menuEdit->addAction(actionSplit);
-        menuEdit->addAction(actionNormalise);
         menuEdit->addAction(actionReverse);
         menuHelp->addAction(actionHelp);
         menuHelp->addSeparator();
@@ -631,7 +636,9 @@ public:
         actionSelect_None->setToolTip(QApplication::translate("MainWindow", "Select None", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP
         actionApply_Gain->setText(QApplication::translate("MainWindow", "Apply Gain", 0, QApplication::UnicodeUTF8));
+        actionApply_Gain->setShortcut(QApplication::translate("MainWindow", "G", 0, QApplication::UnicodeUTF8));
         actionNormalise->setText(QApplication::translate("MainWindow", "Normalise", 0, QApplication::UnicodeUTF8));
+        actionNormalise->setShortcut(QApplication::translate("MainWindow", "N", 0, QApplication::UnicodeUTF8));
         actionZoom_In->setText(QApplication::translate("MainWindow", "Zoom In", 0, QApplication::UnicodeUTF8));
         actionZoom_In->setShortcut(QApplication::translate("MainWindow", "Ctrl++", 0, QApplication::UnicodeUTF8));
         actionZoom_Out->setText(QApplication::translate("MainWindow", "Zoom Out", 0, QApplication::UnicodeUTF8));
@@ -656,6 +663,8 @@ public:
 #endif // QT_NO_TOOLTIP
         actionAudition->setShortcut(QApplication::translate("MainWindow", "3", 0, QApplication::UnicodeUTF8));
         actionSave_As->setText(QApplication::translate("MainWindow", "Save As...", 0, QApplication::UnicodeUTF8));
+        actionApply_Gain_Ramp->setText(QApplication::translate("MainWindow", "Apply Gain Ramp", 0, QApplication::UnicodeUTF8));
+        actionApply_Gain_Ramp->setShortcut(QApplication::translate("MainWindow", "Shift+G", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("MainWindow", "Original BPM:", 0, QApplication::UnicodeUTF8));
         pushButton_CalcBPM->setText(QApplication::translate("MainWindow", "Calc", 0, QApplication::UnicodeUTF8));
         label_2->setText(QApplication::translate("MainWindow", "New BPM:", 0, QApplication::UnicodeUTF8));

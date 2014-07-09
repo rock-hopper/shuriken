@@ -504,6 +504,84 @@ void ApplyGainCommand::redo()
 
 //==================================================================================================
 
+ApplyGainRampCommand::ApplyGainRampCommand( const float startGain,
+                                            const float endGain,
+                                            const int waveformItemOrderPos,
+                                            WaveGraphicsView* const graphicsView,
+                                            const SharedSampleHeader sampleHeader,
+                                            AudioFileHandler& fileHandler,
+                                            const QString tempDirPath,
+                                            const QString fileBaseName,
+                                            QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    mStartGain( startGain ),
+    mEndGain( endGain ),
+    mWaveformItemOrderPos( waveformItemOrderPos ),
+    mGraphicsView( graphicsView ),
+    mSampleHeader( sampleHeader ),
+    mFileHandler( fileHandler ),
+    mTempDirPath( tempDirPath ),
+    mFileBaseName( fileBaseName )
+{
+    setText( "Apply Gain Ramp" );
+}
+
+
+
+void ApplyGainRampCommand::undo()
+{
+    if ( ! mFilePath.isEmpty() )
+    {
+        const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
+        SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
+        SharedSampleRange sampleRange = item->getSampleRange();
+
+        SharedSampleBuffer tempBuffer = mFileHandler.getSampleData( mFilePath );
+
+        for ( int chanNum = 0; chanNum < sampleBuffer->getNumChannels(); chanNum++ )
+        {
+            sampleBuffer->copyFrom( chanNum, sampleRange->startFrame, *tempBuffer.data(), chanNum, 0, sampleRange->numFrames );
+        }
+
+        mGraphicsView->forceRedraw();
+    }
+}
+
+
+
+void ApplyGainRampCommand::redo()
+{
+    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
+    SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
+    SharedSampleRange sampleRange = item->getSampleRange();
+
+    const int numChans = mSampleHeader->numChans;
+
+    SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
+
+    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+    {
+        tempBuffer->copyFrom( chanNum, 0, *sampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
+    }
+
+    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleHeader, true );
+
+    if ( ! mFilePath.isEmpty() )
+    {
+        sampleBuffer->applyGainRamp( sampleRange->startFrame, sampleRange->numFrames, mStartGain, mEndGain );
+
+        mGraphicsView->forceRedraw();
+    }
+    else
+    {
+        MainWindow::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+    }
+}
+
+
+
+//==================================================================================================
+
 NormaliseCommand::NormaliseCommand( const int waveformItemOrderPos,
                                     WaveGraphicsView* const graphicsView,
                                     const SharedSampleHeader sampleHeader,

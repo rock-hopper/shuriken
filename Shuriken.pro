@@ -160,7 +160,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/helpform.cpp \
     src/applygaindialog.cpp \
     src/directoryvalidator.cpp \
-    src/signallistener.cpp
+    src/signallistener.cpp \
+    src/applygainrampdialog.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -381,11 +382,13 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/helpform.h \
     src/applygaindialog.h \
     src/directoryvalidator.h \
-    src/signallistener.h
+    src/signallistener.h \
+    src/applygainrampdialog.h
 FORMS += src/mainwindow.ui \
     src/audiosetupdialog.ui \
     src/helpform.ui \
-    src/applygaindialog.ui
+    src/applygaindialog.ui \
+    src/applygainrampdialog.ui
 INCLUDEPATH += src \
     src/SndLibShuriken \
     src/JuceLibraryCode

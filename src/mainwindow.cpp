@@ -27,6 +27,7 @@
 #include "commands.h"
 #include "globals.h"
 #include "applygaindialog.h"
+#include "applygainrampdialog.h"
 #include <QDebug>
 #include <rubberband/RubberBandStretcher.h>
 
@@ -1103,6 +1104,7 @@ void MainWindow::enableEditActions()
     if ( ! orderPositions.isEmpty() )
     {
         mUI->actionApply_Gain->setEnabled( true );
+        mUI->actionApply_Gain_Ramp->setEnabled( true );
         mUI->actionNormalise->setEnabled( true );
         mUI->actionReverse->setEnabled( true );
 
@@ -1119,6 +1121,7 @@ void MainWindow::enableEditActions()
     else
     {
         mUI->actionApply_Gain->setEnabled( false );
+        mUI->actionApply_Gain_Ramp->setEnabled( false );
         mUI->actionNormalise->setEnabled( false );
         mUI->actionReverse->setEnabled( false );
         mUI->actionSplit->setEnabled( false );
@@ -1398,6 +1401,75 @@ void MainWindow::on_actionApply_Gain_triggered()
 
 
 
+void MainWindow::on_actionApply_Gain_Ramp_triggered()
+{
+    const QString tempDirPath = mOptionsDialog->getTempDirPath();
+
+    if ( ! tempDirPath.isEmpty() )
+    {
+        ApplyGainRampDialog dialog;
+
+        if ( dialog.exec() == QDialog::Accepted )
+        {
+            const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+
+            foreach ( int orderPos, orderPositions )
+            {
+                QString fileBaseName;
+                fileBaseName.setNum( mUndoStack.index() );
+
+                QUndoCommand* command = new ApplyGainRampCommand( dialog.getStartGainValue(),
+                                                                  dialog.getEndGainValue(),
+                                                                  orderPos,
+                                                                  mUI->waveGraphicsView,
+                                                                  mCurrentSampleHeader,
+                                                                  mFileHandler,
+                                                                  tempDirPath,
+                                                                  fileBaseName );
+                mUndoStack.push( command );
+            }
+        }
+    }
+    else
+    {
+        showWarningDialog( tr("Temp dir invalid!"),
+                           tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+    }
+}
+
+
+
+void MainWindow::on_actionNormalise_triggered()
+{
+    const QString tempDirPath = mOptionsDialog->getTempDirPath();
+
+    if ( ! tempDirPath.isEmpty() )
+    {
+        const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+
+        foreach ( int orderPos, orderPositions )
+        {
+            QString fileBaseName;
+            fileBaseName.setNum( mUndoStack.index() );
+
+            QUndoCommand* command = new NormaliseCommand( orderPos,
+                                                          mUI->waveGraphicsView,
+                                                          mCurrentSampleHeader,
+                                                          mFileHandler,
+                                                          tempDirPath,
+                                                          fileBaseName );
+            mUndoStack.push( command );
+        }
+    }
+    else
+    {
+        showWarningDialog( tr("Temp dir invalid!"),
+                           tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+    }
+}
+
+
+
 void MainWindow::on_actionEnvelope_triggered()
 {
 
@@ -1441,37 +1513,6 @@ void MainWindow::on_actionReverse_triggered()
     {
         QUndoCommand* command = new ReverseCommand( orderPos, mUI->waveGraphicsView );
         mUndoStack.push( command );
-    }
-}
-
-
-
-void MainWindow::on_actionNormalise_triggered()
-{
-    const QString tempDirPath = mOptionsDialog->getTempDirPath();
-
-    if ( ! tempDirPath.isEmpty() )
-    {
-        const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
-
-        foreach ( int orderPos, orderPositions )
-        {
-            QString fileBaseName;
-            fileBaseName.setNum( mUndoStack.index() );
-
-            QUndoCommand* command = new NormaliseCommand( orderPos,
-                                                          mUI->waveGraphicsView,
-                                                          mCurrentSampleHeader,
-                                                          mFileHandler,
-                                                          tempDirPath,
-                                                          fileBaseName );
-            mUndoStack.push( command );
-        }
-    }
-    else
-    {
-        showWarningDialog( tr("Temp dir invalid!"),
-                           tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
     }
 }
 
