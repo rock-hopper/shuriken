@@ -228,9 +228,7 @@ void SliceCommand::undo()
 
     mSliceButton->setEnabled( true );
     mAddSlicePointAction->setEnabled( true );
-    mMoveItemsAction->setEnabled( false );
     mSelectItemsAction->setEnabled( false );
-    mAuditionItemsAction->setEnabled( false );
     mAuditionItemsAction->trigger();
 
     QApplication::restoreOverrideCursor();
@@ -262,9 +260,7 @@ void SliceCommand::redo()
 
     mSliceButton->setEnabled( false );
     mAddSlicePointAction->setEnabled( false );
-    mMoveItemsAction->setEnabled( true );
     mSelectItemsAction->setEnabled( true );
-    mAuditionItemsAction->setEnabled( true );
 
     QApplication::restoreOverrideCursor();
 }

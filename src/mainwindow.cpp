@@ -609,6 +609,8 @@ void MainWindow::enableUI()
     mUI->actionAdd_Slice_Point->setEnabled( true );
     mUI->actionZoom_Original->setEnabled( true );
     mUI->actionZoom_In->setEnabled( true );
+    mUI->actionMove->setEnabled( true );
+    mUI->actionAudition->setEnabled( true );
 
     mUI->actionAudition->trigger();
 }
