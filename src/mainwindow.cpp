@@ -94,6 +94,7 @@ void MainWindow::openProject( const QString xmlFilePath )
         if ( docElement->hasTagName( "project" ) )
         {
             QString projectName = docElement->getStringAttribute( "name" ).toRawUTF8();
+            QList<int> slicePointFrameNumList;
             QString audioFileName;
             qreal originalBpm = 0.0;
             qreal newBpm = 0.0;
@@ -117,6 +118,10 @@ void MainWindow::openProject( const QString xmlFilePath )
                     sampleRange->numFrames = elem->getIntAttribute( "num_frames" );
 
                     mSampleRangeList << sampleRange;
+                }
+                else if ( elem->hasTagName( "slice_point" ) )
+                {
+                    slicePointFrameNumList << elem->getIntAttribute( "frame_num" );
                 }
                 else if ( elem->hasTagName( "sample" ) )
                 {
@@ -174,6 +179,14 @@ void MainWindow::openProject( const QString xmlFilePath )
                         setUpSampler( sampleBuffer, sampleHeader );
 
                         enableUI();
+
+                        QUndoCommand* command = new AddSlicePointItemsCommand( mUI->pushButton_FindOnsets, mUI->pushButton_FindBeats );
+
+                        foreach ( int frameNum, slicePointFrameNumList )
+                        {
+                            new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, command );
+                        }
+                        mUndoStack.push( command );
                     }
                     else // Multiple sample ranges are defined - waveform has been sliced
                     {
@@ -871,6 +884,15 @@ void MainWindow::saveProject( const QString projDirPath )
             rangeElement->setAttribute( "start_frame", sampleRange->startFrame );
             rangeElement->setAttribute( "num_frames", sampleRange->numFrames );
             docElement.addChildElement( rangeElement );
+        }
+
+        const QList<int> slicePointFrameNumList = mUI->waveGraphicsView->getSlicePointFrameNumList();
+
+        foreach ( int slicePointFrameNum, slicePointFrameNumList )
+        {
+            XmlElement* slicePointElement = new XmlElement( "slice_point" );
+            slicePointElement->setAttribute( "frame_num", slicePointFrameNum );
+            docElement.addChildElement( slicePointElement );
         }
 
         File file( xmlFilePath.toLocal8Bit().data() );
