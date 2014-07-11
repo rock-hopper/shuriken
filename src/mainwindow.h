@@ -87,6 +87,35 @@ private:
     void saveProjectDialog();
     void openProjectDialog();
 
+    struct ProjectSettings
+    {
+        ProjectSettings() :
+            originalBpm( 0.0 ),
+            newBpm( 0.0 ),
+            appliedBpm( 0.0 ),
+            isTimeStretchChecked( false ),
+            isPitchCorrectionChecked( false ),
+            isJackSyncChecked( false ),
+            options( 0 )
+        {
+        }
+
+        QString projectName;
+        QList<SharedSampleRange> sampleRangeList;
+        QList<int> slicePointFrameNumList;
+        QString audioFileName;
+        qreal originalBpm;
+        qreal newBpm;
+        qreal appliedBpm;
+        bool isTimeStretchChecked;
+        bool isPitchCorrectionChecked;
+        bool isJackSyncChecked;
+        RubberBandStretcher::Options options;
+    };
+
+    void createXmlFile( const QString filePath, const QString projectName );
+    bool readXmlFile( const QString filePath, ProjectSettings& settings );
+
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
     ScopedPointer<AudioSetupDialog> mOptionsDialog;
