@@ -107,8 +107,7 @@ private:
 
     QString mLastOpenedImportDir;
     QString mLastOpenedProjDir;
-    QString mCurrentAudioFilePath;
-    QString mCurrentProjDirPath;
+    QString mCurrentProjectFilePath;
 
     QUndoStack mUndoStack;
 

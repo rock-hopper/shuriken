@@ -23,13 +23,14 @@
 #ifndef ZIPPER_H
 #define ZIPPER_H
 
-#include "JuceHeader.h"
+#include <QString>
+
 
 class Zipper
 {
 public:
-    static void compress( File sourceDir, File zipFile );
-    static void decompress();
+    static void compress( const QString sourceDirPath, const QString zipFilePath );
+    static void decompress( const QString zipFilePath, const QString destDirPath );
 };
 
 #endif // ZIPPER_H

@@ -21,20 +21,27 @@
 */
 
 #include "zipper.h"
+#include "JuceHeader.h"
+#include <QDebug>
 
 
 //==================================================================================================
 // Public Static:
 
-void Zipper::compress( File sourceDir, File zipFile )
+void Zipper::compress( const QString sourceDirPath, const QString zipFilePath )
 {
+    const File sourceDir( sourceDirPath.toLocal8Bit().data() );
+    const File zipFile( zipFilePath.toLocal8Bit().data() );
+    const File parentDir = zipFile.getParentDirectory();
+
     ZipFile::Builder zipBuilder;
     Array<File> files;
+
     sourceDir.findChildFiles( files, File::findFiles, false );
 
     for ( int i = 0; i < files.size(); i++ )
     {
-        zipBuilder.addFile( files[i], 9, files[i].getRelativePathFrom( zipFile ) );
+        zipBuilder.addFile( files[i], 9, files[i].getRelativePathFrom( parentDir ) );
     }
 
     if ( zipFile.exists() )
@@ -48,6 +55,10 @@ void Zipper::compress( File sourceDir, File zipFile )
 
 
 
-void Zipper::decompress()
+void Zipper::decompress( const QString zipFilePath, const QString destDirPath )
 {
+    const File zipFile( zipFilePath.toLocal8Bit().data() );
+    const File destDir( destDirPath.toLocal8Bit().data() );
+
+    ZipFile( zipFile ).uncompressTo( destDir );
 }
