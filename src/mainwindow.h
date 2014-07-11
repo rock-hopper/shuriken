@@ -83,7 +83,7 @@ private:
 
     void importAudioFile();
     void closeProject();
-    void saveProject( const QString projDirPath );
+    void saveProject( const QString filePath );
     void saveProjectDialog();
     void openProjectDialog();
 
