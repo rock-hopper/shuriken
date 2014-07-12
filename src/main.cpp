@@ -26,6 +26,7 @@
 #include "signallistener.h"
 #include <QThread>
 #include <QFileInfo>
+#include <QDesktopWidget>
 #include <QDebug>
 
 
@@ -75,6 +76,11 @@ int main( int argc, char* argv[] )
     QObject::connect( &listener, SIGNAL( quit() ),
                       &window, SLOT( close() ),
                       Qt::BlockingQueuedConnection );
+
+    window.setGeometry
+    (
+        QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, window.size(), app.desktop()->availableGeometry() )
+    );
 
     window.show();
 

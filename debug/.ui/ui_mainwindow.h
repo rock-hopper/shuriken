@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sat Jul 12 09:37:11 2014
+** Created: Sat Jul 12 12:04:17 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -392,6 +392,7 @@ public:
         sizePolicy1.setVerticalStretch(0);
         sizePolicy1.setHeightForWidth(pushButton_Slice->sizePolicy().hasHeightForWidth());
         pushButton_Slice->setSizePolicy(sizePolicy1);
+        pushButton_Slice->setMinimumSize(QSize(98, 0));
         QIcon icon19;
         icon19.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/transform-move.png"), QSize(), QIcon::Normal, QIcon::Off);
         pushButton_Slice->setIcon(icon19);

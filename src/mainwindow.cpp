@@ -24,13 +24,15 @@
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QDesktopWidget>
 #include "commands.h"
 #include "globals.h"
 #include "applygaindialog.h"
 #include "applygainrampdialog.h"
 #include "zipper.h"
-#include <QDebug>
 #include <rubberband/RubberBandStretcher.h>
+#include <QDebug>
+
 
 using namespace RubberBand;
 
@@ -508,6 +510,12 @@ void MainWindow::setupUI()
 
     if ( mHelpForm != NULL )
     {
+        QRect geometryRect = QStyle::alignedRect( Qt::LeftToRight,
+                                                  Qt::AlignCenter,
+                                                  mHelpForm->size(),
+                                                  QApplication::desktop()->availableGeometry() );
+        mHelpForm->setGeometry( geometryRect );
+
         mUI->actionHelp->setEnabled( true );
     }
 }
