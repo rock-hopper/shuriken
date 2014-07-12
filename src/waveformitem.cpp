@@ -192,6 +192,8 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
     {
         if ( mDetailLevel == LOW )
         {
+            painter->setRenderHint( QPainter::Antialiasing, false );
+
             for ( int binCount = 0; binCount < numVisibleBins; binCount++ )
             {
                 min = (*mMinSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
@@ -206,6 +208,8 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
         }
         else if ( mDetailLevel == HIGH )
         {
+            painter->setRenderHint( QPainter::Antialiasing, true );
+
             QPointF points[ numVisibleBins * 2 ];
 
             for ( int binCount = 0; binCount < numVisibleBins; binCount++ )
@@ -220,6 +224,8 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
         }
         else // mDetailLevel == VERY_HIGH
         {
+            painter->setRenderHint( QPainter::Antialiasing, true );
+
             QPointF points[ numVisibleFrames ];
             float* sampleData = mSampleBuffer->getSampleData( chanNum, firstVisibleFrame );
 
@@ -231,8 +237,10 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
             }
             painter->drawPolyline( points, numVisibleFrames );
         }
+
         painter->translate( 0.0, numChans );
     }
+
     painter->restore();
 
     // If selected draw highlight
@@ -509,7 +517,7 @@ void WaveformItem::init()
     setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges | ItemUsesExtendedStyleOption );
 
     setBackgroundGradient();
-    mWavePen = QPen( QColor(0, 0, 127, 191) );
+    mWavePen  = QPen( QColor(15, 15, 159, 191) );
     mCentreLinePen = QPen( QColor(127, 127, 127, 191) );
 
     // Don't draw rect border

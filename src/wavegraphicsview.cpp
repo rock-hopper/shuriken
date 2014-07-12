@@ -36,9 +36,9 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
 //    setViewportUpdateMode( QGraphicsView::FullViewportUpdate );
 //    setRenderHint( QPainter::HighQualityAntialiasing, false );
     setViewport( new QWidget() );
-    setRenderHint( QPainter::Antialiasing, true );
+    setRenderHint( QPainter::Antialiasing, false );
 
-    setOptimizationFlags( DontSavePainterState ); // | DontAdjustForAntialiasing );
+    setOptimizationFlags( DontSavePainterState | DontAdjustForAntialiasing );
     setBackgroundBrush( Qt::gray );
     setCacheMode( CacheBackground );
 
