@@ -28,7 +28,7 @@
 #include <QUndoStack>
 #include "JuceHeader.h"
 #include "samplebuffer.h"
-#include "audiosetupdialog.h"
+#include "optionsdialog.h"
 #include "audiofilehandler.h"
 #include "sampleraudiosource.h"
 #include "rubberbandaudiosource.h"
@@ -118,7 +118,7 @@ private:
 
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
-    ScopedPointer<AudioSetupDialog> mOptionsDialog;
+    ScopedPointer<OptionsDialog> mOptionsDialog;
     ScopedPointer<HelpForm> mHelpForm;
 
     AudioDeviceManager mDeviceManager;

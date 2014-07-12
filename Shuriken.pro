@@ -148,7 +148,7 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/mainwindow.cpp \
     src/wavegraphicsview.cpp \
     src/waveformitem.cpp \
-    src/audiosetupdialog.cpp \
+    src/optionsdialog.cpp \
     src/audiofilehandler.cpp \
     src/sampleraudiosource.cpp \
     src/shurikensampler.cpp \
@@ -369,7 +369,7 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/mainwindow.h \
     src/wavegraphicsview.h \
     src/waveformitem.h \
-    src/audiosetupdialog.h \
+    src/optionsdialog.h \
     src/audiofilehandler.h \
     src/samplebuffer.h \
     src/sampleraudiosource.h \
@@ -387,7 +387,7 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/applygainrampdialog.h \
     src/zipper.h
 FORMS += src/mainwindow.ui \
-    src/audiosetupdialog.ui \
+    src/optionsdialog.ui \
     src/helpform.ui \
     src/applygaindialog.ui \
     src/applygainrampdialog.ui

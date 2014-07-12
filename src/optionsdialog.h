@@ -20,8 +20,8 @@
 
 */
 
-#ifndef AUDIOSETUPDIALOG_H
-#define AUDIOSETUPDIALOG_H
+#ifndef OPTIONSDIALOG_H
+#define OPTIONSDIALOG_H
 
 #include <QDialog>
 #include <QListWidgetItem>
@@ -37,18 +37,18 @@ using namespace RubberBand;
 
 namespace Ui
 {
-    class AudioSetupDialog;
+    class OptionsDialog;
 }
 
-class AudioSetupDialog : public QDialog
+class OptionsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
     enum Tab { AUDIO_SETUP = 0, TIMESTRETCH = 1 };
     
-    AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* parent = NULL );
-    ~AudioSetupDialog();
+    OptionsDialog( AudioDeviceManager& deviceManager, QWidget* parent = NULL );
+    ~OptionsDialog();
 
     void setCurrentTab( const Tab tab );
 
@@ -84,7 +84,7 @@ private:
     void enableStretcherOptions( const RubberBandStretcher::Options options );
     void disableStretcherOptions( const RubberBandStretcher::Options options );
 
-    Ui::AudioSetupDialog* mUI;
+    Ui::OptionsDialog* mUI;
     AudioDeviceManager& mDeviceManager;
     AudioDeviceManager::AudioDeviceSetup mOriginalConfig;
     ScopedPointer<SynthAudioSource> mSynthAudioSource;
@@ -145,7 +145,7 @@ private slots:
     void displayDirValidityText( const bool isValid );
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( AudioSetupDialog );
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( OptionsDialog );
 };
 
-#endif // AUDIOSETUPDIALOG_H
+#endif // OPTIONSDIALOG_H

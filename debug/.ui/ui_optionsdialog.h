@@ -1,14 +1,14 @@
 /********************************************************************************
-** Form generated from reading UI file 'audiosetupdialog.ui'
+** Form generated from reading UI file 'optionsdialog.ui'
 **
-** Created: Fri Jul 4 09:59:13 2014
+** Created: Sat Jul 12 09:37:11 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef UI_AUDIOSETUPDIALOG_H
-#define UI_AUDIOSETUPDIALOG_H
+#ifndef UI_OPTIONSDIALOG_H
+#define UI_OPTIONSDIALOG_H
 
 #include <QtCore/QVariant>
 #include <QtGui/QAction>
@@ -34,7 +34,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Ui_AudioSetupDialog
+class Ui_OptionsDialog
 {
 public:
     QVBoxLayout *verticalLayout;
@@ -100,15 +100,15 @@ public:
     QButtonGroup *buttonGroup_Formants;
     QButtonGroup *buttonGroup_PitchShifting;
 
-    void setupUi(QDialog *AudioSetupDialog)
+    void setupUi(QDialog *OptionsDialog)
     {
-        if (AudioSetupDialog->objectName().isEmpty())
-            AudioSetupDialog->setObjectName(QString::fromUtf8("AudioSetupDialog"));
-        AudioSetupDialog->resize(515, 400);
-        verticalLayout = new QVBoxLayout(AudioSetupDialog);
+        if (OptionsDialog->objectName().isEmpty())
+            OptionsDialog->setObjectName(QString::fromUtf8("OptionsDialog"));
+        OptionsDialog->resize(515, 400);
+        verticalLayout = new QVBoxLayout(OptionsDialog);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         verticalLayout->setContentsMargins(20, -1, 20, -1);
-        tabWidget = new QTabWidget(AudioSetupDialog);
+        tabWidget = new QTabWidget(OptionsDialog);
         tabWidget->setObjectName(QString::fromUtf8("tabWidget"));
         tab_AudioSetup = new QWidget();
         tab_AudioSetup->setObjectName(QString::fromUtf8("tab_AudioSetup"));
@@ -201,7 +201,7 @@ public:
         gridLayout->addWidget(label, 0, 0, 1, 1);
 
         radioButton_Offline = new QRadioButton(tab_TimeStretch);
-        buttonGroup_Processing = new QButtonGroup(AudioSetupDialog);
+        buttonGroup_Processing = new QButtonGroup(OptionsDialog);
         buttonGroup_Processing->setObjectName(QString::fromUtf8("buttonGroup_Processing"));
         buttonGroup_Processing->addButton(radioButton_Offline);
         radioButton_Offline->setObjectName(QString::fromUtf8("radioButton_Offline"));
@@ -221,7 +221,7 @@ public:
         gridLayout->addWidget(label_2, 1, 0, 1, 1);
 
         radioButton_Elastic = new QRadioButton(tab_TimeStretch);
-        buttonGroup_Timestretch = new QButtonGroup(AudioSetupDialog);
+        buttonGroup_Timestretch = new QButtonGroup(OptionsDialog);
         buttonGroup_Timestretch->setObjectName(QString::fromUtf8("buttonGroup_Timestretch"));
         buttonGroup_Timestretch->addButton(radioButton_Elastic);
         radioButton_Elastic->setObjectName(QString::fromUtf8("radioButton_Elastic"));
@@ -241,7 +241,7 @@ public:
         gridLayout->addWidget(label_3, 2, 0, 1, 1);
 
         radioButton_Crisp = new QRadioButton(tab_TimeStretch);
-        buttonGroup_Transients = new QButtonGroup(AudioSetupDialog);
+        buttonGroup_Transients = new QButtonGroup(OptionsDialog);
         buttonGroup_Transients->setObjectName(QString::fromUtf8("buttonGroup_Transients"));
         buttonGroup_Transients->addButton(radioButton_Crisp);
         radioButton_Crisp->setObjectName(QString::fromUtf8("radioButton_Crisp"));
@@ -267,7 +267,7 @@ public:
         gridLayout->addWidget(label_4, 3, 0, 1, 1);
 
         radioButton_Laminar = new QRadioButton(tab_TimeStretch);
-        buttonGroup_Phase = new QButtonGroup(AudioSetupDialog);
+        buttonGroup_Phase = new QButtonGroup(OptionsDialog);
         buttonGroup_Phase->setObjectName(QString::fromUtf8("buttonGroup_Phase"));
         buttonGroup_Phase->addButton(radioButton_Laminar);
         radioButton_Laminar->setObjectName(QString::fromUtf8("radioButton_Laminar"));
@@ -287,7 +287,7 @@ public:
         gridLayout->addWidget(label_6, 4, 0, 1, 1);
 
         radioButton_Standard = new QRadioButton(tab_TimeStretch);
-        buttonGroup_WindowSize = new QButtonGroup(AudioSetupDialog);
+        buttonGroup_WindowSize = new QButtonGroup(OptionsDialog);
         buttonGroup_WindowSize->setObjectName(QString::fromUtf8("buttonGroup_WindowSize"));
         buttonGroup_WindowSize->addButton(radioButton_Standard);
         radioButton_Standard->setObjectName(QString::fromUtf8("radioButton_Standard"));
@@ -313,7 +313,7 @@ public:
         gridLayout->addWidget(label_7, 5, 0, 1, 1);
 
         radioButton_Shifted = new QRadioButton(tab_TimeStretch);
-        buttonGroup_Formants = new QButtonGroup(AudioSetupDialog);
+        buttonGroup_Formants = new QButtonGroup(OptionsDialog);
         buttonGroup_Formants->setObjectName(QString::fromUtf8("buttonGroup_Formants"));
         buttonGroup_Formants->addButton(radioButton_Shifted);
         radioButton_Shifted->setObjectName(QString::fromUtf8("radioButton_Shifted"));
@@ -333,7 +333,7 @@ public:
         gridLayout->addWidget(label_8, 6, 0, 1, 1);
 
         radioButton_HighSpeed = new QRadioButton(tab_TimeStretch);
-        buttonGroup_PitchShifting = new QButtonGroup(AudioSetupDialog);
+        buttonGroup_PitchShifting = new QButtonGroup(OptionsDialog);
         buttonGroup_PitchShifting->setObjectName(QString::fromUtf8("buttonGroup_PitchShifting"));
         buttonGroup_PitchShifting->addButton(radioButton_HighSpeed);
         radioButton_HighSpeed->setObjectName(QString::fromUtf8("radioButton_HighSpeed"));
@@ -408,7 +408,7 @@ public:
 
         verticalLayout->addWidget(tabWidget);
 
-        buttonBox = new QDialogButtonBox(AudioSetupDialog);
+        buttonBox = new QDialogButtonBox(OptionsDialog);
         buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
         buttonBox->setOrientation(Qt::Horizontal);
         buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::Save);
@@ -416,67 +416,67 @@ public:
         verticalLayout->addWidget(buttonBox);
 
 
-        retranslateUi(AudioSetupDialog);
-        QObject::connect(buttonBox, SIGNAL(accepted()), AudioSetupDialog, SLOT(accept()));
-        QObject::connect(buttonBox, SIGNAL(rejected()), AudioSetupDialog, SLOT(reject()));
+        retranslateUi(OptionsDialog);
+        QObject::connect(buttonBox, SIGNAL(accepted()), OptionsDialog, SLOT(accept()));
+        QObject::connect(buttonBox, SIGNAL(rejected()), OptionsDialog, SLOT(reject()));
 
         tabWidget->setCurrentIndex(0);
 
 
-        QMetaObject::connectSlotsByName(AudioSetupDialog);
+        QMetaObject::connectSlotsByName(OptionsDialog);
     } // setupUi
 
-    void retranslateUi(QDialog *AudioSetupDialog)
+    void retranslateUi(QDialog *OptionsDialog)
     {
-        AudioSetupDialog->setWindowTitle(QApplication::translate("AudioSetupDialog", "Options", 0, QApplication::UnicodeUTF8));
-        label_AudioBackend->setText(QApplication::translate("AudioSetupDialog", "Audio Back-end:", 0, QApplication::UnicodeUTF8));
-        label_AudioDevice->setText(QApplication::translate("AudioSetupDialog", "Audio Device:", 0, QApplication::UnicodeUTF8));
-        pushButton_TestTone->setText(QApplication::translate("AudioSetupDialog", "Test Tone", 0, QApplication::UnicodeUTF8));
-        label_OutputChannels->setText(QApplication::translate("AudioSetupDialog", "Output Channels:", 0, QApplication::UnicodeUTF8));
-        label_SampleRate->setText(QApplication::translate("AudioSetupDialog", "Sample Rate:", 0, QApplication::UnicodeUTF8));
-        label_BufferSize->setText(QApplication::translate("AudioSetupDialog", "Audio Buffer Size:", 0, QApplication::UnicodeUTF8));
-        label_MidiInput->setText(QApplication::translate("AudioSetupDialog", "MIDI Input:", 0, QApplication::UnicodeUTF8));
-        checkBox_MidiInputTestTone->setText(QApplication::translate("AudioSetupDialog", "Enable MIDI Input Test Tone", 0, QApplication::UnicodeUTF8));
-        tabWidget->setTabText(tabWidget->indexOf(tab_AudioSetup), QApplication::translate("AudioSetupDialog", "Audio Setup", 0, QApplication::UnicodeUTF8));
-        label->setText(QApplication::translate("AudioSetupDialog", "Processing:", 0, QApplication::UnicodeUTF8));
-        radioButton_Offline->setText(QApplication::translate("AudioSetupDialog", "Offline", 0, QApplication::UnicodeUTF8));
-        radioButton_RealTime->setText(QApplication::translate("AudioSetupDialog", "Real-time", 0, QApplication::UnicodeUTF8));
-        label_2->setText(QApplication::translate("AudioSetupDialog", "Stretch Profile:", 0, QApplication::UnicodeUTF8));
-        radioButton_Elastic->setText(QApplication::translate("AudioSetupDialog", "Elastic", 0, QApplication::UnicodeUTF8));
-        radioButton_Precise->setText(QApplication::translate("AudioSetupDialog", "Precise", 0, QApplication::UnicodeUTF8));
-        label_3->setText(QApplication::translate("AudioSetupDialog", "Transients:", 0, QApplication::UnicodeUTF8));
-        radioButton_Crisp->setText(QApplication::translate("AudioSetupDialog", "Crisp", 0, QApplication::UnicodeUTF8));
-        radioButton_Mixed->setText(QApplication::translate("AudioSetupDialog", "Mixed", 0, QApplication::UnicodeUTF8));
-        radioButton_Smooth->setText(QApplication::translate("AudioSetupDialog", "Smooth", 0, QApplication::UnicodeUTF8));
-        label_4->setText(QApplication::translate("AudioSetupDialog", "Phase:", 0, QApplication::UnicodeUTF8));
-        radioButton_Laminar->setText(QApplication::translate("AudioSetupDialog", "Laminar", 0, QApplication::UnicodeUTF8));
-        radioButton_Independent->setText(QApplication::translate("AudioSetupDialog", "Independent", 0, QApplication::UnicodeUTF8));
-        label_6->setText(QApplication::translate("AudioSetupDialog", "Window Size:", 0, QApplication::UnicodeUTF8));
-        radioButton_Standard->setText(QApplication::translate("AudioSetupDialog", "Standard", 0, QApplication::UnicodeUTF8));
-        radioButton_Short->setText(QApplication::translate("AudioSetupDialog", "Short", 0, QApplication::UnicodeUTF8));
-        radioButton_Long->setText(QApplication::translate("AudioSetupDialog", "Long", 0, QApplication::UnicodeUTF8));
-        label_7->setText(QApplication::translate("AudioSetupDialog", "Formants:", 0, QApplication::UnicodeUTF8));
-        radioButton_Shifted->setText(QApplication::translate("AudioSetupDialog", "Shifted", 0, QApplication::UnicodeUTF8));
-        radioButton_Preserved->setText(QApplication::translate("AudioSetupDialog", "Preserved", 0, QApplication::UnicodeUTF8));
-        label_8->setText(QApplication::translate("AudioSetupDialog", "Pitch Shifting:", 0, QApplication::UnicodeUTF8));
-        radioButton_HighSpeed->setText(QApplication::translate("AudioSetupDialog", "High Speed", 0, QApplication::UnicodeUTF8));
-        radioButton_HighQuality->setText(QApplication::translate("AudioSetupDialog", "High Quality", 0, QApplication::UnicodeUTF8));
-        radioButton_HighConsistency->setText(QApplication::translate("AudioSetupDialog", "High Consistency", 0, QApplication::UnicodeUTF8));
-        label_15->setText(QApplication::translate("AudioSetupDialog", "JACK Sync:", 0, QApplication::UnicodeUTF8));
-        checkBox_JackSync->setText(QApplication::translate("AudioSetupDialog", "Enable", 0, QApplication::UnicodeUTF8));
-        tabWidget->setTabText(tabWidget->indexOf(tab_TimeStretch), QApplication::translate("AudioSetupDialog", "Time Stretch", 0, QApplication::UnicodeUTF8));
-        label_5->setText(QApplication::translate("AudioSetupDialog", "Temp Dir:", 0, QApplication::UnicodeUTF8));
-        pushButton_ChooseTempDir->setText(QApplication::translate("AudioSetupDialog", "Choose...", 0, QApplication::UnicodeUTF8));
+        OptionsDialog->setWindowTitle(QApplication::translate("OptionsDialog", "Options", 0, QApplication::UnicodeUTF8));
+        label_AudioBackend->setText(QApplication::translate("OptionsDialog", "Audio Back-end:", 0, QApplication::UnicodeUTF8));
+        label_AudioDevice->setText(QApplication::translate("OptionsDialog", "Audio Device:", 0, QApplication::UnicodeUTF8));
+        pushButton_TestTone->setText(QApplication::translate("OptionsDialog", "Test Tone", 0, QApplication::UnicodeUTF8));
+        label_OutputChannels->setText(QApplication::translate("OptionsDialog", "Output Channels:", 0, QApplication::UnicodeUTF8));
+        label_SampleRate->setText(QApplication::translate("OptionsDialog", "Sample Rate:", 0, QApplication::UnicodeUTF8));
+        label_BufferSize->setText(QApplication::translate("OptionsDialog", "Audio Buffer Size:", 0, QApplication::UnicodeUTF8));
+        label_MidiInput->setText(QApplication::translate("OptionsDialog", "MIDI Input:", 0, QApplication::UnicodeUTF8));
+        checkBox_MidiInputTestTone->setText(QApplication::translate("OptionsDialog", "Enable MIDI Input Test Tone", 0, QApplication::UnicodeUTF8));
+        tabWidget->setTabText(tabWidget->indexOf(tab_AudioSetup), QApplication::translate("OptionsDialog", "Audio Setup", 0, QApplication::UnicodeUTF8));
+        label->setText(QApplication::translate("OptionsDialog", "Processing:", 0, QApplication::UnicodeUTF8));
+        radioButton_Offline->setText(QApplication::translate("OptionsDialog", "Offline", 0, QApplication::UnicodeUTF8));
+        radioButton_RealTime->setText(QApplication::translate("OptionsDialog", "Real-time", 0, QApplication::UnicodeUTF8));
+        label_2->setText(QApplication::translate("OptionsDialog", "Stretch Profile:", 0, QApplication::UnicodeUTF8));
+        radioButton_Elastic->setText(QApplication::translate("OptionsDialog", "Elastic", 0, QApplication::UnicodeUTF8));
+        radioButton_Precise->setText(QApplication::translate("OptionsDialog", "Precise", 0, QApplication::UnicodeUTF8));
+        label_3->setText(QApplication::translate("OptionsDialog", "Transients:", 0, QApplication::UnicodeUTF8));
+        radioButton_Crisp->setText(QApplication::translate("OptionsDialog", "Crisp", 0, QApplication::UnicodeUTF8));
+        radioButton_Mixed->setText(QApplication::translate("OptionsDialog", "Mixed", 0, QApplication::UnicodeUTF8));
+        radioButton_Smooth->setText(QApplication::translate("OptionsDialog", "Smooth", 0, QApplication::UnicodeUTF8));
+        label_4->setText(QApplication::translate("OptionsDialog", "Phase:", 0, QApplication::UnicodeUTF8));
+        radioButton_Laminar->setText(QApplication::translate("OptionsDialog", "Laminar", 0, QApplication::UnicodeUTF8));
+        radioButton_Independent->setText(QApplication::translate("OptionsDialog", "Independent", 0, QApplication::UnicodeUTF8));
+        label_6->setText(QApplication::translate("OptionsDialog", "Window Size:", 0, QApplication::UnicodeUTF8));
+        radioButton_Standard->setText(QApplication::translate("OptionsDialog", "Standard", 0, QApplication::UnicodeUTF8));
+        radioButton_Short->setText(QApplication::translate("OptionsDialog", "Short", 0, QApplication::UnicodeUTF8));
+        radioButton_Long->setText(QApplication::translate("OptionsDialog", "Long", 0, QApplication::UnicodeUTF8));
+        label_7->setText(QApplication::translate("OptionsDialog", "Formants:", 0, QApplication::UnicodeUTF8));
+        radioButton_Shifted->setText(QApplication::translate("OptionsDialog", "Shifted", 0, QApplication::UnicodeUTF8));
+        radioButton_Preserved->setText(QApplication::translate("OptionsDialog", "Preserved", 0, QApplication::UnicodeUTF8));
+        label_8->setText(QApplication::translate("OptionsDialog", "Pitch Shifting:", 0, QApplication::UnicodeUTF8));
+        radioButton_HighSpeed->setText(QApplication::translate("OptionsDialog", "High Speed", 0, QApplication::UnicodeUTF8));
+        radioButton_HighQuality->setText(QApplication::translate("OptionsDialog", "High Quality", 0, QApplication::UnicodeUTF8));
+        radioButton_HighConsistency->setText(QApplication::translate("OptionsDialog", "High Consistency", 0, QApplication::UnicodeUTF8));
+        label_15->setText(QApplication::translate("OptionsDialog", "JACK Sync:", 0, QApplication::UnicodeUTF8));
+        checkBox_JackSync->setText(QApplication::translate("OptionsDialog", "Enable", 0, QApplication::UnicodeUTF8));
+        tabWidget->setTabText(tabWidget->indexOf(tab_TimeStretch), QApplication::translate("OptionsDialog", "Time Stretch", 0, QApplication::UnicodeUTF8));
+        label_5->setText(QApplication::translate("OptionsDialog", "Temp Dir:", 0, QApplication::UnicodeUTF8));
+        pushButton_ChooseTempDir->setText(QApplication::translate("OptionsDialog", "Choose...", 0, QApplication::UnicodeUTF8));
         label_DirValidity->setText(QString());
-        tabWidget->setTabText(tabWidget->indexOf(tab), QApplication::translate("AudioSetupDialog", "Paths", 0, QApplication::UnicodeUTF8));
+        tabWidget->setTabText(tabWidget->indexOf(tab), QApplication::translate("OptionsDialog", "Paths", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };
 
 namespace Ui {
-    class AudioSetupDialog: public Ui_AudioSetupDialog {};
+    class OptionsDialog: public Ui_OptionsDialog {};
 } // namespace Ui
 
 QT_END_NAMESPACE
 
-#endif // UI_AUDIOSETUPDIALOG_H
+#endif // UI_OPTIONSDIALOG_H

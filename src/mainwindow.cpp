@@ -327,7 +327,7 @@ void MainWindow::initialiseAudio()
     }
     else
     {
-        mOptionsDialog = new AudioSetupDialog( mDeviceManager, this );
+        mOptionsDialog = new OptionsDialog( mDeviceManager, this );
 
         QObject::connect( mOptionsDialog.get(), SIGNAL( realtimeModeToggled(bool) ),
                           this, SLOT( enableRealtimeControls(bool) ) );
@@ -1646,7 +1646,7 @@ void MainWindow::on_actionOptions_triggered()
         pos.setY( 0 );
 
     mOptionsDialog->move( pos );
-    mOptionsDialog->setCurrentTab( AudioSetupDialog::AUDIO_SETUP );
+    mOptionsDialog->setCurrentTab( OptionsDialog::AUDIO_SETUP );
     mOptionsDialog->show();
 }
 
@@ -1943,6 +1943,6 @@ void MainWindow::on_pushButton_TimestretchOptions_clicked()
         pos.setY( 0 );
 
     mOptionsDialog->move( pos );
-    mOptionsDialog->setCurrentTab( AudioSetupDialog::TIMESTRETCH );
+    mOptionsDialog->setCurrentTab( OptionsDialog::TIMESTRETCH );
     mOptionsDialog->show();
 }

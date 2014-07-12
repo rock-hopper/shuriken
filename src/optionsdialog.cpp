@@ -20,8 +20,8 @@
 
 */
 
-#include "audiosetupdialog.h"
-#include "ui_audiosetupdialog.h"
+#include "optionsdialog.h"
+#include "ui_optionsdialog.h"
 #include "globals.h"
 #include <QMessageBox>
 #include <QFileDialog>
@@ -32,9 +32,9 @@
 //==================================================================================================
 // Public:
 
-AudioSetupDialog::AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* parent ) :
+OptionsDialog::OptionsDialog( AudioDeviceManager& deviceManager, QWidget* parent ) :
     QDialog( parent ),
-    mUI( new Ui::AudioSetupDialog ),
+    mUI( new Ui::OptionsDialog ),
     mDeviceManager( deviceManager ),
     mStretcherOptions( RubberBandStretcher::DefaultOptions )
 {
@@ -90,28 +90,28 @@ AudioSetupDialog::AudioSetupDialog( AudioDeviceManager& deviceManager, QWidget* 
 
 
 
-AudioSetupDialog::~AudioSetupDialog()
+OptionsDialog::~OptionsDialog()
 {
     delete mUI;
 }
 
 
 
-void AudioSetupDialog::setCurrentTab( const Tab tab )
+void OptionsDialog::setCurrentTab( const Tab tab )
 {
     mUI->tabWidget->setCurrentIndex( tab );
 }
 
 
 
-bool AudioSetupDialog::isRealtimeModeEnabled() const
+bool OptionsDialog::isRealtimeModeEnabled() const
 {
     return mUI->radioButton_RealTime->isChecked();
 }
 
 
 
-void AudioSetupDialog::setStretcherOptions( const RubberBandStretcher::Options options )
+void OptionsDialog::setStretcherOptions( const RubberBandStretcher::Options options )
 {
     if ( options & RubberBandStretcher::OptionProcessRealTime )
     {
@@ -197,21 +197,21 @@ void AudioSetupDialog::setStretcherOptions( const RubberBandStretcher::Options o
 
 
 
-bool AudioSetupDialog::isJackSyncEnabled() const
+bool OptionsDialog::isJackSyncEnabled() const
 {
     return mUI->checkBox_JackSync->isChecked();
 }
 
 
 
-void AudioSetupDialog::enableJackSync()
+void OptionsDialog::enableJackSync()
 {
     mUI->checkBox_JackSync->setChecked( true );
 }
 
 
 
-QString AudioSetupDialog::getTempDirPath() const
+QString OptionsDialog::getTempDirPath() const
 {
     QDir parentDir( mUI->lineEdit_TempDir->text() );
 
@@ -254,7 +254,7 @@ QString AudioSetupDialog::getTempDirPath() const
 //==================================================================================================
 // Protected:
 
-void AudioSetupDialog::changeEvent( QEvent* event )
+void OptionsDialog::changeEvent( QEvent* event )
 {
     QDialog::changeEvent( event );
 
@@ -270,7 +270,7 @@ void AudioSetupDialog::changeEvent( QEvent* event )
 
 
 
-void AudioSetupDialog::showEvent( QShowEvent* event )
+void OptionsDialog::showEvent( QShowEvent* event )
 {
     // If the dialog is not being maximised, i.e. it has not previoulsy been minimised...
     if ( ! event->spontaneous() )
@@ -291,7 +291,7 @@ void AudioSetupDialog::showEvent( QShowEvent* event )
 
 
 
-void AudioSetupDialog::closeEvent( QCloseEvent* event )
+void OptionsDialog::closeEvent( QCloseEvent* event )
 {
     tearDownMidiInputTestSynth();
     event->accept();
@@ -302,14 +302,14 @@ void AudioSetupDialog::closeEvent( QCloseEvent* event )
 //==================================================================================================
 // Private:
 
-bool AudioSetupDialog::isJackAudioEnabled() const
+bool OptionsDialog::isJackAudioEnabled() const
 {
     return ( mDeviceManager.getCurrentAudioDeviceType() == "JACK" );
 }
 
 
 
-void AudioSetupDialog::updateAudioDeviceComboBox()
+void OptionsDialog::updateAudioDeviceComboBox()
 {
     AudioIODeviceType* const audioBackendType = mDeviceManager.getCurrentDeviceTypeObject();
 
@@ -342,7 +342,7 @@ void AudioSetupDialog::updateAudioDeviceComboBox()
 
 
 
-void AudioSetupDialog::updateOutputChannelComboBox()
+void OptionsDialog::updateOutputChannelComboBox()
 {
     mUI->comboBox_OutputChannels->clear();
 
@@ -402,7 +402,7 @@ void AudioSetupDialog::updateOutputChannelComboBox()
 
 
 
-void AudioSetupDialog::updateSampleRateComboBox()
+void OptionsDialog::updateSampleRateComboBox()
 {
     mUI->comboBox_SampleRate->clear();
 
@@ -439,7 +439,7 @@ void AudioSetupDialog::updateSampleRateComboBox()
 
 
 
-void AudioSetupDialog::updateBufferSizeComboBox()
+void OptionsDialog::updateBufferSizeComboBox()
 {
     mUI->comboBox_BufferSize->clear();
 
@@ -486,7 +486,7 @@ void AudioSetupDialog::updateBufferSizeComboBox()
 
 
 
-void AudioSetupDialog::updateMidiInputListWidget()
+void OptionsDialog::updateMidiInputListWidget()
 {
     mUI->listWidget_MidiInput->clear();
 
@@ -538,7 +538,7 @@ void AudioSetupDialog::updateMidiInputListWidget()
 
 
 
-void AudioSetupDialog::disableAllWidgets()
+void OptionsDialog::disableAllWidgets()
 {
     mUI->comboBox_AudioBackend->addItem( getNoDeviceString() );
     mUI->comboBox_AudioDevice->addItem( getNoDeviceString() );
@@ -557,7 +557,7 @@ void AudioSetupDialog::disableAllWidgets()
 
 
 
-void AudioSetupDialog::setUpMidiInputTestSynth()
+void OptionsDialog::setUpMidiInputTestSynth()
 {
     mSynthAudioSource = new SynthAudioSource();
     mAudioSourcePlayer.setSource( mSynthAudioSource );
@@ -567,7 +567,7 @@ void AudioSetupDialog::setUpMidiInputTestSynth()
 
 
 
-void AudioSetupDialog::tearDownMidiInputTestSynth()
+void OptionsDialog::tearDownMidiInputTestSynth()
 {
     mAudioSourcePlayer.setSource( NULL );
     mDeviceManager.removeMidiInputCallback( String::empty, &(mSynthAudioSource->midiCollector) );
@@ -576,7 +576,7 @@ void AudioSetupDialog::tearDownMidiInputTestSynth()
 
 
 
-void AudioSetupDialog::setJackMidiInput( const String deviceName )
+void OptionsDialog::setJackMidiInput( const String deviceName )
 {
     if ( deviceName.startsWith( "JACK" ) && deviceName.contains( "MIDI" ) )
     {
@@ -600,14 +600,14 @@ void AudioSetupDialog::setJackMidiInput( const String deviceName )
 
 
 
-void AudioSetupDialog::enableStretcherOptions( const RubberBandStretcher::Options options )
+void OptionsDialog::enableStretcherOptions( const RubberBandStretcher::Options options )
 {
     mStretcherOptions |= options;
 }
 
 
 
-void AudioSetupDialog::disableStretcherOptions( const RubberBandStretcher::Options options )
+void OptionsDialog::disableStretcherOptions( const RubberBandStretcher::Options options )
 {
     mStretcherOptions &= ~options;
 }
@@ -617,7 +617,7 @@ void AudioSetupDialog::disableStretcherOptions( const RubberBandStretcher::Optio
 //==================================================================================================
 // Private Static:
 
-void AudioSetupDialog::showWarningBox( const QString text, const QString infoText )
+void OptionsDialog::showWarningBox( const QString text, const QString infoText )
 {
     QMessageBox msgBox;
     msgBox.setIcon( QMessageBox::Warning );
@@ -628,7 +628,7 @@ void AudioSetupDialog::showWarningBox( const QString text, const QString infoTex
 
 
 
-String AudioSetupDialog::getNameForChannelPair( const String& name1, const String& name2 )
+String OptionsDialog::getNameForChannelPair( const String& name1, const String& name2 )
 {
     String commonBit;
 
@@ -653,7 +653,7 @@ String AudioSetupDialog::getNameForChannelPair( const String& name1, const Strin
 //==================================================================================================
 // Private Slots:
 
-void AudioSetupDialog::accept()
+void OptionsDialog::accept()
 {
     tearDownMidiInputTestSynth();
     QDialog::accept();
@@ -661,7 +661,7 @@ void AudioSetupDialog::accept()
 
 
 
-void AudioSetupDialog::reject()
+void OptionsDialog::reject()
 {
     tearDownMidiInputTestSynth();
 
@@ -678,7 +678,7 @@ void AudioSetupDialog::reject()
 
 
 
-void AudioSetupDialog::displayDirValidityText( const bool isValid )
+void OptionsDialog::displayDirValidityText( const bool isValid )
 {
     if ( isValid )
     {
@@ -695,7 +695,7 @@ void AudioSetupDialog::displayDirValidityText( const bool isValid )
 //====================
 // "Audio Setup" tab:
 
-void AudioSetupDialog::on_comboBox_AudioBackend_currentIndexChanged( const int index )
+void OptionsDialog::on_comboBox_AudioBackend_currentIndexChanged( const int index )
 {
     // Set audio backend
     AudioIODeviceType* const audioBackendType = mDeviceManager.getAvailableDeviceTypes()[ index ];
@@ -737,7 +737,7 @@ void AudioSetupDialog::on_comboBox_AudioBackend_currentIndexChanged( const int i
 
 
 
-void AudioSetupDialog::on_comboBox_AudioDevice_activated( const QString deviceName )
+void OptionsDialog::on_comboBox_AudioDevice_activated( const QString deviceName )
 {
     QByteArray charArray = deviceName.toLocal8Bit();
     const String outputDeviceName = charArray.data();
@@ -781,14 +781,14 @@ void AudioSetupDialog::on_comboBox_AudioDevice_activated( const QString deviceNa
 
 
 
-void AudioSetupDialog::on_pushButton_TestTone_clicked()
+void OptionsDialog::on_pushButton_TestTone_clicked()
 {
     mDeviceManager.playTestSound();
 }
 
 
 
-void AudioSetupDialog::on_comboBox_OutputChannels_activated( const int index )
+void OptionsDialog::on_comboBox_OutputChannels_activated( const int index )
 {
     const int64 channelBits = mUI->comboBox_OutputChannels->itemData( index ).toLongLong();
     const BigInteger channels( channelBits );
@@ -813,7 +813,7 @@ void AudioSetupDialog::on_comboBox_OutputChannels_activated( const int index )
 
 
 
-void AudioSetupDialog::on_comboBox_SampleRate_activated( const int index )
+void OptionsDialog::on_comboBox_SampleRate_activated( const int index )
 {
     const int sampleRate = mUI->comboBox_SampleRate->itemData( index ).toInt();
 
@@ -840,7 +840,7 @@ void AudioSetupDialog::on_comboBox_SampleRate_activated( const int index )
 
 
 
-void AudioSetupDialog::on_comboBox_BufferSize_activated( const int index )
+void OptionsDialog::on_comboBox_BufferSize_activated( const int index )
 {
     const int bufferSize = mUI->comboBox_BufferSize->itemData( index ).toInt();
 
@@ -864,7 +864,7 @@ void AudioSetupDialog::on_comboBox_BufferSize_activated( const int index )
 
 
 
-void AudioSetupDialog::on_listWidget_MidiInput_itemClicked( QListWidgetItem* item )
+void OptionsDialog::on_listWidget_MidiInput_itemClicked( QListWidgetItem* item )
 {
     QByteArray charArray = item->text().toLocal8Bit();
     const String midiInputName( charArray.data() );
@@ -881,7 +881,7 @@ void AudioSetupDialog::on_listWidget_MidiInput_itemClicked( QListWidgetItem* ite
 
 
 
-void AudioSetupDialog::on_buttonBox_clicked( QAbstractButton* button )
+void OptionsDialog::on_buttonBox_clicked( QAbstractButton* button )
 {
     QDialogButtonBox::StandardButton stdButton = mUI->buttonBox->standardButton( button );
 
@@ -914,7 +914,7 @@ void AudioSetupDialog::on_buttonBox_clicked( QAbstractButton* button )
 
 
 
-void AudioSetupDialog::on_checkBox_MidiInputTestTone_clicked( const bool isChecked )
+void OptionsDialog::on_checkBox_MidiInputTestTone_clicked( const bool isChecked )
 {
     if ( isChecked )
     {
@@ -931,7 +931,7 @@ void AudioSetupDialog::on_checkBox_MidiInputTestTone_clicked( const bool isCheck
 //====================
 // "Time Stretch" tab:
 
-void AudioSetupDialog::on_radioButton_Offline_clicked()
+void OptionsDialog::on_radioButton_Offline_clicked()
 {
     foreach ( QAbstractButton* button, mUI->buttonGroup_Timestretch->buttons() )
     {
@@ -958,7 +958,7 @@ void AudioSetupDialog::on_radioButton_Offline_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_RealTime_clicked()
+void OptionsDialog::on_radioButton_RealTime_clicked()
 {
     foreach ( QAbstractButton* button, mUI->buttonGroup_Timestretch->buttons() )
     {
@@ -992,7 +992,7 @@ void AudioSetupDialog::on_radioButton_RealTime_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_Elastic_clicked()
+void OptionsDialog::on_radioButton_Elastic_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionStretchPrecise );
     emit stretchOptionChanged( RubberBandStretcher::OptionStretchElastic );
@@ -1001,7 +1001,7 @@ void AudioSetupDialog::on_radioButton_Elastic_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_Precise_clicked()
+void OptionsDialog::on_radioButton_Precise_clicked()
 {
     enableStretcherOptions( RubberBandStretcher::OptionStretchPrecise );
     emit stretchOptionChanged( RubberBandStretcher::OptionStretchPrecise );
@@ -1010,7 +1010,7 @@ void AudioSetupDialog::on_radioButton_Precise_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_Crisp_clicked()
+void OptionsDialog::on_radioButton_Crisp_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionTransientsMixed | RubberBandStretcher::OptionTransientsSmooth );
     emit transientsOptionChanged( RubberBandStretcher::OptionTransientsCrisp );
@@ -1019,7 +1019,7 @@ void AudioSetupDialog::on_radioButton_Crisp_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_Mixed_clicked()
+void OptionsDialog::on_radioButton_Mixed_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionTransientsSmooth );
     enableStretcherOptions( RubberBandStretcher::OptionTransientsMixed );
@@ -1029,7 +1029,7 @@ void AudioSetupDialog::on_radioButton_Mixed_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_Smooth_clicked()
+void OptionsDialog::on_radioButton_Smooth_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionTransientsMixed );
     enableStretcherOptions( RubberBandStretcher::OptionTransientsSmooth );
@@ -1039,7 +1039,7 @@ void AudioSetupDialog::on_radioButton_Smooth_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_Laminar_clicked()
+void OptionsDialog::on_radioButton_Laminar_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionPhaseIndependent );
     emit phaseOptionChanged( RubberBandStretcher::OptionPhaseLaminar );
@@ -1048,7 +1048,7 @@ void AudioSetupDialog::on_radioButton_Laminar_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_Independent_clicked()
+void OptionsDialog::on_radioButton_Independent_clicked()
 {
     enableStretcherOptions( RubberBandStretcher::OptionPhaseIndependent );
     emit phaseOptionChanged( RubberBandStretcher::OptionPhaseIndependent );
@@ -1057,7 +1057,7 @@ void AudioSetupDialog::on_radioButton_Independent_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_Standard_clicked()
+void OptionsDialog::on_radioButton_Standard_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionWindowShort | RubberBandStretcher::OptionWindowLong );
     emit windowOptionChanged();
@@ -1066,7 +1066,7 @@ void AudioSetupDialog::on_radioButton_Standard_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_Short_clicked()
+void OptionsDialog::on_radioButton_Short_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionWindowLong );
     enableStretcherOptions( RubberBandStretcher::OptionWindowShort );
@@ -1076,7 +1076,7 @@ void AudioSetupDialog::on_radioButton_Short_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_Long_clicked()
+void OptionsDialog::on_radioButton_Long_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionWindowShort );
     enableStretcherOptions( RubberBandStretcher::OptionWindowLong );
@@ -1086,7 +1086,7 @@ void AudioSetupDialog::on_radioButton_Long_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_Shifted_clicked()
+void OptionsDialog::on_radioButton_Shifted_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionFormantPreserved );
     emit formantOptionChanged( RubberBandStretcher::OptionFormantShifted );
@@ -1095,7 +1095,7 @@ void AudioSetupDialog::on_radioButton_Shifted_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_Preserved_clicked()
+void OptionsDialog::on_radioButton_Preserved_clicked()
 {
     enableStretcherOptions( RubberBandStretcher::OptionFormantPreserved );
     emit formantOptionChanged( RubberBandStretcher::OptionFormantPreserved );
@@ -1104,7 +1104,7 @@ void AudioSetupDialog::on_radioButton_Preserved_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_HighSpeed_clicked()
+void OptionsDialog::on_radioButton_HighSpeed_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionPitchHighQuality | RubberBandStretcher::OptionPitchHighConsistency );
     emit pitchOptionChanged( RubberBandStretcher::OptionPitchHighSpeed );
@@ -1113,7 +1113,7 @@ void AudioSetupDialog::on_radioButton_HighSpeed_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_HighQuality_clicked()
+void OptionsDialog::on_radioButton_HighQuality_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionPitchHighConsistency );
     enableStretcherOptions( RubberBandStretcher::OptionPitchHighQuality );
@@ -1123,7 +1123,7 @@ void AudioSetupDialog::on_radioButton_HighQuality_clicked()
 
 
 
-void AudioSetupDialog::on_radioButton_HighConsistency_clicked()
+void OptionsDialog::on_radioButton_HighConsistency_clicked()
 {
     disableStretcherOptions( RubberBandStretcher::OptionPitchHighQuality );
     enableStretcherOptions( RubberBandStretcher::OptionPitchHighConsistency );
@@ -1133,7 +1133,7 @@ void AudioSetupDialog::on_radioButton_HighConsistency_clicked()
 
 
 
-void AudioSetupDialog::on_checkBox_JackSync_toggled( const bool isChecked )
+void OptionsDialog::on_checkBox_JackSync_toggled( const bool isChecked )
 {
     emit jackSyncToggled( isChecked );
     emit timeStretchOptionsChanged();
@@ -1144,7 +1144,7 @@ void AudioSetupDialog::on_checkBox_JackSync_toggled( const bool isChecked )
 //====================
 // "Paths" tab:
 
-void AudioSetupDialog::on_pushButton_ChooseTempDir_clicked()
+void OptionsDialog::on_pushButton_ChooseTempDir_clicked()
 {
     const QString dir = QFileDialog::getExistingDirectory( this, tr("Choose Directory"), "/",
                                                            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
