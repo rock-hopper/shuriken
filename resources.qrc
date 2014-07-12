@@ -1,5 +1,7 @@
-<!DOCTYPE RCC><RCC version="1.0">
- <qresource>
-     <file>docs/index.html</file>
- </qresource>
- </RCC>
+<RCC>
+    <qresource prefix="/">
+        <file>docs/index.html</file>
+        <file>docs/about.html</file>
+        <file>images/shuriken.png</file>
+    </qresource>
+</RCC>

@@ -162,7 +162,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/directoryvalidator.cpp \
     src/signallistener.cpp \
     src/applygainrampdialog.cpp \
-    src/zipper.cpp
+    src/zipper.cpp \
+    src/aboutdialog.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -385,12 +386,14 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/directoryvalidator.h \
     src/signallistener.h \
     src/applygainrampdialog.h \
-    src/zipper.h
+    src/zipper.h \
+    src/aboutdialog.h
 FORMS += src/mainwindow.ui \
     src/optionsdialog.ui \
     src/helpform.ui \
     src/applygaindialog.ui \
-    src/applygainrampdialog.ui
+    src/applygainrampdialog.ui \
+    src/aboutdialog.ui
 INCLUDEPATH += src \
     src/SndLibShuriken \
     src/JuceLibraryCode

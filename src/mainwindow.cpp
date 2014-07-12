@@ -29,6 +29,7 @@
 #include "globals.h"
 #include "applygaindialog.h"
 #include "applygainrampdialog.h"
+#include "aboutdialog.h"
 #include "zipper.h"
 #include <rubberband/RubberBandStretcher.h>
 #include <QDebug>
@@ -1679,7 +1680,8 @@ void MainWindow::on_actionHelp_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-
+    AboutDialog dialog;
+    dialog.exec();
 }
 
 
