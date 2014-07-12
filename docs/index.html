@@ -1,24 +1,28 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html><head>
-
-
-  
-  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>Shuriken Help</title></head><body>
-<h1><a name="Shuriken_Beat_Slicer"></a>Shuriken Beat Slicer</h1>
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>Shuriken Help</title>
+</head>
+<body>
+<a name="Top"></a>
+<h1>Shuriken Beat Slicer</h1>
 <p>
 
 Shuriken is an open source beat slicer which harnesses the power of
 aubio's onset detection algorithms and Rubber Band's time stretching
 capabilities.&nbsp; A simple Qt4 interface makes it easy to slice up
 drum loops, assign individual drum hits to MIDI keys, and change the
-tempo of loops in real-time.&nbsp; For more info on aubio and Rubber
-Band please see:</p>
+tempo of loops in real-time.&nbsp; JUCE takes care of handling audio and
+MIDI behind the scenes.</p>
 
+<p>For more info on aubio, Rubber Band, and JUCE please see:</p>
 
 <p><a href="http://aubio.org/">http://aubio.org/</a></p>
 <p><a href="http://www.breakfastquay.com/rubberband/">http://www.breakfastquay.com/rubberband/</a></p>
+<p><a href="http://www.juce.com/">http://www.juce.com/</a></p>
 <p><br>
 </p>
+
 
 <h2>Contents</h2>
 
@@ -37,9 +41,13 @@ Band please see:</p>
 <p><a href="#Time_Stretching">Time Stretching</a></p>
 
 
+<p><a href="#Session_Management">Session Management</a></p>
+
+
 <p><a href="#Hints__Tips">Hints &amp; Tips</a></p>
 <p><br>
 </p>
+
 
 <h2><a name="Audio_Setup"></a>Audio Setup</h2>
 <p>
@@ -87,8 +95,8 @@ Impulse tracker, Korg, Akai, Turtle Beach, Matlab-5.</p>
 <p>
 
 For more info on sndlib please see: <a href="https://ccrma.stanford.edu/software/snd/sndlib/">https://ccrma.stanford.edu/software/snd/sndlib/</a></p>
-<p><a href="https://ccrma.stanford.edu/software/snd/sndlib/"><br>
-</a></p>
+<p><br>
+</p>
 
 
 <h2><a name="Slice_n_Dice"></a>Slice 'n' Dice</h2>
@@ -165,9 +173,8 @@ Shuriken and provides two mode of operation: offline and real-time.</p>
 
 In offline mode, first click the &#8220;Calc&#8221; button (or manually enter the
 current BPM in the &#8220;Original BPM&#8221; box) then enter the desired BPM in
-the &#8220;New BPM&#8221; box and click &#8220;Apply&#8221;.&nbsp; When &#8220;Apply&#8221; is clicked the
-original audio is reloaded before being stretched, so the operation is
-always applied to the original, unmodified audio.</p>
+the &#8220;New BPM&#8221; box and click &#8220;Apply&#8221;.<br>
+</p>
 <p>
 
 In real-time mode, enter values into the &#8220;Original BPM&#8221; and &#8220;New BPM&#8221;
@@ -338,6 +345,24 @@ accurate for this to work well, so you may need to adjust it manually.</p>
 </p>
 
 
+<h2><a name="Session_Management"></a>Session Management</h2>
+<p>
+
+Shuriken has support for LADISH L1 session management.  On receiving the SIGUSR1 Unix signal, 
+Shuriken will save the current project.  On receiving the SIGTERM signal, Shuriken will ask 
+the user if any unsaved changes should be saved, then exit cleanly.  Shuriken can deal with 
+these signals being sent in quick succession and in any order; any save operation will 
+complete before the application shuts down.</p>
+<p>
+
+To fully comply with LADISH L1, the file path of a project can be given as an argument when 
+starting Shuriken from the command line, e.g.:</p>
+
+<p style="margin-bottom: 0cm; margin-left: 40px;">shuriken '/home/user/project.shuriken'</p>
+<p><br>
+</p>
+
+
 <h2><a name="Hints__Tips"></a>Hints &amp; Tips</h2>
 <p>
 
@@ -359,7 +384,9 @@ stretch options dialogue.</p>
 </p>
 
 
-<p><a href="#Shuriken_Beat_Slicer">Top</a></p>
+<p><a href="#Top">Top</a></p>
+
+
 
 
 
