@@ -23,5 +23,5 @@ Envelope ADSR dialog
 GUI Improvements
 ----------------
 Fix gaps in waveform when zoomed in
-Fix colour consistency of waveform
+More efficient waveform drawing routine (possibly OpenGL solution)
 
