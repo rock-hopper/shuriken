@@ -60,9 +60,9 @@ public:
     bool isJackSyncEnabled() const;
     void enableJackSync();
 
-    // Returns the absolute path of the user-defined temp directory if valid,
-    // otherwise returns an empty string
-    QString getTempDirPath() const;
+    // Returns the absolute path of the user-defined temp directory if
+    // it is valid and writable, otherwise returns an empty string
+    QString getTempDirPath() const                              { return mTempDirPath; }
 
 protected:
     void changeEvent( QEvent* event );
@@ -70,6 +70,8 @@ protected:
     void closeEvent( QCloseEvent* event );
 
 private:
+    void setTempDirPath();
+
     bool isJackAudioEnabled() const;
     void updateAudioDeviceComboBox();
     void updateOutputChannelComboBox();
@@ -84,19 +86,26 @@ private:
     void enableStretcherOptions( const RubberBandStretcher::Options options );
     void disableStretcherOptions( const RubberBandStretcher::Options options );
 
+    void saveConfig();
+
     Ui::OptionsDialog* mUI;
+
     AudioDeviceManager& mDeviceManager;
     AudioDeviceManager::AudioDeviceSetup mOriginalConfig;
+
     ScopedPointer<SynthAudioSource> mSynthAudioSource;
     AudioSourcePlayer mAudioSourcePlayer;
+
     RubberBandStretcher::Options mStretcherOptions;
+
+    ScopedPointer<DirectoryValidator> mDirectoryValidator;
+
+    QString mTempDirPath;
 
 private:
     static void showWarningBox( const QString text, const QString infoText );
     static String getNameForChannelPair( const String& name1, const String& name2 );
     static QString getNoDeviceString() { return "<< " + tr("none") + " >>"; }
-
-    ScopedPointer<DirectoryValidator> mDirectoryValidator;
 
 signals:
     void timeStretchOptionsChanged();
@@ -130,7 +139,6 @@ private slots:
     void on_radioButton_Offline_clicked();
     void on_radioButton_RealTime_clicked();
     void on_checkBox_MidiInputTestTone_clicked( const bool isChecked );
-    void on_buttonBox_clicked( QAbstractButton* button );
     void on_listWidget_MidiInput_itemClicked( QListWidgetItem* item );
     void on_comboBox_BufferSize_activated( const int index );
     void on_comboBox_SampleRate_activated( const int index );

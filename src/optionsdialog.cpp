@@ -60,32 +60,7 @@ OptionsDialog::OptionsDialog( AudioDeviceManager& deviceManager, QWidget* parent
 
 
     // Paths
-    ScopedPointer<XmlElement> docElement;
-    docElement = XmlDocument::parse( File( PATHS_CONFIG_FILE_PATH ) );
-
-    QString tempDirPath = QDir::tempPath();
-
-    if ( docElement != NULL )
-    {
-        if ( docElement->hasTagName( "paths" ) )
-        {
-            forEachXmlChildElement( *docElement, elem )
-            {
-                if ( elem->hasTagName( "temp_dir" ) )
-                {
-                    tempDirPath = elem->getStringAttribute( "path" ).toRawUTF8();
-                }
-            }
-        }
-    }
-
-    mDirectoryValidator = new DirectoryValidator();
-    mUI->lineEdit_TempDir->setValidator( mDirectoryValidator );
-
-    QObject::connect( mDirectoryValidator, SIGNAL( isValid(bool) ),
-                      this, SLOT( displayDirValidityText(bool) ) );
-
-    mUI->lineEdit_TempDir->setText( tempDirPath );
+    setTempDirPath();
 }
 
 
@@ -211,46 +186,6 @@ void OptionsDialog::enableJackSync()
 
 
 
-QString OptionsDialog::getTempDirPath() const
-{
-    QDir parentDir( mUI->lineEdit_TempDir->text() );
-
-    // Set a unique name for the temp dir, there may be multiple instances of Shuriken running
-
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    QString userName = env.value( "USER", "user" );
-
-    QString pid;
-    pid.setNum( QCoreApplication::applicationPid() );
-
-    QString tempDirName( "shuriken-" );
-    tempDirName.append( userName );
-    tempDirName.append( "-" );
-    tempDirName.append( pid );
-
-    bool isTempDirValid = false;
-
-    if ( parentDir.exists( tempDirName ) )
-    {
-        isTempDirValid = true;
-    }
-    else
-    {
-        isTempDirValid = parentDir.mkdir( tempDirName );
-    }
-
-    if ( isTempDirValid )
-    {
-        return parentDir.absoluteFilePath( tempDirName );
-    }
-    else
-    {
-        return QString();
-    }
-}
-
-
-
 //==================================================================================================
 // Protected:
 
@@ -279,7 +214,6 @@ void OptionsDialog::showEvent( QShowEvent* event )
         // changes can be reverted if the user later clicks "Cancel"
         mDeviceManager.getAudioDeviceSetup( mOriginalConfig );
 
-
         if ( mUI->checkBox_MidiInputTestTone->isChecked() )
         {
             setUpMidiInputTestSynth();
@@ -301,6 +235,61 @@ void OptionsDialog::closeEvent( QCloseEvent* event )
 
 //==================================================================================================
 // Private:
+
+void OptionsDialog::setTempDirPath()
+{
+    // Set default temp dir
+    QString tempDirPath = QDir::tempPath();
+
+    // Try to load paths config file
+    ScopedPointer<XmlElement> docElement;
+    docElement = XmlDocument::parse( File( PATHS_CONFIG_FILE_PATH ) );
+
+    if ( docElement != NULL )
+    {
+        if ( docElement->hasTagName( "paths" ) )
+        {
+            forEachXmlChildElement( *docElement, elem )
+            {
+                if ( elem->hasTagName( "temp_dir" ) )
+                {
+                    tempDirPath = elem->getStringAttribute( "path" ).toRawUTF8();
+                }
+            }
+        }
+    }
+
+    // Set up validator
+    mDirectoryValidator = new DirectoryValidator();
+    mUI->lineEdit_TempDir->setValidator( mDirectoryValidator );
+
+    QObject::connect( mDirectoryValidator, SIGNAL( isValid(bool) ),
+                      this, SLOT( displayDirValidityText(bool) ) );
+
+    mUI->lineEdit_TempDir->setText( tempDirPath );
+
+    // Create a sub-dir with a unique name; there may be multiple instances of Shuriken running
+    QDir tempDir( tempDirPath );
+
+    QString userName = QProcessEnvironment::systemEnvironment().value( "USER", "user" );
+
+    QString pid;
+    pid.setNum( QCoreApplication::applicationPid() );
+
+    QString subDirName( "shuriken-" );
+    subDirName.append( userName );
+    subDirName.append( "-" );
+    subDirName.append( pid );
+
+    bool isSuccessful = tempDir.mkdir( subDirName );
+
+    if ( isSuccessful )
+    {
+        mTempDirPath = tempDir.absoluteFilePath( subDirName );
+    }
+}
+
+
 
 bool OptionsDialog::isJackAudioEnabled() const
 {
@@ -614,6 +603,34 @@ void OptionsDialog::disableStretcherOptions( const RubberBandStretcher::Options 
 
 
 
+void OptionsDialog::saveConfig()
+{
+    // Save audio setup config
+    ScopedPointer<XmlElement> stateXml( mDeviceManager.createStateXml() );
+
+    if ( stateXml != NULL )
+    {
+        File audioConfigFile( AUDIO_CONFIG_FILE_PATH );
+        audioConfigFile.create();
+        stateXml->writeToFile( audioConfigFile, String::empty );
+    }
+
+    // Save paths config
+    XmlElement docElement( "paths" );
+
+    const QString tempDir = mUI->lineEdit_TempDir->text();
+
+    XmlElement* tempDirElem = new XmlElement( "temp_dir" );
+    tempDirElem->setAttribute( "path", tempDir.toLocal8Bit().data() );
+    docElement.addChildElement( tempDirElem );
+
+    File pathsConfigFile( PATHS_CONFIG_FILE_PATH );
+    pathsConfigFile.create();
+    docElement.writeToFile( pathsConfigFile, String::empty );
+}
+
+
+
 //==================================================================================================
 // Private Static:
 
@@ -656,6 +673,9 @@ String OptionsDialog::getNameForChannelPair( const String& name1, const String& 
 void OptionsDialog::accept()
 {
     tearDownMidiInputTestSynth();
+
+    saveConfig();
+
     QDialog::accept();
 }
 
@@ -672,6 +692,10 @@ void OptionsDialog::reject()
     updateOutputChannelComboBox();
     updateSampleRateComboBox();
     updateBufferSizeComboBox();
+
+    QDir tempDir( mTempDirPath );
+    tempDir.cdUp();
+    mUI->lineEdit_TempDir->setText( tempDir.absolutePath() );
 
     QDialog::reject();
 }
@@ -876,39 +900,6 @@ void OptionsDialog::on_listWidget_MidiInput_itemClicked( QListWidgetItem* item )
     else
     {
         mDeviceManager.setMidiInputEnabled( midiInputName, false );
-    }
-}
-
-
-
-void OptionsDialog::on_buttonBox_clicked( QAbstractButton* button )
-{
-    QDialogButtonBox::StandardButton stdButton = mUI->buttonBox->standardButton( button );
-
-    if ( stdButton == QDialogButtonBox::Save )
-    {
-        // Save audio setup config
-        ScopedPointer<XmlElement> stateXml( mDeviceManager.createStateXml() );
-
-        if ( stateXml != NULL )
-        {
-            File audioConfigFile( AUDIO_CONFIG_FILE_PATH );
-            audioConfigFile.create();
-            stateXml->writeToFile( audioConfigFile, String::empty );
-        }
-
-        // Save paths config
-        XmlElement docElement( "paths" );
-
-        QString tempDir = mUI->lineEdit_TempDir->text();
-
-        XmlElement* tempDirElem = new XmlElement( "temp_dir" );
-        tempDirElem->setAttribute( "path", tempDir.toLocal8Bit().data() );
-        docElement.addChildElement( tempDirElem );
-
-        File pathsConfigFile( PATHS_CONFIG_FILE_PATH );
-        pathsConfigFile.create();
-        docElement.writeToFile( pathsConfigFile, String::empty );
     }
 }
 

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'optionsdialog.ui'
 **
-** Created: Sat Jul 12 09:37:11 2014
+** Created: Sun Jul 13 10:39:20 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -91,6 +91,7 @@ public:
     QLineEdit *lineEdit_TempDir;
     QPushButton *pushButton_ChooseTempDir;
     QLabel *label_DirValidity;
+    QLabel *label_9;
     QDialogButtonBox *buttonBox;
     QButtonGroup *buttonGroup_Phase;
     QButtonGroup *buttonGroup_Transients;
@@ -382,7 +383,7 @@ public:
         label_5 = new QLabel(tab);
         label_5->setObjectName(QString::fromUtf8("label_5"));
 
-        formLayout_2->setWidget(0, QFormLayout::LabelRole, label_5);
+        formLayout_2->setWidget(1, QFormLayout::LabelRole, label_5);
 
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
@@ -397,12 +398,17 @@ public:
         horizontalLayout->addWidget(pushButton_ChooseTempDir);
 
 
-        formLayout_2->setLayout(0, QFormLayout::FieldRole, horizontalLayout);
+        formLayout_2->setLayout(1, QFormLayout::FieldRole, horizontalLayout);
 
         label_DirValidity = new QLabel(tab);
         label_DirValidity->setObjectName(QString::fromUtf8("label_DirValidity"));
 
-        formLayout_2->setWidget(1, QFormLayout::FieldRole, label_DirValidity);
+        formLayout_2->setWidget(2, QFormLayout::FieldRole, label_DirValidity);
+
+        label_9 = new QLabel(tab);
+        label_9->setObjectName(QString::fromUtf8("label_9"));
+
+        formLayout_2->setWidget(0, QFormLayout::FieldRole, label_9);
 
         tabWidget->addTab(tab, QString());
 
@@ -411,7 +417,7 @@ public:
         buttonBox = new QDialogButtonBox(OptionsDialog);
         buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
         buttonBox->setOrientation(Qt::Horizontal);
-        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok|QDialogButtonBox::Save);
+        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
 
         verticalLayout->addWidget(buttonBox);
 
@@ -468,6 +474,7 @@ public:
         label_5->setText(QApplication::translate("OptionsDialog", "Temp Dir:", 0, QApplication::UnicodeUTF8));
         pushButton_ChooseTempDir->setText(QApplication::translate("OptionsDialog", "Choose...", 0, QApplication::UnicodeUTF8));
         label_DirValidity->setText(QString());
+        label_9->setText(QApplication::translate("OptionsDialog", "Requires restart to make changes active", 0, QApplication::UnicodeUTF8));
         tabWidget->setTabText(tabWidget->indexOf(tab), QApplication::translate("OptionsDialog", "Paths", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
