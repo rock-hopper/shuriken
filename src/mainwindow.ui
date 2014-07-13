@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1051</width>
+    <width>1059</width>
     <height>618</height>
    </rect>
   </property>
@@ -30,7 +30,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/media-playback-start.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/media-playback-start.png</iconset>
+          <normaloff>:/images/media-playback-start.png</normaloff>:/images/media-playback-start.png</iconset>
         </property>
        </widget>
       </item>
@@ -41,7 +41,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/media-playback-stop.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/media-playback-stop.png</iconset>
+          <normaloff>:/images/media-playback-stop.png</normaloff>:/images/media-playback-stop.png</iconset>
         </property>
        </widget>
       </item>
@@ -232,7 +232,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/transform-move.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/transform-move.png</iconset>
+          <normaloff>:/images/shuriken_small.png</normaloff>:/images/shuriken_small.png</iconset>
         </property>
        </widget>
       </item>
@@ -414,7 +414,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1051</width>
+     <width>1059</width>
      <height>24</height>
     </rect>
    </property>
@@ -502,7 +502,7 @@
   <action name="actionImport_Audio_File">
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-import.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-import.png</iconset>
+     <normaloff>:/images/document-import.png</normaloff>:/images/document-import.png</iconset>
    </property>
    <property name="text">
     <string>Import Audio File</string>
@@ -515,6 +515,10 @@
    </property>
   </action>
   <action name="actionQuit">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
+   </property>
    <property name="text">
     <string>Quit</string>
    </property>
@@ -533,7 +537,7 @@
   <action name="actionOpen_Project">
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-open.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-open.png</iconset>
+     <normaloff>:/images/document-open.png</normaloff>:/images/document-open.png</iconset>
    </property>
    <property name="text">
     <string>Open Project</string>
@@ -551,7 +555,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-save.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-save.png</iconset>
+     <normaloff>:/images/document-save.png</normaloff>:/images/document-save.png</iconset>
    </property>
    <property name="text">
     <string>Save Project</string>
@@ -566,7 +570,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-close.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-close.png</iconset>
+     <normaloff>:/images/document-close.png</normaloff>:/images/document-close.png</iconset>
    </property>
    <property name="text">
     <string>Close Project</string>
@@ -578,7 +582,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-export.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-export.png</iconset>
+     <normaloff>:/images/document-export.png</normaloff>:/images/document-export.png</iconset>
    </property>
    <property name="text">
     <string>Export As...</string>
@@ -596,7 +600,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-undo.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-undo.png</iconset>
+     <normaloff>:/images/edit-undo.png</normaloff>:/images/edit-undo.png</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -611,7 +615,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-redo.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-redo.png</iconset>
+     <normaloff>:/images/edit-redo.png</normaloff>:/images/edit-redo.png</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -640,7 +644,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-delete.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-delete.png</iconset>
+     <normaloff>:/images/edit-delete.png</normaloff>:/images/edit-delete.png</iconset>
    </property>
    <property name="text">
     <string>Delete</string>
@@ -674,7 +678,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/help-contents.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/help-contents.png</iconset>
+     <normaloff>:/images/help-contents.png</normaloff>:/images/help-contents.png</iconset>
    </property>
    <property name="text">
     <string>Help</string>
@@ -683,7 +687,7 @@
   <action name="actionAbout">
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/help-about.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/help-about.png</iconset>
+     <normaloff>:/images/help-about.png</normaloff>:/images/help-about.png</iconset>
    </property>
    <property name="text">
     <string>About</string>
@@ -750,7 +754,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-in.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-in.png</iconset>
+     <normaloff>:/images/zoom-in.png</normaloff>:/images/zoom-in.png</iconset>
    </property>
    <property name="text">
     <string>Zoom In</string>
@@ -765,7 +769,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-out.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-out.png</iconset>
+     <normaloff>:/images/zoom-out.png</normaloff>:/images/zoom-out.png</iconset>
    </property>
    <property name="text">
     <string>Zoom Out</string>
@@ -780,7 +784,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-original.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/zoom-original.png</iconset>
+     <normaloff>:/images/zoom-original.png</normaloff>:/images/zoom-original.png</iconset>
    </property>
    <property name="text">
     <string>Zoom Original</string>
@@ -795,7 +799,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-select.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/edit-select.png</iconset>
+     <normaloff>:/images/edit-select.png</normaloff>:/images/edit-select.png</iconset>
    </property>
    <property name="text">
     <string>Move</string>
@@ -813,7 +817,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/kdenlive-select-all.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/kdenlive-select-all.png</iconset>
+     <normaloff>:/images/kdenlive-select-all.png</normaloff>:/images/kdenlive-select-all.png</iconset>
    </property>
    <property name="text">
     <string>Select</string>
@@ -842,7 +846,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/text-speak.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/text-speak.png</iconset>
+     <normaloff>:/images/text-speak.png</normaloff>:/images/text-speak.png</iconset>
    </property>
    <property name="text">
     <string>Audition</string>
@@ -860,7 +864,7 @@
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-save-as.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/document-save-as.png</iconset>
+     <normaloff>:/images/document-save-as.png</normaloff>:/images/document-save-as.png</iconset>
    </property>
    <property name="text">
     <string>Save As...</string>

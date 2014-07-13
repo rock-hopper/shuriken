@@ -3,5 +3,26 @@
         <file>docs/index.html</file>
         <file>docs/about.html</file>
         <file>images/shuriken.png</file>
+        <file>images/document-close.png</file>
+        <file>images/document-export.png</file>
+        <file>images/document-import.png</file>
+        <file>images/document-open.png</file>
+        <file>images/document-save.png</file>
+        <file>images/document-save-as.png</file>
+        <file>images/edit-delete.png</file>
+        <file>images/edit-redo.png</file>
+        <file>images/edit-select.png</file>
+        <file>images/edit-undo.png</file>
+        <file>images/help-about.png</file>
+        <file>images/help-contents.png</file>
+        <file>images/kdenlive-select-all.png</file>
+        <file>images/media-playback-start.png</file>
+        <file>images/media-playback-stop.png</file>
+        <file>images/shuriken_small.png</file>
+        <file>images/text-speak.png</file>
+        <file>images/zoom-in.png</file>
+        <file>images/zoom-original.png</file>
+        <file>images/zoom-out.png</file>
+        <file>images/application-exit.png</file>
     </qresource>
 </RCC>

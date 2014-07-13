@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sat Jul 12 13:33:17 2014
+** Created: Sun Jul 13 13:19:04 2014
 **      by: Qt User Interface Compiler version 4.6.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -118,60 +118,63 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(1051, 618);
+        MainWindow->resize(1059, 618);
         actionImport_Audio_File = new QAction(MainWindow);
         actionImport_Audio_File->setObjectName(QString::fromUtf8("actionImport_Audio_File"));
         QIcon icon;
-        icon.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-import.png"), QSize(), QIcon::Normal, QIcon::Off);
+        icon.addFile(QString::fromUtf8(":/images/document-import.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionImport_Audio_File->setIcon(icon);
         actionQuit = new QAction(MainWindow);
         actionQuit->setObjectName(QString::fromUtf8("actionQuit"));
+        QIcon icon1;
+        icon1.addFile(QString::fromUtf8(":/images/application-exit.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionQuit->setIcon(icon1);
         actionOptions = new QAction(MainWindow);
         actionOptions->setObjectName(QString::fromUtf8("actionOptions"));
         actionOpen_Project = new QAction(MainWindow);
         actionOpen_Project->setObjectName(QString::fromUtf8("actionOpen_Project"));
-        QIcon icon1;
-        icon1.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-open.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionOpen_Project->setIcon(icon1);
+        QIcon icon2;
+        icon2.addFile(QString::fromUtf8(":/images/document-open.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionOpen_Project->setIcon(icon2);
         actionSave_Project = new QAction(MainWindow);
         actionSave_Project->setObjectName(QString::fromUtf8("actionSave_Project"));
         actionSave_Project->setEnabled(false);
-        QIcon icon2;
-        icon2.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-save.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionSave_Project->setIcon(icon2);
+        QIcon icon3;
+        icon3.addFile(QString::fromUtf8(":/images/document-save.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionSave_Project->setIcon(icon3);
         actionClose_Project = new QAction(MainWindow);
         actionClose_Project->setObjectName(QString::fromUtf8("actionClose_Project"));
         actionClose_Project->setEnabled(false);
-        QIcon icon3;
-        icon3.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-close.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionClose_Project->setIcon(icon3);
+        QIcon icon4;
+        icon4.addFile(QString::fromUtf8(":/images/document-close.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionClose_Project->setIcon(icon4);
         actionExport_As = new QAction(MainWindow);
         actionExport_As->setObjectName(QString::fromUtf8("actionExport_As"));
         actionExport_As->setEnabled(false);
-        QIcon icon4;
-        icon4.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-export.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionExport_As->setIcon(icon4);
+        QIcon icon5;
+        icon5.addFile(QString::fromUtf8(":/images/document-export.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionExport_As->setIcon(icon5);
         actionUndo = new QAction(MainWindow);
         actionUndo->setObjectName(QString::fromUtf8("actionUndo"));
         actionUndo->setEnabled(false);
-        QIcon icon5;
-        icon5.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/edit-undo.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionUndo->setIcon(icon5);
+        QIcon icon6;
+        icon6.addFile(QString::fromUtf8(":/images/edit-undo.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionUndo->setIcon(icon6);
         actionRedo = new QAction(MainWindow);
         actionRedo->setObjectName(QString::fromUtf8("actionRedo"));
         actionRedo->setEnabled(false);
-        QIcon icon6;
-        icon6.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/edit-redo.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionRedo->setIcon(icon6);
+        QIcon icon7;
+        icon7.addFile(QString::fromUtf8(":/images/edit-redo.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionRedo->setIcon(icon7);
         actionAdd_Slice_Point = new QAction(MainWindow);
         actionAdd_Slice_Point->setObjectName(QString::fromUtf8("actionAdd_Slice_Point"));
         actionAdd_Slice_Point->setEnabled(false);
         actionDelete = new QAction(MainWindow);
         actionDelete->setObjectName(QString::fromUtf8("actionDelete"));
         actionDelete->setEnabled(false);
-        QIcon icon7;
-        icon7.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/edit-delete.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionDelete->setIcon(icon7);
+        QIcon icon8;
+        icon8.addFile(QString::fromUtf8(":/images/edit-delete.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionDelete->setIcon(icon8);
         actionReverse = new QAction(MainWindow);
         actionReverse->setObjectName(QString::fromUtf8("actionReverse"));
         actionReverse->setEnabled(false);
@@ -181,14 +184,14 @@ public:
         actionHelp = new QAction(MainWindow);
         actionHelp->setObjectName(QString::fromUtf8("actionHelp"));
         actionHelp->setEnabled(false);
-        QIcon icon8;
-        icon8.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/help-contents.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionHelp->setIcon(icon8);
+        QIcon icon9;
+        icon9.addFile(QString::fromUtf8(":/images/help-contents.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionHelp->setIcon(icon9);
         actionAbout = new QAction(MainWindow);
         actionAbout->setObjectName(QString::fromUtf8("actionAbout"));
-        QIcon icon9;
-        icon9.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/help-about.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionAbout->setIcon(icon9);
+        QIcon icon10;
+        icon10.addFile(QString::fromUtf8(":/images/help-about.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionAbout->setIcon(icon10);
         actionJoin = new QAction(MainWindow);
         actionJoin->setObjectName(QString::fromUtf8("actionJoin"));
         actionJoin->setEnabled(false);
@@ -207,48 +210,48 @@ public:
         actionZoom_In = new QAction(MainWindow);
         actionZoom_In->setObjectName(QString::fromUtf8("actionZoom_In"));
         actionZoom_In->setEnabled(false);
-        QIcon icon10;
-        icon10.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/zoom-in.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionZoom_In->setIcon(icon10);
+        QIcon icon11;
+        icon11.addFile(QString::fromUtf8(":/images/zoom-in.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionZoom_In->setIcon(icon11);
         actionZoom_Out = new QAction(MainWindow);
         actionZoom_Out->setObjectName(QString::fromUtf8("actionZoom_Out"));
         actionZoom_Out->setEnabled(false);
-        QIcon icon11;
-        icon11.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/zoom-out.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionZoom_Out->setIcon(icon11);
+        QIcon icon12;
+        icon12.addFile(QString::fromUtf8(":/images/zoom-out.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionZoom_Out->setIcon(icon12);
         actionZoom_Original = new QAction(MainWindow);
         actionZoom_Original->setObjectName(QString::fromUtf8("actionZoom_Original"));
         actionZoom_Original->setEnabled(false);
-        QIcon icon12;
-        icon12.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/zoom-original.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionZoom_Original->setIcon(icon12);
+        QIcon icon13;
+        icon13.addFile(QString::fromUtf8(":/images/zoom-original.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionZoom_Original->setIcon(icon13);
         actionMove = new QAction(MainWindow);
         actionMove->setObjectName(QString::fromUtf8("actionMove"));
         actionMove->setEnabled(false);
-        QIcon icon13;
-        icon13.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/edit-select.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionMove->setIcon(icon13);
+        QIcon icon14;
+        icon14.addFile(QString::fromUtf8(":/images/edit-select.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionMove->setIcon(icon14);
         actionSelect = new QAction(MainWindow);
         actionSelect->setObjectName(QString::fromUtf8("actionSelect"));
         actionSelect->setEnabled(false);
-        QIcon icon14;
-        icon14.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/kdenlive-select-all.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionSelect->setIcon(icon14);
+        QIcon icon15;
+        icon15.addFile(QString::fromUtf8(":/images/kdenlive-select-all.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionSelect->setIcon(icon15);
         actionSplit = new QAction(MainWindow);
         actionSplit->setObjectName(QString::fromUtf8("actionSplit"));
         actionSplit->setEnabled(false);
         actionAudition = new QAction(MainWindow);
         actionAudition->setObjectName(QString::fromUtf8("actionAudition"));
         actionAudition->setEnabled(false);
-        QIcon icon15;
-        icon15.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/text-speak.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionAudition->setIcon(icon15);
+        QIcon icon16;
+        icon16.addFile(QString::fromUtf8(":/images/text-speak.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionAudition->setIcon(icon16);
         actionSave_As = new QAction(MainWindow);
         actionSave_As->setObjectName(QString::fromUtf8("actionSave_As"));
         actionSave_As->setEnabled(false);
-        QIcon icon16;
-        icon16.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/document-save-as.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionSave_As->setIcon(icon16);
+        QIcon icon17;
+        icon17.addFile(QString::fromUtf8(":/images/document-save-as.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionSave_As->setIcon(icon17);
         actionApply_Gain_Ramp = new QAction(MainWindow);
         actionApply_Gain_Ramp->setObjectName(QString::fromUtf8("actionApply_Gain_Ramp"));
         actionApply_Gain_Ramp->setEnabled(false);
@@ -269,18 +272,18 @@ public:
         sizePolicy.setVerticalStretch(0);
         sizePolicy.setHeightForWidth(pushButton_Play->sizePolicy().hasHeightForWidth());
         pushButton_Play->setSizePolicy(sizePolicy);
-        QIcon icon17;
-        icon17.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/media-playback-start.png"), QSize(), QIcon::Normal, QIcon::Off);
-        pushButton_Play->setIcon(icon17);
+        QIcon icon18;
+        icon18.addFile(QString::fromUtf8(":/images/media-playback-start.png"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_Play->setIcon(icon18);
 
         horizontalLayout_2->addWidget(pushButton_Play);
 
         pushButton_Stop = new QPushButton(centralWidget);
         pushButton_Stop->setObjectName(QString::fromUtf8("pushButton_Stop"));
         pushButton_Stop->setEnabled(false);
-        QIcon icon18;
-        icon18.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/media-playback-stop.png"), QSize(), QIcon::Normal, QIcon::Off);
-        pushButton_Stop->setIcon(icon18);
+        QIcon icon19;
+        icon19.addFile(QString::fromUtf8(":/images/media-playback-stop.png"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_Stop->setIcon(icon19);
 
         horizontalLayout_2->addWidget(pushButton_Stop);
 
@@ -393,9 +396,9 @@ public:
         sizePolicy1.setHeightForWidth(pushButton_Slice->sizePolicy().hasHeightForWidth());
         pushButton_Slice->setSizePolicy(sizePolicy1);
         pushButton_Slice->setMinimumSize(QSize(98, 0));
-        QIcon icon19;
-        icon19.addFile(QString::fromUtf8("../../../../usr/share/icons/oxygen/22x22/actions/transform-move.png"), QSize(), QIcon::Normal, QIcon::Off);
-        pushButton_Slice->setIcon(icon19);
+        QIcon icon20;
+        icon20.addFile(QString::fromUtf8(":/images/shuriken_small.png"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_Slice->setIcon(icon20);
 
         horizontalLayout->addWidget(pushButton_Slice);
 
@@ -511,7 +514,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1051, 24));
+        menuBar->setGeometry(QRect(0, 0, 1059, 24));
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
         menuOptions = new QMenu(menuBar);
