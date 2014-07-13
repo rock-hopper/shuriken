@@ -59,6 +59,17 @@ MainWindow::MainWindow( QWidget* parent ) :
 MainWindow::~MainWindow()
 {
     closeProject();
+
+    if ( mOptionsDialog != NULL)
+    {
+        const QString tempDirPath = mOptionsDialog->getTempDirPath();
+
+        if ( ! tempDirPath.isEmpty() )
+        {
+            File( tempDirPath.toLocal8Bit().data() ).deleteRecursively();
+        }
+    }
+
     delete mUI;
 }
 
