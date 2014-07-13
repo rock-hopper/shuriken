@@ -517,7 +517,7 @@ void WaveformItem::init()
     setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges | ItemUsesExtendedStyleOption );
 
     setBackgroundGradient();
-    mWavePen  = QPen( QColor(15, 15, 159, 191) );
+    mWavePen  = QPen( QColor(23, 23, 135, 191) );
     mCentreLinePen = QPen( QColor(127, 127, 127, 191) );
 
     // Don't draw rect border
