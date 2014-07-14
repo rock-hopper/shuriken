@@ -3,28 +3,40 @@
 declare -ra ARGS=("$@")
 declare -ri NUM_ARGS=$#
 
-function usage() 
+declare isDebugBuild=false
+declare isToBeMadeClean=false
+
+
+function showUsage() 
 {
     cat << EOF
 
-Usage:  build
+Usage:  build [debug]
         build clean
 
 EOF
 }
 
-if (( NUM_ARGS > 0 )); then
-    if [ "${ARGS[$i]}" == "clean" ]; then
-        make clean -w
-        rm -fv lib/libsndlib_shuriken.a
-        cd src/SndLibShuriken
-        make clean -w
-        cd ../..
-    else
-        usage
+
+function clean()
+{
+    make clean -w
+    rm -fv lib/libsndlib_shuriken.a
+    cd src/SndLibShuriken
+    make clean -w
+    cd ../..
+}
+
+
+function build()
+{
+    declare configOptions=""
+
+    if $isDebugBuild; then
+        configOptions="CONFIG+=debug"
     fi
-else
-    # make sndlib
+
+    # configure and make sndlib
     mkdir -p lib
     cd src/SndLibShuriken
     ./configure --without-audio --without-s7
@@ -33,10 +45,40 @@ else
     cd ../..
 
     # make shuriken
-    qmake-qt4 ./Shuriken.pro -spec linux-g++ -r CONFIG+=debug
+    qmake-qt4 ./Shuriken.pro -spec linux-g++ -r $configOptions
     make -w
 
     if [ $? -eq 0 ]; then
-        echo -e "\nSuccessfully built debug/shuriken\n"
+        echo -e "\nSuccessfully built shuriken\n"
     fi
+}
+
+
+function processArgs()
+{
+    declare -i i=0
+
+    if (( NUM_ARGS > 0 )); then
+        while (( i < NUM_ARGS )); do
+            case ${ARGS[$i]} in
+                clean )             isToBeMadeClean=true;;
+                debug )             isDebugBuild=true;;
+                -h )                showUsage; exit 0;;
+                --help )            showUsage; exit 0;;
+                * )                 echo -e "\nInvalid arg: \"${ARGS[$i]}\""; showUsage; exit 1;;
+            esac
+            (( i++ ))
+        done
+    fi
+}
+
+
+
+processArgs
+
+if $isToBeMadeClean; then
+    clean
+else
+    build
 fi
+

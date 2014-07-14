@@ -348,24 +348,6 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/juce_events/native/juce_osx_MessageQueue.h \
     src/JuceLibraryCode/modules/juce_events/timers/juce_Timer.h \
     src/JuceLibraryCode/modules/juce_events/timers/juce_MultiTimer.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/window.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/stream_encoder_framing.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/metadata.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/memory.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/md5.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/lpc.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/format.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/float.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/fixed.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/crc.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/cpu.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/bitwriter.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/bitreader.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/bitmath.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/private/all.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/protected/stream_encoder.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/protected/stream_decoder.h \
-    src/JuceLibraryCode/modules/juce_audio_formats/codecs/flac/libFLAC/include/protected/all.h \
     src/JuceLibraryCode/modules/juce_audio_devices/native/jack_device.h \
     src/mainwindow.h \
     src/wavegraphicsview.h \
@@ -414,7 +396,7 @@ CONFIG(debug, debug|release) {
         "_DEBUG=1"
 }
 else { 
-    DESTDIR = $$OUT_PWD
+    DESTDIR = $$OUT_PWD/release
     DEFINES += "NDEBUG=1"
 }
 OBJECTS_DIR = $${DESTDIR}/.obj
