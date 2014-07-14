@@ -71,6 +71,7 @@ public:
     void hideSlicePoints();
     void showSlicePoints();
     QList<int> getSlicePointFrameNumList();
+    QList<SharedSlicePointItem> getSlicePointList() const   { return mSlicePointItemList; }
 
     void selectNone();
     void selectAll();
@@ -97,7 +98,7 @@ private:
 
     QList<SharedWaveformItem> mWaveformItemList;
     QList<SharedSlicePointItem> mSlicePointItemList;
-    int mNumFrames;
+    SharedSampleBuffer mSampleBuffer;
 
 signals:
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );
@@ -110,7 +111,7 @@ private slots:
     void reorderWaveformItems( QList<int> oldOrderPositions, const int numPlacesMoved );
 
     void slideWaveformItemIntoPlace( const int orderPos );
-    void reorderSlicePoints( SlicePointItem* const movedItem );
+    void updateSlicePointFrameNum( SlicePointItem* const movedItem );
     void relayMaxDetailLevelReached();
 
 private:

@@ -743,6 +743,8 @@ void ApplyTimeStretchCommand::undo()
 
     updateSampleRanges( timeRatio, numFrames );
     mMainWindow->resetSampler();
+
+    updateSlicePoints( timeRatio );
     mGraphicsView->forceRedraw();
 
     mSpinBoxOriginalBPM->setValue( mOriginalBPM );
@@ -775,6 +777,8 @@ void ApplyTimeStretchCommand::redo()
 
         updateSampleRanges( timeRatio, newTotalNumFrames );
         mMainWindow->resetSampler();
+
+        updateSlicePoints( timeRatio );
         mGraphicsView->forceRedraw();
 
         mSpinBoxOriginalBPM->setValue( mNewBPM );
@@ -957,5 +961,18 @@ void ApplyTimeStretchCommand::updateSampleRanges( const qreal timeRatio, const i
     else
     {
         mMainWindow->mSampleRangeList.first()->numFrames = newTotalNumFrames;
+    }
+}
+
+
+
+void ApplyTimeStretchCommand::updateSlicePoints( const qreal timeRatio )
+{
+    QList<SharedSlicePointItem> slicePointList = mGraphicsView->getSlicePointList();
+
+    foreach ( SharedSlicePointItem slicePoint, slicePointList )
+    {
+        const int newFrameNum = roundToInt( slicePoint->getFrameNum() * timeRatio );
+        slicePoint->setFrameNum( newFrameNum );
     }
 }

@@ -51,9 +51,9 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
 SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sampleBuffer,
                                                      const SharedSampleRange sampleRange )
 {
-    mNumFrames = sampleBuffer->getNumFrames();
+    Q_ASSERT( sampleBuffer->getNumFrames() > 0 );
 
-    Q_ASSERT( mNumFrames > 0 );
+    mSampleBuffer = sampleBuffer;
 
     WaveformItem* waveformItem = new WaveformItem( sampleBuffer, sampleRange, scene()->width(), scene()->height() );
     waveformItem->setPos( 0.0, 0.0 );
@@ -74,16 +74,16 @@ SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sa
 QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const SharedSampleBuffer sampleBuffer,
                                                              const QList<SharedSampleRange> sampleRangeList )
 {
-    mNumFrames = sampleBuffer->getNumFrames();
+    Q_ASSERT( sampleBuffer->getNumFrames() > 0 );
 
-    Q_ASSERT( mNumFrames > 0 );
+    mSampleBuffer = sampleBuffer;
 
     qreal scenePosX = 0.0;
     int orderPos = 0;
 
     foreach ( SharedSampleRange sampleRange, sampleRangeList )
     {
-        const qreal sliceWidth = sampleRange->numFrames * ( scene()->width() / mNumFrames );
+        const qreal sliceWidth = sampleRange->numFrames * ( scene()->width() / sampleBuffer->getNumFrames() );
 
         WaveformItem* waveformItem = new WaveformItem( sampleBuffer,
                                                        sampleRange,
@@ -265,7 +265,7 @@ SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
     mSlicePointItemList.append( sharedSlicePoint );
 
     QObject::connect( slicePointItem, SIGNAL( scenePosChanged(SlicePointItem*const) ),
-                      this, SLOT( reorderSlicePoints(SlicePointItem*const) ) );
+                      this, SLOT( updateSlicePointFrameNum(SlicePointItem*const) ) );
 
     scene()->addItem( slicePointItem );
     scene()->update();
@@ -437,7 +437,7 @@ void WaveGraphicsView::clearWaveform()
 
 qreal WaveGraphicsView::getScenePosX( const int frameNum ) const
 {
-    qreal scenePosX = frameNum * ( scene()->width() / mNumFrames );
+    qreal scenePosX = frameNum * ( scene()->width() / mSampleBuffer->getNumFrames() );
 
     if ( scenePosX < 0.0)
         scenePosX = 0.0;
@@ -452,13 +452,15 @@ qreal WaveGraphicsView::getScenePosX( const int frameNum ) const
 
 int WaveGraphicsView::getFrameNum( qreal scenePosX ) const
 {
-    int frameNum = roundToInt( scenePosX / ( scene()->width() / mNumFrames ) );
+    const int numFrames = mSampleBuffer->getNumFrames();
+
+    int frameNum = roundToInt( scenePosX / ( scene()->width() / numFrames ) );
 
     if ( frameNum < 0 )
         frameNum = 0;
 
-    if ( frameNum >= mNumFrames )
-        frameNum = mNumFrames - 1;
+    if ( frameNum >= numFrames )
+        frameNum = numFrames - 1;
 
     return frameNum;
 }
@@ -702,23 +704,24 @@ void WaveGraphicsView::slideWaveformItemIntoPlace( const int orderPos )
 
 
 
-void WaveGraphicsView::reorderSlicePoints( SlicePointItem* const movedItem )
+void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem )
 {
-    SharedSlicePointItem slicePointItem;
+    SharedSlicePointItem sharedSlicePoint;
 
-    foreach ( SharedSlicePointItem sharedSlicePointItem, mSlicePointItemList )
+    foreach ( SharedSlicePointItem item, mSlicePointItemList )
     {
-        if ( sharedSlicePointItem == movedItem )
+        if ( item == movedItem )
         {
-            slicePointItem = sharedSlicePointItem;
+            sharedSlicePoint = item;
+            break;
         }
     }
 
-    const int oldFrameNum = slicePointItem->getFrameNum();
-    const int newFrameNum = getFrameNum( slicePointItem->pos().x() );
-    slicePointItem->setFrameNum( newFrameNum );
+    const int oldFrameNum = sharedSlicePoint->getFrameNum();
+    const int newFrameNum = getFrameNum( sharedSlicePoint->pos().x() );
+    sharedSlicePoint->setFrameNum( newFrameNum );
 
-    emit slicePointOrderChanged( slicePointItem, oldFrameNum, newFrameNum );
+    emit slicePointOrderChanged( sharedSlicePoint, oldFrameNum, newFrameNum );
 }
 
 
