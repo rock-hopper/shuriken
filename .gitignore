@@ -22,4 +22,5 @@ Makefile
 # Project specific
 
 debug/shuriken
+release/shuriken
 config.log
