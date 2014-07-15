@@ -103,14 +103,14 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
 
     const int numChans = mSampleBuffer->getNumChannels();
 
-    int firstVisibleBin;
-    int lastVisibleBin;
-    int numVisibleBins;
+    int firstVisibleBin = 0;
+    int lastVisibleBin = 0;
+    int numVisibleBins = 0;
 
-    qreal distanceBetweenFrames;
-    int firstVisibleFrame;
-    int lastVisibleFrame;
-    int numVisibleFrames;
+    qreal distanceBetweenFrames = 0.0;
+    int firstVisibleFrame = 0;
+    int lastVisibleFrame = 0;
+    int numVisibleFrames = 0;
 
     // If scale has changed since the last redraw then reset sample bins and establish new detail level
     if ( mScaleFactor != painter->worldTransform().m11() )
