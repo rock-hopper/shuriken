@@ -30,7 +30,7 @@
 #include <QDebug>
 
 
-static int setupSignalHandlers()
+static void setupSignalHandlers()
 {
     struct sigaction sigusr1Action;
     struct sigaction sigtermAction;
@@ -41,7 +41,7 @@ static int setupSignalHandlers()
 
     if ( sigaction( SIGUSR1, &sigusr1Action, NULL ) > 0 )
     {
-        return 1;
+        std::cerr << "Failed to set up signal handler for SIGUSR1 \n";
     }
 
     sigtermAction.sa_handler = SignalListener::sigtermHandler;
@@ -50,10 +50,8 @@ static int setupSignalHandlers()
 
     if ( sigaction( SIGTERM, &sigtermAction, NULL ) > 0 )
     {
-        return 2;
+        std::cerr << "Failed to set up signal handler for SIGTERM \n";
     }
-
-    return 0;
 }
 
 
