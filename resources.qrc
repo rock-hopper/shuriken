@@ -24,5 +24,8 @@
         <file>images/zoom-original.png</file>
         <file>images/zoom-out.png</file>
         <file>images/application-exit.png</file>
+        <file>images/go-home.png</file>
+        <file>images/go-next.png</file>
+        <file>images/go-previous.png</file>
     </qresource>
 </RCC>

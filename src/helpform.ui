@@ -22,8 +22,8 @@
         <string>Home</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/go-home.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/go-home.png</iconset>
+        <iconset resource="../resources.qrc">
+         <normaloff>:/images/go-home.png</normaloff>:/images/go-home.png</iconset>
        </property>
       </widget>
      </item>
@@ -36,8 +36,8 @@
         <string>Back</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/go-previous.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/go-previous.png</iconset>
+        <iconset resource="../resources.qrc">
+         <normaloff>:/images/go-previous.png</normaloff>:/images/go-previous.png</iconset>
        </property>
       </widget>
      </item>
@@ -50,8 +50,8 @@
         <string>Forward</string>
        </property>
        <property name="icon">
-        <iconset>
-         <normaloff>../../../../usr/share/icons/oxygen/22x22/actions/go-next.png</normaloff>../../../../usr/share/icons/oxygen/22x22/actions/go-next.png</iconset>
+        <iconset resource="../resources.qrc">
+         <normaloff>:/images/go-next.png</normaloff>:/images/go-next.png</iconset>
        </property>
       </widget>
      </item>
@@ -75,6 +75,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
