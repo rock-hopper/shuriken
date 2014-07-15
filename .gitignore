@@ -24,3 +24,5 @@ Makefile
 debug/shuriken
 release/shuriken
 config.log
+config.status
+
