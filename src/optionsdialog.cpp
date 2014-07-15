@@ -49,14 +49,17 @@ OptionsDialog::OptionsDialog( AudioDeviceManager& deviceManager, QWidget* parent
     // Populate audio backend combo box
     for ( int i = 0; i < audioBackendTypes.size(); ++i )
     {
-        mUI->comboBox_AudioBackend->addItem( audioBackendTypes.getUnchecked( i )->getTypeName().toRawUTF8() );
+        const QString backendName = audioBackendTypes.getUnchecked( i )->getTypeName().toRawUTF8();
+        mUI->comboBox_AudioBackend->addItem( backendName );
     }
 
 
     // Select current audio backend
     const QString backendName = mDeviceManager.getCurrentAudioDeviceType().toRawUTF8();
     const int index = mUI->comboBox_AudioBackend->findText( backendName );
-    mUI->comboBox_AudioBackend->setCurrentIndex( index ); // This will also update all the other widgets
+
+    mUI->comboBox_AudioBackend->setCurrentIndex( index );
+    on_comboBox_AudioBackend_activated( index ); // This will update all the other widgets
 
 
     // Paths
@@ -210,9 +213,13 @@ void OptionsDialog::showEvent( QShowEvent* event )
     // If the dialog is not being maximised, i.e. it has not previoulsy been minimised...
     if ( ! event->spontaneous() )
     {
-        // Get current audio settings and store them so that any
-        // changes can be reverted if the user later clicks "Cancel"
+        // Get current audio settings and store them so that any changes
+        // can be reverted if the user later clicks "Cancel"
         mDeviceManager.getAudioDeviceSetup( mOriginalConfig );
+
+        const QString backendName = mDeviceManager.getCurrentAudioDeviceType().toRawUTF8();
+        mOriginalBackendIndex = mUI->comboBox_AudioBackend->findText( backendName );
+
 
         if ( mUI->checkBox_MidiInputTestTone->isChecked() )
         {
@@ -685,9 +692,11 @@ void OptionsDialog::reject()
 {
     tearDownMidiInputTestSynth();
 
+    mUI->comboBox_AudioBackend->setCurrentIndex( mOriginalBackendIndex );
+    on_comboBox_AudioBackend_activated( mOriginalBackendIndex ); // This will update all the other widgets
+
     mDeviceManager.setAudioDeviceSetup( mOriginalConfig, true );
 
-    updateAudioDeviceComboBox();
     updateAudioDeviceComboBox();
     updateOutputChannelComboBox();
     updateSampleRateComboBox();
@@ -719,7 +728,7 @@ void OptionsDialog::displayDirValidityText( const bool isValid )
 //====================
 // "Audio Setup" tab:
 
-void OptionsDialog::on_comboBox_AudioBackend_currentIndexChanged( const int index )
+void OptionsDialog::on_comboBox_AudioBackend_activated( const int index )
 {
     // Set audio backend
     AudioIODeviceType* const audioBackendType = mDeviceManager.getAvailableDeviceTypes()[ index ];

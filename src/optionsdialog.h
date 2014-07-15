@@ -92,6 +92,7 @@ private:
 
     AudioDeviceManager& mDeviceManager;
     AudioDeviceManager::AudioDeviceSetup mOriginalConfig;
+    int mOriginalBackendIndex;
 
     ScopedPointer<SynthAudioSource> mSynthAudioSource;
     AudioSourcePlayer mAudioSourcePlayer;
@@ -145,7 +146,7 @@ private slots:
     void on_comboBox_OutputChannels_activated( const int index );
     void on_pushButton_TestTone_clicked();
     void on_comboBox_AudioDevice_activated( const QString deviceName );
-    void on_comboBox_AudioBackend_currentIndexChanged( const int index );
+    void on_comboBox_AudioBackend_activated( const int index );
 
     void accept();
     void reject();
