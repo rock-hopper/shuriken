@@ -21,8 +21,8 @@ Makefile
 
 # Project specific
 
-debug/shuriken
-release/shuriken
+debug/*
+release/*
 config.log
 config.status
 
