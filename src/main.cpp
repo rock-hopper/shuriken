@@ -62,6 +62,8 @@ int main( int argc, char* argv[] )
     SignalListener listener;
     QThread listenerThread;
 
+
+    // Set up signal listeners
     listenerThread.start();
     listener.moveToThread( &listenerThread );
 
@@ -75,6 +77,29 @@ int main( int argc, char* argv[] )
                       &window, SLOT( close() ),
                       Qt::BlockingQueuedConnection );
 
+
+    // Set up window geometry
+    const int desktopWidth = app.desktop()->availableGeometry().width();
+    const int desktopHeight = app.desktop()->availableGeometry().height();
+
+    const int frameWidth = window.frameSize().width();
+    const int frameHeight = window.frameSize().height();
+
+    int windowWidth = window.size().width();
+    int windowHeight = window.size().height();
+
+    if ( frameWidth > desktopWidth )
+    {
+        windowWidth = desktopWidth - ( frameWidth - windowWidth );
+    }
+
+    if ( frameHeight > desktopHeight )
+    {
+        windowHeight = desktopHeight - ( frameHeight - windowHeight );
+    }
+
+    window.resize( windowWidth, windowHeight );
+
     window.setGeometry
     (
         QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, window.size(), app.desktop()->availableGeometry() )
@@ -82,6 +107,8 @@ int main( int argc, char* argv[] )
 
     window.show();
 
+
+    // Try to open project if a file name has been passed on the command line
     if ( app.arguments().size() > 1 )
     {
         QString filePath = app.arguments().at( 1 );
@@ -93,8 +120,12 @@ int main( int argc, char* argv[] )
         }
     }
 
+
+    // Start main event loop
     const int exitValue = app.exec();
 
+
+    // Wait for listener thread to finish before exiting
     listenerThread.quit();
     listenerThread.wait( 2000 );
 

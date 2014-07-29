@@ -48,7 +48,6 @@ MainWindow::MainWindow( QWidget* parent ) :
     mLastOpenedProjDir( QDir::homePath() ),
     mAppliedBPM( 0.0 ),
     mIsProjectOpen( false )
-
 {
     setupUI();
     initialiseAudio();
