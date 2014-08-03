@@ -1429,7 +1429,12 @@ void MainWindow::on_actionExport_As_triggered()
                 tempBuffer->copyFrom( chanNum, 0, *mCurrentSampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
             }
 
-            const QString path = mFileHandler.saveAudioFile( outputDirPath, fileName, tempBuffer, mCurrentSampleHeader, sndFileFormat );
+            const QString path = mFileHandler.saveAudioFile( outputDirPath,
+                                                             fileName,
+                                                             tempBuffer,
+                                                             mCurrentSampleHeader,
+                                                             sndFileFormat,
+                                                             isOverwritingEnabled );
 
             if ( path.isEmpty() )
             {

@@ -44,7 +44,8 @@ public:
                            const QString fileBaseName,
                            const SharedSampleBuffer sampleBuffer,
                            const SharedSampleHeader sampleHeader,
-                           const int format );
+                           const int sndFileFormat,
+                           const bool isOverwritingEnabled = true );
 
     QString getLastErrorTitle() const   { return sErrorTitle; }
     QString getLastErrorInfo() const    { return sErrorInfo; }

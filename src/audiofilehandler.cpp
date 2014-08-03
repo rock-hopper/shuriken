@@ -136,7 +136,8 @@ QString AudioFileHandler::saveAudioFile( const QString dirPath,
                                          const QString fileBaseName,
                                          const SharedSampleBuffer sampleBuffer,
                                          const SharedSampleHeader sampleHeader,
-                                         const int format )
+                                         const int sndFileFormat,
+                                         const bool isOverwritingEnabled )
 {
     const int hopSize = 8192;
     const int numChans = sampleHeader->numChans;
@@ -155,9 +156,9 @@ QString AudioFileHandler::saveAudioFile( const QString dirPath,
 
         sfInfo.samplerate = sampleHeader->sampleRate;
         sfInfo.channels   = numChans;
-        sfInfo.format = format;
+        sfInfo.format = sndFileFormat;
 
-        switch ( format & SF_FORMAT_TYPEMASK )
+        switch ( sndFileFormat & SF_FORMAT_TYPEMASK )
         {
         case SF_FORMAT_WAV:
             filePath.append( ".wav" );
@@ -175,74 +176,80 @@ QString AudioFileHandler::saveAudioFile( const QString dirPath,
             filePath.append( ".ogg" );
             break;
         default:
-            qDebug() << "Unknown format: " << format;
+            qDebug() << "Unknown format: " << sndFileFormat;
             break;
         }
 
         Q_ASSERT( sf_format_check( &sfInfo ) );
 
-        SNDFILE* handle = sf_open( filePath.toLocal8Bit().data(), SFM_WRITE, &sfInfo );
-
-        if ( handle != NULL )
+        if ( isOverwritingEnabled || ! QFileInfo( filePath ).exists() )
         {
-            const int numFrames = sampleBuffer->getNumFrames();
-            int numFramesToWrite = 0;
-            int startFrame = 0;
-            int numSamplesWritten = 0;
+            SNDFILE* handle = sf_open( filePath.toLocal8Bit().data(), SFM_WRITE, &sfInfo );
 
-            Array<float> tempBuffer;
-            tempBuffer.resize( hopSize * numChans );
-
-            float* sampleData = NULL;
-
-            isSuccessful = true;
-
-            do
+            if ( handle != NULL )
             {
-                numFramesToWrite = numFrames - startFrame >= hopSize ? hopSize : numFrames - startFrame;
+                const int numFrames = sampleBuffer->getNumFrames();
+                int numFramesToWrite = 0;
+                int startFrame = 0;
+                int numSamplesWritten = 0;
 
-                // Interleave sample data
-                for ( int chanNum = 0; chanNum < numChans; ++chanNum )
+                Array<float> tempBuffer;
+                tempBuffer.resize( hopSize * numChans );
+
+                float* sampleData = NULL;
+
+                isSuccessful = true;
+
+                do
                 {
-                    sampleData = sampleBuffer->getSampleData( chanNum, startFrame );
+                    numFramesToWrite = numFrames - startFrame >= hopSize ? hopSize : numFrames - startFrame;
 
-                    for ( int frameNum = 0; frameNum < numFramesToWrite; ++frameNum )
+                    // Interleave sample data
+                    for ( int chanNum = 0; chanNum < numChans; ++chanNum )
                     {
-                        tempBuffer.set( numChans * frameNum + chanNum,  // Index
-                                        sampleData[ frameNum ] );       // Value
+                        sampleData = sampleBuffer->getSampleData( chanNum, startFrame );
+
+                        for ( int frameNum = 0; frameNum < numFramesToWrite; ++frameNum )
+                        {
+                            tempBuffer.set( numChans * frameNum + chanNum,  // Index
+                                            sampleData[ frameNum ] );       // Value
+                        }
+                    }
+
+                    // Write sample data to file
+                    numSamplesWritten = sf_write_float( handle, tempBuffer.getRawDataPointer(), numFramesToWrite * numChans );
+
+                    startFrame += hopSize;
+
+                    // If there was a write error
+                    if ( numSamplesWritten != numFramesToWrite * numChans)
+                    {
+                        const QString samplesToWrite = QString::number( numFramesToWrite * numChans );
+                        const QString samplesWritten = QString::number( numSamplesWritten );
+
+                        sErrorTitle = "Error while writing to audio file";
+                        sErrorInfo = "no. of samples to write: " + samplesToWrite + ", " +
+                                     "no. of samples written: " + samplesWritten;
+
+                        isSuccessful = false;
                     }
                 }
+                while ( numFramesToWrite == hopSize && isSuccessful );
 
-                // Write sample data to file
-                numSamplesWritten = sf_write_float( handle, tempBuffer.getRawDataPointer(), numFramesToWrite * numChans );
-
-                startFrame += hopSize;
-
-                // If there was a write error
-                if ( numSamplesWritten != numFramesToWrite * numChans)
-                {
-                    QString samplesToWriteStr;
-                    samplesToWriteStr.setNum( numFramesToWrite * numChans );
-
-                    QString samplesWrittenStr;
-                    samplesWrittenStr.setNum( numSamplesWritten );
-
-                    sErrorTitle = "Error while writing to audio file";
-                    sErrorInfo = "no. of samples to write: " + samplesToWriteStr + ", " +
-                                 "no. of samples written: " + samplesWrittenStr;
-
-                    isSuccessful = false;
-                }
+                sf_write_sync( handle );
+                sf_close( handle );
             }
-            while ( numFramesToWrite == hopSize && isSuccessful );
-
-            sf_write_sync( handle );
-            sf_close( handle );
+            else // Could not open file for writing
+            {
+                sErrorTitle = "Couldn't open file for writing";
+                sErrorInfo = sf_strerror( NULL );
+                isSuccessful = false;
+            }
         }
-        else // Could not open file for writing
+        else // File already exists and overwriting is not enabled
         {
-            sErrorTitle = "Couldn't open file for writing";
-            sErrorInfo = sf_strerror( NULL );
+            sErrorTitle = "Couldn't overwrite existing file";
+            sErrorInfo = "The file " + filePath + " already exists and could not be overwritten";
             isSuccessful = false;
         }
     }
