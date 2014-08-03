@@ -529,6 +529,10 @@ void MainWindow::setupUI()
 
         mUI->actionHelp->setEnabled( true );
     }
+
+
+    // Create export dialog
+    mExportDialog = new ExportDialog();
 }
 
 
@@ -567,6 +571,7 @@ void MainWindow::enableUI()
 
     mUI->actionSave_As->setEnabled( true );
     mUI->actionClose_Project->setEnabled( true );
+    mUI->actionExport_As->setEnabled( true );
     mUI->actionSelect_All->setEnabled( true );
     mUI->actionSelect_None->setEnabled( true );
     mUI->actionAdd_Slice_Point->setEnabled( true );
@@ -605,6 +610,7 @@ void MainWindow::disableUI()
     mUI->actionSave_Project->setEnabled( false );
     mUI->actionSave_As->setEnabled( false );
     mUI->actionClose_Project->setEnabled( false );
+    mUI->actionExport_As->setEnabled( false );
     mUI->actionSelect_All->setEnabled( false );
     mUI->actionSelect_None->setEnabled( false );
     mUI->actionAdd_Slice_Point->setEnabled( false );
@@ -1402,7 +1408,32 @@ void MainWindow::on_actionImport_Audio_File_triggered()
 
 void MainWindow::on_actionExport_As_triggered()
 {
+    QPoint pos = mExportDialog->pos();
 
+    if ( pos.x() < 0 )
+        pos.setX( 0 );
+    if ( pos.y() < 0 )
+        pos.setY( 0 );
+
+    mExportDialog->move( pos );
+
+    const int result = mExportDialog->exec();
+
+    if ( result == QDialog::Accepted )
+    {
+        const QString outputDirPath = mExportDialog->getOutputDirPath();
+        const QString fileBaseName = mExportDialog->getFileBaseName();
+        const ExportDialog::NumberingStyle numbering = mExportDialog->getNumberingStyle();
+        const bool isOverwritingEnabled = mExportDialog->isOverwritingEnabled();
+        const bool isFormatSFZ = mExportDialog->isFormatSFZ();
+        const bool isFormatH2Drumkit = mExportDialog->isFormatH2Drumkit();
+        const int sndFileFormat = mExportDialog->getSndFileFormat();
+
+        foreach ( SharedSampleRange range, mSampleRangeList )
+        {
+            ; // TODO
+        }
+    }
 }
 
 

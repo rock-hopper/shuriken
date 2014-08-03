@@ -58,5 +58,5 @@ QValidator::State DirectoryValidator::validate( QString& input, int& pos ) const
 
 void DirectoryValidator::fixup( QString& input ) const
 {
-    QDir::cleanPath( input );
+    input = QDir::cleanPath( input );
 }

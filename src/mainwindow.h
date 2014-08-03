@@ -36,6 +36,7 @@
 #include "audioanalyser.h"
 #include "waveformitem.h"
 #include "helpform.h"
+#include "exportdialog.h"
 
 
 namespace Ui
@@ -120,6 +121,7 @@ private:
 
     ScopedPointer<OptionsDialog> mOptionsDialog;
     ScopedPointer<HelpForm> mHelpForm;
+    ScopedPointer<ExportDialog> mExportDialog;
 
     AudioDeviceManager mDeviceManager;
     AudioFileHandler mFileHandler;

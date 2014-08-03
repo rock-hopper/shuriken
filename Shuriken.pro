@@ -163,7 +163,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/signallistener.cpp \
     src/applygainrampdialog.cpp \
     src/zipper.cpp \
-    src/aboutdialog.cpp
+    src/aboutdialog.cpp \
+    src/exportdialog.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -369,13 +370,15 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/signallistener.h \
     src/applygainrampdialog.h \
     src/zipper.h \
-    src/aboutdialog.h
+    src/aboutdialog.h \
+    src/exportdialog.h
 FORMS += src/mainwindow.ui \
     src/optionsdialog.ui \
     src/helpform.ui \
     src/applygaindialog.ui \
     src/applygainrampdialog.ui \
-    src/aboutdialog.ui
+    src/aboutdialog.ui \
+    src/exportdialog.ui
 INCLUDEPATH += src \
     src/SndLibShuriken \
     src/JuceLibraryCode
@@ -405,6 +408,7 @@ MOC_DIR = $${DESTDIR}/.moc
 RCC_DIR = $${DESTDIR}/.rcc
 UI_DIR = $${DESTDIR}/.ui
 RESOURCES = resources.qrc
+
 # -------------------------------------------------
 # Install
 # -------------------------------------------------
