@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 declare -ra ARGS=("$@")
 declare -ri NUM_ARGS=$#
