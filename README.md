@@ -11,10 +11,10 @@ To clean the project:
 
     ./build clean
 
-You must have qmake-qt4, and the aubio (>=0.4.0) and rubberband (>=1.3) dev files installed on your system.
+You must have qmake-qt4, and the aubio (>=0.4.1) and rubberband (>=1.3) dev files installed on your system.
 ___
 
-As noted above, Shuriken requires the latest incarnation of the aubio library (>= 0.4.0) which I've packaged for Ubuntu Precise and AVLinux 6:
+As noted above, Shuriken requires the latest incarnation of the aubio library which I've packaged for Ubuntu Precise and Trusty, and AVLinux 6:
 
 https://launchpad.net/~rock-hopper/+archive/ubuntu/audiotools
 
