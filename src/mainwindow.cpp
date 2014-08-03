@@ -1392,17 +1392,57 @@ void MainWindow::on_actionExport_As_triggered()
 
     if ( result == QDialog::Accepted )
     {
+        QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
         const QString outputDirPath = mExportDialog->getOutputDirPath();
         const QString fileBaseName = mExportDialog->getFileBaseName();
-        const ExportDialog::NumberingStyle numbering = mExportDialog->getNumberingStyle();
+
         const bool isOverwritingEnabled = mExportDialog->isOverwritingEnabled();
+
         const bool isFormatSFZ = mExportDialog->isFormatSFZ();
         const bool isFormatH2Drumkit = mExportDialog->isFormatH2Drumkit();
+
         const int sndFileFormat = mExportDialog->getSndFileFormat();
 
-        foreach ( SharedSampleRange range, mSampleRangeList )
+        bool isSuccessful = true;
+
+        for ( int i = 0; i < mSampleRangeList.size(); i++ )
         {
-            ; // TODO
+            QString fileName = fileBaseName;
+
+            if ( mExportDialog->getNumberingStyle() == ExportDialog::PREFIX )
+            {
+                fileName.prepend( QString::number( i + 1 ) );
+            }
+            else // SUFFIX
+            {
+                fileName.append( QString::number( i + 1 ) );
+            }
+
+            const SharedSampleRange sampleRange = mSampleRangeList.at( i );
+            const int numChans = mCurrentSampleHeader->numChans;
+
+            SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
+
+            for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+            {
+                tempBuffer->copyFrom( chanNum, 0, *mCurrentSampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
+            }
+
+            const QString path = mFileHandler.saveAudioFile( outputDirPath, fileName, tempBuffer, mCurrentSampleHeader, sndFileFormat );
+
+            if ( path.isEmpty() )
+            {
+                isSuccessful = false;
+                break;
+            }
+        }
+
+        QApplication::restoreOverrideCursor();
+
+        if ( ! isSuccessful )
+        {
+            MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
         }
     }
 }
