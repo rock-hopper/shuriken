@@ -483,7 +483,7 @@ void ApplyGainCommand::redo()
         tempBuffer->copyFrom( chanNum, 0, *sampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
     }
 
-    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleHeader, true );
+    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleHeader, AudioFileHandler::TEMP_FORMAT );
 
     if ( ! mFilePath.isEmpty() )
     {
@@ -561,7 +561,7 @@ void ApplyGainRampCommand::redo()
         tempBuffer->copyFrom( chanNum, 0, *sampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
     }
 
-    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleHeader, true );
+    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleHeader, AudioFileHandler::TEMP_FORMAT );
 
     if ( ! mFilePath.isEmpty() )
     {
@@ -635,7 +635,7 @@ void NormaliseCommand::redo()
         tempBuffer->copyFrom( chanNum, 0, *sampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
     }
 
-    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleHeader, true );
+    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleHeader, AudioFileHandler::TEMP_FORMAT );
 
     if ( ! mFilePath.isEmpty() )
     {
@@ -767,7 +767,7 @@ void ApplyTimeStretchCommand::redo()
                                                              mFileBaseName,
                                                              mMainWindow->mCurrentSampleBuffer,
                                                              mMainWindow->mCurrentSampleHeader,
-                                                             true );
+                                                             AudioFileHandler::TEMP_FORMAT );
 
     if ( ! mTempFilePath.isEmpty() )
     {

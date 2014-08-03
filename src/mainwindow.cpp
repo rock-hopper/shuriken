@@ -794,7 +794,8 @@ void MainWindow::saveProject( const QString filePath )
     const QString audioFilePath = mFileHandler.saveAudioFile( projTempDir.absolutePath(),
                                                               "audio",
                                                               mCurrentSampleBuffer,
-                                                              mCurrentSampleHeader );
+                                                              mCurrentSampleHeader,
+                                                              AudioFileHandler::SAVE_FORMAT );
 
     if ( ! audioFilePath.isEmpty() )
     {

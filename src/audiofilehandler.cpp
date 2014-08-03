@@ -21,7 +21,6 @@
 */
 
 #include "audiofilehandler.h"
-#include <sndfile.h>
 #include <QDir>
 #include <QDebug>
 
@@ -137,7 +136,7 @@ QString AudioFileHandler::saveAudioFile( const QString dirPath,
                                          const QString fileBaseName,
                                          const SharedSampleBuffer sampleBuffer,
                                          const SharedSampleHeader sampleHeader,
-                                         const bool isTempFile )
+                                         const int format )
 {
     const int hopSize = 8192;
     const int numChans = sampleHeader->numChans;
@@ -156,17 +155,30 @@ QString AudioFileHandler::saveAudioFile( const QString dirPath,
 
         sfInfo.samplerate = sampleHeader->sampleRate;
         sfInfo.channels   = numChans;
+        sfInfo.format = format;
 
-        if ( isTempFile )
+        switch ( format & SF_FORMAT_TYPEMASK )
         {
-            sfInfo.format = SF_ENDIAN_CPU | SF_FORMAT_AU | SF_FORMAT_FLOAT;
-            filePath.append( ".au" );
-        }
-        else
-        {
-            sfInfo.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
+        case SF_FORMAT_WAV:
             filePath.append( ".wav" );
+            break;
+        case SF_FORMAT_AIFF:
+            filePath.append( ".aiff" );
+            break;
+        case SF_FORMAT_AU:
+            filePath.append( ".au" );
+            break;
+        case SF_FORMAT_FLAC:
+            filePath.append( ".flac" );
+            break;
+        case SF_FORMAT_OGG:
+            filePath.append( ".ogg" );
+            break;
+        default:
+            qDebug() << "Unknown format: " << format;
+            break;
         }
+
         Q_ASSERT( sf_format_check( &sfInfo ) );
 
         SNDFILE* handle = sf_open( filePath.toLocal8Bit().data(), SFM_WRITE, &sfInfo );

@@ -27,6 +27,7 @@
 #include "samplebuffer.h"
 #include "SndLibShuriken/_sndlib.h"
 #include <aubio/aubio.h>
+#include <sndfile.h>
 
 
 class AudioFileHandler
@@ -38,14 +39,19 @@ public:
     SharedSampleBuffer getSampleData( const QString filePath, const int startFrame, const int numFramesToRead );
     SharedSampleHeader getSampleHeader( const QString filePath );
 
+    // Returns absolute file path of saved audio file on success, otherwise returns an empty string
     QString saveAudioFile( const QString dirPath,
-                        const QString fileBaseName,
-                        const SharedSampleBuffer sampleBuffer,
-                        const SharedSampleHeader sampleHeader,
-                        const bool isTempFile = false );
+                           const QString fileBaseName,
+                           const SharedSampleBuffer sampleBuffer,
+                           const SharedSampleHeader sampleHeader,
+                           const int format );
 
     QString getLastErrorTitle() const   { return sErrorTitle; }
     QString getLastErrorInfo() const    { return sErrorInfo; }
+
+public:
+    static const int SAVE_FORMAT = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
+    static const int TEMP_FORMAT = SF_ENDIAN_CPU | SF_FORMAT_AU | SF_FORMAT_FLOAT;
 
 private:
     static QString sErrorTitle;
