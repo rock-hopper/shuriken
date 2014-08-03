@@ -31,6 +31,7 @@
 #include "applygainrampdialog.h"
 #include "aboutdialog.h"
 #include "zipper.h"
+#include "messageboxes.h"
 #include <rubberband/RubberBandStretcher.h>
 #include <QDebug>
 
@@ -99,8 +100,8 @@ void MainWindow::openProject( const QString filePath )
 
     if ( tempDirPath.isEmpty() )
     {
-        showWarningDialog( tr("Temp directory is invalid!"),
-                           tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+        MessageBoxes::showWarningDialog( tr("Temp directory is invalid!"),
+                                         tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
         return;
     }
 
@@ -212,40 +213,9 @@ void MainWindow::openProject( const QString filePath )
         else // Error loading audio file
         {
             QApplication::restoreOverrideCursor();
-            showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+            MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
         }
     }
-}
-
-
-
-//==================================================================================================
-// Public Static:
-
-void MainWindow::showWarningDialog( const QString text, const QString infoText )
-{
-    QMessageBox msgBox;
-    msgBox.setWindowTitle( "Shuriken Beat Slicer" );
-    msgBox.setIcon( QMessageBox::Warning );
-    msgBox.setText( text );
-    msgBox.setInformativeText( infoText );
-    msgBox.exec();
-}
-
-
-
-int MainWindow::showUnsavedChangesDialog()
-{
-    QMessageBox msgBox;
-    msgBox.setWindowTitle( "Shuriken Beat Slicer" );
-    msgBox.setIcon( QMessageBox::Question );
-    msgBox.setText( "The project has been modified" );
-    msgBox.setInformativeText( "Do you want to save your changes?" );
-    msgBox.setStandardButtons( QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel) ;
-    msgBox.setDefaultButton( QMessageBox::Save );
-    const int buttonClicked = msgBox.exec();
-
-    return buttonClicked;
 }
 
 
@@ -277,7 +247,7 @@ void MainWindow::closeEvent( QCloseEvent* event )
     }
     else
     {
-        const int buttonClicked = showUnsavedChangesDialog();
+        const int buttonClicked = MessageBoxes::showUnsavedChangesDialog();
 
         switch ( buttonClicked )
         {
@@ -334,7 +304,7 @@ void MainWindow::initialiseAudio()
 
     if ( error.isNotEmpty() )
     {
-        showWarningDialog( tr("Error initialising audio device manager!"), error.toRawUTF8() );
+        MessageBoxes::showWarningDialog( tr("Error initialising audio device manager!"), error.toRawUTF8() );
         mUI->actionOptions->setDisabled( true );
         mIsAudioInitialised = false;
     }
@@ -360,7 +330,7 @@ void MainWindow::initialiseAudio()
     // Check there were no errors while the audio file handler was being initialised
     if ( ! mFileHandler.getLastErrorTitle().isEmpty() )
     {
-        showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+        MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
     }
 }
 
@@ -717,7 +687,7 @@ void MainWindow::importAudioFile()
         if ( sampleBuffer.isNull() || sampleHeader.isNull() )
         {
             QApplication::restoreOverrideCursor();
-            showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+            MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
         }
         else
         {
@@ -795,8 +765,8 @@ void MainWindow::saveProject( const QString filePath )
 
     if ( tempDirPath.isEmpty() )
     {
-        showWarningDialog( tr("Temp directory is invalid!"),
-                           tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+        MessageBoxes::showWarningDialog( tr("Temp directory is invalid!"),
+                                         tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
         return;
     }
 
@@ -853,7 +823,7 @@ void MainWindow::saveProject( const QString filePath )
     else // An error occurred while writing the audio file
     {
         QApplication::restoreOverrideCursor();
-        showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+        MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
     }
 }
 
@@ -897,14 +867,14 @@ void MainWindow::saveProjectDialog()
             }
             else
             {
-                showWarningDialog( tr("Could not save project"),
-                                   tr("Permission to write file denied") );
+                MessageBoxes::showWarningDialog( tr("Could not save project"),
+                                                 tr("Permission to write file denied") );
             }
         }
         else
         {
-            showWarningDialog( tr("Could not save project"),
-                               tr("The file \"") + filePath + tr("\" could not be overwritten") );
+            MessageBoxes::showWarningDialog( tr("Could not save project"),
+                                             tr("The file \"") + filePath + tr("\" could not be overwritten") );
         }
     }
 }
@@ -1066,12 +1036,12 @@ bool MainWindow::readXmlFile( const QString filePath, ProjectSettings& settings 
         }
         else // The xml file doesn't have a valid "project" tag
         {
-            showWarningDialog( tr("Couldn't open project!"), tr("The project file is invalid") );
+            MessageBoxes::showWarningDialog( tr("Couldn't open project!"), tr("The project file is invalid") );
         }
     }
     else // The xml file couldn't be read
     {
-        showWarningDialog( tr("Couldn't open project!"), tr("The project file is unreadable") );
+        MessageBoxes::showWarningDialog( tr("Couldn't open project!"), tr("The project file is unreadable") );
     }
 
     return isSuccessful;
@@ -1292,7 +1262,7 @@ void MainWindow::on_actionOpen_Project_triggered()
     }
     else
     {
-        const int buttonClicked = showUnsavedChangesDialog();
+        const int buttonClicked = MessageBoxes::showUnsavedChangesDialog();
 
         switch ( buttonClicked )
         {
@@ -1351,7 +1321,7 @@ void MainWindow::on_actionClose_Project_triggered()
     }
     else
     {
-        const int buttonClicked = showUnsavedChangesDialog();
+        const int buttonClicked = MessageBoxes::showUnsavedChangesDialog();
 
         switch ( buttonClicked )
         {
@@ -1383,7 +1353,7 @@ void MainWindow::on_actionImport_Audio_File_triggered()
     }
     else
     {
-        const int buttonClicked = showUnsavedChangesDialog();
+        const int buttonClicked = MessageBoxes::showUnsavedChangesDialog();
 
         switch ( buttonClicked )
         {
@@ -1447,7 +1417,7 @@ void MainWindow::on_actionQuit_triggered()
     }
     else
     {
-        const int buttonClicked = showUnsavedChangesDialog();
+        const int buttonClicked = MessageBoxes::showUnsavedChangesDialog();
 
         switch ( buttonClicked )
         {
@@ -1560,8 +1530,8 @@ void MainWindow::on_actionApply_Gain_triggered()
     }
     else
     {
-        showWarningDialog( tr("Temp dir invalid!"),
-                           tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+        MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
+                                         tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
     }
 }
 
@@ -1598,8 +1568,8 @@ void MainWindow::on_actionApply_Gain_Ramp_triggered()
     }
     else
     {
-        showWarningDialog( tr("Temp dir invalid!"),
-                           tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+        MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
+                                         tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
     }
 }
 
@@ -1629,8 +1599,8 @@ void MainWindow::on_actionNormalise_triggered()
     }
     else
     {
-        showWarningDialog( tr("Temp dir invalid!"),
-                           tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+        MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
+                                         tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
     }
 }
 
@@ -1956,8 +1926,8 @@ void MainWindow::on_pushButton_Apply_clicked()
         }
         else
         {
-            showWarningDialog( tr("Temp dir invalid!"),
-                               tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+            MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
+                                             tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
         }
     }
 }

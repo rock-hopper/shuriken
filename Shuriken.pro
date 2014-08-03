@@ -164,7 +164,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/applygainrampdialog.cpp \
     src/zipper.cpp \
     src/aboutdialog.cpp \
-    src/exportdialog.cpp
+    src/exportdialog.cpp \
+    src/messageboxes.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -371,7 +372,8 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/applygainrampdialog.h \
     src/zipper.h \
     src/aboutdialog.h \
-    src/exportdialog.h
+    src/exportdialog.h \
+    src/messageboxes.h
 FORMS += src/mainwindow.ui \
     src/optionsdialog.ui \
     src/helpform.ui \

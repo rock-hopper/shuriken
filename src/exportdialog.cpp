@@ -24,6 +24,7 @@
 #include "ui_exportdialog.h"
 #include <QFileDialog>
 #include <QDebug>
+#include "messageboxes.h"
 
 
 //==================================================================================================
@@ -332,7 +333,8 @@ void ExportDialog::on_pushButton_Create_clicked()
     }
     else
     {
-        qDebug() << "Result: " << result.getErrorMessage().toUTF8();
+        QString errorInfo( result.getErrorMessage().toUTF8() );
+        MessageBoxes::showWarningDialog( tr( "Couldn't create directory!" ), errorInfo );
     }
 }
 

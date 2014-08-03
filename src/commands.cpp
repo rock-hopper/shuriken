@@ -25,6 +25,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QDebug>
+#include "messageboxes.h"
 
 using namespace RubberBand;
 
@@ -492,7 +493,7 @@ void ApplyGainCommand::redo()
     }
     else
     {
-        MainWindow::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+        MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
     }
 }
 
@@ -570,7 +571,7 @@ void ApplyGainRampCommand::redo()
     }
     else
     {
-        MainWindow::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+        MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
     }
 }
 
@@ -648,7 +649,7 @@ void NormaliseCommand::redo()
     }
     else
     {
-        MainWindow::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+        MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
     }
 }
 
@@ -793,7 +794,7 @@ void ApplyTimeStretchCommand::redo()
     {
         QApplication::restoreOverrideCursor();
 
-        MainWindow::showWarningDialog( mMainWindow->mFileHandler.getLastErrorTitle(),
+        MessageBoxes::showWarningDialog( mMainWindow->mFileHandler.getLastErrorTitle(),
                                        mMainWindow->mFileHandler.getLastErrorInfo() );
     }
 }

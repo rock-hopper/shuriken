@@ -23,6 +23,7 @@
 #include "optionsdialog.h"
 #include "ui_optionsdialog.h"
 #include "globals.h"
+#include "messageboxes.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QProcessEnvironment>
@@ -641,17 +642,6 @@ void OptionsDialog::saveConfig()
 //==================================================================================================
 // Private Static:
 
-void OptionsDialog::showWarningBox( const QString text, const QString infoText )
-{
-    QMessageBox msgBox;
-    msgBox.setIcon( QMessageBox::Warning );
-    msgBox.setText( text );
-    msgBox.setInformativeText( infoText );
-    msgBox.exec();
-}
-
-
-
 String OptionsDialog::getNameForChannelPair( const String& name1, const String& name2 )
 {
     String commonBit;
@@ -764,7 +754,7 @@ void OptionsDialog::on_comboBox_AudioBackend_activated( const int index )
 
     if ( error.isNotEmpty() )
     {
-        showWarningBox( tr("Error when trying to open audio device!"), error.toRawUTF8() );
+        MessageBoxes::showWarningDialog( tr("Error when trying to open audio device!"), error.toRawUTF8() );
     }
 }
 
@@ -808,7 +798,7 @@ void OptionsDialog::on_comboBox_AudioDevice_activated( const QString deviceName 
 
     if ( error.isNotEmpty() )
     {
-        showWarningBox( tr("Error when trying to open audio device!"), error.toRawUTF8() );
+        MessageBoxes::showWarningDialog( tr("Error when trying to open audio device!"), error.toRawUTF8() );
     }
 }
 
@@ -840,7 +830,7 @@ void OptionsDialog::on_comboBox_OutputChannels_activated( const int index )
 
     if ( error.isNotEmpty() )
     {
-        showWarningBox( tr("Error when trying to set output channels!"), error.toRawUTF8() );
+        MessageBoxes::showWarningDialog( tr("Error when trying to set output channels!"), error.toRawUTF8() );
     }
 }
 
@@ -867,7 +857,7 @@ void OptionsDialog::on_comboBox_SampleRate_activated( const int index )
 
     if ( error.isNotEmpty() )
     {
-        showWarningBox( tr("Error when trying to set sample rate!"), error.toRawUTF8() );
+        MessageBoxes::showWarningDialog( tr("Error when trying to set sample rate!"), error.toRawUTF8() );
     }
 }
 
@@ -891,7 +881,7 @@ void OptionsDialog::on_comboBox_BufferSize_activated( const int index )
 
     if ( error.isNotEmpty() )
     {
-        showWarningBox( tr("Error when trying to set buffer size!"), error.toRawUTF8() );
+        MessageBoxes::showWarningDialog( tr("Error when trying to set buffer size!"), error.toRawUTF8() );
     }
 }
 

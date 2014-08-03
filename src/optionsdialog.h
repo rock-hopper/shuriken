@@ -104,7 +104,6 @@ private:
     QString mTempDirPath;
 
 private:
-    static void showWarningBox( const QString text, const QString infoText );
     static String getNameForChannelPair( const String& name1, const String& name2 );
     static QString getNoDeviceString() { return "<< " + tr("none") + " >>"; }
 

@@ -61,10 +61,6 @@ public:
 
     void openProject( const QString filePath );
 
-public:
-    static void showWarningDialog( const QString text, const QString infoText );
-    static int showUnsavedChangesDialog();
-
 protected:
     void changeEvent( QEvent* event );
     void closeEvent( QCloseEvent* event );
