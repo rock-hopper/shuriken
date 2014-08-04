@@ -46,7 +46,7 @@ public:
     ~ExportDialog();
 
     QString getOutputDirPath() const;
-    QString getFileBaseName() const;
+    QString getFileName() const;
     NumberingStyle getNumberingStyle() const;
     bool isOverwritingEnabled() const;
 
@@ -70,7 +70,9 @@ private:
     ScopedPointer<DirectoryValidator> mDirectoryValidator;
 
 private slots:
-    void on_comboBox_AudioFiles_activated( const QString text );
+    void on_radioButton_SFZ_clicked();
+    void on_radioButton_H2Drumkit_clicked();
+    void on_radioButton_AudioFiles_clicked();
     void on_comboBox_Format_currentIndexChanged( const QString text );
     void on_pushButton_Create_clicked();
     void on_pushButton_Choose_clicked();

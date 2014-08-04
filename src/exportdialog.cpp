@@ -55,21 +55,14 @@ ExportDialog::ExportDialog( QWidget* parent ) :
 
     // Set up file base name validator
     const QRegExp regex( "[^/\\s]+" ); // Match any character except forward slash and white space
-    mUI->lineEdit_BaseName->setValidator( new QRegExpValidator( regex, this ) );
+    mUI->lineEdit_FileName->setValidator( new QRegExpValidator( regex, this ) );
 
-    QObject::connect( mUI->lineEdit_BaseName, SIGNAL( textChanged(QString) ),
+    QObject::connect( mUI->lineEdit_FileName, SIGNAL( textChanged(QString) ),
                       this, SLOT( enableOkButtonIfInputValid() ) );
 
 
-    // Populate "Format" combo box
-    QStringList formatTextList;
-    formatTextList << "WAV" << "AIFF" << "FLAC" << "Ogg" << "SFZ" << "Hydrogen Drumkit";
-    mUI->comboBox_Format->addItems( formatTextList );
-
-
-    // Hide "Audio Files" combo box
-    mUI->comboBox_AudioFiles->setVisible( false );
-    mUI->label_AudioFiles->setVisible( false );
+    // Populate combo boxes
+    mUI->radioButton_AudioFiles->click();
 }
 
 
@@ -88,9 +81,9 @@ QString ExportDialog::getOutputDirPath() const
 
 
 
-QString ExportDialog::getFileBaseName() const
+QString ExportDialog::getFileName() const
 {
-    return mUI->lineEdit_BaseName->text();
+    return mUI->lineEdit_FileName->text();
 }
 
 
@@ -118,14 +111,14 @@ bool ExportDialog::isOverwritingEnabled() const
 
 bool ExportDialog::isFormatSFZ() const
 {
-    return mUI->comboBox_Format->currentText() == "SFZ";
+    return mUI->radioButton_SFZ->isChecked();
 }
 
 
 
 bool ExportDialog::isFormatH2Drumkit() const
 {
-    return mUI->comboBox_Format->currentText() == "Hydrogen Drumkit";
+    return mUI->radioButton_H2Drumkit->isChecked();
 }
 
 
@@ -137,11 +130,6 @@ int ExportDialog::getSndFileFormat() const
 
     QString formatName = mUI->comboBox_Format->currentText();
     int format = 0;
-
-    if ( formatName == "SFZ" || formatName == "Hydrogen Drumkit" )
-    {
-        formatName = mUI->comboBox_AudioFiles->currentText();
-    }
 
     if ( formatName == "WAV")
     {
@@ -198,65 +186,10 @@ void ExportDialog::showEvent( QShowEvent* event )
     if ( ! event->spontaneous() )
     {
         mUI->lineEdit_OutputDir->setText( mLastOpenedExportDir );
-        mUI->lineEdit_BaseName->clear();
+        mUI->lineEdit_FileName->clear();
     }
 
     QDialog::showEvent( event );
-}
-
-
-
-//==================================================================================================
-// Private:
-
-void ExportDialog::updateEncodingComboBox( const QString format )
-{
-    QStringList encodingTextList;
-    QList<int> encodingDataList;
-    int index = 0;
-
-    if ( format == "WAV")
-    {
-        encodingTextList << "Unsigned 8 bit PCM" << "Signed 16 bit PCM" << "Signed 24 bit PCM" << "Signed 32 bit PCM" << "32 bit float" << "64 bit double" << "u-law encoding" << "A-law encoding";
-        encodingDataList << SF_FORMAT_PCM_U8 << SF_FORMAT_PCM_16 << SF_FORMAT_PCM_24 << SF_FORMAT_PCM_32 << SF_FORMAT_FLOAT << SF_FORMAT_DOUBLE << SF_FORMAT_ULAW << SF_FORMAT_ALAW;
-        index = 1; // Signed 16 bit PCM
-    }
-    else if ( format == "AIFF" )
-    {
-        encodingTextList << "Unsigned 8 bit PCM" << "Signed 8 bit PCM" << "Signed 16 bit PCM" << "Signed 24 bit PCM" << "Signed 32 bit PCM" << "32 bit float" << "64 bit double" << "u-law encoding" << "A-law encoding";
-        encodingDataList << SF_FORMAT_PCM_U8 << SF_FORMAT_PCM_S8 << SF_FORMAT_PCM_16 << SF_FORMAT_PCM_24 << SF_FORMAT_PCM_32 << SF_FORMAT_FLOAT << SF_FORMAT_DOUBLE << SF_FORMAT_ULAW << SF_FORMAT_ALAW;
-        index = 2; // Signed 16 bit PCM
-    }
-    else if ( format == "AU")
-    {
-        encodingTextList << "Signed 8 bit PCM" << "Signed 16 bit PCM" << "Signed 24 bit PCM" << "Signed 32 bit PCM" << "32 bit float" << "64 bit double" << "u-law encoding" << "A-law encoding";
-        encodingDataList << SF_FORMAT_PCM_S8 << SF_FORMAT_PCM_16 << SF_FORMAT_PCM_24 << SF_FORMAT_PCM_32 << SF_FORMAT_FLOAT << SF_FORMAT_DOUBLE << SF_FORMAT_ULAW << SF_FORMAT_ALAW;
-        index = 1; // Signed 16 bit PCM
-    }
-    else if ( format == "FLAC" )
-    {
-        encodingTextList << "Signed 8 bit PCM" << "Signed 16 bit PCM" << "Signed 24 bit PCM";
-        encodingDataList << SF_FORMAT_PCM_S8 << SF_FORMAT_PCM_16 << SF_FORMAT_PCM_24;
-        index = 1; // Signed 16 bit PCM
-    }
-    else if ( format == "Ogg" )
-    {
-        encodingTextList << "Vorbis";
-        encodingDataList << SF_FORMAT_VORBIS;
-    }
-    else
-    {
-        qDebug() << "Unknown format: " << format;
-    }
-
-    mUI->comboBox_Encoding->clear();
-
-    for ( int i = 0; i < encodingTextList.size(); i++ )
-    {
-        mUI->comboBox_Encoding->addItem( encodingTextList[ i ], encodingDataList[ i ] );
-    }
-
-    mUI->comboBox_Encoding->setCurrentIndex( index );
 }
 
 
@@ -283,7 +216,7 @@ void ExportDialog::enableOkButtonIfInputValid()
 {
     QPushButton* okButton = mUI->buttonBox->button( QDialogButtonBox::Ok );
 
-    if ( mUI->lineEdit_OutputDir->hasAcceptableInput() && mUI->lineEdit_BaseName->hasAcceptableInput() )
+    if ( mUI->lineEdit_OutputDir->hasAcceptableInput() && mUI->lineEdit_FileName->hasAcceptableInput() )
     {
         okButton->setEnabled( true );
     }
@@ -342,48 +275,105 @@ void ExportDialog::on_pushButton_Create_clicked()
 
 void ExportDialog::on_comboBox_Format_currentIndexChanged( const QString text )
 {
-    QString format;
+    QStringList encodingTextList;
+    QList<int> encodingDataList;
+    int index = 0;
 
-    if ( text == "SFZ" )
+    if ( text == "WAV")
     {
-        QStringList audioFilesTextList;
-        audioFilesTextList << "WAV" << "FLAC" << "Ogg";
-        mUI->comboBox_AudioFiles->clear();
-        mUI->comboBox_AudioFiles->addItems( audioFilesTextList );
-
-        format = "WAV";
+        encodingTextList << "Unsigned 8 bit PCM" << "Signed 16 bit PCM" << "Signed 24 bit PCM" << "Signed 32 bit PCM" << "32 bit float" << "64 bit double" << "u-law encoding" << "A-law encoding";
+        encodingDataList << SF_FORMAT_PCM_U8 << SF_FORMAT_PCM_16 << SF_FORMAT_PCM_24 << SF_FORMAT_PCM_32 << SF_FORMAT_FLOAT << SF_FORMAT_DOUBLE << SF_FORMAT_ULAW << SF_FORMAT_ALAW;
+        index = 1; // Signed 16 bit PCM
     }
-    else if ( text == "Hydrogen Drumkit" )
+    else if ( text == "AIFF" )
     {
-        QStringList audioFilesTextList;
-        audioFilesTextList << "FLAC" << "WAV" << "AU" << "AIFF";
-        mUI->comboBox_AudioFiles->clear();
-        mUI->comboBox_AudioFiles->addItems( audioFilesTextList );
-
-        format = "FLAC";
+        encodingTextList << "Unsigned 8 bit PCM" << "Signed 8 bit PCM" << "Signed 16 bit PCM" << "Signed 24 bit PCM" << "Signed 32 bit PCM" << "32 bit float" << "64 bit double" << "u-law encoding" << "A-law encoding";
+        encodingDataList << SF_FORMAT_PCM_U8 << SF_FORMAT_PCM_S8 << SF_FORMAT_PCM_16 << SF_FORMAT_PCM_24 << SF_FORMAT_PCM_32 << SF_FORMAT_FLOAT << SF_FORMAT_DOUBLE << SF_FORMAT_ULAW << SF_FORMAT_ALAW;
+        index = 2; // Signed 16 bit PCM
+    }
+    else if ( text == "AU")
+    {
+        encodingTextList << "Signed 8 bit PCM" << "Signed 16 bit PCM" << "Signed 24 bit PCM" << "Signed 32 bit PCM" << "32 bit float" << "64 bit double" << "u-law encoding" << "A-law encoding";
+        encodingDataList << SF_FORMAT_PCM_S8 << SF_FORMAT_PCM_16 << SF_FORMAT_PCM_24 << SF_FORMAT_PCM_32 << SF_FORMAT_FLOAT << SF_FORMAT_DOUBLE << SF_FORMAT_ULAW << SF_FORMAT_ALAW;
+        index = 1; // Signed 16 bit PCM
+    }
+    else if ( text == "FLAC" )
+    {
+        encodingTextList << "Signed 8 bit PCM" << "Signed 16 bit PCM" << "Signed 24 bit PCM";
+        encodingDataList << SF_FORMAT_PCM_S8 << SF_FORMAT_PCM_16 << SF_FORMAT_PCM_24;
+        index = 1; // Signed 16 bit PCM
+    }
+    else if ( text == "Ogg" )
+    {
+        encodingTextList << "Vorbis";
+        encodingDataList << SF_FORMAT_VORBIS;
     }
     else
     {
-        format = text;
+        qDebug() << "Unknown format: " << text;
     }
 
-    updateEncodingComboBox( format );
+    mUI->comboBox_Encoding->clear();
 
-    if ( text == "SFZ" || text == "Hydrogen Drumkit" )
+    for ( int i = 0; i < encodingTextList.size(); i++ )
     {
-        mUI->comboBox_AudioFiles->setVisible( true );
-        mUI->label_AudioFiles->setVisible( true );
+        mUI->comboBox_Encoding->addItem( encodingTextList[ i ], encodingDataList[ i ] );
     }
-    else
-    {
-        mUI->comboBox_AudioFiles->setVisible( false );
-        mUI->label_AudioFiles->setVisible( false );
-    }
+
+    mUI->comboBox_Encoding->setCurrentIndex( index );
 }
 
 
 
-void ExportDialog::on_comboBox_AudioFiles_activated( const QString text )
+void ExportDialog::on_radioButton_AudioFiles_clicked()
 {
-    updateEncodingComboBox( text );
+    mUI->label_FileName->setText( tr( "File Name(s):" ) );
+
+    foreach ( QAbstractButton* button, mUI->buttonGroup_Numbering->buttons() )
+    {
+        button->setEnabled( true );
+    }
+
+    QStringList audioFormatTextList;
+    audioFormatTextList << "WAV" << "AIFF" << "AU" << "FLAC" << "Ogg";
+    mUI->comboBox_Format->clear();
+    mUI->comboBox_Format->addItems( audioFormatTextList );
+}
+
+
+
+void ExportDialog::on_radioButton_H2Drumkit_clicked()
+{
+    mUI->label_FileName->setText( tr( "Kit Name:" ) );
+
+    foreach ( QAbstractButton* button, mUI->buttonGroup_Numbering->buttons() )
+    {
+        button->setEnabled( false );
+    }
+
+    mUI->radioButton_Suffix->setChecked( true );
+
+    QStringList audioFormatTextList;
+    audioFormatTextList << "FLAC" << "WAV" << "AIFF" << "AU";
+    mUI->comboBox_Format->clear();
+    mUI->comboBox_Format->addItems( audioFormatTextList );
+}
+
+
+
+void ExportDialog::on_radioButton_SFZ_clicked()
+{
+    mUI->label_FileName->setText( tr( "SFZ Name:" ) );
+
+    foreach ( QAbstractButton* button, mUI->buttonGroup_Numbering->buttons() )
+    {
+        button->setEnabled( false );
+    }
+
+    mUI->radioButton_Suffix->setChecked( true );
+
+    QStringList audioFilesTextList;
+    audioFilesTextList << "WAV" << "FLAC" << "Ogg";
+    mUI->comboBox_Format->clear();
+    mUI->comboBox_Format->addItems( audioFilesTextList );
 }

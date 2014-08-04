@@ -1557,8 +1557,8 @@ void MainWindow::on_actionExport_As_triggered()
     {
         QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-        const QString outputDirPath = mExportDialog->getOutputDirPath();
-        const QString fileBaseName = mExportDialog->getFileBaseName();
+        QString outputDirPath = mExportDialog->getOutputDirPath();
+        const QString fileName = mExportDialog->getFileName();
 
         const bool isOverwritingEnabled = mExportDialog->isOverwritingEnabled();
 
@@ -1567,20 +1567,28 @@ void MainWindow::on_actionExport_As_triggered()
 
         const int sndFileFormat = mExportDialog->getSndFileFormat();
 
+        if ( isFormatH2Drumkit )
+        {
+            const QDir outputDir( outputDirPath );
+            outputDir.mkdir( fileName );
+
+            outputDirPath = outputDir.absoluteFilePath( fileName );
+        }
+
         QStringList audioFileNames;
         bool isSuccessful = true;
 
         for ( int i = 0; i < mSampleRangeList.size(); i++ )
         {
-            QString fileName = fileBaseName;
+            QString audioFileName = fileName;
 
             if ( mExportDialog->getNumberingStyle() == ExportDialog::PREFIX )
             {
-                fileName.prepend( QString::number( i + 1 ) );
+                audioFileName.prepend( QString::number( i + 1 ) );
             }
             else // SUFFIX
             {
-                fileName.append( QString::number( i + 1 ) );
+                audioFileName.append( QString::number( i + 1 ) );
             }
 
             const SharedSampleRange sampleRange = mSampleRangeList.at( i );
@@ -1594,7 +1602,7 @@ void MainWindow::on_actionExport_As_triggered()
             }
 
             const QString path = mFileHandler.saveAudioFile( outputDirPath,
-                                                             fileName,
+                                                             audioFileName,
                                                              tempBuffer,
                                                              mCurrentSampleHeader,
                                                              sndFileFormat,
@@ -1613,19 +1621,20 @@ void MainWindow::on_actionExport_As_triggered()
 
         if ( isSuccessful && isFormatH2Drumkit )
         {
-            const QString kitName = QFileInfo( outputDirPath ).fileName();
+            createH2DrumkitXmlFile( outputDirPath, fileName, audioFileNames );
 
-            createH2DrumkitXmlFile( outputDirPath, kitName, audioFileNames );
+            const QString parentDirPath = QFileInfo( outputDirPath ).absolutePath();
 
 #ifdef LINUX
-            const QString cdCommand  = "cd " + QFileInfo( outputDirPath ).absolutePath();
-            const QString tarCommand = "tar --create --gzip --file " + kitName + ".h2drumkit " + kitName;
-            const QString rmCommand  = "rm -rf " + kitName;
+            const QString cdCommand  = "cd '" + parentDirPath + "'";
+            const QString tarCommand = "tar --create --gzip --file '" + fileName + ".h2drumkit' '" + fileName + "'";
 
-            const QString command = cdCommand + " && " + tarCommand + " && " + rmCommand;
+            const QString command = cdCommand + " && " + tarCommand;
 
             system( command.toLocal8Bit().data() );
 #endif
+
+            File( outputDirPath.toLocal8Bit().data() ).deleteRecursively();
         }
 
         QApplication::restoreOverrideCursor();
