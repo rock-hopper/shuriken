@@ -32,6 +32,7 @@
 #include "aboutdialog.h"
 #include "zipper.h"
 #include "messageboxes.h"
+#include "textfilehandler.h"
 #include <rubberband/RubberBandStretcher.h>
 #include <QDebug>
 
@@ -114,9 +115,9 @@ void MainWindow::openProject( const QString filePath )
     QDir projTempDir = tempDir.absoluteFilePath( projectName );
 
     const QString xmlFilePath = projTempDir.absoluteFilePath( "shuriken.xml" );
-    ProjectSettings settings;
+    TextFileHandler::ProjectSettings settings;
 
-    const bool isSuccessful = readProjectXmlFile( xmlFilePath, settings );
+    const bool isSuccessful = TextFileHandler::readProjectXmlFile( xmlFilePath, settings );
 
     if ( isSuccessful )
     {
@@ -799,7 +800,31 @@ void MainWindow::saveProject( const QString filePath )
 
     if ( ! audioFilePath.isEmpty() )
     {
-        createProjectXmlFile( xmlFilePath, projectName );
+        const bool isRealtimeModeEnabled = mOptionsDialog->isRealtimeModeEnabled();
+
+        TextFileHandler::ProjectSettings settings;
+
+        if ( isRealtimeModeEnabled )
+        {
+            settings.originalBpm = mUI->doubleSpinBox_OriginalBPM->value();
+            settings.newBpm = mUI->doubleSpinBox_NewBPM->value();
+            settings.appliedBpm = mAppliedBPM;
+        }
+        else
+        {
+            settings.originalBpm = mAppliedBPM;
+            settings.newBpm = mAppliedBPM;
+            settings.appliedBpm = mAppliedBPM;
+        }
+
+        settings.isTimeStretchChecked = mUI->checkBox_TimeStretch->isChecked();
+        settings.isPitchCorrectionChecked = mUI->checkBox_PitchCorrection->isChecked();
+        settings.options = mOptionsDialog->getStretcherOptions();
+        settings.isJackSyncChecked = mOptionsDialog->isJackSyncEnabled();
+
+        const QList<int> slicePointFrameNumList = mUI->waveGraphicsView->getSlicePointFrameNumList();
+
+        TextFileHandler::createProjectXmlFile( xmlFilePath, projectName, settings, mSampleRangeList, slicePointFrameNumList );
 
         Zipper::compress( projTempDir.absolutePath(), zipFilePath );
 
@@ -894,321 +919,6 @@ void MainWindow::openProjectDialog()
         openProject( filePath );
         mLastOpenedProjDir = QFileInfo( filePath ).absolutePath();
     }
-}
-
-
-
-void MainWindow::createProjectXmlFile( const QString filePath, const QString projectName )
-{
-    const bool isRealtimeModeEnabled = mOptionsDialog->isRealtimeModeEnabled();
-
-    XmlElement docElement( "project" );
-    docElement.setAttribute( "name", projectName.toLocal8Bit().data() );
-
-    XmlElement* origBpmElement = new XmlElement( "original_bpm" );
-    XmlElement* newBpmElement = new XmlElement( "new_bpm" );
-    XmlElement* appliedBpmElement = new XmlElement( "applied_bpm" );
-
-    if ( isRealtimeModeEnabled )
-    {
-        origBpmElement->setAttribute( "value", mUI->doubleSpinBox_OriginalBPM->value() );
-        newBpmElement->setAttribute( "value", mUI->doubleSpinBox_NewBPM->value() );
-        appliedBpmElement->setAttribute( "value", mAppliedBPM );
-    }
-    else
-    {
-        origBpmElement->setAttribute( "value", mAppliedBPM );
-        newBpmElement->setAttribute( "value", mAppliedBPM );
-        appliedBpmElement->setAttribute( "value", mAppliedBPM );
-    }
-    docElement.addChildElement( origBpmElement );
-    docElement.addChildElement( newBpmElement );
-    docElement.addChildElement( appliedBpmElement );
-
-    XmlElement* timeStretchElement = new XmlElement( "time_stretch" );
-    timeStretchElement->setAttribute( "checked", mUI->checkBox_TimeStretch->isChecked() );
-    docElement.addChildElement( timeStretchElement );
-
-    XmlElement* pitchCorrectionElement = new XmlElement( "pitch_correction" );
-    pitchCorrectionElement->setAttribute( "checked", mUI->checkBox_PitchCorrection->isChecked() );
-    docElement.addChildElement( pitchCorrectionElement );
-
-    XmlElement* stretchOptionsElement = new XmlElement( "stretch_options" );
-    stretchOptionsElement->setAttribute( "value", mOptionsDialog->getStretcherOptions() );
-    docElement.addChildElement( stretchOptionsElement );
-
-    XmlElement* jackSyncElement = new XmlElement( "jack_sync" );
-    jackSyncElement->setAttribute( "checked", mOptionsDialog->isJackSyncEnabled() );
-    docElement.addChildElement( jackSyncElement );
-
-    XmlElement* sampleElement = new XmlElement( "sample" );
-    sampleElement->setAttribute( "filename", "audio.wav" );
-    docElement.addChildElement( sampleElement );
-
-    foreach ( SharedSampleRange sampleRange, mSampleRangeList )
-    {
-        XmlElement* rangeElement = new XmlElement( "sample_range" );
-        rangeElement->setAttribute( "start_frame", sampleRange->startFrame );
-        rangeElement->setAttribute( "num_frames", sampleRange->numFrames );
-        docElement.addChildElement( rangeElement );
-    }
-
-    const QList<int> slicePointFrameNumList = mUI->waveGraphicsView->getSlicePointFrameNumList();
-
-    foreach ( int slicePointFrameNum, slicePointFrameNumList )
-    {
-        XmlElement* slicePointElement = new XmlElement( "slice_point" );
-        slicePointElement->setAttribute( "frame_num", slicePointFrameNum );
-        docElement.addChildElement( slicePointElement );
-    }
-
-    File file( filePath.toLocal8Bit().data() );
-
-    docElement.writeToFile( file, String::empty );
-}
-
-
-
-bool MainWindow::readProjectXmlFile( const QString filePath, ProjectSettings& settings )
-{
-    ScopedPointer<XmlElement> docElement;
-    docElement = XmlDocument::parse( File( filePath.toLocal8Bit().data() ) );
-
-    bool isSuccessful = false;
-
-    // If the xml file was successfully read
-    if ( docElement != NULL )
-    {
-        // If the main document element has a valid "project" tag
-        if ( docElement->hasTagName( "project" ) )
-        {
-            settings.projectName = docElement->getStringAttribute( "name" ).toRawUTF8();
-
-            forEachXmlChildElement( *docElement, elem )
-            {
-                if ( elem->hasTagName( "sample_range" ) )
-                {
-                    SharedSampleRange sampleRange( new SampleRange );
-
-                    sampleRange->startFrame = elem->getIntAttribute( "start_frame" );
-                    sampleRange->numFrames = elem->getIntAttribute( "num_frames" );
-
-                    settings.sampleRangeList << sampleRange;
-                }
-                else if ( elem->hasTagName( "slice_point" ) )
-                {
-                    settings.slicePointFrameNumList << elem->getIntAttribute( "frame_num" );
-                }
-                else if ( elem->hasTagName( "sample" ) )
-                {
-                    settings.audioFileName = elem->getStringAttribute( "filename" ).toRawUTF8();
-                }
-                else if ( elem->hasTagName( "original_bpm" ) )
-                {
-                    settings.originalBpm = elem->getDoubleAttribute( "value" );
-                }
-                else if ( elem->hasTagName( "new_bpm" ) )
-                {
-                    settings.newBpm = elem->getDoubleAttribute( "value" );
-                }
-                else if ( elem->hasTagName( "applied_bpm" ) )
-                {
-                    settings.appliedBpm = elem->getDoubleAttribute( "value" );
-                }
-                else if ( elem->hasTagName( "time_stretch" ) )
-                {
-                    settings.isTimeStretchChecked = elem->getBoolAttribute( "checked" );
-                }
-                else if ( elem->hasTagName( "pitch_correction" ) )
-                {
-                    settings.isPitchCorrectionChecked = elem->getBoolAttribute( "checked" );
-                }
-                else if ( elem->hasTagName( "stretch_options" ) )
-                {
-                    settings.options = elem->getIntAttribute( "value" );
-                }
-                else if ( elem->hasTagName( "jack_sync" ) )
-                {
-                    settings.isJackSyncChecked = elem->getBoolAttribute( "checked" );
-                }
-            }
-
-            isSuccessful = true;
-        }
-        else // The xml file doesn't have a valid "project" tag
-        {
-            MessageBoxes::showWarningDialog( tr("Couldn't open project!"), tr("The project file is invalid") );
-        }
-    }
-    else // The xml file couldn't be read
-    {
-        MessageBoxes::showWarningDialog( tr("Couldn't open project!"), tr("The project file is unreadable") );
-    }
-
-    return isSuccessful;
-}
-
-
-
-void MainWindow::createH2DrumkitXmlFile( const QString dirPath, const QString kitName, QStringList audioFileNames )
-{
-    const String infoFormattingText = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'Lucida Grande'; font-size:10pt; font-weight:400; font-style:normal;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p></body></html>";
-
-    XmlElement docElement( "drumkit_info" );
-    docElement.setAttribute( "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance" );
-    docElement.setAttribute( "xmlns", "http://www.hydrogen-music.org/drumkit" );
-
-    XmlElement* nameElement = new XmlElement( "name" );
-    nameElement->addTextElement( kitName.toLocal8Bit().data() );
-    docElement.addChildElement( nameElement );
-
-    XmlElement* authorElement = new XmlElement( "author" );
-    authorElement->addTextElement( "" );
-    docElement.addChildElement( authorElement );
-
-    XmlElement* infoElement = new XmlElement( "info" );
-    infoElement->addTextElement( infoFormattingText );
-    docElement.addChildElement( infoElement );
-
-    XmlElement* licenseElement = new XmlElement( "license" );
-    licenseElement->addTextElement( "" );
-    docElement.addChildElement( licenseElement );
-
-    XmlElement* instrumentListElement = new XmlElement( "instrumentList" );
-
-    for ( int i = 0; i < audioFileNames.size(); i++ )
-    {
-        XmlElement* instrumentElement = new XmlElement( "instrument" );
-
-        XmlElement* idElement = new XmlElement( "id" );
-        idElement->addTextElement( String( i ) );
-        instrumentElement->addChildElement( idElement );
-
-        XmlElement* nameElement = new XmlElement( "name" );
-        String name( kitName.toLocal8Bit().data() );
-        name += " ";
-        name += String( i + 1 );
-        nameElement->addTextElement( name );
-        instrumentElement->addChildElement( nameElement );
-
-        XmlElement* volumeElement = new XmlElement( "volume" );
-        volumeElement->addTextElement( "1" );
-        instrumentElement->addChildElement( volumeElement );
-
-        XmlElement* isMutedElement = new XmlElement( "isMuted" );
-        isMutedElement->addTextElement( "false" );
-        instrumentElement->addChildElement( isMutedElement );
-
-        XmlElement* pan_LElement = new XmlElement( "pan_L" );
-        pan_LElement->addTextElement( "1" );
-        instrumentElement->addChildElement( pan_LElement );
-
-        XmlElement* pan_RElement = new XmlElement( "pan_R" );
-        pan_RElement->addTextElement( "1" );
-        instrumentElement->addChildElement( pan_RElement );
-
-        XmlElement* randomPitchFactorElement = new XmlElement( "randomPitchFactor" );
-        randomPitchFactorElement->addTextElement( "0" );
-        instrumentElement->addChildElement( randomPitchFactorElement );
-
-        XmlElement* gainElement = new XmlElement( "gain" );
-        gainElement->addTextElement( "1" );
-        instrumentElement->addChildElement( gainElement );
-
-        XmlElement* filterActiveElement = new XmlElement( "filterActive" );
-        filterActiveElement->addTextElement( "false" );
-        instrumentElement->addChildElement( filterActiveElement );
-
-        XmlElement* filterCutoffElement = new XmlElement( "filterCutoff" );
-        filterCutoffElement->addTextElement( "1" );
-        instrumentElement->addChildElement( filterCutoffElement );
-
-        XmlElement* filterResonanceElement = new XmlElement( "filterResonance" );
-        filterResonanceElement->addTextElement( "0" );
-        instrumentElement->addChildElement( filterResonanceElement );
-
-        XmlElement* AttackElement = new XmlElement( "Attack" );
-        AttackElement->addTextElement( "0" );
-        instrumentElement->addChildElement( AttackElement );
-
-        XmlElement* DecayElement = new XmlElement( "Decay" );
-        DecayElement->addTextElement( "0" );
-        instrumentElement->addChildElement( DecayElement );
-
-        XmlElement* SustainElement = new XmlElement( "Sustain" );
-        SustainElement->addTextElement( "1" );
-        instrumentElement->addChildElement( SustainElement );
-
-        XmlElement* ReleaseElement = new XmlElement( "Release" );
-        ReleaseElement->addTextElement( "1000" );
-        instrumentElement->addChildElement( ReleaseElement );
-
-        XmlElement* muteGroupElement = new XmlElement( "muteGroup" );
-        muteGroupElement->addTextElement( "-1" );
-        instrumentElement->addChildElement( muteGroupElement );
-
-        XmlElement* midiOutChannelElement = new XmlElement( "midiOutChannel" );
-        midiOutChannelElement->addTextElement( "-1" );
-        instrumentElement->addChildElement( midiOutChannelElement );
-
-        XmlElement* midiOutNoteElement = new XmlElement( "midiOutNote" );
-        midiOutNoteElement->addTextElement( "60" );
-        instrumentElement->addChildElement( midiOutNoteElement );
-
-        XmlElement* isStopNoteElement = new XmlElement( "isStopNote" );
-        isStopNoteElement->addTextElement( "false" );
-        instrumentElement->addChildElement( isStopNoteElement );
-
-        XmlElement* FX1LevelElement = new XmlElement( "FX1Level" );
-        FX1LevelElement->addTextElement( "0" );
-        instrumentElement->addChildElement( FX1LevelElement );
-
-        XmlElement* FX2LevelElement = new XmlElement( "FX2Level" );
-        FX2LevelElement->addTextElement( "0" );
-        instrumentElement->addChildElement( FX2LevelElement );
-
-        XmlElement* FX3LevelElement = new XmlElement( "FX3Level" );
-        FX3LevelElement->addTextElement( "0" );
-        instrumentElement->addChildElement( FX3LevelElement );
-
-        XmlElement* FX4LevelElement = new XmlElement( "FX4Level" );
-        FX4LevelElement->addTextElement( "0" );
-        instrumentElement->addChildElement( FX4LevelElement );
-
-        XmlElement* layerElement = new XmlElement( "layer" );
-
-        {
-            XmlElement* filenameElement = new XmlElement( "filename" );
-            filenameElement->addTextElement( audioFileNames.at( i ).toLocal8Bit().data() );
-            layerElement->addChildElement( filenameElement );
-
-            XmlElement* minElement = new XmlElement( "min" );
-            minElement->addTextElement( "0" );
-            layerElement->addChildElement( minElement );
-
-            XmlElement* maxElement = new XmlElement( "max" );
-            maxElement->addTextElement( "1" );
-            layerElement->addChildElement( maxElement );
-
-            XmlElement* gainElement = new XmlElement( "gain" );
-            gainElement->addTextElement( "1" );
-            layerElement->addChildElement( gainElement );
-
-            XmlElement* pitchElement = new XmlElement( "pitch" );
-            pitchElement->addTextElement( "0" );
-            layerElement->addChildElement( pitchElement );
-        }
-
-        instrumentElement->addChildElement( layerElement );
-
-        instrumentListElement->addChildElement( instrumentElement );
-    }
-
-    docElement.addChildElement( instrumentListElement );
-
-    File file( QDir( dirPath ).absoluteFilePath( "drumkit.xml" ).toLocal8Bit().data() );
-
-    docElement.writeToFile( file, String::empty );
 }
 
 
@@ -1621,7 +1331,7 @@ void MainWindow::on_actionExport_As_triggered()
 
         if ( isSuccessful && isFormatH2Drumkit )
         {
-            createH2DrumkitXmlFile( outputDirPath, fileName, audioFileNames );
+            TextFileHandler::createH2DrumkitXmlFile( outputDirPath, fileName, audioFileNames );
 
             const QString parentDirPath = QFileInfo( outputDirPath ).absolutePath();
 
