@@ -116,7 +116,7 @@ void MainWindow::openProject( const QString filePath )
     const QString xmlFilePath = projTempDir.absoluteFilePath( "shuriken.xml" );
     ProjectSettings settings;
 
-    const bool isSuccessful = readXmlFile( xmlFilePath, settings );
+    const bool isSuccessful = readProjectXmlFile( xmlFilePath, settings );
 
     if ( isSuccessful )
     {
@@ -799,7 +799,7 @@ void MainWindow::saveProject( const QString filePath )
 
     if ( ! audioFilePath.isEmpty() )
     {
-        createXmlFile( xmlFilePath, projectName );
+        createProjectXmlFile( xmlFilePath, projectName );
 
         Zipper::compress( projTempDir.absolutePath(), zipFilePath );
 
@@ -898,7 +898,7 @@ void MainWindow::openProjectDialog()
 
 
 
-void MainWindow::createXmlFile( const QString filePath, const QString projectName )
+void MainWindow::createProjectXmlFile( const QString filePath, const QString projectName )
 {
     const bool isRealtimeModeEnabled = mOptionsDialog->isRealtimeModeEnabled();
 
@@ -969,7 +969,7 @@ void MainWindow::createXmlFile( const QString filePath, const QString projectNam
 
 
 
-bool MainWindow::readXmlFile( const QString filePath, ProjectSettings& settings )
+bool MainWindow::readProjectXmlFile( const QString filePath, ProjectSettings& settings )
 {
     ScopedPointer<XmlElement> docElement;
     docElement = XmlDocument::parse( File( filePath.toLocal8Bit().data() ) );
@@ -1046,6 +1046,169 @@ bool MainWindow::readXmlFile( const QString filePath, ProjectSettings& settings 
     }
 
     return isSuccessful;
+}
+
+
+
+void MainWindow::createH2DrumkitXmlFile( const QString dirPath, const QString kitName, QStringList audioFileNames )
+{
+    const String infoFormattingText = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'Lucida Grande'; font-size:10pt; font-weight:400; font-style:normal;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p></body></html>";
+
+    XmlElement docElement( "drumkit_info" );
+    docElement.setAttribute( "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance" );
+    docElement.setAttribute( "xmlns", "http://www.hydrogen-music.org/drumkit" );
+
+    XmlElement* nameElement = new XmlElement( "name" );
+    nameElement->addTextElement( kitName.toLocal8Bit().data() );
+    docElement.addChildElement( nameElement );
+
+    XmlElement* authorElement = new XmlElement( "author" );
+    authorElement->addTextElement( "" );
+    docElement.addChildElement( authorElement );
+
+    XmlElement* infoElement = new XmlElement( "info" );
+    infoElement->addTextElement( infoFormattingText );
+    docElement.addChildElement( infoElement );
+
+    XmlElement* licenseElement = new XmlElement( "license" );
+    licenseElement->addTextElement( "" );
+    docElement.addChildElement( licenseElement );
+
+    XmlElement* instrumentListElement = new XmlElement( "instrumentList" );
+
+    for ( int i = 0; i < audioFileNames.size(); i++ )
+    {
+        XmlElement* instrumentElement = new XmlElement( "instrument" );
+
+        XmlElement* idElement = new XmlElement( "id" );
+        idElement->addTextElement( String( i ) );
+        instrumentElement->addChildElement( idElement );
+
+        XmlElement* nameElement = new XmlElement( "name" );
+        String name( kitName.toLocal8Bit().data() );
+        name += " ";
+        name += String( i + 1 );
+        nameElement->addTextElement( name );
+        instrumentElement->addChildElement( nameElement );
+
+        XmlElement* volumeElement = new XmlElement( "volume" );
+        volumeElement->addTextElement( "1" );
+        instrumentElement->addChildElement( volumeElement );
+
+        XmlElement* isMutedElement = new XmlElement( "isMuted" );
+        isMutedElement->addTextElement( "false" );
+        instrumentElement->addChildElement( isMutedElement );
+
+        XmlElement* pan_LElement = new XmlElement( "pan_L" );
+        pan_LElement->addTextElement( "1" );
+        instrumentElement->addChildElement( pan_LElement );
+
+        XmlElement* pan_RElement = new XmlElement( "pan_R" );
+        pan_RElement->addTextElement( "1" );
+        instrumentElement->addChildElement( pan_RElement );
+
+        XmlElement* randomPitchFactorElement = new XmlElement( "randomPitchFactor" );
+        randomPitchFactorElement->addTextElement( "0" );
+        instrumentElement->addChildElement( randomPitchFactorElement );
+
+        XmlElement* gainElement = new XmlElement( "gain" );
+        gainElement->addTextElement( "1" );
+        instrumentElement->addChildElement( gainElement );
+
+        XmlElement* filterActiveElement = new XmlElement( "filterActive" );
+        filterActiveElement->addTextElement( "false" );
+        instrumentElement->addChildElement( filterActiveElement );
+
+        XmlElement* filterCutoffElement = new XmlElement( "filterCutoff" );
+        filterCutoffElement->addTextElement( "1" );
+        instrumentElement->addChildElement( filterCutoffElement );
+
+        XmlElement* filterResonanceElement = new XmlElement( "filterResonance" );
+        filterResonanceElement->addTextElement( "0" );
+        instrumentElement->addChildElement( filterResonanceElement );
+
+        XmlElement* AttackElement = new XmlElement( "Attack" );
+        AttackElement->addTextElement( "0" );
+        instrumentElement->addChildElement( AttackElement );
+
+        XmlElement* DecayElement = new XmlElement( "Decay" );
+        DecayElement->addTextElement( "0" );
+        instrumentElement->addChildElement( DecayElement );
+
+        XmlElement* SustainElement = new XmlElement( "Sustain" );
+        SustainElement->addTextElement( "1" );
+        instrumentElement->addChildElement( SustainElement );
+
+        XmlElement* ReleaseElement = new XmlElement( "Release" );
+        ReleaseElement->addTextElement( "1000" );
+        instrumentElement->addChildElement( ReleaseElement );
+
+        XmlElement* muteGroupElement = new XmlElement( "muteGroup" );
+        muteGroupElement->addTextElement( "-1" );
+        instrumentElement->addChildElement( muteGroupElement );
+
+        XmlElement* midiOutChannelElement = new XmlElement( "midiOutChannel" );
+        midiOutChannelElement->addTextElement( "-1" );
+        instrumentElement->addChildElement( midiOutChannelElement );
+
+        XmlElement* midiOutNoteElement = new XmlElement( "midiOutNote" );
+        midiOutNoteElement->addTextElement( "60" );
+        instrumentElement->addChildElement( midiOutNoteElement );
+
+        XmlElement* isStopNoteElement = new XmlElement( "isStopNote" );
+        isStopNoteElement->addTextElement( "false" );
+        instrumentElement->addChildElement( isStopNoteElement );
+
+        XmlElement* FX1LevelElement = new XmlElement( "FX1Level" );
+        FX1LevelElement->addTextElement( "0" );
+        instrumentElement->addChildElement( FX1LevelElement );
+
+        XmlElement* FX2LevelElement = new XmlElement( "FX2Level" );
+        FX2LevelElement->addTextElement( "0" );
+        instrumentElement->addChildElement( FX2LevelElement );
+
+        XmlElement* FX3LevelElement = new XmlElement( "FX3Level" );
+        FX3LevelElement->addTextElement( "0" );
+        instrumentElement->addChildElement( FX3LevelElement );
+
+        XmlElement* FX4LevelElement = new XmlElement( "FX4Level" );
+        FX4LevelElement->addTextElement( "0" );
+        instrumentElement->addChildElement( FX4LevelElement );
+
+        XmlElement* layerElement = new XmlElement( "layer" );
+
+        {
+            XmlElement* filenameElement = new XmlElement( "filename" );
+            filenameElement->addTextElement( audioFileNames.at( i ).toLocal8Bit().data() );
+            layerElement->addChildElement( filenameElement );
+
+            XmlElement* minElement = new XmlElement( "min" );
+            minElement->addTextElement( "0" );
+            layerElement->addChildElement( minElement );
+
+            XmlElement* maxElement = new XmlElement( "max" );
+            maxElement->addTextElement( "1" );
+            layerElement->addChildElement( maxElement );
+
+            XmlElement* gainElement = new XmlElement( "gain" );
+            gainElement->addTextElement( "1" );
+            layerElement->addChildElement( gainElement );
+
+            XmlElement* pitchElement = new XmlElement( "pitch" );
+            pitchElement->addTextElement( "0" );
+            layerElement->addChildElement( pitchElement );
+        }
+
+        instrumentElement->addChildElement( layerElement );
+
+        instrumentListElement->addChildElement( instrumentElement );
+    }
+
+    docElement.addChildElement( instrumentListElement );
+
+    File file( QDir( dirPath ).absoluteFilePath( "drumkit.xml" ).toLocal8Bit().data() );
+
+    docElement.writeToFile( file, String::empty );
 }
 
 
@@ -1404,6 +1567,7 @@ void MainWindow::on_actionExport_As_triggered()
 
         const int sndFileFormat = mExportDialog->getSndFileFormat();
 
+        QStringList audioFileNames;
         bool isSuccessful = true;
 
         for ( int i = 0; i < mSampleRangeList.size(); i++ )
@@ -1436,11 +1600,32 @@ void MainWindow::on_actionExport_As_triggered()
                                                              sndFileFormat,
                                                              isOverwritingEnabled );
 
-            if ( path.isEmpty() )
+            if ( ! path.isEmpty() )
+            {
+                audioFileNames << QFileInfo( path ).fileName();
+            }
+            else
             {
                 isSuccessful = false;
                 break;
             }
+        }
+
+        if ( isSuccessful && isFormatH2Drumkit )
+        {
+            const QString kitName = QFileInfo( outputDirPath ).fileName();
+
+            createH2DrumkitXmlFile( outputDirPath, kitName, audioFileNames );
+
+#ifdef LINUX
+            const QString cdCommand  = "cd " + QFileInfo( outputDirPath ).absolutePath();
+            const QString tarCommand = "tar --create --gzip --file " + kitName + ".h2drumkit " + kitName;
+            const QString rmCommand  = "rm -rf " + kitName;
+
+            const QString command = cdCommand + " && " + tarCommand + " && " + rmCommand;
+
+            system( command.toLocal8Bit().data() );
+#endif
         }
 
         QApplication::restoreOverrideCursor();

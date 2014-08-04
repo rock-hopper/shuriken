@@ -110,8 +110,10 @@ private:
         RubberBandStretcher::Options options;
     };
 
-    void createXmlFile( const QString filePath, const QString projectName );
-    bool readXmlFile( const QString filePath, ProjectSettings& settings );
+    void createProjectXmlFile( const QString filePath, const QString projectName );
+    bool readProjectXmlFile( const QString filePath, ProjectSettings& settings );
+
+    void createH2DrumkitXmlFile( const QString dirPath, const QString kitName, QStringList audioFileNames );
 
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
