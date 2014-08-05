@@ -60,7 +60,7 @@ public:
         RubberBandStretcher::Options options;
     };
 
-    static void createProjectXmlFile( const QString filePath,
+    static bool createProjectXmlFile( const QString filePath,
                                       const QString projectName,
                                       const ProjectSettings settings,
                                       const QList<SharedSampleRange> sampleRangeList,
@@ -68,7 +68,7 @@ public:
     ;
     static bool readProjectXmlFile( const QString filePath, ProjectSettings& settings );
 
-    static void createH2DrumkitXmlFile( const QString dirPath, const QString kitName, QStringList audioFileNames );
+    static bool createH2DrumkitXmlFile( const QString dirPath, const QString kitName, QStringList audioFileNames );
 };
 
 #endif // TEXTFILEHANDLER_H

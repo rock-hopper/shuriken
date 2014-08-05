@@ -1265,25 +1265,37 @@ void MainWindow::on_actionExport_As_triggered()
 
     if ( result == QDialog::Accepted )
     {
-        QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
-
         QString outputDirPath = mExportDialog->getOutputDirPath();
         const QString fileName = mExportDialog->getFileName();
 
         const bool isOverwritingEnabled = mExportDialog->isOverwritingEnabled();
 
-        const bool isFormatSFZ = mExportDialog->isFormatSFZ();
         const bool isFormatH2Drumkit = mExportDialog->isFormatH2Drumkit();
+        const bool isFormatSFZ = mExportDialog->isFormatSFZ();
 
         const int sndFileFormat = mExportDialog->getSndFileFormat();
 
-        if ( isFormatH2Drumkit )
+        if ( isFormatH2Drumkit || isFormatSFZ )
         {
             const QDir outputDir( outputDirPath );
-            outputDir.mkdir( fileName );
 
-            outputDirPath = outputDir.absoluteFilePath( fileName );
+            if ( ! outputDir.exists( fileName ) )
+            {
+                outputDir.mkdir( fileName );
+                outputDirPath = outputDir.absoluteFilePath( fileName );
+            }
+            else
+            {
+                const QString format = isFormatH2Drumkit ? "Hydrogen Drumkit" : "SFZ";
+                const QString dirPath = outputDir.absoluteFilePath( fileName );
+
+                MessageBoxes::showWarningDialog( tr( "Couldn't export " ) + format + "!",
+                                                 tr( "Tried to create " ) + dirPath + tr( " but this directory already exists" ) );
+                return;
+            }
         }
+
+        QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
         QStringList audioFileNames;
         bool isSuccessful = true;
