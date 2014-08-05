@@ -60,9 +60,6 @@ protected:
     void showEvent( QShowEvent* event );
 
 private:
-    void updateEncodingComboBox( const QString format );
-
-private:
     Ui::ExportDialog* mUI;
 
     QString mLastOpenedExportDir;

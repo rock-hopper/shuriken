@@ -236,7 +236,7 @@ void ExportDialog::on_pushButton_Choose_clicked()
     if ( ! dirPath.isEmpty() )
     {
         mUI->lineEdit_OutputDir->setText( dirPath );
-        mLastOpenedExportDir = QFileInfo( dirPath ).absolutePath();
+        mLastOpenedExportDir = dirPath;
     }
 }
 
