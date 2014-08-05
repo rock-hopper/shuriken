@@ -851,13 +851,15 @@ void MainWindow::saveProject( const QString filePath )
 void MainWindow::saveProjectDialog()
 {
     // Save file dialog
-    QString filter = "Shuriken Project (*.shuriken)";
-    QString filePath = QFileDialog::getSaveFileName( this, tr("Save Project"), mLastOpenedProjDir, filter, &filter );
+    const QString filter = "Shuriken Project (*.shuriken)";
+    QString selectedFilter;
+    QString filePath = QFileDialog::getSaveFileName( this, tr("Save Project"), mLastOpenedProjDir, filter, &selectedFilter );
 
     // If user didn't click "Cancel"
     if ( ! filePath.isEmpty() )
     {
         QFileInfo projectFile( filePath );
+        bool isFileNameChanged = false;
 
         if ( projectFile.completeSuffix() != "shuriken" )
         {
@@ -866,13 +868,37 @@ void MainWindow::saveProjectDialog()
 
             filePath = dir.absoluteFilePath( newFileName );
             projectFile.setFile( filePath );
+
+            isFileNameChanged = true;
         }
 
         bool isOkToSave = true;
 
         if ( projectFile.exists() )
         {
-            isOkToSave = QFile::remove( filePath );
+            int buttonClicked = QMessageBox::Ok;
+
+            if ( isFileNameChanged )
+            {
+                buttonClicked = MessageBoxes::showQuestionDialog( tr( "Overwrite existing file?" ),
+                                                                  tr( "The file " ) + filePath + tr( " already exists.\n\nDo you want to overwrite this file?" ),
+                                                                  QMessageBox::Ok | QMessageBox::Cancel );
+            }
+
+            if ( buttonClicked == QMessageBox::Ok )
+            {
+                isOkToSave = QFile::remove( filePath );
+
+                if ( ! isOkToSave )
+                {
+                    MessageBoxes::showWarningDialog( tr( "Could not save project!" ),
+                                                     tr( "The file \"" ) + filePath + tr( "\" could not be overwritten" ) );
+                }
+            }
+            else // QMessageBox::Cancel
+            {
+                isOkToSave = false;
+            }
         }
 
         if ( isOkToSave )
@@ -886,14 +912,9 @@ void MainWindow::saveProjectDialog()
             }
             else
             {
-                MessageBoxes::showWarningDialog( tr("Could not save project"),
-                                                 tr("Permission to write file denied") );
+                MessageBoxes::showWarningDialog( tr( "Could not save project!" ),
+                                                 tr( "Permission to write file denied" ) );
             }
-        }
-        else
-        {
-            MessageBoxes::showWarningDialog( tr("Could not save project"),
-                                             tr("The file \"") + filePath + tr("\" could not be overwritten") );
         }
     }
 }
@@ -903,8 +924,8 @@ void MainWindow::saveProjectDialog()
 void MainWindow::openProjectDialog()
 {
     // Open file dialog
-    const QString filePath = QFileDialog::getOpenFileName( this, tr("Open Project"), mLastOpenedProjDir,
-                                                           tr("Shuriken Project (*.shuriken)") );
+    const QString filePath = QFileDialog::getOpenFileName( this, tr( "Open Project" ), mLastOpenedProjDir,
+                                                           tr( "Shuriken Project (*.shuriken)" ) );
 
     // If user didn't click "Cancel"
     if ( ! filePath.isEmpty() )

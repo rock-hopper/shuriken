@@ -21,7 +21,6 @@
 */
 
 #include "messageboxes.h"
-#include <QMessageBox>
 
 
 //==================================================================================================
@@ -48,6 +47,22 @@ int MessageBoxes::showUnsavedChangesDialog()
     msgBox.setInformativeText( "Do you want to save your changes?" );
     msgBox.setStandardButtons( QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel );
     msgBox.setDefaultButton( QMessageBox::Save );
+    const int buttonClicked = msgBox.exec();
+
+    return buttonClicked;
+}
+
+
+
+int MessageBoxes::showQuestionDialog( const QString text, const QString infoText, const QMessageBox::StandardButtons buttons )
+{
+    QMessageBox msgBox;
+    msgBox.setWindowTitle( "Shuriken Beat Slicer" );
+    msgBox.setIcon( QMessageBox::Question );
+    msgBox.setText( text );
+    msgBox.setInformativeText( infoText );
+    msgBox.setStandardButtons( buttons );
+    msgBox.setDefaultButton( QMessageBox::Ok );
     const int buttonClicked = msgBox.exec();
 
     return buttonClicked;

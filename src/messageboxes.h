@@ -24,13 +24,17 @@
 #define MESSAGEBOXES_H
 
 #include <QString>
+#include <QMessageBox>
 
 
 class MessageBoxes
 {
 public:
     static void showWarningDialog( const QString text, const QString infoText );
+
     static int showUnsavedChangesDialog();
+
+    static int showQuestionDialog( const QString text, const QString infoText, const QMessageBox::StandardButtons buttons );
 };
 
 #endif // MESSAGEBOXES_H
