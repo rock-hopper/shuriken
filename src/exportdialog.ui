@@ -113,9 +113,6 @@
        <property name="text">
         <string>overwrite existing files</string>
        </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
       </widget>
      </item>
      <item row="6" column="0">

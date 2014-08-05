@@ -1265,7 +1265,7 @@ void MainWindow::on_actionExport_As_triggered()
 
     if ( result == QDialog::Accepted )
     {
-        QString outputDirPath = mExportDialog->getOutputDirPath();
+        const QString outputDirPath = mExportDialog->getOutputDirPath();
         const QString fileName = mExportDialog->getFileName();
 
         const bool isOverwritingEnabled = mExportDialog->isOverwritingEnabled();
@@ -1275,30 +1275,68 @@ void MainWindow::on_actionExport_As_triggered()
 
         const int sndFileFormat = mExportDialog->getSndFileFormat();
 
-        if ( isFormatH2Drumkit || isFormatSFZ )
-        {
-            const QDir outputDir( outputDirPath );
+        const QDir outputDir( outputDirPath );
 
-            if ( ! outputDir.exists( fileName ) )
+
+        if ( isFormatH2Drumkit )
+        {
+            if ( outputDir.exists( fileName ) )
             {
-                outputDir.mkdir( fileName );
-                outputDirPath = outputDir.absoluteFilePath( fileName );
-            }
-            else
-            {
-                const QString format = isFormatH2Drumkit ? "Hydrogen Drumkit" : "SFZ";
                 const QString dirPath = outputDir.absoluteFilePath( fileName );
 
-                MessageBoxes::showWarningDialog( tr( "Couldn't export " ) + format + "!",
+                MessageBoxes::showWarningDialog( tr( "Couldn't export Hydrogen Drumkit!" ),
                                                  tr( "Tried to create " ) + dirPath + tr( " but this directory already exists" ) );
                 return;
             }
+
+            const QString h2FileName = fileName + ".h2drumkit";
+
+            if ( outputDir.exists( h2FileName ) )
+            {
+                if ( isOverwritingEnabled )
+                {
+                    QFile::remove( outputDir.absoluteFilePath( h2FileName ) );
+                }
+                else
+                {
+                    MessageBoxes::showWarningDialog( tr( "Couldn't export Hydrogen Drumkit!" ),
+                                                     h2FileName + tr( " already exists" ) );
+                    return;
+                }
+            }
         }
+        else if ( isFormatSFZ )
+        {
+            const QString sfzFileName = fileName + ".sfz";
+
+            if ( outputDir.exists( sfzFileName ) )
+            {
+                if ( isOverwritingEnabled )
+                {
+                    QFile::remove( outputDir.absoluteFilePath( sfzFileName ) );
+                }
+                else
+                {
+                    MessageBoxes::showWarningDialog( tr( "Couldn't export SFZ!" ),
+                                                     sfzFileName + tr( " already exists" ) );
+                    return;
+                }
+            }
+        }
+
 
         QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
+
+        QString samplesDirPath = outputDirPath;
         QStringList audioFileNames;
         bool isSuccessful = true;
+
+        if ( isFormatH2Drumkit || isFormatSFZ )
+        {
+            outputDir.mkdir( fileName );
+            samplesDirPath = outputDir.absoluteFilePath( fileName );
+        }
 
         for ( int i = 0; i < mSampleRangeList.size(); i++ )
         {
@@ -1323,7 +1361,7 @@ void MainWindow::on_actionExport_As_triggered()
                 tempBuffer->copyFrom( chanNum, 0, *mCurrentSampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
             }
 
-            const QString path = mFileHandler.saveAudioFile( outputDirPath,
+            const QString path = mFileHandler.saveAudioFile( samplesDirPath,
                                                              audioFileName,
                                                              tempBuffer,
                                                              mCurrentSampleHeader,
@@ -1343,32 +1381,28 @@ void MainWindow::on_actionExport_As_triggered()
 
         if ( isSuccessful && isFormatH2Drumkit )
         {
-            TextFileHandler::createH2DrumkitXmlFile( outputDirPath, fileName, audioFileNames );
-
-            const QString parentDirPath = QFileInfo( outputDirPath ).absolutePath();
-
+            TextFileHandler::createH2DrumkitXmlFile( samplesDirPath, fileName, audioFileNames );
 #ifdef LINUX
-            const QString cdCommand  = "cd '" + parentDirPath + "'";
+            const QString cdCommand  = "cd '" + outputDirPath + "'";
             const QString tarCommand = "tar --create --gzip --file '" + fileName + ".h2drumkit' '" + fileName + "'";
 
             const QString command = cdCommand + " && " + tarCommand;
 
             system( command.toLocal8Bit().data() );
 #endif
-
-            File( outputDirPath.toLocal8Bit().data() ).deleteRecursively();
+            File( samplesDirPath.toLocal8Bit().data() ).deleteRecursively();
         }
         else if ( isSuccessful && isFormatSFZ )
         {
-            QDir parentDir( outputDirPath );
-            parentDir.cdUp();
-            const QString sfzFilePath = parentDir.absoluteFilePath( fileName + ".sfz" );
-            const QString samplesDirName = QFileInfo( outputDirPath ).fileName();
+            const QString sfzFilePath = outputDir.absoluteFilePath( fileName + ".sfz" );
+            const QString samplesDirName = QFileInfo( samplesDirPath ).fileName();
 
             TextFileHandler::createSFZFile( sfzFilePath, samplesDirName, audioFileNames );
         }
 
+
         QApplication::restoreOverrideCursor();
+
 
         if ( ! isSuccessful )
         {
