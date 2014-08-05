@@ -1358,6 +1358,15 @@ void MainWindow::on_actionExport_As_triggered()
 
             File( outputDirPath.toLocal8Bit().data() ).deleteRecursively();
         }
+        else if ( isSuccessful && isFormatSFZ )
+        {
+            QDir parentDir( outputDirPath );
+            parentDir.cdUp();
+            const QString sfzFilePath = parentDir.absoluteFilePath( fileName + ".sfz" );
+            const QString samplesDirName = QFileInfo( outputDirPath ).fileName();
+
+            TextFileHandler::createSFZFile( sfzFilePath, samplesDirName, audioFileNames );
+        }
 
         QApplication::restoreOverrideCursor();
 

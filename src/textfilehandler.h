@@ -68,7 +68,9 @@ public:
     ;
     static bool readProjectXmlFile( const QString filePath, ProjectSettings& settings );
 
-    static bool createH2DrumkitXmlFile( const QString dirPath, const QString kitName, QStringList audioFileNames );
+    static bool createH2DrumkitXmlFile( const QString dirPath, const QString kitName, const QStringList audioFileNames );
+
+    static bool createSFZFile( const QString sfzFilePath, const QString samplesDirName, const QStringList audioFileNames );
 };
 
 #endif // TEXTFILEHANDLER_H
