@@ -831,14 +831,7 @@ void MainWindow::saveProject( const QString filePath )
         QFile::remove( filePath );
         QFile::copy( zipFilePath, filePath );
         QFile::remove( zipFilePath );
-
-        // Clean up temp dir
-        QStringList fileList = projTempDir.entryList( QDir::Files | QDir::NoDotAndDotDot );
-        foreach ( QString fileName, fileList )
-        {
-            projTempDir.remove( fileName );
-        }
-        tempDir.rmdir( projectName );
+        File( projTempDir.absolutePath().toLocal8Bit().data() ).deleteRecursively();
 
         mUndoStack.setClean();
 
