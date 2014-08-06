@@ -492,11 +492,33 @@ void MainWindow::setupUI()
 
     if ( mHelpForm != NULL )
     {
-        QRect geometryRect = QStyle::alignedRect( Qt::LeftToRight,
-                                                  Qt::AlignCenter,
-                                                  mHelpForm->size(),
-                                                  QApplication::desktop()->availableGeometry() );
-        mHelpForm->setGeometry( geometryRect );
+        // Make sure help form isn't larger than desktop
+        const int desktopWidth = QApplication::desktop()->availableGeometry().width();
+        const int desktopHeight = QApplication::desktop()->availableGeometry().height();
+
+        const int frameWidth = mHelpForm->frameSize().width();
+        const int frameHeight = mHelpForm->frameSize().height();
+
+        int formWidth = mHelpForm->size().width();
+        int formHeight = mHelpForm->size().height();
+
+        if ( frameWidth > desktopWidth )
+        {
+            formWidth = desktopWidth - ( frameWidth - formWidth );
+        }
+
+        if ( frameHeight > desktopHeight )
+        {
+            formHeight = desktopHeight - ( frameHeight - formHeight );
+        }
+
+        mHelpForm->resize( formWidth, formHeight );
+
+        // Centre form in desktop
+        mHelpForm->setGeometry
+        (
+            QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, mHelpForm->size(), QApplication::desktop()->availableGeometry() )
+        );
 
         mUI->actionHelp->setEnabled( true );
     }
