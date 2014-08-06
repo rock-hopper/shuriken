@@ -1615,31 +1615,39 @@ void MainWindow::on_actionApply_Gain_Ramp_triggered()
     {
         ApplyGainRampDialog dialog;
 
-        if ( dialog.exec() == QDialog::Accepted )
+        const int result = dialog.exec();
+
+        if ( result == QDialog::Accepted )
         {
             const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
 
+            QUndoCommand* parentCommand = new QUndoCommand();
+
+            const QString stackIndex = QString::number( mUndoStack.index() );
+            int i = 0;
+
             foreach ( int orderPos, orderPositions )
             {
-                QString fileBaseName;
-                fileBaseName.setNum( mUndoStack.index() );
+                QString fileBaseName = stackIndex + "_" + QString::number( i++ );
 
-                QUndoCommand* command = new ApplyGainRampCommand( dialog.getStartGainValue(),
-                                                                  dialog.getEndGainValue(),
-                                                                  orderPos,
-                                                                  mUI->waveGraphicsView,
-                                                                  mCurrentSampleHeader,
-                                                                  mFileHandler,
-                                                                  tempDirPath,
-                                                                  fileBaseName );
-                mUndoStack.push( command );
+                new ApplyGainRampCommand( dialog.getStartGainValue(),
+                                          dialog.getEndGainValue(),
+                                          orderPos,
+                                          mUI->waveGraphicsView,
+                                          mCurrentSampleHeader,
+                                          mFileHandler,
+                                          tempDirPath,
+                                          fileBaseName,
+                                          parentCommand );
             }
+
+            mUndoStack.push( parentCommand );
         }
     }
     else
     {
-        MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
-                                         tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+        MessageBoxes::showWarningDialog( tr( "Temp dir invalid!" ),
+                                         tr( "This operation needs to save temporary files, please change \"Temp Dir\" in options" ) );
     }
 }
 
@@ -1653,24 +1661,30 @@ void MainWindow::on_actionNormalise_triggered()
     {
         const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
 
+        QUndoCommand* parentCommand = new QUndoCommand();
+
+        const QString stackIndex = QString::number( mUndoStack.index() );
+        int i = 0;
+
         foreach ( int orderPos, orderPositions )
         {
-            QString fileBaseName;
-            fileBaseName.setNum( mUndoStack.index() );
+            QString fileBaseName = stackIndex + "_" + QString::number( i++ );
 
-            QUndoCommand* command = new NormaliseCommand( orderPos,
-                                                          mUI->waveGraphicsView,
-                                                          mCurrentSampleHeader,
-                                                          mFileHandler,
-                                                          tempDirPath,
-                                                          fileBaseName );
-            mUndoStack.push( command );
+            new NormaliseCommand( orderPos,
+                                  mUI->waveGraphicsView,
+                                  mCurrentSampleHeader,
+                                  mFileHandler,
+                                  tempDirPath,
+                                  fileBaseName,
+                                  parentCommand );
         }
+
+        mUndoStack.push( parentCommand );
     }
     else
     {
-        MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
-                                         tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+        MessageBoxes::showWarningDialog( tr( "Temp dir invalid!" ),
+                                         tr( "This operation needs to save temporary files, please change \"Temp Dir\" in options" ) );
     }
 }
 
@@ -1678,7 +1692,7 @@ void MainWindow::on_actionNormalise_triggered()
 
 void MainWindow::on_actionEnvelope_triggered()
 {
-
+    // TODO
 }
 
 
@@ -1697,16 +1711,19 @@ void MainWindow::on_actionSplit_triggered()
 {
     const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
 
+    QUndoCommand* parentCommand = new QUndoCommand();
+
     for ( int i = orderPositions.size() - 1; i >= 0; i-- )
     {
         const int orderPos = orderPositions.at( i );
 
         if ( mUI->waveGraphicsView->getWaveformAt( orderPos )->isJoined() )
         {
-            QUndoCommand* command = new SplitCommand( orderPos, mUI->waveGraphicsView, this );
-            mUndoStack.push( command );
+            new SplitCommand( orderPos, mUI->waveGraphicsView, this, parentCommand );
         }
     }
+
+    mUndoStack.push( parentCommand );
 }
 
 
@@ -1715,11 +1732,14 @@ void MainWindow::on_actionReverse_triggered()
 {
     const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
 
+    QUndoCommand* parentCommand = new QUndoCommand();
+
     foreach ( int orderPos, orderPositions )
     {
-        QUndoCommand* command = new ReverseCommand( orderPos, mUI->waveGraphicsView );
-        mUndoStack.push( command );
+        new ReverseCommand( orderPos, mUI->waveGraphicsView, parentCommand );
     }
+
+    mUndoStack.push( parentCommand );
 }
 
 
