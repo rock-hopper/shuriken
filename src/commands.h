@@ -53,23 +53,6 @@ private:
 
 
 
-class AddSlicePointItemsCommand : public QUndoCommand
-{
-public:
-    AddSlicePointItemsCommand( QPushButton* const findOnsetsButton,
-                               QPushButton* const findBeatsButton,
-                               QUndoCommand* parent = NULL );
-
-    void undo();
-    void redo();
-
-private:
-    QPushButton* const mFindOnsetsButton;
-    QPushButton* const mFindBeatsButton;
-};
-
-
-
 class MoveSlicePointItemCommand : public QUndoCommand
 {
 public:
@@ -117,6 +100,8 @@ public:
     SliceCommand( MainWindow* const mainWindow,
                   WaveGraphicsView* const graphicsView,
                   QPushButton* const sliceButton,
+                  QPushButton* const findOnsetsButton,
+                  QPushButton* const findBeatsButton,
                   QAction* const addSlicePointAction,
                   QAction* const moveItemsAction,
                   QAction* const selectItemsAction,
@@ -130,6 +115,8 @@ private:
     MainWindow* const mMainWindow;
     WaveGraphicsView* const mGraphicsView;
     QPushButton* const mSliceButton;
+    QPushButton* const mFindOnsetsButton;
+    QPushButton* const mFindBeatsButton;
     QAction* const mAddSlicePointAction;
     QAction* const mMoveItemsAction;
     QAction* const mSelectItemsAction;

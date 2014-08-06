@@ -364,7 +364,7 @@ void WaveGraphicsView::showSlicePoints()
 
 
 
-QList<int> WaveGraphicsView::getSlicePointFrameNumList()
+QList<int> WaveGraphicsView::getSlicePointFrameNumList() const
 {
     QList<int> slicePointFrameNumList;
 

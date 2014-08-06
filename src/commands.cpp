@@ -72,46 +72,6 @@ void AddSlicePointItemCommand::redo()
 
 //==================================================================================================
 
-AddSlicePointItemsCommand::AddSlicePointItemsCommand( QPushButton* const findOnsetsButton,
-                                                      QPushButton* const findBeatsButton,
-                                                      QUndoCommand* parent )
-    : QUndoCommand( parent ), mFindOnsetsButton( findOnsetsButton ), mFindBeatsButton( findBeatsButton )
-{
-    setText( "Add Slice Points" );
-}
-
-
-
-void AddSlicePointItemsCommand::undo()
-{
-    mFindOnsetsButton->setEnabled( true );
-    mFindBeatsButton->setEnabled( true );
-
-    for ( int i = 0; i < childCount(); i++ )
-    {
-        QUndoCommand* command = const_cast<QUndoCommand*>( child( i ) );
-        command->undo();
-    }
-}
-
-
-
-void AddSlicePointItemsCommand::redo()
-{
-    mFindOnsetsButton->setEnabled( false );
-    mFindBeatsButton->setEnabled( false );
-
-    for ( int i = 0; i < childCount(); i++ )
-    {
-        QUndoCommand* command = const_cast<QUndoCommand*>( child( i ) );
-        command->redo();
-    }
-}
-
-
-
-//==================================================================================================
-
 MoveSlicePointItemCommand::MoveSlicePointItemCommand( const SharedSlicePointItem slicePoint,
                                                       const int oldFrameNum,
                                                       const int newFrameNum,
@@ -188,6 +148,8 @@ void DeleteSlicePointItemCommand::redo()
 SliceCommand::SliceCommand( MainWindow* const mainWindow,
                             WaveGraphicsView* const graphicsView,
                             QPushButton* const sliceButton,
+                            QPushButton* const findOnsetsButton,
+                            QPushButton* const findBeatsButton,
                             QAction* const addSlicePointAction,
                             QAction* const moveItemsAction,
                             QAction* const selectItemsAction,
@@ -197,6 +159,8 @@ SliceCommand::SliceCommand( MainWindow* const mainWindow,
     mMainWindow( mainWindow ),
     mGraphicsView( graphicsView ),
     mSliceButton( sliceButton ),
+    mFindOnsetsButton( findOnsetsButton ),
+    mFindBeatsButton( findBeatsButton ),
     mAddSlicePointAction( addSlicePointAction ),
     mMoveItemsAction( moveItemsAction ),
     mSelectItemsAction( selectItemsAction ),
@@ -228,6 +192,8 @@ void SliceCommand::undo()
     mGraphicsView->showSlicePoints();
 
     mSliceButton->setEnabled( true );
+    mFindOnsetsButton->setEnabled( true );
+    mFindBeatsButton->setEnabled( true );
     mAddSlicePointAction->setEnabled( true );
     mSelectItemsAction->setEnabled( false );
     mAuditionItemsAction->trigger();
@@ -260,6 +226,8 @@ void SliceCommand::redo()
     }
 
     mSliceButton->setEnabled( false );
+    mFindOnsetsButton->setEnabled( false );
+    mFindBeatsButton->setEnabled( false );
     mAddSlicePointAction->setEnabled( false );
     mSelectItemsAction->setEnabled( true );
 

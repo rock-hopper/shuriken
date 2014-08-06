@@ -148,13 +148,13 @@ void MainWindow::openProject( const QString filePath )
 
                 enableUI();
 
-                QUndoCommand* command = new AddSlicePointItemsCommand( mUI->pushButton_FindOnsets, mUI->pushButton_FindBeats );
+                QUndoCommand* parentCommand = new QUndoCommand();
 
                 foreach ( int frameNum, settings.slicePointFrameNumList )
                 {
-                    new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, command );
+                    new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, parentCommand );
                 }
-                mUndoStack.push( command );
+                mUndoStack.push( parentCommand );
             }
             else // Multiple sample ranges are defined - waveform has been sliced
             {
@@ -1789,6 +1789,8 @@ void MainWindow::on_pushButton_Slice_clicked()
     QUndoCommand* command = new SliceCommand( this,
                                               mUI->waveGraphicsView,
                                               mUI->pushButton_Slice,
+                                              mUI->pushButton_FindOnsets,
+                                              mUI->pushButton_FindBeats,
                                               mUI->actionAdd_Slice_Point,
                                               mUI->actionMove,
                                               mUI->actionSelect,
@@ -1812,15 +1814,25 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
     AudioAnalyser::DetectionSettings settings;
     getDetectionSettings( settings );
 
+    // Get list of frame numbers for slice points to be added
     const QList<int> slicePointFrameNumList = AudioAnalyser::findOnsetFrameNums( mCurrentSampleBuffer, settings );
 
-    QUndoCommand* command = new AddSlicePointItemsCommand( mUI->pushButton_FindOnsets, mUI->pushButton_FindBeats );
+    // Get list of slice point items to be removed
+    const QList<SharedSlicePointItem> slicePointItemList = mUI->waveGraphicsView->getSlicePointList();
+
+    QUndoCommand* parentCommand = new QUndoCommand();
+
+    foreach ( SharedSlicePointItem item, slicePointItemList )
+    {
+        new DeleteSlicePointItemCommand( item, mUI->waveGraphicsView, mUI->pushButton_Slice, parentCommand );
+    }
 
     foreach ( int frameNum, slicePointFrameNumList )
     {
-        new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, command );
+        new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, parentCommand );
     }
-    mUndoStack.push( command );
+
+    mUndoStack.push( parentCommand );
 
     QApplication::restoreOverrideCursor();
 }
@@ -1834,15 +1846,25 @@ void MainWindow::on_pushButton_FindBeats_clicked()
     AudioAnalyser::DetectionSettings settings;
     getDetectionSettings( settings );
 
+    // Get list of frame numbers for slice points to be added
     const QList<int> slicePointFrameNumList = AudioAnalyser::findBeatFrameNums( mCurrentSampleBuffer, settings );
 
-    QUndoCommand* command = new AddSlicePointItemsCommand( mUI->pushButton_FindOnsets, mUI->pushButton_FindBeats );
+    // Get list of slice point items to be removed
+    const QList<SharedSlicePointItem> slicePointItemList = mUI->waveGraphicsView->getSlicePointList();
+
+    QUndoCommand* parentCommand = new QUndoCommand();
+
+    foreach ( SharedSlicePointItem item, slicePointItemList )
+    {
+        new DeleteSlicePointItemCommand( item, mUI->waveGraphicsView, mUI->pushButton_Slice, parentCommand );
+    }
 
     foreach ( int frameNum, slicePointFrameNumList )
     {
-        new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, command );
+        new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, parentCommand );
     }
-    mUndoStack.push( command );
+
+    mUndoStack.push( parentCommand );
 
     QApplication::restoreOverrideCursor();
 }

@@ -70,7 +70,7 @@ public:
     SharedSlicePointItem getSelectedSlicePoint();
     void hideSlicePoints();
     void showSlicePoints();
-    QList<int> getSlicePointFrameNumList();
+    QList<int> getSlicePointFrameNumList() const;
     QList<SharedSlicePointItem> getSlicePointList() const   { return mSlicePointItemList; }
 
     void selectNone();
