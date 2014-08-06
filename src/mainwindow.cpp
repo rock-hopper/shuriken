@@ -196,12 +196,7 @@ void MainWindow::openProject( const QString filePath )
             }
 
             // Clean up temp dir
-            QStringList fileList = projTempDir.entryList( QDir::Files | QDir::NoDotAndDotDot );
-            foreach ( QString fileName, fileList )
-            {
-                projTempDir.remove( fileName );
-            }
-            tempDir.rmdir( projectName );
+            File( projTempDir.absolutePath().toLocal8Bit().data() ).deleteRecursively();
 
             mCurrentProjectFilePath = filePath;
 
