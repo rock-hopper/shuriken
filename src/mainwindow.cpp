@@ -1292,6 +1292,14 @@ void MainWindow::on_actionExport_As_triggered()
         const QDir outputDir( outputDirPath );
 
 
+        if ( ! QFileInfo( outputDirPath ).isWritable() )
+        {
+            MessageBoxes::showWarningDialog( tr( "Could not export project!" ),
+                                             tr( "Permission to write file(s) denied" ) );
+
+            return;
+        }
+
         if ( isFormatH2Drumkit )
         {
             if ( outputDir.exists( fileName ) )
@@ -1331,7 +1339,7 @@ void MainWindow::on_actionExport_As_triggered()
                 }
                 else
                 {
-                    MessageBoxes::showWarningDialog( tr( "Couldn't export SFZ!" ),
+                    MessageBoxes::showWarningDialog( tr( "Could not export SFZ!" ),
                                                      sfzFileName + tr( " already exists" ) );
                     return;
                 }
