@@ -305,27 +305,36 @@ void MainWindow::initialiseAudio()
 
     if ( error.isNotEmpty() )
     {
-        MessageBoxes::showWarningDialog( tr("Error initialising audio device manager!"), error.toRawUTF8() );
+        MessageBoxes::showWarningDialog( tr( "Error initialising audio device manager!" ), error.toRawUTF8() );
         mUI->actionOptions->setDisabled( true );
         mIsAudioInitialised = false;
     }
     else
     {
-        mOptionsDialog = new OptionsDialog( mDeviceManager, this );
+        mOptionsDialog = new OptionsDialog( mDeviceManager );
 
-        QObject::connect( mOptionsDialog.get(), SIGNAL( realtimeModeToggled(bool) ),
-                          this, SLOT( enableRealtimeControls(bool) ) );
+        if ( mExportDialog != NULL )
+        {
+            // Centre form in desktop
+            mOptionsDialog->setGeometry
+            (
+                QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, mOptionsDialog->size(), QApplication::desktop()->availableGeometry() )
+            );
 
-        QObject::connect( mOptionsDialog.get(), SIGNAL( jackSyncToggled(bool) ),
-                          mUI->doubleSpinBox_NewBPM, SLOT( setHidden(bool) ) );
+            QObject::connect( mOptionsDialog, SIGNAL( realtimeModeToggled(bool) ),
+                              this, SLOT( enableRealtimeControls(bool) ) );
 
-        QObject::connect( mOptionsDialog.get(), SIGNAL( jackSyncToggled(bool) ),
-                          mUI->label_JackSync, SLOT( setVisible(bool) ) );
+            QObject::connect( mOptionsDialog, SIGNAL( jackSyncToggled(bool) ),
+                              mUI->doubleSpinBox_NewBPM, SLOT( setHidden(bool) ) );
 
-        QObject::connect( mOptionsDialog.get(), SIGNAL( timeStretchOptionsChanged() ),
-                          this, SLOT( enableSaveAction() ) );
+            QObject::connect( mOptionsDialog, SIGNAL( jackSyncToggled(bool) ),
+                              mUI->label_JackSync, SLOT( setVisible(bool) ) );
 
-        mIsAudioInitialised = true;
+            QObject::connect( mOptionsDialog, SIGNAL( timeStretchOptionsChanged() ),
+                              this, SLOT( enableSaveAction() ) );
+
+            mIsAudioInitialised = true;
+        }
     }
 
     // Check there were no errors while the audio file handler was being initialised
@@ -526,6 +535,15 @@ void MainWindow::setupUI()
 
     // Create export dialog
     mExportDialog = new ExportDialog();
+
+    if ( mExportDialog != NULL )
+    {
+        // Centre form in desktop
+        mExportDialog->setGeometry
+        (
+            QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, mExportDialog->size(), QApplication::desktop()->availableGeometry() )
+        );
+    }
 }
 
 
