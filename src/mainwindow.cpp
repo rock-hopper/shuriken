@@ -1570,30 +1570,38 @@ void MainWindow::on_actionApply_Gain_triggered()
     {
         ApplyGainDialog dialog;
 
-        if ( dialog.exec() == QDialog::Accepted )
+        const int result = dialog.exec();
+
+        if ( result == QDialog::Accepted )
         {
             const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
 
+            QUndoCommand* parentCommand = new QUndoCommand();
+
+            const QString stackIndex = QString::number( mUndoStack.index() );
+            int i = 0;
+
             foreach ( int orderPos, orderPositions )
             {
-                QString fileBaseName;
-                fileBaseName.setNum( mUndoStack.index() );
+                QString fileBaseName = stackIndex + "_" + QString::number( i++ );
 
-                QUndoCommand* command = new ApplyGainCommand( dialog.getGainValue(),
-                                                              orderPos,
-                                                              mUI->waveGraphicsView,
-                                                              mCurrentSampleHeader,
-                                                              mFileHandler,
-                                                              tempDirPath,
-                                                              fileBaseName );
-                mUndoStack.push( command );
+                new ApplyGainCommand( dialog.getGainValue(),
+                                      orderPos,
+                                      mUI->waveGraphicsView,
+                                      mCurrentSampleHeader,
+                                      mFileHandler,
+                                      tempDirPath,
+                                      fileBaseName,
+                                      parentCommand );
             }
+
+            mUndoStack.push( parentCommand );
         }
     }
     else
     {
-        MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
-                                         tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+        MessageBoxes::showWarningDialog( tr( "Temp dir invalid!" ),
+                                         tr( "This operation needs to save temporary files, please change \"Temp Dir\" in options" ) );
     }
 }
 
