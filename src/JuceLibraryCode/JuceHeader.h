@@ -26,11 +26,4 @@
  using namespace juce;
 #endif
 
-namespace ProjectInfo
-{
-    const char* const  projectName    = "Shuriken";
-    const char* const  versionString  = "0.1.0";
-    const int          versionNumber  = 0x00100;
-}
-
 #endif   // __APPHEADERFILE_SLVVV6J__
