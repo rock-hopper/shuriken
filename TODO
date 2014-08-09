@@ -2,6 +2,10 @@ TODO
 
 Add Features
 ------------
+Export option for Akai MPC .pgm files
+
+Time-folding feature
+
 Qt5 compatibility
 
 JACK Session, NSM
@@ -18,8 +22,16 @@ Audio outputs dialog
 Envelope ADSR dialog
 
 
-GUI Improvements
+UI Improvements
 ----------------
-Fix gaps in waveform when zoomed in
+Fix gaps in waveform caused by dragging frame markers when zoomed in to very high detail level
+Fix gaps in waveform when zoomed in to low detail level
 More efficient waveform drawing routine (possibly OpenGL solution)
 
+Scrolling playhead
+
+Some kind of visual indicator for the threshold level
+
+Control zoom with mouse wheel
+
+Start/stop playback with space bar
