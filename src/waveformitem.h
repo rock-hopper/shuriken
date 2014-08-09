@@ -32,6 +32,7 @@
 #include <QList>
 #include "JuceHeader.h"
 #include "samplebuffer.h"
+#include "globals.h"
 
 
 class WaveformItem;
@@ -43,7 +44,7 @@ class WaveformItem : public QObject, public QGraphicsRectItem
     Q_OBJECT
 
 public:
-    enum { Type = UserType + 1 };
+    enum { Type = UserType + UserTypes::waveformItem };
 
     WaveformItem( const SharedSampleBuffer sampleBuffer,
                   const SharedSampleRange sampleRange,

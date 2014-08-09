@@ -166,7 +166,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/aboutdialog.cpp \
     src/exportdialog.cpp \
     src/messageboxes.cpp \
-    src/textfilehandler.cpp
+    src/textfilehandler.cpp \
+    src/framemarkeritem.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -375,7 +376,8 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/aboutdialog.h \
     src/exportdialog.h \
     src/messageboxes.h \
-    src/textfilehandler.h
+    src/textfilehandler.h \
+    src/framemarkeritem.h
 FORMS += src/mainwindow.ui \
     src/optionsdialog.ui \
     src/helpform.ui \

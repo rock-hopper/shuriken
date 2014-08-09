@@ -23,39 +23,30 @@
 #ifndef SLICEPOINTITEM_H
 #define SLICEPOINTITEM_H
 
-#include <QObject>
-#include <QGraphicsPolygonItem>
-#include <QPainter>
-#include <QStyleOptionGraphicsItem>
 #include "JuceHeader.h"
+#include "framemarkeritem.h"
 
 
 class SlicePointItem;
 typedef QSharedPointer<SlicePointItem> SharedSlicePointItem;
 
 
-class SlicePointItem : public QObject, public QGraphicsPolygonItem
+class SlicePointItem : public FrameMarkerItem
 {
     Q_OBJECT
 
 public:
-    enum { Type = UserType + 2 };
+    enum { Type = UserType + UserTypes::slicePointItem };
 
     SlicePointItem( const qreal height, QGraphicsItem* parent = NULL );
 
-    void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
-    void setHeight( const qreal height );
-    int getFrameNum() const                     { return mFrameNum; }
-    void setFrameNum( const int frameNum )      { mFrameNum = frameNum; }
-    int type() const                            { return Type; }
+    int type() const    { return Type; }
 
 protected:
-    QVariant itemChange( GraphicsItemChange change, const QVariant &value );
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
     void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
 private:
-    int mFrameNum;
     qreal mScenePosBeforeMove;
 
 signals:

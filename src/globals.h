@@ -33,6 +33,13 @@
 #define AUDIO_CONFIG_FILE_PATH      "~/.shuriken/audioconfig.xml"
 #define PATHS_CONFIG_FILE_PATH      "~/.shuriken/pathsconfig.xml"
 
+namespace UserTypes
+{
+    static const int waveformItem = 1;
+    static const int frameMarkerItem = 2;
+    static const int slicePointItem = 3;
+}
+
 extern volatile double gCurrentJackBPM;
 
 
