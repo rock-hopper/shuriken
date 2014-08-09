@@ -117,9 +117,9 @@ void SamplerAudioSource::playRange( const SharedSampleRange sampleRange )
 
 void SamplerAudioSource::playAll()
 {
-    mIsPlaySeqEnabled = true;
     mNoteCounter = 0;
     mFrameCounter = 0;
+    mIsPlaySeqEnabled = true;
 }
 
 
@@ -128,8 +128,8 @@ void SamplerAudioSource::stop()
 {
     const int midiChannel = 1;
     const bool allowTailOff = false;
-    mIsPlaySeqEnabled = false;
 
+    mIsPlaySeqEnabled = false;
     mSampler.allNotesOff( midiChannel, allowTailOff );
 }
 

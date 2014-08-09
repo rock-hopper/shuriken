@@ -41,14 +41,16 @@ public:
 
     void playRange( const SharedSampleRange sampleRange );
     void playAll();
-
     void stop();
 
+    MidiMessageCollector* getMidiMessageCollector()             { return &mMidiCollector; }
+
+    // For JUCE use only!
     void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;
     void releaseResources() override;
     void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill ) override;
 
-    MidiMessageCollector* getMidiMessageCollector()             { return &mMidiCollector; }
+
 
 private:
     bool addNewSample( const SharedSampleBuffer sampleBuffer,
