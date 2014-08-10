@@ -47,7 +47,7 @@ AddSlicePointItemCommand::AddSlicePointItemCommand( const int frameNum,
 
 void AddSlicePointItemCommand::undo()
 {
-    mGraphicsView->deleteSlicePoint( mSlicePointItem );
+    mGraphicsView->removeSlicePoint( mSlicePointItem );
 
     if ( mGraphicsView->getSlicePointFrameNumList().isEmpty() )
     {
@@ -133,7 +133,7 @@ void DeleteSlicePointItemCommand::undo()
 
 void DeleteSlicePointItemCommand::redo()
 {
-    mGraphicsView->deleteSlicePoint( mSlicePointItem );
+    mGraphicsView->removeSlicePoint( mSlicePointItem );
 
     if ( mGraphicsView->getSlicePointFrameNumList().isEmpty() )
     {

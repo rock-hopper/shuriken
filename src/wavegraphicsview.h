@@ -37,8 +37,6 @@ class WaveGraphicsView : public QGraphicsView
     Q_OBJECT
 
 public:
-    enum InteractionMode { MOVE_ITEMS, SELECT_ITEMS, AUDITION_ITEMS };
-
     WaveGraphicsView( QWidget* parent = NULL );
 
     // Creates a new waveform item and returns a shared pointer to it
@@ -49,7 +47,7 @@ public:
     QList<SharedWaveformItem> createWaveforms( const SharedSampleBuffer sampleBuffer,
                                                const QList<SharedSampleRange> sampleRangeList );
 
-    // Create a new waveform item by joining several waveform items together. The new item's start frame,
+    // Creates a new waveform item by joining several waveform items together. The new item's start frame,
     // order position and scene position will be the same as the first item in the list. The new item's
     // width and no. of frames will be the sum of the widths and no. of frames of all items in the list
     SharedWaveformItem joinWaveforms( const QList<int> orderPositions );
@@ -63,14 +61,27 @@ public:
 
     SharedWaveformItem getWaveformAt( const int orderPos ) const;
 
+    // Create a new slice point item and add it to the scene
     SharedSlicePointItem createSlicePoint( const int frameNum );
+
+    // Add a slice point item to the scene
     void addSlicePoint( const SharedSlicePointItem slicePoint );
-    void deleteSlicePoint( const SharedSlicePointItem slicePointItem );
+
+    // Remove a slice point item from the scene
+    void removeSlicePoint( const SharedSlicePointItem slicePointItem );
+
     void moveSlicePoint( const SharedSlicePointItem slicePointItem, const int newFrameNum );
-    SharedSlicePointItem getSelectedSlicePoint();
+
     void hideSlicePoints();
     void showSlicePoints();
+
+    // Returns the currently selected slice point item
+    SharedSlicePointItem getSelectedSlicePoint();
+
+    // Returns a sorted list containing the frame no. of every slice point item
     QList<int> getSlicePointFrameNumList() const;
+
+    // Returns a list of all slice point items
     QList<SharedSlicePointItem> getSlicePointList() const   { return mSlicePointItemList; }
 
     void selectNone();
@@ -88,6 +99,7 @@ public:
 
     void forceRedraw();
 
+    enum InteractionMode { MOVE_ITEMS, SELECT_ITEMS, AUDITION_ITEMS };
     void setInteractionMode( const InteractionMode mode );
 
 protected:

@@ -296,7 +296,7 @@ void WaveGraphicsView::addSlicePoint( const SharedSlicePointItem slicePoint )
 
 
 
-void WaveGraphicsView::deleteSlicePoint( const SharedSlicePointItem slicePointItem )
+void WaveGraphicsView::removeSlicePoint( const SharedSlicePointItem slicePointItem )
 {
     scene()->removeItem( slicePointItem.data() );
     scene()->update();
@@ -312,6 +312,26 @@ void WaveGraphicsView::moveSlicePoint( const SharedSlicePointItem slicePointItem
 
     slicePointItem->setFrameNum( newFrameNum );
     slicePointItem->setPos( newScenePosX, 0.0 );
+}
+
+
+
+void WaveGraphicsView::hideSlicePoints()
+{
+    foreach ( SharedSlicePointItem item, mSlicePointItemList )
+    {
+        item->setVisible( false );
+    }
+}
+
+
+
+void WaveGraphicsView::showSlicePoints()
+{
+    foreach ( SharedSlicePointItem item, mSlicePointItemList )
+    {
+        item->setVisible( true );
+    }
 }
 
 
@@ -340,26 +360,6 @@ SharedSlicePointItem WaveGraphicsView::getSelectedSlicePoint()
     }
 
     return selectedSlicePointItem;
-}
-
-
-
-void WaveGraphicsView::hideSlicePoints()
-{
-    foreach ( SharedSlicePointItem item, mSlicePointItemList )
-    {
-        item->setVisible( false );
-    }
-}
-
-
-
-void WaveGraphicsView::showSlicePoints()
-{
-    foreach ( SharedSlicePointItem item, mSlicePointItemList )
-    {
-        item->setVisible( true );
-    }
 }
 
 
