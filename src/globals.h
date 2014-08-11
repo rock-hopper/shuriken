@@ -33,12 +33,17 @@
 #define AUDIO_CONFIG_FILE_PATH      "~/.shuriken/audioconfig.xml"
 #define PATHS_CONFIG_FILE_PATH      "~/.shuriken/pathsconfig.xml"
 
+
+#include <QGraphicsItem>
+
 namespace UserTypes
 {
-    static const int waveformItem = 1;
-    static const int frameMarkerItem = 2;
-    static const int slicePointItem = 3;
+    static const int waveformItem       = QGraphicsItem::UserType + 1;
+    static const int frameMarkerItem    = QGraphicsItem::UserType + 2;
+    static const int slicePointItem     = QGraphicsItem::UserType + 3;
+    static const int playheadItem       = QGraphicsItem::UserType + 4;
 }
+
 
 extern volatile double gCurrentJackBPM;
 

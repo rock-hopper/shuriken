@@ -34,7 +34,7 @@
 class FrameMarkerItem : public QObject, public QGraphicsPolygonItem
 {
 public:
-    enum { Type = UserType + UserTypes::frameMarkerItem };
+    enum { Type = UserTypes::frameMarkerItem };
 
     FrameMarkerItem( const QBrush brush, const QBrush selectedBrush, const qreal height, QGraphicsItem* parent = NULL );
 

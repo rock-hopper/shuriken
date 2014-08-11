@@ -122,7 +122,7 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
     if ( mDetailLevel != VERY_HIGH )
     {
         // Reduce no. of samples to draw by finding the min/max values in each consecutive sample "bin"
-        firstVisibleBin = (int) floor( option->exposedRect.left() * mScaleFactor );
+        firstVisibleBin = qMax( (int) floor( option->exposedRect.left() * mScaleFactor ), 0 );
         lastVisibleBin = qMin( (int) ceil( option->exposedRect.right() * mScaleFactor ), mNumBins - 1 );
 
         if ( mFirstCalculatedBin == NOT_SET || mLastCalculatedBin == NOT_SET )

@@ -21,8 +21,9 @@
 */
 
 #include "wavegraphicsview.h"
+#include <QGLWidget>
 #include <QDebug>
-//#include <QGLWidget>
+
 
 
 //==================================================================================================
@@ -31,19 +32,29 @@
 WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
     QGraphicsView( parent )
 {
-    // Set up view
-//    setViewport( new QGLWidget( QGLFormat(QGL::SampleBuffers) ) );
-//    setViewportUpdateMode( QGraphicsView::FullViewportUpdate );
-//    setRenderHint( QPainter::HighQualityAntialiasing, false );
-    setViewport( new QWidget() );
-    setRenderHint( QPainter::Antialiasing, false );
-
+    setViewport( new QGLWidget( QGLFormat(QGL::SampleBuffers) ) );
+    setRenderHint( QPainter::HighQualityAntialiasing, false );
+    setViewportUpdateMode( QGraphicsView::FullViewportUpdate );
     setOptimizationFlags( DontSavePainterState | DontAdjustForAntialiasing );
     setBackgroundBrush( Qt::gray );
     setCacheMode( CacheBackground );
 
-    // Set up the scene
     setScene( new QGraphicsScene( 0.0, 0.0, 1024.0, 768.0 ) );
+
+    mPlayhead = new QGraphicsLineItem( 0.0, 0.0, 0.0, scene()->height() - 1 );
+    mPlayhead->setPen( QColor( Qt::red ) );
+
+    mTimer = new QTimeLine();
+    mTimer->setFrameRange( 0, 100 );
+    mTimer->setCurveShape( QTimeLine::LinearCurve );
+    mTimer->setUpdateInterval( 17 );
+
+    mAnimation = new QGraphicsItemAnimation;
+    mAnimation->setItem( mPlayhead );
+    mAnimation->setTimeLine( mTimer );
+
+    QObject::connect( mTimer, SIGNAL( finished() ),
+                      this, SLOT( removePlayhead() ) );
 }
 
 
@@ -405,6 +416,28 @@ void WaveGraphicsView::selectAll()
 
 
 
+void WaveGraphicsView::startPlayhead( const int millis )
+{
+    mAnimation->setPosAt( 0.0, QPointF( 0.0, 0.0 ) );
+    mAnimation->setPosAt( 1.0, QPointF( scene()->width() - 1, 0.0 ) );
+
+    mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
+    scene()->addItem( mPlayhead );
+
+    mTimer->setDuration( millis );
+    mTimer->start();
+}
+
+
+
+void WaveGraphicsView::stopPlayhead()
+{
+    mTimer->stop();
+    removePlayhead();
+}
+
+
+
 void WaveGraphicsView::clearAll()
 {
     foreach ( QGraphicsItem* item, items() )
@@ -557,32 +590,51 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
 
 void WaveGraphicsView::resizeEvent ( QResizeEvent* event )
 {
-    const qreal oldSceneWidth = scene()->width();
-
     scene()->setSceneRect( 0.0, 0.0, event->size().width(), event->size().height() );
 
-    const qreal scaleFactor = scene()->width() / oldSceneWidth;
+    const qreal scaleFactorX = scene()->width() / event->oldSize().width();
+//    const qreal scaleFactorY = scene()->height() / event->oldSize().height();
 
+
+    // Resize waveform items
     if ( ! mWaveformItemList.isEmpty() )
     {
         foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
         {
-            const qreal newWidth = waveformItem->rect().width() * scaleFactor;
+            const qreal newWidth = waveformItem->rect().width() * scaleFactorX;
             waveformItem->setRect( 0.0, 0.0, newWidth, scene()->height() );
-            const qreal newX = waveformItem->scenePos().x() * scaleFactor;
+            const qreal newX = waveformItem->scenePos().x() * scaleFactorX;
             waveformItem->setPos( newX, 0.0 );
         }
     }
 
+
+    // Resize slice point items
     if ( ! mSlicePointItemList.isEmpty() )
     {
         foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
         {
             slicePointItem->setHeight( scene()->height() - 1 );
-            const qreal newX = slicePointItem->scenePos().x() * scaleFactor;
+            const qreal newX = slicePointItem->scenePos().x() * scaleFactorX;
             slicePointItem->setPos( newX, 0.0 );
         }
     }
+
+
+    // Resize playhead
+    if ( mTimer->state() == QTimeLine::Running )
+    {
+        mTimer->stop();
+
+        mAnimation->clear();
+        mAnimation->setPosAt( 0.0, QPointF( 0.0, 0.0 ) );
+        mAnimation->setPosAt( 1.0, QPointF( scene()->width() - 1, 0.0 ) );
+
+        mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
+
+        mTimer->resume();
+    }
+
 
     QGraphicsView::resizeEvent( event );
 }
@@ -729,4 +781,12 @@ void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem
 void WaveGraphicsView::relayMaxDetailLevelReached()
 {
     emit maxDetailLevelReached();
+}
+
+
+
+void WaveGraphicsView::removePlayhead()
+{
+    scene()->removeItem( mPlayhead );
+    scene()->update();
 }

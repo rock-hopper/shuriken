@@ -1976,7 +1976,15 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
 
 void MainWindow::on_pushButton_Play_clicked()
 {
+    AudioDeviceManager::AudioDeviceSetup setup;
+    mDeviceManager.getAudioDeviceSetup( setup );
+
+    const qreal sampleRate = setup.sampleRate;
+    const int numFrames = mCurrentSampleBuffer->getNumFrames();
+    const int millis = roundToInt( (numFrames / sampleRate) * 1000 );
+
     mSamplerAudioSource->playAll();
+    mUI->waveGraphicsView->startPlayhead( millis );
 }
 
 
@@ -1984,6 +1992,7 @@ void MainWindow::on_pushButton_Play_clicked()
 void MainWindow::on_pushButton_Stop_clicked()
 {
     mSamplerAudioSource->stop();
+    mUI->waveGraphicsView->stopPlayhead();
 }
 
 

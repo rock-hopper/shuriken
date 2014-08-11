@@ -26,6 +26,8 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QResizeEvent>
+#include <QTimeLine>
+#include <QGraphicsItemAnimation>
 #include "JuceHeader.h"
 #include "waveformitem.h"
 #include "slicepointitem.h"
@@ -87,6 +89,9 @@ public:
     void selectNone();
     void selectAll();
 
+    void startPlayhead( const int millis );
+    void stopPlayhead();
+
     void clearAll();
     void clearWaveform();
 
@@ -112,6 +117,10 @@ private:
     QList<SharedSlicePointItem> mSlicePointItemList;
     SharedSampleBuffer mSampleBuffer;
 
+    ScopedPointer<QGraphicsLineItem> mPlayhead;
+    ScopedPointer<QTimeLine> mTimer;
+    ScopedPointer<QGraphicsItemAnimation> mAnimation;
+
 signals:
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );
     void minDetailLevelReached();
@@ -125,6 +134,7 @@ private slots:
     void slideWaveformItemIntoPlace( const int orderPos );
     void updateSlicePointFrameNum( SlicePointItem* const movedItem );
     void relayMaxDetailLevelReached();
+    void removePlayhead();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( WaveGraphicsView );

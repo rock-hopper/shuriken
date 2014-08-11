@@ -3,6 +3,7 @@
 # -------------------------------------------------
 QMAKE_CXXFLAGS += -msse \
     -msse2
+QT += opengl
 TARGET = shuriken
 TEMPLATE = app
 SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
