@@ -418,6 +418,11 @@ void WaveGraphicsView::selectAll()
 
 void WaveGraphicsView::startPlayhead( const int millis )
 {
+    if ( isPlayheadScrolling() )
+    {
+        stopPlayhead();
+    }
+
     mAnimation->setPosAt( 0.0, QPointF( 0.0, 0.0 ) );
     mAnimation->setPosAt( 1.0, QPointF( scene()->width() - 1, 0.0 ) );
 
@@ -432,8 +437,11 @@ void WaveGraphicsView::startPlayhead( const int millis )
 
 void WaveGraphicsView::stopPlayhead()
 {
-    mTimer->stop();
-    removePlayhead();
+    if ( isPlayheadScrolling() )
+    {
+        mTimer->stop();
+        removePlayhead();
+    }
 }
 
 

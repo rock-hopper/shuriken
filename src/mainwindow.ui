@@ -28,8 +28,11 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../resources.qrc">
           <normaloff>:/images/media-playback-start.png</normaloff>:/images/media-playback-start.png</iconset>
         </property>
        </widget>
@@ -39,8 +42,11 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../resources.qrc">
           <normaloff>:/images/media-playback-stop.png</normaloff>:/images/media-playback-stop.png</iconset>
         </property>
        </widget>
@@ -82,6 +88,9 @@
           <width>55</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
          <string>Calc</string>
@@ -136,6 +145,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Apply</string>
         </property>
@@ -156,6 +168,9 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="layoutDirection">
          <enum>Qt::LeftToRight</enum>
         </property>
@@ -172,6 +187,9 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="layoutDirection">
          <enum>Qt::LeftToRight</enum>
         </property>
@@ -187,6 +205,9 @@
        <widget class="QPushButton" name="pushButton_TimestretchOptions">
         <property name="enabled">
          <bool>false</bool>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
          <string>Stretch Options...</string>
@@ -227,11 +248,14 @@
           <height>0</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Slice</string>
         </property>
         <property name="icon">
-         <iconset>
+         <iconset resource="../resources.qrc">
           <normaloff>:/images/shuriken_small.png</normaloff>:/images/shuriken_small.png</iconset>
         </property>
        </widget>
@@ -351,6 +375,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -370,6 +397,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
             <property name="text">
              <string>Find Onsets</string>
             </property>
@@ -379,6 +409,9 @@
            <widget class="QPushButton" name="pushButton_FindBeats">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
             </property>
             <property name="text">
              <string>Find Beats</string>
@@ -501,7 +534,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionImport_Audio_File">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/document-import.png</normaloff>:/images/document-import.png</iconset>
    </property>
    <property name="text">
@@ -516,7 +549,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
    </property>
    <property name="text">
@@ -536,7 +569,7 @@
   </action>
   <action name="actionOpen_Project">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/document-open.png</normaloff>:/images/document-open.png</iconset>
    </property>
    <property name="text">
@@ -554,7 +587,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/document-save.png</normaloff>:/images/document-save.png</iconset>
    </property>
    <property name="text">
@@ -569,7 +602,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/document-close.png</normaloff>:/images/document-close.png</iconset>
    </property>
    <property name="text">
@@ -581,7 +614,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/document-export.png</normaloff>:/images/document-export.png</iconset>
    </property>
    <property name="text">
@@ -599,7 +632,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/edit-undo.png</normaloff>:/images/edit-undo.png</iconset>
    </property>
    <property name="text">
@@ -614,7 +647,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/edit-redo.png</normaloff>:/images/edit-redo.png</iconset>
    </property>
    <property name="text">
@@ -643,7 +676,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/edit-delete.png</normaloff>:/images/edit-delete.png</iconset>
    </property>
    <property name="text">
@@ -677,7 +710,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/help-contents.png</normaloff>:/images/help-contents.png</iconset>
    </property>
    <property name="text">
@@ -686,7 +719,7 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/help-about.png</normaloff>:/images/help-about.png</iconset>
    </property>
    <property name="text">
@@ -753,7 +786,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/zoom-in.png</normaloff>:/images/zoom-in.png</iconset>
    </property>
    <property name="text">
@@ -768,7 +801,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/zoom-out.png</normaloff>:/images/zoom-out.png</iconset>
    </property>
    <property name="text">
@@ -783,7 +816,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/zoom-original.png</normaloff>:/images/zoom-original.png</iconset>
    </property>
    <property name="text">
@@ -798,7 +831,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/edit-select.png</normaloff>:/images/edit-select.png</iconset>
    </property>
    <property name="text">
@@ -816,7 +849,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/kdenlive-select-all.png</normaloff>:/images/kdenlive-select-all.png</iconset>
    </property>
    <property name="text">
@@ -845,7 +878,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/text-speak.png</normaloff>:/images/text-speak.png</iconset>
    </property>
    <property name="text">
@@ -863,7 +896,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../resources.qrc">
      <normaloff>:/images/document-save-as.png</normaloff>:/images/document-save-as.png</iconset>
    </property>
    <property name="text">
@@ -890,6 +923,8 @@
    <header>src/wavegraphicsview.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

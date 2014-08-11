@@ -91,6 +91,7 @@ public:
 
     void startPlayhead( const int millis );
     void stopPlayhead();
+    bool isPlayheadScrolling() const        { return mTimer->state() == QTimeLine::Running; }
 
     void clearAll();
     void clearWaveform();

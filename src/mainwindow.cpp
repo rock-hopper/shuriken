@@ -267,17 +267,24 @@ void MainWindow::closeEvent( QCloseEvent* event )
 
 
 
-//void MainWindow::keyPressEvent( QKeyEvent* event )
-//{
-//    if ( event->key() == Qt::Key_Space )
-//    {
-//        mSamplerAudioSource->playAll();
-//    }
-//    else
-//    {
-//        QMainWindow::keyPressEvent( event );
-//    }
-//}
+void MainWindow::keyPressEvent( QKeyEvent* event )
+{
+    if ( event->key() == Qt::Key_Space && ! event->isAutoRepeat() && mSamplerAudioSource != NULL )
+    {
+        if ( mUI->waveGraphicsView->isPlayheadScrolling() )
+        {
+            on_pushButton_Stop_clicked();
+        }
+        else
+        {
+            on_pushButton_Play_clicked();
+        }
+    }
+    else
+    {
+        QMainWindow::keyPressEvent( event );
+    }
+}
 
 
 

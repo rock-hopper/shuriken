@@ -64,7 +64,7 @@ public:
 protected:
     void changeEvent( QEvent* event );
     void closeEvent( QCloseEvent* event );
-//    void keyPressEvent( QKeyEvent* event );
+    void keyPressEvent( QKeyEvent* event );
 
 private:
     void initialiseAudio();
