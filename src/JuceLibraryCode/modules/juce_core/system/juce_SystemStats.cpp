@@ -172,12 +172,12 @@ void SystemStats::setApplicationCrashHandler (CrashHandlerFunction handler)
    #if JUCE_WINDOWS
     SetUnhandledExceptionFilter (handleCrash);
    #else
-    const int signals[] = { SIGFPE, SIGILL, SIGSEGV, SIGBUS, SIGABRT, SIGSYS };
+    const int unixSignals[] = { SIGFPE, SIGILL, SIGSEGV, SIGBUS, SIGABRT, SIGSYS };
 
-    for (int i = 0; i < numElementsInArray (signals); ++i)
+    for (int i = 0; i < numElementsInArray (unixSignals); ++i)
     {
-        ::signal (signals[i], handleCrash);
-        juce_siginterrupt (signals[i], 1);
+        ::signal (unixSignals[i], handleCrash);
+        juce_siginterrupt (unixSignals[i], 1);
     }
    #endif
 }
