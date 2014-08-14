@@ -23,15 +23,10 @@ Envelope ADSR dialog
 
 
 UI Improvements
-----------------
-Fix gaps in waveform caused by dragging frame markers when zoomed in to very high detail level
+---------------
 Fix gaps in waveform when zoomed in to low detail level
 More efficient waveform drawing routine (possibly OpenGL solution)
-
-Scrolling playhead
 
 Some kind of visual indicator for the threshold level
 
 Control zoom with mouse wheel
-
-Start/stop playback with space bar
