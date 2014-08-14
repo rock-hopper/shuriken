@@ -23,7 +23,7 @@
        </property>
        <property name="icon">
         <iconset resource="../resources.qrc">
-         <normaloff>:/images/go-home.png</normaloff>:/images/go-home.png</iconset>
+         <normaloff>:/resources/images/go-home.png</normaloff>:/resources/images/go-home.png</iconset>
        </property>
       </widget>
      </item>
@@ -37,7 +37,7 @@
        </property>
        <property name="icon">
         <iconset resource="../resources.qrc">
-         <normaloff>:/images/go-previous.png</normaloff>:/images/go-previous.png</iconset>
+         <normaloff>:/resources/images/go-previous.png</normaloff>:/resources/images/go-previous.png</iconset>
        </property>
       </widget>
      </item>
@@ -51,7 +51,7 @@
        </property>
        <property name="icon">
         <iconset resource="../resources.qrc">
-         <normaloff>:/images/go-next.png</normaloff>:/images/go-next.png</iconset>
+         <normaloff>:/resources/images/go-next.png</normaloff>:/resources/images/go-next.png</iconset>
        </property>
       </widget>
      </item>

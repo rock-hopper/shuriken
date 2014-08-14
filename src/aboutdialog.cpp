@@ -34,7 +34,7 @@ AboutDialog::AboutDialog( QWidget* parent ) :
     mUI->setupUi( this );
 
     mUI->textBrowser->setOpenExternalLinks( true );
-    mUI->textBrowser->setSource( QUrl( "qrc:/docs/about.html" ) );
+    mUI->textBrowser->setSource( QUrl( "qrc:/resources/docs/about.html" ) );
 }
 
 

@@ -33,6 +33,7 @@
 #include "zipper.h"
 #include "messageboxes.h"
 #include "textfilehandler.h"
+#include "akaifilehandler.h"
 #include <rubberband/RubberBandStretcher.h>
 #include <QDebug>
 
@@ -1308,6 +1309,11 @@ void MainWindow::on_actionImport_Audio_File_triggered()
 
 void MainWindow::on_actionExport_As_triggered()
 {
+    if ( mExportDialog == NULL || mOptionsDialog == NULL )
+    {
+        return;
+    }
+
     QPoint pos = mExportDialog->pos();
 
     if ( pos.x() < 0 )
@@ -1321,17 +1327,22 @@ void MainWindow::on_actionExport_As_triggered()
 
     if ( result == QDialog::Accepted )
     {
+        const QString tempDirPath = mOptionsDialog->getTempDirPath();
+
         const QString outputDirPath = mExportDialog->getOutputDirPath();
         const QString fileName = mExportDialog->getFileName();
 
-        const bool isOverwritingEnabled = mExportDialog->isOverwritingEnabled();
+        const bool isOverwriteEnabled = mExportDialog->isOverwriteEnabled();
 
         const bool isFormatH2Drumkit = mExportDialog->isFormatH2Drumkit();
         const bool isFormatSFZ = mExportDialog->isFormatSFZ();
+        const bool isFormatAkaiPgm = mExportDialog->isFormatAkaiPgm();
 
         const int sndFileFormat = mExportDialog->getSndFileFormat();
 
         const QDir outputDir( outputDirPath );
+
+        int numSamplesToExport = mSampleRangeList.size();
 
 
         if ( ! QFileInfo( outputDirPath ).isWritable() )
@@ -1357,7 +1368,7 @@ void MainWindow::on_actionExport_As_triggered()
 
             if ( outputDir.exists( h2FileName ) )
             {
-                if ( isOverwritingEnabled )
+                if ( isOverwriteEnabled )
                 {
                     QFile::remove( outputDir.absoluteFilePath( h2FileName ) );
                 }
@@ -1375,7 +1386,7 @@ void MainWindow::on_actionExport_As_triggered()
 
             if ( outputDir.exists( sfzFileName ) )
             {
-                if ( isOverwritingEnabled )
+                if ( isOverwriteEnabled )
                 {
                     QFile::remove( outputDir.absoluteFilePath( sfzFileName ) );
                 }
@@ -1385,6 +1396,37 @@ void MainWindow::on_actionExport_As_triggered()
                                                      sfzFileName + tr( " already exists" ) );
                     return;
                 }
+            }
+        }
+        else if ( isFormatAkaiPgm )
+        {
+            const QString pgmFileName = fileName + ".pgm";
+
+            if ( outputDir.exists( pgmFileName ) )
+            {
+                if ( isOverwriteEnabled )
+                {
+                    QFile::remove( outputDir.absoluteFilePath( pgmFileName ) );
+                }
+                else
+                {
+                    MessageBoxes::showWarningDialog( tr( "Could not export Akai PGM!" ),
+                                                     pgmFileName + tr( " already exists" ) );
+                    return;
+                }
+            }
+
+            const int modelID = mExportDialog->getAkaiModelID();
+
+            const int numPads = AkaiFileHandler::getNumPads( modelID );
+
+            if ( numSamplesToExport > numPads )
+            {
+                numSamplesToExport = numPads;
+
+                MessageBoxes::showWarningDialog( tr( "Cannot export all samples!" ),
+                                                 tr( "Too many samples for this Akai model, only the first " ) +
+                                                 QString::number( numPads ) + tr( " will be exported" ) );
             }
         }
 
@@ -1402,9 +1444,14 @@ void MainWindow::on_actionExport_As_triggered()
             samplesDirPath = outputDir.absoluteFilePath( fileName );
         }
 
-        for ( int i = 0; i < mSampleRangeList.size(); i++ )
+        for ( int i = 0; i < numSamplesToExport; i++ )
         {
             QString audioFileName = fileName;
+
+            if ( isFormatAkaiPgm && audioFileName.size() > 14 )
+            {
+                audioFileName.resize( 14 );
+            }
 
             if ( mExportDialog->getNumberingStyle() == ExportDialog::PREFIX )
             {
@@ -1430,7 +1477,7 @@ void MainWindow::on_actionExport_As_triggered()
                                                              tempBuffer,
                                                              mCurrentSampleHeader,
                                                              sndFileFormat,
-                                                             isOverwritingEnabled );
+                                                             isOverwriteEnabled );
 
             if ( ! path.isEmpty() )
             {
@@ -1443,6 +1490,7 @@ void MainWindow::on_actionExport_As_triggered()
             }
         }
 
+        // Export Hydrogen Drumkit
         if ( isSuccessful && isFormatH2Drumkit )
         {
             TextFileHandler::createH2DrumkitXmlFile( samplesDirPath, fileName, audioFileNames );
@@ -1456,12 +1504,30 @@ void MainWindow::on_actionExport_As_triggered()
 #endif
             File( samplesDirPath.toLocal8Bit().data() ).deleteRecursively();
         }
+        // Export SFZ
         else if ( isSuccessful && isFormatSFZ )
         {
             const QString sfzFilePath = outputDir.absoluteFilePath( fileName + ".sfz" );
             const QString samplesDirName = QFileInfo( samplesDirPath ).fileName();
 
             TextFileHandler::createSFZFile( sfzFilePath, samplesDirName, audioFileNames );
+        }
+        // Export Akai PGM
+        else if ( isSuccessful && isFormatAkaiPgm )
+        {
+            const int modelID = mExportDialog->getAkaiModelID();
+
+            switch ( modelID )
+            {
+            case AkaiModelID::MPC1000_ID:
+                AkaiFileHandler::writePgmFileMPC1000( audioFileNames, fileName, outputDirPath, tempDirPath, isOverwriteEnabled );
+                break;
+            case AkaiModelID::MPC500_ID:
+                AkaiFileHandler::writePgmFileMPC500( audioFileNames, fileName, outputDirPath, tempDirPath, isOverwriteEnabled );
+                break;
+            default:
+                break;
+            }
         }
 
 
