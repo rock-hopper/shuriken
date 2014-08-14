@@ -22,6 +22,7 @@
 
 #include "exportdialog.h"
 #include "ui_exportdialog.h"
+#include "akaifilehandler.h"
 #include <QFileDialog>
 #include <QDebug>
 #include "messageboxes.h"
@@ -39,7 +40,7 @@ ExportDialog::ExportDialog( QWidget* parent ) :
     mUI->setupUi( this );
 
 
-    // Set up output directory validator
+    // Set up input validators
     mDirectoryValidator = new DirectoryValidator();
     mUI->lineEdit_OutputDir->setValidator( mDirectoryValidator );
 
@@ -52,17 +53,26 @@ ExportDialog::ExportDialog( QWidget* parent ) :
     QObject::connect( mUI->lineEdit_OutputDir, SIGNAL( textChanged(QString) ),
                       this, SLOT( enableOkButtonIfInputValid() ) );
 
-
-    // Set up file base name validator
-    const QRegExp regex( "[^/\\s]+" ); // Match any character except forward slash and white space
-    mUI->lineEdit_FileName->setValidator( new QRegExpValidator( regex, this ) );
-
     QObject::connect( mUI->lineEdit_FileName, SIGNAL( textChanged(QString) ),
                       this, SLOT( enableOkButtonIfInputValid() ) );
 
 
     // Populate combo boxes
     mUI->radioButton_AudioFiles->click();
+
+    QStringList akaiModelTextList;
+    QList<int> akaiModelDataList;
+
+    akaiModelTextList << "MPC 1000/2500" << "MPC 500";
+    akaiModelDataList << AkaiModelID::MPC1000_ID << AkaiModelID::MPC500_ID;
+
+    for ( int i = 0; i < akaiModelTextList.size(); i++ )
+    {
+        mUI->comboBox_Model->addItem( akaiModelTextList[ i ], akaiModelDataList[ i ] );
+    }
+
+    mUI->label_Model->setVisible( false );
+    mUI->comboBox_Model->setVisible( false );
 }
 
 
@@ -102,7 +112,7 @@ ExportDialog::NumberingStyle ExportDialog::getNumberingStyle() const
 
 
 
-bool ExportDialog::isOverwritingEnabled() const
+bool ExportDialog::isOverwriteEnabled() const
 {
     return mUI->checkBox_Overwrite->isChecked();
 }
@@ -123,6 +133,13 @@ bool ExportDialog::isFormatH2Drumkit() const
 
 
 
+bool ExportDialog::isFormatAkaiPgm() const
+{
+    return mUI->radioButton_Akai->isChecked();
+}
+
+
+
 int ExportDialog::getSndFileFormat() const
 {
     const int index = mUI->comboBox_Encoding->currentIndex();
@@ -131,7 +148,7 @@ int ExportDialog::getSndFileFormat() const
     QString formatName = mUI->comboBox_Format->currentText();
     int format = 0;
 
-    if ( formatName == "WAV")
+    if ( formatName.contains( "WAV" ) )
     {
         format = SF_FORMAT_WAV;
     }
@@ -157,6 +174,16 @@ int ExportDialog::getSndFileFormat() const
     }
 
     return format | encoding;
+}
+
+
+
+int ExportDialog::getAkaiModelID() const
+{
+    const int index = mUI->comboBox_Model->currentIndex();
+    const int modelID = mUI->comboBox_Model->itemData( index ).toInt();
+
+    return modelID;
 }
 
 
@@ -187,9 +214,40 @@ void ExportDialog::showEvent( QShowEvent* event )
     {
         mUI->lineEdit_OutputDir->setText( mLastOpenedExportDir );
         mUI->lineEdit_FileName->clear();
+
+        resize( 502, 282 );
     }
 
     QDialog::showEvent( event );
+}
+
+
+
+//==================================================================================================
+// Private:
+
+void ExportDialog::setPlatformFileNameValidator()
+{
+    QString pattern;
+
+#ifdef LINUX
+    pattern = "[^/\\s]+"; // Match any character except forward slash and white space
+#endif
+
+    if ( mUI->lineEdit_FileName->validator() != NULL )
+    {
+        const QValidator* validator = mUI->lineEdit_FileName->validator();
+        const QRegExpValidator* regExpValidator = static_cast<const QRegExpValidator*>( validator );
+
+        if ( regExpValidator->regExp().pattern() != pattern )
+        {
+            mUI->lineEdit_FileName->setValidator( new QRegExpValidator( QRegExp(pattern), this ) );
+        }
+    }
+    else
+    {
+        mUI->lineEdit_FileName->setValidator( new QRegExpValidator( QRegExp(pattern), this ) );
+    }
 }
 
 
@@ -308,6 +366,11 @@ void ExportDialog::on_comboBox_Format_currentIndexChanged( const QString text )
         encodingTextList << "Vorbis";
         encodingDataList << SF_FORMAT_VORBIS;
     }
+    else if ( text == "PGM, WAV" )
+    {
+        encodingTextList << "Signed 16 bit PCM";
+        encodingDataList << ( SF_FORMAT_PCM_16 | SF_ENDIAN_LITTLE );
+    }
     else
     {
         qDebug() << "Unknown format: " << text;
@@ -334,10 +397,19 @@ void ExportDialog::on_radioButton_AudioFiles_clicked()
         button->setEnabled( true );
     }
 
-    QStringList audioFormatTextList;
-    audioFormatTextList << "WAV" << "AIFF" << "AU" << "FLAC" << "Ogg";
+    QStringList fileFormatTextList;
+    fileFormatTextList << "WAV" << "AIFF" << "AU" << "FLAC" << "Ogg";
     mUI->comboBox_Format->clear();
-    mUI->comboBox_Format->addItems( audioFormatTextList );
+    mUI->comboBox_Format->addItems( fileFormatTextList );
+
+    mUI->label_Model->setVisible( false );
+    mUI->comboBox_Model->setVisible( false );
+
+    mUI->label_Encoding->setVisible( true );
+    mUI->comboBox_Encoding->setVisible( true );
+
+    mUI->lineEdit_FileName->clear();
+    setPlatformFileNameValidator();
 }
 
 
@@ -353,10 +425,19 @@ void ExportDialog::on_radioButton_H2Drumkit_clicked()
 
     mUI->radioButton_Suffix->setChecked( true );
 
-    QStringList audioFormatTextList;
-    audioFormatTextList << "FLAC" << "WAV" << "AIFF" << "AU";
+    QStringList fileFormatTextList;
+    fileFormatTextList << "FLAC" << "WAV" << "AIFF" << "AU";
     mUI->comboBox_Format->clear();
-    mUI->comboBox_Format->addItems( audioFormatTextList );
+    mUI->comboBox_Format->addItems( fileFormatTextList );
+
+    mUI->label_Model->setVisible( false );
+    mUI->comboBox_Model->setVisible( false );
+
+    mUI->label_Encoding->setVisible( true );
+    mUI->comboBox_Encoding->setVisible( true );
+
+    mUI->lineEdit_FileName->clear();
+    setPlatformFileNameValidator();
 }
 
 
@@ -372,8 +453,47 @@ void ExportDialog::on_radioButton_SFZ_clicked()
 
     mUI->radioButton_Suffix->setChecked( true );
 
-    QStringList audioFilesTextList;
-    audioFilesTextList << "WAV" << "FLAC" << "Ogg";
+    QStringList fileFormatTextList;
+    fileFormatTextList << "WAV" << "FLAC" << "Ogg";
     mUI->comboBox_Format->clear();
-    mUI->comboBox_Format->addItems( audioFilesTextList );
+    mUI->comboBox_Format->addItems( fileFormatTextList );
+
+    mUI->label_Model->setVisible( false );
+    mUI->comboBox_Model->setVisible( false );
+
+    mUI->label_Encoding->setVisible( true );
+    mUI->comboBox_Encoding->setVisible( true );
+
+    mUI->lineEdit_FileName->clear();
+    setPlatformFileNameValidator();
+}
+
+
+
+void ExportDialog::on_radioButton_Akai_clicked()
+{
+    mUI->label_FileName->setText( tr( "PGM Name:" ) );
+
+    foreach ( QAbstractButton* button, mUI->buttonGroup_Numbering->buttons() )
+    {
+        button->setEnabled( false );
+    }
+
+    mUI->radioButton_Suffix->setChecked( true );
+
+    QStringList fileFormatTextList;
+    fileFormatTextList << "PGM, WAV";
+    mUI->comboBox_Format->clear();
+    mUI->comboBox_Format->addItems( fileFormatTextList );
+
+    mUI->label_Encoding->setVisible( false );
+    mUI->comboBox_Encoding->setVisible( false );
+
+    mUI->label_Model->setVisible( true );
+    mUI->comboBox_Model->setVisible( true );
+
+    mUI->lineEdit_FileName->clear();
+
+    const QRegExp regexp( AkaiFileHandler::getFileNameRegExpMPC1000() );
+    mUI->lineEdit_FileName->setValidator( new QRegExpValidator( regexp, this ) );
 }

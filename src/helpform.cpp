@@ -40,7 +40,7 @@ HelpForm::HelpForm( QWidget* parent ) :
                       mUI->pushButton_Forward, SLOT( setEnabled(bool) ) );
 
     mUI->textBrowser->setOpenExternalLinks( true );
-    mUI->textBrowser->setSource( QUrl( "qrc:/docs/index.html" ) );
+    mUI->textBrowser->setSource( QUrl( "qrc:/resources/docs/index.html" ) );
 }
 
 

@@ -48,18 +48,23 @@ public:
     QString getOutputDirPath() const;
     QString getFileName() const;
     NumberingStyle getNumberingStyle() const;
-    bool isOverwritingEnabled() const;
+    bool isOverwriteEnabled() const;
 
     bool isFormatSFZ() const;
     bool isFormatH2Drumkit() const;
+    bool isFormatAkaiPgm() const;
 
     int getSndFileFormat() const;
+
+    int getAkaiModelID() const;
 
 protected:
     void changeEvent( QEvent* event );
     void showEvent( QShowEvent* event );
 
 private:
+    void setPlatformFileNameValidator();
+
     Ui::ExportDialog* mUI;
 
     QString mLastOpenedExportDir;
@@ -67,6 +72,7 @@ private:
     ScopedPointer<DirectoryValidator> mDirectoryValidator;
 
 private slots:
+    void on_radioButton_Akai_clicked();
     void on_radioButton_SFZ_clicked();
     void on_radioButton_H2Drumkit_clicked();
     void on_radioButton_AudioFiles_clicked();

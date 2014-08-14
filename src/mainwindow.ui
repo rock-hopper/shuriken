@@ -33,7 +33,7 @@
         </property>
         <property name="icon">
          <iconset resource="../resources.qrc">
-          <normaloff>:/images/media-playback-start.png</normaloff>:/images/media-playback-start.png</iconset>
+          <normaloff>:/resources/images/media-playback-start.png</normaloff>:/resources/images/media-playback-start.png</iconset>
         </property>
        </widget>
       </item>
@@ -47,7 +47,7 @@
         </property>
         <property name="icon">
          <iconset resource="../resources.qrc">
-          <normaloff>:/images/media-playback-stop.png</normaloff>:/images/media-playback-stop.png</iconset>
+          <normaloff>:/resources/images/media-playback-stop.png</normaloff>:/resources/images/media-playback-stop.png</iconset>
         </property>
        </widget>
       </item>
@@ -256,7 +256,7 @@
         </property>
         <property name="icon">
          <iconset resource="../resources.qrc">
-          <normaloff>:/images/shuriken_small.png</normaloff>:/images/shuriken_small.png</iconset>
+          <normaloff>:/resources/images/shuriken_small.png</normaloff>:/resources/images/shuriken_small.png</iconset>
         </property>
        </widget>
       </item>
@@ -535,7 +535,7 @@
   <action name="actionImport_Audio_File">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/document-import.png</normaloff>:/images/document-import.png</iconset>
+     <normaloff>:/resources/images/document-import.png</normaloff>:/resources/images/document-import.png</iconset>
    </property>
    <property name="text">
     <string>Import Audio File</string>
@@ -550,7 +550,7 @@
   <action name="actionQuit">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
+     <normaloff>:/resources/images/application-exit.png</normaloff>:/resources/images/application-exit.png</iconset>
    </property>
    <property name="text">
     <string>Quit</string>
@@ -570,7 +570,7 @@
   <action name="actionOpen_Project">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/document-open.png</normaloff>:/images/document-open.png</iconset>
+     <normaloff>:/resources/images/document-open.png</normaloff>:/resources/images/document-open.png</iconset>
    </property>
    <property name="text">
     <string>Open Project</string>
@@ -588,7 +588,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/document-save.png</normaloff>:/images/document-save.png</iconset>
+     <normaloff>:/resources/images/document-save.png</normaloff>:/resources/images/document-save.png</iconset>
    </property>
    <property name="text">
     <string>Save Project</string>
@@ -603,7 +603,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/document-close.png</normaloff>:/images/document-close.png</iconset>
+     <normaloff>:/resources/images/document-close.png</normaloff>:/resources/images/document-close.png</iconset>
    </property>
    <property name="text">
     <string>Close Project</string>
@@ -615,7 +615,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/document-export.png</normaloff>:/images/document-export.png</iconset>
+     <normaloff>:/resources/images/document-export.png</normaloff>:/resources/images/document-export.png</iconset>
    </property>
    <property name="text">
     <string>Export As...</string>
@@ -633,7 +633,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/edit-undo.png</normaloff>:/images/edit-undo.png</iconset>
+     <normaloff>:/resources/images/edit-undo.png</normaloff>:/resources/images/edit-undo.png</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -648,7 +648,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/edit-redo.png</normaloff>:/images/edit-redo.png</iconset>
+     <normaloff>:/resources/images/edit-redo.png</normaloff>:/resources/images/edit-redo.png</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -677,7 +677,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/edit-delete.png</normaloff>:/images/edit-delete.png</iconset>
+     <normaloff>:/resources/images/edit-delete.png</normaloff>:/resources/images/edit-delete.png</iconset>
    </property>
    <property name="text">
     <string>Delete</string>
@@ -711,7 +711,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/help-contents.png</normaloff>:/images/help-contents.png</iconset>
+     <normaloff>:/resources/images/help-contents.png</normaloff>:/resources/images/help-contents.png</iconset>
    </property>
    <property name="text">
     <string>Help</string>
@@ -720,7 +720,7 @@
   <action name="actionAbout">
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/help-about.png</normaloff>:/images/help-about.png</iconset>
+     <normaloff>:/resources/images/help-about.png</normaloff>:/resources/images/help-about.png</iconset>
    </property>
    <property name="text">
     <string>About</string>
@@ -787,7 +787,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/zoom-in.png</normaloff>:/images/zoom-in.png</iconset>
+     <normaloff>:/resources/images/zoom-in.png</normaloff>:/resources/images/zoom-in.png</iconset>
    </property>
    <property name="text">
     <string>Zoom In</string>
@@ -802,7 +802,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/zoom-out.png</normaloff>:/images/zoom-out.png</iconset>
+     <normaloff>:/resources/images/zoom-out.png</normaloff>:/resources/images/zoom-out.png</iconset>
    </property>
    <property name="text">
     <string>Zoom Out</string>
@@ -817,7 +817,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/zoom-original.png</normaloff>:/images/zoom-original.png</iconset>
+     <normaloff>:/resources/images/zoom-original.png</normaloff>:/resources/images/zoom-original.png</iconset>
    </property>
    <property name="text">
     <string>Zoom Original</string>
@@ -832,7 +832,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/edit-select.png</normaloff>:/images/edit-select.png</iconset>
+     <normaloff>:/resources/images/edit-select.png</normaloff>:/resources/images/edit-select.png</iconset>
    </property>
    <property name="text">
     <string>Move</string>
@@ -850,7 +850,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/kdenlive-select-all.png</normaloff>:/images/kdenlive-select-all.png</iconset>
+     <normaloff>:/resources/images/kdenlive-select-all.png</normaloff>:/resources/images/kdenlive-select-all.png</iconset>
    </property>
    <property name="text">
     <string>Select</string>
@@ -879,7 +879,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/text-speak.png</normaloff>:/images/text-speak.png</iconset>
+     <normaloff>:/resources/images/text-speak.png</normaloff>:/resources/images/text-speak.png</iconset>
    </property>
    <property name="text">
     <string>Audition</string>
@@ -897,7 +897,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/images/document-save-as.png</normaloff>:/images/document-save-as.png</iconset>
+     <normaloff>:/resources/images/document-save-as.png</normaloff>:/resources/images/document-save-as.png</iconset>
    </property>
    <property name="text">
     <string>Save As...</string>
