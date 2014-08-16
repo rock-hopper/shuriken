@@ -194,7 +194,7 @@ public:
     ApplyGainCommand( const float gain,
                       const int waveformItemOrderPos,
                       WaveGraphicsView* const graphicsView,
-                      const SharedSampleHeader sampleHeader,
+                      const int sampleRate,
                       AudioFileHandler& fileHandler,
                       const QString tempDirPath,
                       const QString fileBaseName,
@@ -207,7 +207,7 @@ private:
     const float mGain;
     const int mWaveformItemOrderPos;
     WaveGraphicsView* const mGraphicsView;
-    const SharedSampleHeader mSampleHeader;
+    const int mSampleRate;
     AudioFileHandler& mFileHandler;
     const QString mTempDirPath;
     const QString mFileBaseName;
@@ -223,7 +223,7 @@ public:
                           const float endGain,
                           const int waveformItemOrderPos,
                           WaveGraphicsView* const graphicsView,
-                          const SharedSampleHeader sampleHeader,
+                          const int sampleRate,
                           AudioFileHandler& fileHandler,
                           const QString tempDirPath,
                           const QString fileBaseName,
@@ -237,7 +237,7 @@ private:
     const float mEndGain;
     const int mWaveformItemOrderPos;
     WaveGraphicsView* const mGraphicsView;
-    const SharedSampleHeader mSampleHeader;
+    const int mSampleRate;
     AudioFileHandler& mFileHandler;
     const QString mTempDirPath;
     const QString mFileBaseName;
@@ -251,7 +251,7 @@ class NormaliseCommand : public QUndoCommand
 public:
     NormaliseCommand( const int waveformItemOrderPos,
                       WaveGraphicsView* const graphicsView,
-                      const SharedSampleHeader sampleHeader,
+                      const int sampleRate,
                       AudioFileHandler& fileHandler,
                       const QString tempDirPath,
                       const QString fileBaseName,
@@ -263,7 +263,7 @@ public:
 private:
     const int mWaveformItemOrderPos;
     WaveGraphicsView* const mGraphicsView;
-    const SharedSampleHeader mSampleHeader;
+    const int mSampleRate;
     AudioFileHandler& mFileHandler;
     const QString mTempDirPath;
     const QString mFileBaseName;

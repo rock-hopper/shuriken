@@ -73,6 +73,17 @@ ExportDialog::ExportDialog( QWidget* parent ) :
 
     mUI->label_Model->setVisible( false );
     mUI->comboBox_Model->setVisible( false );
+
+    QStringList sampleRateTextList;
+    QList<int> sampleRateDataList;
+
+    sampleRateTextList << "Keep Same" << "8,000 Hz" << "11,025 Hz" << "16,000 Hz"<< "22,050 Hz" << "32,000 Hz" << "44,100 Hz" << "48,000 Hz" << "88,200 Hz" << "96,000 Hz" << "192,000 Hz";
+    sampleRateDataList << SampleRate::KEEP_SAME << 8000 << 11025 << 16000 << 22050 << 32000 << 44100 << 48000 << 88200 << 96000 << 192000;
+
+    for ( int i = 0; i < sampleRateTextList.size(); i++ )
+    {
+        mUI->comboBox_SampleRate->addItem( sampleRateTextList[ i ], sampleRateDataList[ i ] );
+    }
 }
 
 
@@ -174,6 +185,16 @@ int ExportDialog::getSndFileFormat() const
     }
 
     return format | encoding;
+}
+
+
+
+int ExportDialog::getSampleRate() const
+{
+    const int index = mUI->comboBox_SampleRate->currentIndex();
+    const int sampleRate = mUI->comboBox_SampleRate->itemData( index ).toInt();
+
+    return sampleRate;
 }
 
 
@@ -368,7 +389,7 @@ void ExportDialog::on_comboBox_Format_currentIndexChanged( const QString text )
     }
     else if ( text == "PGM, WAV" )
     {
-        encodingTextList << "Signed 16 bit PCM";
+        encodingTextList << "16 bit PCM, 44,100 Hz";
         encodingDataList << ( SF_FORMAT_PCM_16 | SF_ENDIAN_LITTLE );
     }
     else
@@ -405,11 +426,14 @@ void ExportDialog::on_radioButton_AudioFiles_clicked()
     mUI->label_Model->setVisible( false );
     mUI->comboBox_Model->setVisible( false );
 
-    mUI->label_Encoding->setVisible( true );
-    mUI->comboBox_Encoding->setVisible( true );
+    mUI->label_SampleRate->setVisible( true );
+    mUI->comboBox_SampleRate->setVisible( true );
 
     mUI->lineEdit_FileName->clear();
     setPlatformFileNameValidator();
+
+    const int index = mUI->comboBox_SampleRate->findData( SampleRate::KEEP_SAME );
+    mUI->comboBox_SampleRate->setCurrentIndex( index );
 }
 
 
@@ -433,11 +457,14 @@ void ExportDialog::on_radioButton_H2Drumkit_clicked()
     mUI->label_Model->setVisible( false );
     mUI->comboBox_Model->setVisible( false );
 
-    mUI->label_Encoding->setVisible( true );
-    mUI->comboBox_Encoding->setVisible( true );
+    mUI->label_SampleRate->setVisible( true );
+    mUI->comboBox_SampleRate->setVisible( true );
 
     mUI->lineEdit_FileName->clear();
     setPlatformFileNameValidator();
+
+    const int index = mUI->comboBox_SampleRate->findData( SampleRate::KEEP_SAME );
+    mUI->comboBox_SampleRate->setCurrentIndex( index );
 }
 
 
@@ -461,11 +488,14 @@ void ExportDialog::on_radioButton_SFZ_clicked()
     mUI->label_Model->setVisible( false );
     mUI->comboBox_Model->setVisible( false );
 
-    mUI->label_Encoding->setVisible( true );
-    mUI->comboBox_Encoding->setVisible( true );
+    mUI->label_SampleRate->setVisible( true );
+    mUI->comboBox_SampleRate->setVisible( true );
 
     mUI->lineEdit_FileName->clear();
     setPlatformFileNameValidator();
+
+    const int index = mUI->comboBox_SampleRate->findData( SampleRate::KEEP_SAME );
+    mUI->comboBox_SampleRate->setCurrentIndex( index );
 }
 
 
@@ -486,8 +516,8 @@ void ExportDialog::on_radioButton_Akai_clicked()
     mUI->comboBox_Format->clear();
     mUI->comboBox_Format->addItems( fileFormatTextList );
 
-    mUI->label_Encoding->setVisible( false );
-    mUI->comboBox_Encoding->setVisible( false );
+    mUI->label_SampleRate->setVisible( false );
+    mUI->comboBox_SampleRate->setVisible( false );
 
     mUI->label_Model->setVisible( true );
     mUI->comboBox_Model->setVisible( true );
@@ -496,4 +526,7 @@ void ExportDialog::on_radioButton_Akai_clicked()
 
     const QRegExp regexp( AkaiFileHandler::getFileNameRegExpMPC1000() );
     mUI->lineEdit_FileName->setValidator( new QRegExpValidator( regexp, this ) );
+
+    const int index = mUI->comboBox_SampleRate->findData( 44100 );
+    mUI->comboBox_SampleRate->setCurrentIndex( index );
 }

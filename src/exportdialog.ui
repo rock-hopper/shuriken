@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>496</width>
-    <height>310</height>
+    <height>342</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -215,6 +215,19 @@
        <attribute name="buttonGroup">
         <string>buttonGroup_Export</string>
        </attribute>
+      </widget>
+     </item>
+     <item row="9" column="1" colspan="2">
+      <widget class="QComboBox" name="comboBox_SampleRate"/>
+     </item>
+     <item row="9" column="0">
+      <widget class="QLabel" name="label_SampleRate">
+       <property name="text">
+        <string>Sample Rate:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
       </widget>
      </item>
     </layout>

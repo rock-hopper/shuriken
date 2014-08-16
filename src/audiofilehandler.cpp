@@ -21,6 +21,7 @@
 */
 
 #include "audiofilehandler.h"
+#include <samplerate.h>
 #include <QDir>
 #include <QDebug>
 
@@ -135,12 +136,13 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
 QString AudioFileHandler::saveAudioFile( const QString dirPath,
                                          const QString fileBaseName,
                                          const SharedSampleBuffer sampleBuffer,
-                                         const SharedSampleHeader sampleHeader,
+                                         const int currentSampleRate,
+                                         const int outputSampleRate,
                                          const int sndFileFormat,
-                                         const bool isOverwritingEnabled )
+                                         const bool isOverwriteEnabled )
 {
     const int hopSize = 8192;
-    const int numChans = sampleHeader->numChans;
+    const int numChans = sampleBuffer->getNumChannels();
 
     bool isSuccessful = false;
 
@@ -152,11 +154,11 @@ QString AudioFileHandler::saveAudioFile( const QString dirPath,
         filePath = saveDir.absoluteFilePath( fileBaseName );
 
         SF_INFO sfInfo;
-        memset( &sfInfo, 0, sizeof( sfInfo ) );
+        memset( &sfInfo, 0, sizeof( SF_INFO ) );
 
-        sfInfo.samplerate = sampleHeader->sampleRate;
+        sfInfo.samplerate = outputSampleRate;
         sfInfo.channels   = numChans;
-        sfInfo.format = sndFileFormat;
+        sfInfo.format     = sndFileFormat;
 
         switch ( sndFileFormat & SF_FORMAT_TYPEMASK )
         {
@@ -182,62 +184,31 @@ QString AudioFileHandler::saveAudioFile( const QString dirPath,
 
         Q_ASSERT( sf_format_check( &sfInfo ) );
 
-        if ( isOverwritingEnabled || ! QFileInfo( filePath ).exists() )
+        if ( isOverwriteEnabled || ! QFileInfo( filePath ).exists() )
         {
-            SNDFILE* handle = sf_open( filePath.toLocal8Bit().data(), SFM_WRITE, &sfInfo );
+            SNDFILE* fileID = sf_open( filePath.toLocal8Bit().data(), SFM_WRITE, &sfInfo );
 
-            if ( handle != NULL )
+            if ( fileID != NULL )
             {
-                const int numFrames = sampleBuffer->getNumFrames();
-                int numFramesToWrite = 0;
-                int startFrame = 0;
-                int numSamplesWritten = 0;
-
-                Array<float> tempBuffer;
-                tempBuffer.resize( hopSize * numChans );
-
-                float* sampleData = NULL;
-
-                isSuccessful = true;
-
-                do
+                if ( outputSampleRate == currentSampleRate )
                 {
-                    numFramesToWrite = numFrames - startFrame >= hopSize ? hopSize : numFrames - startFrame;
+                    isSuccessful = sndfileSaveAudioFile( fileID, sampleBuffer, hopSize );
+                }
+                else
+                {
+                    const qreal sampleRateRatio = (qreal) outputSampleRate / (qreal) currentSampleRate;
 
-                    // Interleave sample data
-                    for ( int chanNum = 0; chanNum < numChans; ++chanNum )
+                    Array<float> interleavedBuffer;
+
+                    isSuccessful = convertSampleRate( sampleBuffer, sampleRateRatio, interleavedBuffer );
+
+                    if ( isSuccessful )
                     {
-                        sampleData = sampleBuffer->getSampleData( chanNum, startFrame );
-
-                        for ( int frameNum = 0; frameNum < numFramesToWrite; ++frameNum )
-                        {
-                            tempBuffer.set( numChans * frameNum + chanNum,  // Index
-                                            sampleData[ frameNum ] );       // Value
-                        }
-                    }
-
-                    // Write sample data to file
-                    numSamplesWritten = sf_write_float( handle, tempBuffer.getRawDataPointer(), numFramesToWrite * numChans );
-
-                    startFrame += hopSize;
-
-                    // If there was a write error
-                    if ( numSamplesWritten != numFramesToWrite * numChans)
-                    {
-                        const QString samplesToWrite = QString::number( numFramesToWrite * numChans );
-                        const QString samplesWritten = QString::number( numSamplesWritten );
-
-                        sErrorTitle = "Error while writing to audio file";
-                        sErrorInfo = "no. of samples to write: " + samplesToWrite + ", " +
-                                     "no. of samples written: " + samplesWritten;
-
-                        isSuccessful = false;
+                        isSuccessful = sndfileSaveAudioFile( fileID, interleavedBuffer, hopSize * numChans );
                     }
                 }
-                while ( numFramesToWrite == hopSize && isSuccessful );
-
-                sf_write_sync( handle );
-                sf_close( handle );
+                sf_write_sync( fileID );
+                sf_close( fileID );
             }
             else // Could not open file for writing
             {
@@ -269,6 +240,160 @@ QString AudioFileHandler::saveAudioFile( const QString dirPath,
 
 QString AudioFileHandler::sErrorTitle;
 QString AudioFileHandler::sErrorInfo;
+
+
+void AudioFileHandler::interleaveSamples( const SharedSampleBuffer inputBuffer,
+                                          const int numChans,
+                                          const int startFrame,
+                                          const int numFrames,
+                                          Array<float>& outputBuffer )
+{
+    for ( int chanNum = 0; chanNum < numChans; ++chanNum )
+    {
+        float* sampleData = inputBuffer->getSampleData( chanNum, startFrame );
+
+        for ( int frameNum = 0; frameNum < numFrames; ++frameNum )
+        {
+            outputBuffer.set( numChans * frameNum + chanNum,  // Index
+                              sampleData[ frameNum ] );       // Value
+        }
+    }
+}
+
+
+
+bool AudioFileHandler::convertSampleRate( const SharedSampleBuffer inputBuffer,
+                                          const qreal sampleRateRatio,
+                                          Array<float>& outputBuffer )
+{
+    const int inputNumFrames = inputBuffer->getNumFrames();
+    const int numChans = inputBuffer->getNumChannels();
+
+    const long outputNumFrames = roundToInt( inputNumFrames * sampleRateRatio );
+
+    if ( outputBuffer.size() != outputNumFrames * numChans )
+    {
+        outputBuffer.resize( outputNumFrames * numChans );
+    }
+
+    Array<float> tempBuffer;
+    tempBuffer.resize( inputNumFrames * numChans );
+
+    interleaveSamples( inputBuffer, numChans, 0, inputNumFrames, tempBuffer );
+
+    SRC_DATA srcData;
+    memset( &srcData, 0, sizeof( SRC_DATA ) );
+
+    srcData.data_in = tempBuffer.getRawDataPointer();
+    srcData.data_out = outputBuffer.getRawDataPointer();
+
+    srcData.input_frames = inputNumFrames;
+    srcData.output_frames = outputNumFrames;
+
+    srcData.src_ratio = sampleRateRatio;
+
+    bool isSuccessful = true;
+
+    const int errorCode = src_simple( &srcData, SRC_SINC_BEST_QUALITY, numChans );
+
+    if ( errorCode > 0 )
+    {
+        sErrorTitle = "Couldn't convert sample rate!";
+        sErrorInfo = src_strerror( errorCode );
+        isSuccessful = false;
+    }
+
+    return isSuccessful;
+}
+
+
+
+bool AudioFileHandler::sndfileSaveAudioFile( SNDFILE* fileID, const SharedSampleBuffer sampleBuffer, const int hopSize )
+{
+    const int totalNumFrames = sampleBuffer->getNumFrames();
+    const int numChans = sampleBuffer->getNumChannels();
+
+    int numFramesToWrite = 0;
+    int startFrame = 0;
+    int numSamplesWritten = 0;
+
+    Array<float> tempBuffer;
+    tempBuffer.resize( hopSize * numChans );
+
+    bool isSuccessful = true;
+
+    do
+    {
+        numFramesToWrite = totalNumFrames - startFrame >= hopSize ? hopSize : totalNumFrames - startFrame;
+
+        interleaveSamples( sampleBuffer, numChans, startFrame, numFramesToWrite, tempBuffer );
+
+        numSamplesWritten = sf_write_float( fileID, tempBuffer.getRawDataPointer(), numFramesToWrite * numChans );
+
+        if ( numSamplesWritten != numFramesToWrite * numChans )
+        {
+            sndfileRecordWriteError( numFramesToWrite * numChans, numSamplesWritten );
+            isSuccessful = false;
+        }
+
+        startFrame += hopSize;
+    }
+    while ( numFramesToWrite == hopSize && isSuccessful );
+
+    return isSuccessful;
+}
+
+
+
+bool AudioFileHandler::sndfileSaveAudioFile( SNDFILE* fileID, const Array<float> interleavedBuffer, const int hopSize )
+{
+    const int totalNumSamples = interleavedBuffer.size();
+
+    int numSamplesToWrite = 0;
+    int startSample = 0;
+    int numSamplesWritten = 0;
+
+    Array<float> tempBuffer;
+    tempBuffer.resize( hopSize );
+
+    bool isSuccessful = true;
+
+    do
+    {
+        numSamplesToWrite = totalNumSamples - startSample >= hopSize ? hopSize : totalNumSamples - startSample;
+
+        for ( int i = 0; i < numSamplesToWrite; i++ )
+        {
+            tempBuffer.setUnchecked( i, interleavedBuffer.getUnchecked( startSample + i ) );
+        }
+
+        numSamplesWritten = sf_write_float( fileID, tempBuffer.getRawDataPointer(), numSamplesToWrite );
+
+        if ( numSamplesWritten != numSamplesToWrite )
+        {
+            sndfileRecordWriteError( numSamplesToWrite, numSamplesWritten );
+            isSuccessful = false;
+        }
+
+        startSample += hopSize;
+    }
+    while ( numSamplesToWrite == hopSize && isSuccessful );
+
+    return isSuccessful;
+}
+
+
+
+void AudioFileHandler::sndfileRecordWriteError( const int numSamplesToWrite, const int numSamplesWritten )
+{
+    const QString samplesToWrite = QString::number( numSamplesToWrite );
+    const QString samplesWritten = QString::number( numSamplesWritten );
+
+    sErrorTitle = "Error while writing to audio file";
+    sErrorInfo = "no. of samples to write: " + samplesToWrite + ", " +
+                 "no. of samples written: " + samplesWritten;
+}
+
 
 
 int AudioFileHandler::initSndLib()

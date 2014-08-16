@@ -838,7 +838,8 @@ void MainWindow::saveProject( const QString filePath )
     const QString audioFilePath = mFileHandler.saveAudioFile( projTempDir.absolutePath(),
                                                               "audio",
                                                               mCurrentSampleBuffer,
-                                                              mCurrentSampleHeader,
+                                                              mCurrentSampleHeader->sampleRate,
+                                                              mCurrentSampleHeader->sampleRate,
                                                               AudioFileHandler::SAVE_FORMAT );
 
     if ( ! audioFilePath.isEmpty() )
@@ -1340,6 +1341,17 @@ void MainWindow::on_actionExport_As_triggered()
 
         const int sndFileFormat = mExportDialog->getSndFileFormat();
 
+        int outputSampleRate = mExportDialog->getSampleRate();
+
+        if ( outputSampleRate == SampleRate::KEEP_SAME )
+        {
+            outputSampleRate = mCurrentSampleHeader->sampleRate;
+        }
+
+
+        qDebug() << outputSampleRate;
+
+
         const QDir outputDir( outputDirPath );
 
         int numSamplesToExport = mSampleRangeList.size();
@@ -1475,7 +1487,8 @@ void MainWindow::on_actionExport_As_triggered()
             const QString path = mFileHandler.saveAudioFile( samplesDirPath,
                                                              audioFileName,
                                                              tempBuffer,
-                                                             mCurrentSampleHeader,
+                                                             mCurrentSampleHeader->sampleRate,
+                                                             outputSampleRate,
                                                              sndFileFormat,
                                                              isOverwriteEnabled );
 
@@ -1661,7 +1674,7 @@ void MainWindow::on_actionApply_Gain_triggered()
                 new ApplyGainCommand( dialog.getGainValue(),
                                       orderPos,
                                       mUI->waveGraphicsView,
-                                      mCurrentSampleHeader,
+                                      mCurrentSampleHeader->sampleRate,
                                       mFileHandler,
                                       tempDirPath,
                                       fileBaseName,
@@ -1707,7 +1720,7 @@ void MainWindow::on_actionApply_Gain_Ramp_triggered()
                                           dialog.getEndGainValue(),
                                           orderPos,
                                           mUI->waveGraphicsView,
-                                          mCurrentSampleHeader,
+                                          mCurrentSampleHeader->sampleRate,
                                           mFileHandler,
                                           tempDirPath,
                                           fileBaseName,
@@ -1745,7 +1758,7 @@ void MainWindow::on_actionNormalise_triggered()
 
             new NormaliseCommand( orderPos,
                                   mUI->waveGraphicsView,
-                                  mCurrentSampleHeader,
+                                  mCurrentSampleHeader->sampleRate,
                                   mFileHandler,
                                   tempDirPath,
                                   fileBaseName,

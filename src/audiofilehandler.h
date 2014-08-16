@@ -43,9 +43,10 @@ public:
     QString saveAudioFile( const QString dirPath,
                            const QString fileBaseName,
                            const SharedSampleBuffer sampleBuffer,
-                           const SharedSampleHeader sampleHeader,
+                           const int currentSampleRateRate,
+                           const int outputSampleRate,
                            const int sndFileFormat,
-                           const bool isOverwritingEnabled = true );
+                           const bool isOverwriteEnabled = true );
 
     QString getLastErrorTitle() const   { return sErrorTitle; }
     QString getLastErrorInfo() const    { return sErrorInfo; }
@@ -55,14 +56,31 @@ public:
     static const int TEMP_FORMAT = SF_ENDIAN_CPU | SF_FORMAT_AU | SF_FORMAT_FLOAT;
 
 private:
-    static QString sErrorTitle;
-    static QString sErrorInfo;
+    static void interleaveSamples( const SharedSampleBuffer inputBuffer,
+                                   const int numChans,
+                                   const int startFrame,
+                                   const int numFrames,
+                                   Array<float>& outputBuffer );
+
+    // Takes a buffer of non-interleaved samples, converts sample rate,
+    // and outputs a buffer of interleaved samples
+    static bool convertSampleRate( const SharedSampleBuffer inputBuffer,
+                                   const qreal sampleRateRatio,
+                                   Array<float>& outputBuffer );
+
+    static bool sndfileSaveAudioFile( SNDFILE* fileID, const SharedSampleBuffer sampleBuffer, const int hopSize );
+    static bool sndfileSaveAudioFile( SNDFILE* fileID, const Array<float> interleavedBuffer, const int hopSize );
+
+    static void sndfileRecordWriteError( const int numSamplesToWrite, const int numSamplesWritten );
 
     static int initSndLib();
     static void recordSndLibError( int errorCode, char* errorMessage );
 
     static SharedSampleBuffer sndlibLoadFile( const char* filePath, mus_long_t startFrame, mus_long_t numFramesToRead );
     static SharedSampleBuffer aubioLoadFile( const char* filePath, uint_t startFrame, uint_t numFramesToRead );
+
+    static QString sErrorTitle;
+    static QString sErrorInfo;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( AudioFileHandler );

@@ -396,7 +396,7 @@ void SplitCommand::redo()
 ApplyGainCommand::ApplyGainCommand( const float gain,
                                     const int waveformItemOrderPos,
                                     WaveGraphicsView* const graphicsView,
-                                    const SharedSampleHeader sampleHeader,
+                                    const int sampleRate,
                                     AudioFileHandler& fileHandler,
                                     const QString tempDirPath,
                                     const QString fileBaseName,
@@ -405,7 +405,7 @@ ApplyGainCommand::ApplyGainCommand( const float gain,
     mGain( gain ),
     mWaveformItemOrderPos( waveformItemOrderPos ),
     mGraphicsView( graphicsView ),
-    mSampleHeader( sampleHeader ),
+    mSampleRate( sampleRate ),
     mFileHandler( fileHandler ),
     mTempDirPath( tempDirPath ),
     mFileBaseName( fileBaseName )
@@ -442,7 +442,7 @@ void ApplyGainCommand::redo()
     SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
     SharedSampleRange sampleRange = item->getSampleRange();
 
-    const int numChans = mSampleHeader->numChans;
+    const int numChans = sampleBuffer->getNumChannels();
 
     SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
 
@@ -451,7 +451,7 @@ void ApplyGainCommand::redo()
         tempBuffer->copyFrom( chanNum, 0, *sampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
     }
 
-    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleHeader, AudioFileHandler::TEMP_FORMAT );
+    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleRate, mSampleRate, AudioFileHandler::TEMP_FORMAT );
 
     if ( ! mFilePath.isEmpty() )
     {
@@ -473,7 +473,7 @@ ApplyGainRampCommand::ApplyGainRampCommand( const float startGain,
                                             const float endGain,
                                             const int waveformItemOrderPos,
                                             WaveGraphicsView* const graphicsView,
-                                            const SharedSampleHeader sampleHeader,
+                                            const int sampleRate,
                                             AudioFileHandler& fileHandler,
                                             const QString tempDirPath,
                                             const QString fileBaseName,
@@ -483,7 +483,7 @@ ApplyGainRampCommand::ApplyGainRampCommand( const float startGain,
     mEndGain( endGain ),
     mWaveformItemOrderPos( waveformItemOrderPos ),
     mGraphicsView( graphicsView ),
-    mSampleHeader( sampleHeader ),
+    mSampleRate( sampleRate ),
     mFileHandler( fileHandler ),
     mTempDirPath( tempDirPath ),
     mFileBaseName( fileBaseName )
@@ -520,7 +520,7 @@ void ApplyGainRampCommand::redo()
     SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
     SharedSampleRange sampleRange = item->getSampleRange();
 
-    const int numChans = mSampleHeader->numChans;
+    const int numChans = sampleBuffer->getNumChannels();
 
     SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
 
@@ -529,7 +529,7 @@ void ApplyGainRampCommand::redo()
         tempBuffer->copyFrom( chanNum, 0, *sampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
     }
 
-    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleHeader, AudioFileHandler::TEMP_FORMAT );
+    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleRate, mSampleRate, AudioFileHandler::TEMP_FORMAT );
 
     if ( ! mFilePath.isEmpty() )
     {
@@ -549,7 +549,7 @@ void ApplyGainRampCommand::redo()
 
 NormaliseCommand::NormaliseCommand( const int waveformItemOrderPos,
                                     WaveGraphicsView* const graphicsView,
-                                    const SharedSampleHeader sampleHeader,
+                                    const int sampleRate,
                                     AudioFileHandler& fileHandler,
                                     const QString tempDirPath,
                                     const QString fileBaseName,
@@ -557,7 +557,7 @@ NormaliseCommand::NormaliseCommand( const int waveformItemOrderPos,
     QUndoCommand( parent ),
     mWaveformItemOrderPos( waveformItemOrderPos ),
     mGraphicsView( graphicsView ),
-    mSampleHeader( sampleHeader ),
+    mSampleRate( sampleRate ),
     mFileHandler( fileHandler ),
     mTempDirPath( tempDirPath ),
     mFileBaseName( fileBaseName )
@@ -594,7 +594,7 @@ void NormaliseCommand::redo()
     SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
     SharedSampleRange sampleRange = item->getSampleRange();
 
-    const int numChans = mSampleHeader->numChans;
+    const int numChans = sampleBuffer->getNumChannels();
 
     SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
 
@@ -603,7 +603,7 @@ void NormaliseCommand::redo()
         tempBuffer->copyFrom( chanNum, 0, *sampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
     }
 
-    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleHeader, AudioFileHandler::TEMP_FORMAT );
+    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleRate, mSampleRate, AudioFileHandler::TEMP_FORMAT );
 
     if ( ! mFilePath.isEmpty() )
     {
@@ -734,7 +734,8 @@ void ApplyTimeStretchCommand::redo()
     mTempFilePath = mMainWindow->mFileHandler.saveAudioFile( mTempDirPath,
                                                              mFileBaseName,
                                                              mMainWindow->mCurrentSampleBuffer,
-                                                             mMainWindow->mCurrentSampleHeader,
+                                                             mMainWindow->mCurrentSampleHeader->sampleRate,
+                                                             mMainWindow->mCurrentSampleHeader->sampleRate,
                                                              AudioFileHandler::TEMP_FORMAT );
 
     if ( ! mTempFilePath.isEmpty() )

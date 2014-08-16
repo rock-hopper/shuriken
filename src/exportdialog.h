@@ -30,10 +30,17 @@
 #include <sndfile.h>
 
 
+namespace SampleRate
+{
+    static const int KEEP_SAME = 0;
+}
+
+
 namespace Ui
 {
     class ExportDialog;
 }
+
 
 class ExportDialog : public QDialog
 {
@@ -55,6 +62,8 @@ public:
     bool isFormatAkaiPgm() const;
 
     int getSndFileFormat() const;
+
+    int getSampleRate() const;
 
     int getAkaiModelID() const;
 
