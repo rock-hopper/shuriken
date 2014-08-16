@@ -43,6 +43,7 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
 
     mPlayhead = new QGraphicsLineItem( 0.0, 0.0, 0.0, scene()->height() - 1 );
     mPlayhead->setPen( QColor( Qt::red ) );
+    mPlayhead->setZValue( ZValues::PLAYHEAD );
 
     mTimer = new QTimeLine();
     mTimer->setFrameRange( 0, 100 );

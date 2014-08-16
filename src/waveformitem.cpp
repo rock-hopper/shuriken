@@ -352,9 +352,9 @@ QVariant WaveformItem::itemChange( GraphicsItemChange change, const QVariant &va
     if ( change == ItemSelectedHasChanged )
     {
         if ( isSelected() )
-            setZValue( 1 );
+            setZValue( ZValues::SELECTED_WAVEFORM );
         else
-            setZValue( 0 );
+            setZValue( ZValues::WAVEFORM );
     }
 
     return QGraphicsItem::itemChange( change, value );

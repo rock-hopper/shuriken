@@ -38,10 +38,17 @@
 
 namespace UserTypes
 {
-    static const int waveformItem       = QGraphicsItem::UserType + 1;
-    static const int frameMarkerItem    = QGraphicsItem::UserType + 2;
-    static const int slicePointItem     = QGraphicsItem::UserType + 3;
-    static const int playheadItem       = QGraphicsItem::UserType + 4;
+    static const int WAVEFORM       = QGraphicsItem::UserType + 1;
+    static const int FRAME_MARKER   = QGraphicsItem::UserType + 2;
+    static const int SLICE_POINT    = QGraphicsItem::UserType + 3;
+}
+
+namespace ZValues
+{
+    static const int WAVEFORM           = 0;
+    static const int SELECTED_WAVEFORM  = 1;
+    static const int FRAME_MARKER       = 2;
+    static const int PLAYHEAD           = 5;
 }
 
 

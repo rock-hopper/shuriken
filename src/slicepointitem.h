@@ -36,7 +36,7 @@ class SlicePointItem : public FrameMarkerItem
     Q_OBJECT
 
 public:
-    enum { Type = UserTypes::slicePointItem };
+    enum { Type = UserTypes::SLICE_POINT };
 
     SlicePointItem( const qreal height, QGraphicsItem* parent = NULL );
 

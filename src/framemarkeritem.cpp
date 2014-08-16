@@ -37,7 +37,7 @@ FrameMarkerItem::FrameMarkerItem( const QBrush brush, const QBrush selectedBrush
 {
     setBrush( brush );
     setHeight( height );
-    setZValue( 2 );
+    setZValue( ZValues::FRAME_MARKER );
     setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges );
 }
 

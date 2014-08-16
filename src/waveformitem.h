@@ -44,7 +44,7 @@ class WaveformItem : public QObject, public QGraphicsRectItem
     Q_OBJECT
 
 public:
-    enum { Type = UserTypes::waveformItem };
+    enum { Type = UserTypes::WAVEFORM };
 
     WaveformItem( const SharedSampleBuffer sampleBuffer,
                   const SharedSampleRange sampleRange,
