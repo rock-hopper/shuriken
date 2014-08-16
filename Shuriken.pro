@@ -401,7 +401,8 @@ LIBS += -Llib \
     -ldl \
     -lpthread \
     -lrt \
-    -lsndfile
+    -lsndfile \
+    -lsamplerate
 unix:DEFINES += "LINUX=1"
 CONFIG(debug, debug|release) { 
     DESTDIR = $$OUT_PWD/debug
