@@ -85,6 +85,9 @@ void MainWindow::connectWaveformToMainWindow( const SharedWaveformItem item )
     QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
                       this, SLOT( reorderSampleRangeList(QList<int>,int) ) );
 
+    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
+                      this, SLOT( on_pushButton_Stop_clicked() ) );
+
     QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
                       this, SLOT( playSampleRange(int,int,QPointF) ) );
 }
