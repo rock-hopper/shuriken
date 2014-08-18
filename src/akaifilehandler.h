@@ -74,6 +74,7 @@ private:
         static const int FILE_SIZE              = 0x2A04;
         static const int PAD_DATA_START         = 0x18;
         static const int PAD_DATA_SIZE          = 0xA4;
+        static const int PAD_DATA_LEVEL_OFFSET  = 0x11;
         static const int SAMPLE_NAME_SIZE       = 16;
         static const int PAD_MIDI_DATA_START    = 0x2918;
         static const int MIDI_NOTE_DATA_START   = 0x2958;

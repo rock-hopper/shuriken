@@ -82,18 +82,34 @@ bool AkaiFileHandler::writePgmFileMPC1000( const QStringList sampleNames,
                 pgmData.replace( pos, MPC1000_PGM::SAMPLE_NAME_SIZE, sampleName );
             }
 
+            // Add sample volume to PGM data
+            {
+                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::PAD_DATA_LEVEL_OFFSET;
+
+                QByteArray byteArray;
+                byteArray += quint8( 100 );
+
+                pgmData.replace( pos, 1, byteArray );
+            }
+
             // Add "pad" -> "MIDI note" mapping to PGM data
             {
                 const int pos = MPC1000_PGM::PAD_MIDI_DATA_START + padNum;
 
-                pgmData.replace( pos, 1, (char*) &noteNum );
+                QByteArray byteArray;
+                byteArray += noteNum;
+
+                pgmData.replace( pos, 1, byteArray );
             }
 
             // Add "MIDI note" -> "pad" mapping to PGM data
             {
                 const int pos = MPC1000_PGM::MIDI_NOTE_DATA_START + noteNum;
 
-                pgmData.replace( pos, 1, (char*) &padNum );
+                QByteArray byteArray;
+                byteArray += padNum;
+
+                pgmData.replace( pos, 1, byteArray );
             }
 
             noteNum++;

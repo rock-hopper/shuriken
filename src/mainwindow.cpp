@@ -1482,11 +1482,11 @@ void MainWindow::on_actionExport_As_triggered()
 
                 if ( mExportDialog->getNumberingStyle() == ExportDialog::PREFIX )
                 {
-                    audioFileName.prepend( QString::number( i + 1 ) );
+                    audioFileName.prepend( QString::number( i + 1 ).rightJustified( 2, '0' ) );
                 }
                 else // SUFFIX
                 {
-                    audioFileName.append( QString::number( i + 1 ) );
+                    audioFileName.append( QString::number( i + 1 ).rightJustified( 2, '0' ) );
                 }
 
                 const SharedSampleRange sampleRange = mSampleRangeList.at( i );
@@ -1509,7 +1509,14 @@ void MainWindow::on_actionExport_As_triggered()
 
                 if ( ! path.isEmpty() )
                 {
-                    audioFileNames << QFileInfo( path ).fileName();
+                    if ( isExportTypeAkaiPgm )
+                    {
+                        audioFileNames << audioFileName;
+                    }
+                    else
+                    {
+                        audioFileNames << QFileInfo( path ).fileName();
+                    }
                 }
                 else
                 {
