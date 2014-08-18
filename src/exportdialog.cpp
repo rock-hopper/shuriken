@@ -60,6 +60,7 @@ ExportDialog::ExportDialog( QWidget* parent ) :
     // Populate combo boxes
     mUI->radioButton_AudioFiles->click();
 
+
     QStringList akaiModelTextList;
     QList<int> akaiModelDataList;
 
@@ -74,6 +75,7 @@ ExportDialog::ExportDialog( QWidget* parent ) :
     mUI->label_Model->setVisible( false );
     mUI->comboBox_Model->setVisible( false );
 
+
     QStringList sampleRateTextList;
     QList<int> sampleRateDataList;
 
@@ -84,6 +86,12 @@ ExportDialog::ExportDialog( QWidget* parent ) :
     {
         mUI->comboBox_SampleRate->addItem( sampleRateTextList[ i ], sampleRateDataList[ i ] );
     }
+
+
+    QStringList midiFileTextList;
+    midiFileTextList << "Don't Export" << "Export" << "Export Only";
+
+    mUI->comboBox_MidiFile->addItems( midiFileTextList );
 }
 
 
@@ -98,6 +106,55 @@ ExportDialog::~ExportDialog()
 QString ExportDialog::getOutputDirPath() const
 {
     return mUI->lineEdit_OutputDir->text();
+}
+
+
+
+int ExportDialog::getExportType() const
+{
+    int exportType;
+
+    if ( mUI->comboBox_MidiFile->currentText() == "Export Only" )
+    {
+        exportType = EXPORT_MIDI_FILE;
+    }
+    else if ( mUI->radioButton_AudioFiles->isChecked() )
+    {
+        exportType = EXPORT_AUDIO_FILES;
+    }
+    else if ( mUI->radioButton_H2Drumkit->isChecked() )
+    {
+        exportType = EXPORT_H2DRUMKIT | EXPORT_AUDIO_FILES;
+    }
+    else if ( mUI->radioButton_SFZ->isChecked() )
+    {
+        exportType = EXPORT_SFZ | EXPORT_AUDIO_FILES;
+    }
+    else if ( mUI->radioButton_Akai->isChecked() )
+    {
+        exportType = EXPORT_AKAI_PGM | EXPORT_AUDIO_FILES;
+    }
+
+    if ( mUI->comboBox_MidiFile->currentText() == "Export" )
+    {
+        exportType |= EXPORT_MIDI_FILE;
+    }
+
+    return exportType;
+}
+
+
+
+int ExportDialog::getMidiFileType() const
+{
+    if ( mUI->radioButton_MidiType0->isChecked() )
+    {
+        return 0;
+    }
+    else // mUI->radioButton_MidiType1->isChecked()
+    {
+        return 1;
+    }
 }
 
 
@@ -126,27 +183,6 @@ ExportDialog::NumberingStyle ExportDialog::getNumberingStyle() const
 bool ExportDialog::isOverwriteEnabled() const
 {
     return mUI->checkBox_Overwrite->isChecked();
-}
-
-
-
-bool ExportDialog::isFormatSFZ() const
-{
-    return mUI->radioButton_SFZ->isChecked();
-}
-
-
-
-bool ExportDialog::isFormatH2Drumkit() const
-{
-    return mUI->radioButton_H2Drumkit->isChecked();
-}
-
-
-
-bool ExportDialog::isFormatAkaiPgm() const
-{
-    return mUI->radioButton_Akai->isChecked();
 }
 
 
@@ -434,6 +470,14 @@ void ExportDialog::on_radioButton_AudioFiles_clicked()
 
     const int index = mUI->comboBox_SampleRate->findData( SampleRate::KEEP_SAME );
     mUI->comboBox_SampleRate->setCurrentIndex( index );
+
+    if ( mUI->comboBox_MidiFile->currentText() == "Export" || mUI->comboBox_MidiFile->currentText() == "Export Only" )
+    {
+        foreach ( QAbstractButton* button, mUI->buttonGroup_Midi->buttons() )
+        {
+            button->setEnabled( true );
+        }
+    }
 }
 
 
@@ -465,6 +509,14 @@ void ExportDialog::on_radioButton_H2Drumkit_clicked()
 
     const int index = mUI->comboBox_SampleRate->findData( SampleRate::KEEP_SAME );
     mUI->comboBox_SampleRate->setCurrentIndex( index );
+
+    if ( mUI->comboBox_MidiFile->currentText() == "Export" || mUI->comboBox_MidiFile->currentText() == "Export Only" )
+    {
+        foreach ( QAbstractButton* button, mUI->buttonGroup_Midi->buttons() )
+        {
+            button->setEnabled( true );
+        }
+    }
 }
 
 
@@ -496,6 +548,14 @@ void ExportDialog::on_radioButton_SFZ_clicked()
 
     const int index = mUI->comboBox_SampleRate->findData( SampleRate::KEEP_SAME );
     mUI->comboBox_SampleRate->setCurrentIndex( index );
+
+    if ( mUI->comboBox_MidiFile->currentText() == "Export" || mUI->comboBox_MidiFile->currentText() == "Export Only" )
+    {
+        foreach ( QAbstractButton* button, mUI->buttonGroup_Midi->buttons() )
+        {
+            button->setEnabled( true );
+        }
+    }
 }
 
 
@@ -529,4 +589,53 @@ void ExportDialog::on_radioButton_Akai_clicked()
 
     const int index = mUI->comboBox_SampleRate->findData( 44100 );
     mUI->comboBox_SampleRate->setCurrentIndex( index );
+
+    foreach ( QAbstractButton* button, mUI->buttonGroup_Midi->buttons() )
+    {
+        button->setEnabled( false );
+    }
+
+    mUI->radioButton_MidiType1->setChecked( true );
+}
+
+
+
+void ExportDialog::on_comboBox_MidiFile_activated( const QString text )
+{
+    if ( text == "Export Only" )
+    {
+        foreach ( QAbstractButton* button, mUI->buttonGroup_Export->buttons() )
+        {
+            button->setEnabled( false );
+        }
+
+        foreach ( QAbstractButton* button, mUI->buttonGroup_Midi->buttons() )
+        {
+            button->setEnabled( true );
+        }
+    }
+    else
+    {
+        foreach ( QAbstractButton* button, mUI->buttonGroup_Export->buttons() )
+        {
+            button->setEnabled( true );
+        }
+
+        if ( mUI->radioButton_Akai->isChecked() )
+        {
+            foreach ( QAbstractButton* button, mUI->buttonGroup_Midi->buttons() )
+            {
+                button->setEnabled( false );
+            }
+
+            mUI->radioButton_MidiType1->setChecked( true );
+        }
+        else
+        {
+            foreach ( QAbstractButton* button, mUI->buttonGroup_Midi->buttons() )
+            {
+                button->setEnabled( text == "Export" || text == "Export Only" );
+            }
+        }
+    }
 }

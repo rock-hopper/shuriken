@@ -22,6 +22,7 @@
 
 #include "sampleraudiosource.h"
 #include "shurikensampler.h"
+#include "globals.h"
 #include <QDebug>
 
 
@@ -32,8 +33,8 @@ SamplerAudioSource::SamplerAudioSource() :
     AudioSource(),
     mFileSampleRate( 0.0 ),
     mPlaybackSampleRate( 0.0 ),
-    mNextFreeKey( DEFAULT_KEY ),
-    mStartKey( DEFAULT_KEY ),
+    mNextFreeKey( Midi::MIDDLE_C ),
+    mStartKey( Midi::MIDDLE_C ),
     mIsPlaySeqEnabled( false ),
     mNoteCounter( 0 ),
     mFrameCounter( 0 )
@@ -75,15 +76,15 @@ void SamplerAudioSource::setSampleRanges( const QList<SharedSampleRange> sampleR
         clearSampleRanges();
         mSampleRangeList = sampleRangeList;
 
-        if ( sampleRangeList.size() > MAX_POLYPHONY - DEFAULT_KEY )
+        if ( sampleRangeList.size() > Midi::MAX_POLYPHONY - Midi::MIDDLE_C )
         {
-            mNextFreeKey = qMax( MAX_POLYPHONY - sampleRangeList.size(), 0 );
+            mNextFreeKey = qMax( Midi::MAX_POLYPHONY - sampleRangeList.size(), 0 );
         }
 
         mStartKey = mNextFreeKey;
 
         int i = 0;
-        while (  i < sampleRangeList.size() && i < MAX_POLYPHONY )
+        while (  i < sampleRangeList.size() && i < Midi::MAX_POLYPHONY )
         {
             addNewSample( mSampleBuffer, sampleRangeList.at( i ), mFileSampleRate );
             i++;
@@ -206,7 +207,7 @@ bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer,
 {
     bool isSampleAssignedToKey = false;
 
-    if ( mNextFreeKey < MAX_POLYPHONY )
+    if ( mNextFreeKey < Midi::MAX_POLYPHONY )
     {
         mSampler.addVoice( new ShurikenSamplerVoice() );
 
@@ -236,25 +237,24 @@ void SamplerAudioSource::clearSampleRanges()
     mSampler.clearSounds();
     mNoteOnFrameNumList.clear();
     mSampleRangeList.clear();
-    mNextFreeKey = DEFAULT_KEY;
-    mStartKey = DEFAULT_KEY;
+    mNextFreeKey = Midi::MIDDLE_C;
+    mStartKey = Midi::MIDDLE_C;
 }
 
 
 
 void SamplerAudioSource::updateNoteOnFrameNumList()
 {
-    if ( mFileSampleRate > 0.0 )
-    {
-        mNoteOnFrameNumList.clear();
-        int noteOnFrameNum = 0;
+    Q_ASSERT( mFileSampleRate > 0.0 );
 
-        int i = 0;
-        while (  i < mSampleRangeList.size() && i < MAX_POLYPHONY )
-        {
-            mNoteOnFrameNumList.append( noteOnFrameNum );
-            noteOnFrameNum += mSampleRangeList.at( i )->numFrames * ( mPlaybackSampleRate / mFileSampleRate );
-            i++;
-        }
+    mNoteOnFrameNumList.clear();
+    int noteOnFrameNum = 0;
+
+    int i = 0;
+    while (  i < mSampleRangeList.size() && i < Midi::MAX_POLYPHONY )
+    {
+        mNoteOnFrameNumList.append( noteOnFrameNum );
+        noteOnFrameNum += mSampleRangeList.at( i )->numFrames * ( mPlaybackSampleRate / mFileSampleRate );
+        i++;
     }
 }

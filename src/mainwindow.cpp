@@ -34,6 +34,7 @@
 #include "messageboxes.h"
 #include "textfilehandler.h"
 #include "akaifilehandler.h"
+#include "midifilehandler.h"
 #include <rubberband/RubberBandStretcher.h>
 #include <QDebug>
 
@@ -1338,9 +1339,13 @@ void MainWindow::on_actionExport_As_triggered()
 
         const bool isOverwriteEnabled = mExportDialog->isOverwriteEnabled();
 
-        const bool isFormatH2Drumkit = mExportDialog->isFormatH2Drumkit();
-        const bool isFormatSFZ = mExportDialog->isFormatSFZ();
-        const bool isFormatAkaiPgm = mExportDialog->isFormatAkaiPgm();
+        const int exportType = mExportDialog->getExportType();
+
+        const bool isExportTypeAudioFiles = exportType & ExportDialog::EXPORT_AUDIO_FILES;
+        const bool isExportTypeH2Drumkit  = exportType & ExportDialog::EXPORT_H2DRUMKIT;
+        const bool isExportTypeSFZ        = exportType & ExportDialog::EXPORT_SFZ;
+        const bool isExportTypeAkaiPgm    = exportType & ExportDialog::EXPORT_AKAI_PGM;
+        const bool isExportTypeMidiFile   = exportType & ExportDialog::EXPORT_MIDI_FILE;
 
         const int sndFileFormat = mExportDialog->getSndFileFormat();
 
@@ -1350,10 +1355,6 @@ void MainWindow::on_actionExport_As_triggered()
         {
             outputSampleRate = mCurrentSampleHeader->sampleRate;
         }
-
-
-        qDebug() << outputSampleRate;
-
 
         const QDir outputDir( outputDirPath );
 
@@ -1368,7 +1369,15 @@ void MainWindow::on_actionExport_As_triggered()
             return;
         }
 
-        if ( isFormatH2Drumkit )
+        if ( isExportTypeMidiFile && mUI->doubleSpinBox_OriginalBPM->value() == 0.0 )
+        {
+            MessageBoxes::showWarningDialog( tr( "Cannot export MIDI file!" ),
+                                             tr( "BPM needs to be set to a value higher than 0" ) );
+
+            return;
+        }
+
+        if ( isExportTypeH2Drumkit )
         {
             if ( outputDir.exists( fileName ) )
             {
@@ -1395,7 +1404,7 @@ void MainWindow::on_actionExport_As_triggered()
                 }
             }
         }
-        else if ( isFormatSFZ )
+        else if ( isExportTypeSFZ )
         {
             const QString sfzFileName = fileName + ".sfz";
 
@@ -1413,7 +1422,7 @@ void MainWindow::on_actionExport_As_triggered()
                 }
             }
         }
-        else if ( isFormatAkaiPgm )
+        else if ( isExportTypeAkaiPgm )
         {
             const QString pgmFileName = fileName + ".pgm";
 
@@ -1453,61 +1462,65 @@ void MainWindow::on_actionExport_As_triggered()
         QStringList audioFileNames;
         bool isSuccessful = true;
 
-        if ( isFormatH2Drumkit || isFormatSFZ )
+        if ( isExportTypeH2Drumkit || isExportTypeSFZ )
         {
             outputDir.mkdir( fileName );
             samplesDirPath = outputDir.absoluteFilePath( fileName );
         }
 
-        for ( int i = 0; i < numSamplesToExport; i++ )
+        // Export audio files
+        if ( isExportTypeAudioFiles )
         {
-            QString audioFileName = fileName;
-
-            if ( isFormatAkaiPgm && audioFileName.size() > 14 )
+            for ( int i = 0; i < numSamplesToExport; i++ )
             {
-                audioFileName.resize( 14 );
-            }
+                QString audioFileName = fileName;
 
-            if ( mExportDialog->getNumberingStyle() == ExportDialog::PREFIX )
-            {
-                audioFileName.prepend( QString::number( i + 1 ) );
-            }
-            else // SUFFIX
-            {
-                audioFileName.append( QString::number( i + 1 ) );
-            }
+                if ( isExportTypeAkaiPgm && audioFileName.size() > 14 )
+                {
+                    audioFileName.resize( 14 );
+                }
 
-            const SharedSampleRange sampleRange = mSampleRangeList.at( i );
-            const int numChans = mCurrentSampleHeader->numChans;
+                if ( mExportDialog->getNumberingStyle() == ExportDialog::PREFIX )
+                {
+                    audioFileName.prepend( QString::number( i + 1 ) );
+                }
+                else // SUFFIX
+                {
+                    audioFileName.append( QString::number( i + 1 ) );
+                }
 
-            SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
+                const SharedSampleRange sampleRange = mSampleRangeList.at( i );
+                const int numChans = mCurrentSampleHeader->numChans;
 
-            for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-            {
-                tempBuffer->copyFrom( chanNum, 0, *mCurrentSampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
-            }
+                SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
 
-            const QString path = mFileHandler.saveAudioFile( samplesDirPath,
-                                                             audioFileName,
-                                                             tempBuffer,
-                                                             mCurrentSampleHeader->sampleRate,
-                                                             outputSampleRate,
-                                                             sndFileFormat,
-                                                             isOverwriteEnabled );
+                for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                {
+                    tempBuffer->copyFrom( chanNum, 0, *mCurrentSampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
+                }
 
-            if ( ! path.isEmpty() )
-            {
-                audioFileNames << QFileInfo( path ).fileName();
-            }
-            else
-            {
-                isSuccessful = false;
-                break;
+                const QString path = mFileHandler.saveAudioFile( samplesDirPath,
+                                                                 audioFileName,
+                                                                 tempBuffer,
+                                                                 mCurrentSampleHeader->sampleRate,
+                                                                 outputSampleRate,
+                                                                 sndFileFormat,
+                                                                 isOverwriteEnabled );
+
+                if ( ! path.isEmpty() )
+                {
+                    audioFileNames << QFileInfo( path ).fileName();
+                }
+                else
+                {
+                    isSuccessful = false;
+                    break;
+                }
             }
         }
 
-        // Export Hydrogen Drumkit
-        if ( isSuccessful && isFormatH2Drumkit )
+        // Export Hydrogen drumkit
+        if ( isSuccessful && isExportTypeH2Drumkit )
         {
             TextFileHandler::createH2DrumkitXmlFile( samplesDirPath, fileName, audioFileNames );
 #ifdef LINUX
@@ -1521,7 +1534,7 @@ void MainWindow::on_actionExport_As_triggered()
             File( samplesDirPath.toLocal8Bit().data() ).deleteRecursively();
         }
         // Export SFZ
-        else if ( isSuccessful && isFormatSFZ )
+        else if ( isSuccessful && isExportTypeSFZ )
         {
             const QString sfzFilePath = outputDir.absoluteFilePath( fileName + ".sfz" );
             const QString samplesDirName = QFileInfo( samplesDirPath ).fileName();
@@ -1529,7 +1542,7 @@ void MainWindow::on_actionExport_As_triggered()
             TextFileHandler::createSFZFile( sfzFilePath, samplesDirName, audioFileNames );
         }
         // Export Akai PGM
-        else if ( isSuccessful && isFormatAkaiPgm )
+        else if ( isSuccessful && isExportTypeAkaiPgm )
         {
             const int modelID = mExportDialog->getAkaiModelID();
 
@@ -1544,6 +1557,16 @@ void MainWindow::on_actionExport_As_triggered()
             default:
                 break;
             }
+        }
+
+        // Export MIDI file
+        if ( isSuccessful && isExportTypeMidiFile )
+        {
+            const QString midiFilePath = outputDir.absoluteFilePath( fileName + ".mid" );
+            const qreal bpm = mUI->doubleSpinBox_OriginalBPM->value();
+            const int midiFileType = mExportDialog->getMidiFileType();
+
+            MidiFileHandler::SaveMidiFile( midiFilePath, mSampleRangeList, mCurrentSampleHeader->sampleRate, bpm, midiFileType );
         }
 
 

@@ -49,22 +49,29 @@ class ExportDialog : public QDialog
 public:
     enum NumberingStyle { PREFIX, SUFFIX };
 
+    enum ExportType
+    {
+        EXPORT_AUDIO_FILES = 0x01,
+        EXPORT_H2DRUMKIT   = 0x02,
+        EXPORT_SFZ         = 0x04,
+        EXPORT_AKAI_PGM    = 0x08,
+        EXPORT_MIDI_FILE   = 0x10
+    };
+
     ExportDialog( QWidget* parent = NULL );
     ~ExportDialog();
 
     QString getOutputDirPath() const;
+
+    int getExportType() const;
+    int getMidiFileType() const;
+
     QString getFileName() const;
     NumberingStyle getNumberingStyle() const;
     bool isOverwriteEnabled() const;
 
-    bool isFormatSFZ() const;
-    bool isFormatH2Drumkit() const;
-    bool isFormatAkaiPgm() const;
-
     int getSndFileFormat() const;
-
     int getSampleRate() const;
-
     int getAkaiModelID() const;
 
 protected:
@@ -81,6 +88,7 @@ private:
     ScopedPointer<DirectoryValidator> mDirectoryValidator;
 
 private slots:
+    void on_comboBox_MidiFile_activated( const QString text );
     void on_radioButton_Akai_clicked();
     void on_radioButton_SFZ_clicked();
     void on_radioButton_H2Drumkit_clicked();

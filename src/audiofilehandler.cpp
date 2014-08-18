@@ -126,9 +126,13 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
         }
     }
 
-    return sampleHeader;
+    // It's essential that the sample rate is known
+    if ( sampleHeader->sampleRate < 1.0 )
+    {
+        sampleHeader.clear();
+    }
 
-//    QString dataFormatName = mus_data_format_name( mus_sound_data_format(path) );
+    return sampleHeader;
 }
 
 
@@ -141,6 +145,8 @@ QString AudioFileHandler::saveAudioFile( const QString dirPath,
                                          const int sndFileFormat,
                                          const bool isOverwriteEnabled )
 {
+    Q_ASSERT( currentSampleRate != 0 );
+
     const int hopSize = 8192;
     const int numChans = sampleBuffer->getNumChannels();
 
