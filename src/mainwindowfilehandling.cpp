@@ -206,7 +206,7 @@ void MainWindow::exportAs( const QString tempDirPath,
                 audioFileName.resize( 14 );
             }
 
-            if ( mExportDialog->getNumberingStyle() == ExportDialog::PREFIX )
+            if ( mExportDialog->getNumberingStyle() == ExportDialog::NUMBERING_PREFIX )
             {
                 audioFileName.prepend( QString::number( i + 1 ).rightJustified( 2, '0' ) );
             }
@@ -613,7 +613,7 @@ void MainWindow::exportAsDialog()
 
     int outputSampleRate = mExportDialog->getSampleRate();
 
-    if ( outputSampleRate == SampleRate::KEEP_SAME )
+    if ( outputSampleRate == ExportDialog::SAMPLE_RATE_KEEP_SAME )
     {
         outputSampleRate = mCurrentSampleHeader->sampleRate;
     }

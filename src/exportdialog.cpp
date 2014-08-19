@@ -80,7 +80,7 @@ ExportDialog::ExportDialog( QWidget* parent ) :
     QList<int> sampleRateDataList;
 
     sampleRateTextList << "Keep Same" << "8,000 Hz" << "11,025 Hz" << "16,000 Hz"<< "22,050 Hz" << "32,000 Hz" << "44,100 Hz" << "48,000 Hz" << "88,200 Hz" << "96,000 Hz" << "192,000 Hz";
-    sampleRateDataList << SampleRate::KEEP_SAME << 8000 << 11025 << 16000 << 22050 << 32000 << 44100 << 48000 << 88200 << 96000 << 192000;
+    sampleRateDataList << SAMPLE_RATE_KEEP_SAME << 8000 << 11025 << 16000 << 22050 << 32000 << 44100 << 48000 << 88200 << 96000 << 192000;
 
     for ( int i = 0; i < sampleRateTextList.size(); i++ )
     {
@@ -172,11 +172,11 @@ ExportDialog::NumberingStyle ExportDialog::getNumberingStyle() const
 {
     if ( mUI->radioButton_Prefix->isChecked() )
     {
-        return PREFIX;
+        return NUMBERING_PREFIX;
     }
     else
     {
-        return SUFFIX;
+        return NUMBERING_SUFFIX;
     }
 }
 
@@ -470,7 +470,7 @@ void ExportDialog::on_radioButton_AudioFiles_clicked()
     mUI->lineEdit_FileName->clear();
     setPlatformFileNameValidator();
 
-    const int index = mUI->comboBox_SampleRate->findData( SampleRate::KEEP_SAME );
+    const int index = mUI->comboBox_SampleRate->findData( SAMPLE_RATE_KEEP_SAME );
     mUI->comboBox_SampleRate->setCurrentIndex( index );
 
     if ( mUI->comboBox_MidiFile->currentText() == "Export" || mUI->comboBox_MidiFile->currentText() == "Export Only" )
@@ -509,7 +509,7 @@ void ExportDialog::on_radioButton_H2Drumkit_clicked()
     mUI->lineEdit_FileName->clear();
     setPlatformFileNameValidator();
 
-    const int index = mUI->comboBox_SampleRate->findData( SampleRate::KEEP_SAME );
+    const int index = mUI->comboBox_SampleRate->findData( SAMPLE_RATE_KEEP_SAME );
     mUI->comboBox_SampleRate->setCurrentIndex( index );
 
     if ( mUI->comboBox_MidiFile->currentText() == "Export" || mUI->comboBox_MidiFile->currentText() == "Export Only" )
@@ -548,7 +548,7 @@ void ExportDialog::on_radioButton_SFZ_clicked()
     mUI->lineEdit_FileName->clear();
     setPlatformFileNameValidator();
 
-    const int index = mUI->comboBox_SampleRate->findData( SampleRate::KEEP_SAME );
+    const int index = mUI->comboBox_SampleRate->findData( SAMPLE_RATE_KEEP_SAME );
     mUI->comboBox_SampleRate->setCurrentIndex( index );
 
     if ( mUI->comboBox_MidiFile->currentText() == "Export" || mUI->comboBox_MidiFile->currentText() == "Export Only" )

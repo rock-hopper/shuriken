@@ -30,12 +30,6 @@
 #include <sndfile.h>
 
 
-namespace SampleRate
-{
-    static const int KEEP_SAME = 0;
-}
-
-
 namespace Ui
 {
     class ExportDialog;
@@ -47,7 +41,7 @@ class ExportDialog : public QDialog
     Q_OBJECT
 
 public:
-    enum NumberingStyle { PREFIX, SUFFIX };
+    enum NumberingStyle { NUMBERING_PREFIX, NUMBERING_SUFFIX };
 
     enum ExportType
     {
@@ -57,6 +51,8 @@ public:
         EXPORT_AKAI_PGM    = 0x08,
         EXPORT_MIDI_FILE   = 0x10
     };
+
+    enum SampleRate { SAMPLE_RATE_KEEP_SAME = 0 };
 
     ExportDialog( QWidget* parent = NULL );
     ~ExportDialog();
