@@ -179,6 +179,7 @@ void MainWindow::exportAs( const QString tempDirPath,
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     const QDir outputDir( outputDirPath );
+    const QString samplesDirPath = outputDir.absoluteFilePath( fileName );
 
     const bool isExportTypeAudioFiles = exportType & ExportDialog::EXPORT_AUDIO_FILES;
     const bool isExportTypeH2Drumkit  = exportType & ExportDialog::EXPORT_H2DRUMKIT;
@@ -186,15 +187,13 @@ void MainWindow::exportAs( const QString tempDirPath,
     const bool isExportTypeAkaiPgm    = exportType & ExportDialog::EXPORT_AKAI_PGM;
     const bool isExportTypeMidiFile   = exportType & ExportDialog::EXPORT_MIDI_FILE;
 
-    QString samplesDirPath = outputDirPath;
-    QStringList audioFileNames;
-    bool isSuccessful = true;
-
-    if ( isExportTypeH2Drumkit || isExportTypeSFZ )
+    if ( isExportTypeAudioFiles )
     {
         outputDir.mkdir( fileName );
-        samplesDirPath = outputDir.absoluteFilePath( fileName );
     }
+
+    QStringList audioFileNames;
+    bool isSuccessful = true;
 
     // Export audio files
     if ( isExportTypeAudioFiles )
@@ -284,10 +283,10 @@ void MainWindow::exportAs( const QString tempDirPath,
         switch ( modelID )
         {
         case AkaiModelID::MPC1000_ID:
-            AkaiFileHandler::writePgmFileMPC1000( audioFileNames, fileName, outputDirPath, tempDirPath, isOverwriteEnabled );
+            AkaiFileHandler::writePgmFileMPC1000( audioFileNames, fileName, samplesDirPath, tempDirPath, isOverwriteEnabled );
             break;
         case AkaiModelID::MPC500_ID:
-            AkaiFileHandler::writePgmFileMPC500( audioFileNames, fileName, outputDirPath, tempDirPath, isOverwriteEnabled );
+            AkaiFileHandler::writePgmFileMPC500( audioFileNames, fileName, samplesDirPath, tempDirPath, isOverwriteEnabled );
             break;
         default:
             break;
@@ -297,11 +296,17 @@ void MainWindow::exportAs( const QString tempDirPath,
     // Export MIDI file
     if ( isSuccessful && isExportTypeMidiFile )
     {
-        const QString midiFilePath = outputDir.absoluteFilePath( fileName + ".mid" );
         const qreal bpm = mUI->doubleSpinBox_OriginalBPM->value();
         const MidiFileHandler::MidiFileType type = (MidiFileHandler::MidiFileType) mExportDialog->getMidiFileType();
 
-        MidiFileHandler::SaveMidiFile( midiFilePath, mSampleRangeList, mCurrentSampleHeader->sampleRate, bpm, type );
+        if ( isExportTypeAkaiPgm )
+        {
+            MidiFileHandler::SaveMidiFile( fileName, samplesDirPath, mSampleRangeList, mCurrentSampleHeader->sampleRate, bpm, type );
+        }
+        else
+        {
+            MidiFileHandler::SaveMidiFile( fileName, outputDirPath, mSampleRangeList, mCurrentSampleHeader->sampleRate, bpm, type );
+        }
     }
 
     QApplication::restoreOverrideCursor();

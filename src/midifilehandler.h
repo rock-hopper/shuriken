@@ -32,7 +32,8 @@ class MidiFileHandler
 public:
     enum MidiFileType { MIDI_FILE_TYPE_0 = 0, MIDI_FILE_TYPE_1 = 1 };
 
-    static bool SaveMidiFile( const QString filePath,
+    static bool SaveMidiFile( const QString fileBaseName,
+                              const QString outputDirPath,
                               const QList<SharedSampleRange> sampleRangeList,
                               const qreal sampleRate,
                               const qreal bpm,

@@ -22,12 +22,14 @@
 
 #include "midifilehandler.h"
 #include "globals.h"
+#include <QDir>
 
 
 //==================================================================================================
 // Public Static:
 
-bool MidiFileHandler::SaveMidiFile( const QString filePath,
+bool MidiFileHandler::SaveMidiFile( const QString fileBaseName,
+                                    const QString outputDirPath,
                                     const QList<SharedSampleRange> sampleRangeList,
                                     const qreal sampleRate,
                                     const qreal bpm,
@@ -36,6 +38,8 @@ bool MidiFileHandler::SaveMidiFile( const QString filePath,
     Q_ASSERT( sampleRangeList.size() != 0 );
     Q_ASSERT( sampleRate > 0.0 );
     Q_ASSERT( bpm > 0.0 );
+
+    const QString filePath = QDir( outputDirPath ).absoluteFilePath( fileBaseName + ".mid");
 
     File file( filePath.toLocal8Bit().data() );
     FileOutputStream outputStream( file );
