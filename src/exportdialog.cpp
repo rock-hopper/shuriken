@@ -611,6 +611,16 @@ void ExportDialog::on_comboBox_MidiFile_activated( const QString text )
             button->setEnabled( false );
         }
 
+        foreach ( QAbstractButton* button, mUI->buttonGroup_Numbering->buttons() )
+        {
+            button->setEnabled( false );
+        }
+
+        mUI->comboBox_Encoding->setEnabled( false );
+        mUI->comboBox_Format->setEnabled( false );
+        mUI->comboBox_Model->setEnabled( false );
+        mUI->comboBox_SampleRate->setEnabled( false );
+
         foreach ( QAbstractButton* button, mUI->buttonGroup_Midi->buttons() )
         {
             button->setEnabled( true );
@@ -622,6 +632,16 @@ void ExportDialog::on_comboBox_MidiFile_activated( const QString text )
         {
             button->setEnabled( true );
         }
+
+        foreach ( QAbstractButton* button, mUI->buttonGroup_Numbering->buttons() )
+        {
+            button->setEnabled( true );
+        }
+
+        mUI->comboBox_Encoding->setEnabled( true );
+        mUI->comboBox_Format->setEnabled( true );
+        mUI->comboBox_Model->setEnabled( true );
+        mUI->comboBox_SampleRate->setEnabled( true );
 
         if ( mUI->radioButton_Akai->isChecked() )
         {
