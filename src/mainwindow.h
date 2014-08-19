@@ -78,11 +78,23 @@ private:
     void getDetectionSettings( AudioAnalyser::DetectionSettings& settings );
     void getSampleRanges( QList<SharedSampleRange>& sampleRangeList );
 
-    void importAudioFile();
     void closeProject();
+
+    void exportAs( const QString tempDirPath,
+                   const QString outputDirPath,
+                   const QString fileName,
+                   const bool isOverwriteEnabled,
+                   const int exportType,
+                   const int sndFileFormat,
+                   const int outputSampleRate,
+                   const int numSamplesToExport );
+
     void saveProject( const QString filePath );
+
     void saveProjectDialog();
     void openProjectDialog();
+    void importAudioFileDialog();
+    void exportAsDialog();
 
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 

@@ -170,7 +170,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/textfilehandler.cpp \
     src/framemarkeritem.cpp \
     src/akaifilehandler.cpp \
-    src/midifilehandler.cpp
+    src/midifilehandler.cpp \
+    src/mainwindowfilehandling.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
