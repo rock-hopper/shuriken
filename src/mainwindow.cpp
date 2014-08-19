@@ -1571,9 +1571,9 @@ void MainWindow::on_actionExport_As_triggered()
         {
             const QString midiFilePath = outputDir.absoluteFilePath( fileName + ".mid" );
             const qreal bpm = mUI->doubleSpinBox_OriginalBPM->value();
-            const int midiFileType = mExportDialog->getMidiFileType();
+            const MidiFileHandler::MidiFileType type = (MidiFileHandler::MidiFileType) mExportDialog->getMidiFileType();
 
-            MidiFileHandler::SaveMidiFile( midiFilePath, mSampleRangeList, mCurrentSampleHeader->sampleRate, bpm, midiFileType );
+            MidiFileHandler::SaveMidiFile( midiFilePath, mSampleRangeList, mCurrentSampleHeader->sampleRate, bpm, type );
         }
 
 

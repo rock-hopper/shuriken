@@ -56,7 +56,6 @@ namespace Midi
 {
     static const int MIDDLE_C               = 60;
     static const int MAX_POLYPHONY          = 128;
-    static const int TICKS_PER_QUART_NOTE   = 960;
 }
 
 

@@ -147,14 +147,16 @@ int ExportDialog::getExportType() const
 
 int ExportDialog::getMidiFileType() const
 {
-    if ( mUI->radioButton_MidiType0->isChecked() )
-    {
-        return 0;
-    }
-    else // mUI->radioButton_MidiType1->isChecked()
-    {
-        return 1;
-    }
+    return 1;
+
+//    if ( mUI->radioButton_MidiType0->isChecked() )
+//    {
+//        return 0;
+//    }
+//    else // mUI->radioButton_MidiType1->isChecked()
+//    {
+//        return 1;
+//    }
 }
 
 

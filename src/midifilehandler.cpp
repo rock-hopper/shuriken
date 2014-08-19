@@ -1,30 +1,64 @@
+/*
+  This file is part of Shuriken Beat Slicer.
+
+  Copyright (C) 2014 Andrew M Taylor <a.m.taylor303@gmail.com>
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation; either version 2
+  of the License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <https://www.gnu.org/licenses/>
+  or write to the Free Software Foundation, Inc., 51 Franklin Street,
+  Fifth Floor, Boston, MA  02110-1301, USA.
+
+*/
+
 #include "midifilehandler.h"
 #include "globals.h"
 
+
+//==================================================================================================
+// Public Static:
 
 bool MidiFileHandler::SaveMidiFile( const QString filePath,
                                     const QList<SharedSampleRange> sampleRangeList,
                                     const qreal sampleRate,
                                     const qreal bpm,
-                                    const int midiFileType )
+                                    const MidiFileType midiFileType )
 {
     Q_ASSERT( sampleRangeList.size() != 0 );
     Q_ASSERT( sampleRate > 0.0 );
     Q_ASSERT( bpm > 0.0 );
 
-
     File file( filePath.toLocal8Bit().data() );
-    FileOutputStream fos( file );
+    FileOutputStream outputStream( file );
     MidiFile midiFile;
     MidiMessageSequence midiSeq;
 
     const int microsecsPerQuartNote = roundToInt( MICROSECS_PER_MINUTE / bpm );
     const int chanNum = 1;
 
-    midiFile.setTicksPerQuarterNote( Midi::TICKS_PER_QUART_NOTE );
+    midiFile.setTicksPerQuarterNote( TICKS_PER_QUART_NOTE );
 
     midiSeq.addEvent( MidiMessage::timeSignatureMetaEvent( 4, 4 ) );
     midiSeq.addEvent( MidiMessage::tempoMetaEvent( microsecsPerQuartNote ) );
+
+    if ( midiFileType == MIDI_FILE_TYPE_1 )
+    {
+        midiSeq.addEvent( MidiMessage::endOfTrack(), midiSeq.getEndTime() );
+
+        midiFile.addTrack( midiSeq );
+
+        midiSeq.clear();
+    }
+
     midiSeq.addEvent( MidiMessage::midiChannelMetaEvent( chanNum ) );
 
     int startNote = Midi::MIDDLE_C;
@@ -34,7 +68,7 @@ bool MidiFileHandler::SaveMidiFile( const QString filePath,
         startNote = qMax( Midi::MAX_POLYPHONY - sampleRangeList.size(), 0 );
     }
 
-    const qreal secondsPerTick = ( SECONDS_PER_MINUTE / bpm ) / Midi::TICKS_PER_QUART_NOTE;
+    const qreal secondsPerTick = ( SECONDS_PER_MINUTE / bpm ) / TICKS_PER_QUART_NOTE;
     const float velocity = 1.0f;
 
     int noteCounter = 0;
@@ -61,5 +95,5 @@ bool MidiFileHandler::SaveMidiFile( const QString filePath,
 
     midiFile.addTrack( midiSeq );
 
-    return midiFile.writeTo( fos );
+    return midiFile.writeTo( outputStream );
 }
