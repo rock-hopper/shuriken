@@ -44,13 +44,15 @@ public:
                                      const QString fileBaseName,
                                      const QString outputDirPath,
                                      const QString tempDirPath,
-                                     const bool isOverwriteEnabled );
+                                     const bool isOverwriteEnabled = true );
 
     static bool writePgmFileMPC500( QStringList sampleNames,
                                     const QString fileBaseName,
                                     const QString outputDirPath,
                                     const QString tempDirPath,
-                                    const bool isOverwriteEnabled );
+                                    const bool isOverwriteEnabled = true );
+
+    static QString getFileExtension()               { return QString( ".pgm" ); }
 
 private:
     static bool getTemplateDataMPC1000( QByteArray& pgmData );

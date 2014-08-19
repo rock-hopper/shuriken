@@ -341,25 +341,24 @@ bool TextFileHandler::createH2DrumkitXmlFile( const QString dirPath, const QStri
 bool TextFileHandler::createSFZFile( const QString sfzFilePath, const QString samplesDirName, const QStringList audioFileNames )
 {
     File file( sfzFilePath.toLocal8Bit().data() );
+
     const bool isSuccessful = file.create();
 
-    if ( ! isSuccessful )
+    if ( isSuccessful )
     {
-        return false;
-    }
+        int key = 60;
 
-    int key = 60;
+        foreach ( QString fileName, audioFileNames )
+        {
+            QString groupText = "<group> key=" + QString::number( key ) + " loop_mode=one_shot\n";
+            QString regionText = "<region> sample=" + samplesDirName + "\\" + fileName + "\n";
 
-    foreach ( QString fileName, audioFileNames )
-    {
-        QString groupText = "<group> key=" + QString::number( key ) + " loop_mode=one_shot\n";
-        QString regionText = "<region> sample=" + samplesDirName + "\\" + fileName + "\n";
+            file.appendText( groupText.toLocal8Bit().data() );
+            file.appendText( regionText.toLocal8Bit().data() );
+            file.appendText( "\n" );
 
-        file.appendText( groupText.toLocal8Bit().data() );
-        file.appendText( regionText.toLocal8Bit().data() );
-        file.appendText( "\n" );
-
-        key++;
+            key++;
+        }
     }
 
     return isSuccessful;

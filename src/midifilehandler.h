@@ -37,7 +37,10 @@ public:
                               const QList<SharedSampleRange> sampleRangeList,
                               const qreal sampleRate,
                               const qreal bpm,
-                              const MidiFileType midiFileType );
+                              const MidiFileType midiFileType,
+                              const bool isOverwriteEnabled = true );
+
+    static QString getFileExtension()           { return QString( ".mid" ); }
 
 private:
     static const int SECONDS_PER_MINUTE   = 60;

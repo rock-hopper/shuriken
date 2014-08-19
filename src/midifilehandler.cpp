@@ -33,15 +33,24 @@ bool MidiFileHandler::SaveMidiFile( const QString fileBaseName,
                                     const QList<SharedSampleRange> sampleRangeList,
                                     const qreal sampleRate,
                                     const qreal bpm,
-                                    const MidiFileType midiFileType )
+                                    const MidiFileType midiFileType,
+                                    const bool isOverwriteEnabled )
 {
     Q_ASSERT( sampleRangeList.size() != 0 );
     Q_ASSERT( sampleRate > 0.0 );
     Q_ASSERT( bpm > 0.0 );
 
-    const QString filePath = QDir( outputDirPath ).absoluteFilePath( fileBaseName + ".mid");
+    const QString filePath = QDir( outputDirPath ).absoluteFilePath( fileBaseName + getFileExtension() );
 
     File file( filePath.toLocal8Bit().data() );
+
+    if ( file.exists() && ! isOverwriteEnabled )
+    {
+        return false;
+    }
+
+    file.deleteFile();
+
     FileOutputStream outputStream( file );
     MidiFile midiFile;
     MidiMessageSequence midiSeq;

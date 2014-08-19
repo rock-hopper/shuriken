@@ -169,8 +169,8 @@ void MainWindow::openProject( const QString filePath )
 
 void MainWindow::exportAs( const QString tempDirPath,
                            const QString outputDirPath,
+                           const QString samplesDirPath,
                            const QString fileName,
-                           const bool isOverwriteEnabled,
                            const int exportType,
                            const int sndFileFormat,
                            const int outputSampleRate,
@@ -179,7 +179,6 @@ void MainWindow::exportAs( const QString tempDirPath,
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     const QDir outputDir( outputDirPath );
-    const QString samplesDirPath = outputDir.absoluteFilePath( fileName );
 
     const bool isExportTypeAudioFiles = exportType & ExportDialog::EXPORT_AUDIO_FILES;
     const bool isExportTypeH2Drumkit  = exportType & ExportDialog::EXPORT_H2DRUMKIT;
@@ -231,8 +230,7 @@ void MainWindow::exportAs( const QString tempDirPath,
                                                              tempBuffer,
                                                              mCurrentSampleHeader->sampleRate,
                                                              outputSampleRate,
-                                                             sndFileFormat,
-                                                             isOverwriteEnabled );
+                                                             sndFileFormat );
 
             if ( ! path.isEmpty() )
             {
@@ -283,10 +281,10 @@ void MainWindow::exportAs( const QString tempDirPath,
         switch ( modelID )
         {
         case AkaiModelID::MPC1000_ID:
-            AkaiFileHandler::writePgmFileMPC1000( audioFileNames, fileName, samplesDirPath, tempDirPath, isOverwriteEnabled );
+            AkaiFileHandler::writePgmFileMPC1000( audioFileNames, fileName, samplesDirPath, tempDirPath );
             break;
         case AkaiModelID::MPC500_ID:
-            AkaiFileHandler::writePgmFileMPC500( audioFileNames, fileName, samplesDirPath, tempDirPath, isOverwriteEnabled );
+            AkaiFileHandler::writePgmFileMPC500( audioFileNames, fileName, samplesDirPath, tempDirPath );
             break;
         default:
             break;
@@ -595,12 +593,17 @@ void MainWindow::exportAsDialog()
     const QString tempDirPath = mOptionsDialog->getTempDirPath();
 
     const QString outputDirPath = mExportDialog->getOutputDirPath();
+    const QDir outputDir( outputDirPath );
+
     const QString fileName = mExportDialog->getFileName();
+
+    const QString samplesDirPath = outputDir.absoluteFilePath( fileName );
 
     const bool isOverwriteEnabled = mExportDialog->isOverwriteEnabled();
 
     const int exportType = mExportDialog->getExportType();
 
+    const bool isExportTypeAudioFiles = exportType & ExportDialog::EXPORT_AUDIO_FILES;
     const bool isExportTypeH2Drumkit  = exportType & ExportDialog::EXPORT_H2DRUMKIT;
     const bool isExportTypeSFZ        = exportType & ExportDialog::EXPORT_SFZ;
     const bool isExportTypeAkaiPgm    = exportType & ExportDialog::EXPORT_AKAI_PGM;
@@ -615,16 +618,35 @@ void MainWindow::exportAsDialog()
         outputSampleRate = mCurrentSampleHeader->sampleRate;
     }
 
-    const QDir outputDir( outputDirPath );
-
     int numSamplesToExport = mSampleRangeList.size();
+
+    QStringList fullFileNamesList;
+
+    if ( isExportTypeH2Drumkit )
+    {
+        fullFileNamesList << fileName + ".h2drumkit";
+    }
+    else if ( isExportTypeSFZ )
+    {
+        fullFileNamesList << fileName + ".sfz";
+    }
+    else if ( isExportTypeAkaiPgm )
+    {
+        fullFileNamesList << fileName + AkaiFileHandler::getFileExtension();
+    }
+    else if ( isExportTypeMidiFile )
+    {
+        fullFileNamesList << fileName + MidiFileHandler::getFileExtension();
+    }
+
+
+    // Carry out some basic checks before exporting
 
 
     if ( ! QFileInfo( outputDirPath ).isWritable() )
     {
-        MessageBoxes::showWarningDialog( tr( "Could not export project!" ),
+        MessageBoxes::showWarningDialog( tr( "Cannot export project!" ),
                                          tr( "Permission to write file(s) denied" ) );
-
         return;
     }
 
@@ -632,73 +654,53 @@ void MainWindow::exportAsDialog()
     {
         MessageBoxes::showWarningDialog( tr( "Cannot export MIDI file!" ),
                                          tr( "BPM needs to be set to a value higher than 0" ) );
-
         return;
     }
 
-    if ( isExportTypeH2Drumkit )
+    if ( isExportTypeAudioFiles && QFileInfo( samplesDirPath ).exists() )
     {
-        if ( outputDir.exists( fileName ) )
+        if ( isOverwriteEnabled )
         {
-            const QString dirPath = outputDir.absoluteFilePath( fileName );
-
-            MessageBoxes::showWarningDialog( tr( "Couldn't export Hydrogen Drumkit!" ),
-                                             tr( "Tried to create " ) + dirPath + tr( " but this directory already exists" ) );
+            const int buttonClicked = MessageBoxes::showQuestionDialog( tr( "Delete contents of directory?" ),
+                                                                        tr( "Do you want to delete the contents of \"" ) + samplesDirPath + tr( "\" before continuing?" )
+                                                                        + tr( "\n\nThis operation cannot be undone"),
+                                                                        QMessageBox::Ok | QMessageBox::Cancel );
+            if ( buttonClicked == QMessageBox::Ok )
+            {
+                File( samplesDirPath.toLocal8Bit().data() ).deleteRecursively();
+            }
+            else
+            {
+                return;
+            }
+        }
+        else
+        {
+            MessageBoxes::showWarningDialog( tr( "Cannot export project!" ),
+                                             tr( "Tried to create \"" ) + samplesDirPath + tr( "\" but this directory already exists" ) );
             return;
         }
+    }
 
-        const QString h2FileName = fileName + ".h2drumkit";
-
-        if ( outputDir.exists( h2FileName ) )
+    foreach ( QString fullFileName, fullFileNamesList )
+    {
+        if ( outputDir.exists( fullFileName ) )
         {
             if ( isOverwriteEnabled )
             {
-                QFile::remove( outputDir.absoluteFilePath( h2FileName ) );
+                QFile::remove( outputDir.absoluteFilePath( fullFileName ) );
             }
             else
             {
-                MessageBoxes::showWarningDialog( tr( "Couldn't export Hydrogen Drumkit!" ),
-                                                 h2FileName + tr( " already exists" ) );
+                MessageBoxes::showWarningDialog( tr( "Cannot export project!" ),
+                                                 "\"" + fullFileName + tr( "\" already exists" ) );
                 return;
             }
         }
     }
-    else if ( isExportTypeSFZ )
+
+    if ( isExportTypeAkaiPgm )
     {
-        const QString sfzFileName = fileName + ".sfz";
-
-        if ( outputDir.exists( sfzFileName ) )
-        {
-            if ( isOverwriteEnabled )
-            {
-                QFile::remove( outputDir.absoluteFilePath( sfzFileName ) );
-            }
-            else
-            {
-                MessageBoxes::showWarningDialog( tr( "Could not export SFZ!" ),
-                                                 sfzFileName + tr( " already exists" ) );
-                return;
-            }
-        }
-    }
-    else if ( isExportTypeAkaiPgm )
-    {
-        const QString pgmFileName = fileName + ".pgm";
-
-        if ( outputDir.exists( pgmFileName ) )
-        {
-            if ( isOverwriteEnabled )
-            {
-                QFile::remove( outputDir.absoluteFilePath( pgmFileName ) );
-            }
-            else
-            {
-                MessageBoxes::showWarningDialog( tr( "Could not export Akai PGM!" ),
-                                                 pgmFileName + tr( " already exists" ) );
-                return;
-            }
-        }
-
         const int modelID = mExportDialog->getAkaiModelID();
 
         const int numPads = AkaiFileHandler::getNumPads( modelID );
@@ -713,5 +715,7 @@ void MainWindow::exportAsDialog()
         }
     }
 
-    exportAs( tempDirPath, outputDirPath, fileName, isOverwriteEnabled, exportType, sndFileFormat, outputSampleRate, numSamplesToExport );
+
+    // Checks complete, now do export
+    exportAs( tempDirPath, outputDirPath, samplesDirPath, fileName, exportType, sndFileFormat, outputSampleRate, numSamplesToExport );
 }

@@ -82,8 +82,8 @@ private:
 
     void exportAs( const QString tempDirPath,
                    const QString outputDirPath,
+                   const QString samplesDirPath,
                    const QString fileName,
-                   const bool isOverwriteEnabled,
                    const int exportType,
                    const int sndFileFormat,
                    const int outputSampleRate,

@@ -56,7 +56,7 @@ bool AkaiFileHandler::writePgmFileMPC1000( const QStringList sampleNames,
                                            const QString tempDirPath,
                                            const bool isOverwriteEnabled )
 {
-    const QString fileName = fileBaseName + ".pgm";
+    const QString fileName = fileBaseName + getFileExtension();
 
     if ( QDir( outputDirPath ).exists( fileName ) && ! isOverwriteEnabled )
     {
