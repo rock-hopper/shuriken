@@ -27,19 +27,12 @@
 #include <QDesktopWidget>
 #include "commands.h"
 #include "globals.h"
-#include "applygaindialog.h"
-#include "applygainrampdialog.h"
-#include "aboutdialog.h"
 #include "zipper.h"
 #include "messageboxes.h"
 #include "textfilehandler.h"
 #include "akaifilehandler.h"
 #include "midifilehandler.h"
-#include <rubberband/RubberBandStretcher.h>
 #include <QDebug>
-
-
-using namespace RubberBand;
 
 
 //==================================================================================================
