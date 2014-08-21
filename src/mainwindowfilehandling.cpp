@@ -88,8 +88,9 @@ void MainWindow::openProject( const QString filePath )
             // Only one sample range is defined - waveform has not been sliced
             if ( mSampleRangeList.size() == 1 )
             {
-                const SharedWaveformItem item =
-                        mUI->waveGraphicsView->createWaveform( sampleBuffer, mSampleRangeList.first() );
+                const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer,
+                                                                                       sampleHeader,
+                                                                                       mSampleRangeList.first() );
                 connectWaveformToMainWindow( item );
 
                 setUpSampler( sampleBuffer, sampleHeader );
@@ -106,8 +107,9 @@ void MainWindow::openProject( const QString filePath )
             }
             else // Multiple sample ranges are defined - waveform has been sliced
             {
-                const QList<SharedWaveformItem> waveformItemList =
-                        mUI->waveGraphicsView->createWaveforms( sampleBuffer, mSampleRangeList );
+                const QList<SharedWaveformItem> waveformItemList = mUI->waveGraphicsView->createWaveforms( sampleBuffer,
+                                                                                                           sampleHeader,
+                                                                                                           mSampleRangeList );
 
                 foreach ( SharedWaveformItem item, waveformItemList )
                 {
@@ -536,7 +538,7 @@ void MainWindow::importAudioFileDialog()
             sampleRange->numFrames = sampleBuffer->getNumFrames();
             mSampleRangeList << sampleRange;
 
-            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer, sampleRange );
+            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer, sampleHeader, sampleRange );
             connectWaveformToMainWindow( item );
 
             setUpSampler( sampleBuffer, sampleHeader );

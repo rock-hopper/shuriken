@@ -42,11 +42,15 @@ public:
     WaveGraphicsView( QWidget* parent = NULL );
 
     // Creates a new waveform item and returns a shared pointer to it
+    // 'sampleRate' is the original audio file sample rate, not playback sample rate
     SharedWaveformItem createWaveform( const SharedSampleBuffer sampleBuffer,
-                                       const SharedSampleRange sampleRange);
+                                       const SharedSampleHeader sampleHeader,
+                                       const SharedSampleRange sampleRange );
 
     // Creates new waveform items and returns a list of shared pointers to them
+    // 'sampleRate' is the original audio file sample rate, not playback sample rate
     QList<SharedWaveformItem> createWaveforms( const SharedSampleBuffer sampleBuffer,
+                                               const SharedSampleHeader sampleHeader,
                                                const QList<SharedSampleRange> sampleRangeList );
 
     // Creates a new waveform item by joining several waveform items together. The new item's start frame,
@@ -89,7 +93,7 @@ public:
     void selectNone();
     void selectAll();
 
-    void startPlayhead( const int millis );
+    void startPlayhead();
     void stopPlayhead();
     bool isPlayheadScrolling() const        { return mTimer->state() == QTimeLine::Running; }
 
@@ -117,6 +121,7 @@ private:
     QList<SharedWaveformItem> mWaveformItemList;
     QList<SharedSlicePointItem> mSlicePointItemList;
     SharedSampleBuffer mSampleBuffer;
+    SharedSampleHeader mSampleHeader;
 
     ScopedPointer<QGraphicsLineItem> mPlayhead;
     ScopedPointer<QTimeLine> mTimer;

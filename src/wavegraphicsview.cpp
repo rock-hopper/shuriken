@@ -61,11 +61,13 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
 
 
 SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sampleBuffer,
+                                                     const SharedSampleHeader sampleHeader,
                                                      const SharedSampleRange sampleRange )
 {
     Q_ASSERT( sampleBuffer->getNumFrames() > 0 );
 
     mSampleBuffer = sampleBuffer;
+    mSampleHeader = sampleHeader;
 
     WaveformItem* waveformItem = new WaveformItem( sampleBuffer, sampleRange, scene()->width(), scene()->height() );
     waveformItem->setPos( 0.0, 0.0 );
@@ -84,11 +86,13 @@ SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sa
 
 
 QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const SharedSampleBuffer sampleBuffer,
+                                                             const SharedSampleHeader sampleHeader,
                                                              const QList<SharedSampleRange> sampleRangeList )
 {
     Q_ASSERT( sampleBuffer->getNumFrames() > 0 );
 
     mSampleBuffer = sampleBuffer;
+    mSampleHeader = sampleHeader;
 
     qreal scenePosX = 0.0;
     int orderPos = 0;
@@ -417,21 +421,29 @@ void WaveGraphicsView::selectAll()
 
 
 
-void WaveGraphicsView::startPlayhead( const int millis )
+void WaveGraphicsView::startPlayhead()
 {
-    if ( isPlayheadScrolling() )
+    const qreal sampleRate = mSampleHeader->sampleRate;
+
+    if ( sampleRate > 0.0 )
     {
-        stopPlayhead();
+        const int numFrames = mSampleBuffer->getNumFrames();
+        const int millis = roundToInt( (numFrames / sampleRate) * 1000 );
+
+        if ( isPlayheadScrolling() )
+        {
+            stopPlayhead();
+        }
+
+        mAnimation->setPosAt( 0.0, QPointF( 0.0, 0.0 ) );
+        mAnimation->setPosAt( 1.0, QPointF( scene()->width() - 1, 0.0 ) );
+
+        mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
+        scene()->addItem( mPlayhead );
+
+        mTimer->setDuration( millis );
+        mTimer->start();
     }
-
-    mAnimation->setPosAt( 0.0, QPointF( 0.0, 0.0 ) );
-    mAnimation->setPosAt( 1.0, QPointF( scene()->width() - 1, 0.0 ) );
-
-    mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
-    scene()->addItem( mPlayhead );
-
-    mTimer->setDuration( millis );
-    mTimer->start();
 }
 
 

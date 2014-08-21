@@ -175,8 +175,9 @@ void SliceCommand::undo()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    mMainWindow->mSamplerAudioSource->setSample( mMainWindow->mCurrentSampleBuffer,
-                                                 mMainWindow->mCurrentSampleHeader->sampleRate );
+    const qreal sampleRate = mMainWindow->mCurrentSampleHeader->sampleRate;
+
+    mMainWindow->mSamplerAudioSource->setSample( mMainWindow->mCurrentSampleBuffer, sampleRate );
     mMainWindow->mSampleRangeList.clear();
 
     SharedSampleRange sampleRange( new SampleRange );
@@ -186,7 +187,9 @@ void SliceCommand::undo()
 
     mGraphicsView->clearWaveform();
 
-    SharedWaveformItem item = mGraphicsView->createWaveform( mMainWindow->mCurrentSampleBuffer, sampleRange );
+    SharedWaveformItem item = mGraphicsView->createWaveform( mMainWindow->mCurrentSampleBuffer,
+                                                             mMainWindow->mCurrentSampleHeader,
+                                                             sampleRange );
     mMainWindow->connectWaveformToMainWindow( item );
 
     mGraphicsView->showSlicePoints();
@@ -218,6 +221,7 @@ void SliceCommand::redo()
 
     const QList<SharedWaveformItem> waveformItemList =
             mGraphicsView->createWaveforms( mMainWindow->mCurrentSampleBuffer,
+                                            mMainWindow->mCurrentSampleHeader,
                                             mMainWindow->mSampleRangeList );
 
     foreach ( SharedWaveformItem item, waveformItemList )
