@@ -30,7 +30,15 @@ function clean()
 
 function build()
 {
+    declare archString=""
+    declare arch=""
     declare configOptions=""
+
+    archString=$( lscpu | grep 'Architecture' )
+
+    if [[ $archString =~ (x86_64) ]]; then
+        arch="-64"
+    fi
 
     if $isDebugBuild; then
         configOptions="CONFIG+=debug"
@@ -45,7 +53,7 @@ function build()
     cd ../..
 
     # make shuriken
-    qmake-qt4 ./Shuriken.pro -spec linux-g++ -r $configOptions
+    qmake-qt4 ./Shuriken.pro -r -spec linux-g++$arch $configOptions
     make -w
 
     if [ $? -eq 0 ]; then
