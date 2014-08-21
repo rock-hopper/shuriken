@@ -20,7 +20,7 @@
 
 */
 
-#include <QtGui/QApplication>
+#include <QApplication>
 #include "mainwindow.h"
 #include <signal.h>
 #include "signallistener.h"

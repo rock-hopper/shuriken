@@ -75,7 +75,7 @@ bool AkaiFileHandler::writePgmFileMPC1000( const QStringList sampleNames,
         {
             // Add sample names to PGM data
             {
-                QByteArray sampleName = sampleNames.at( padNum ).toAscii().leftJustified( MPC1000_PGM::SAMPLE_NAME_SIZE, PAD_BYTE, true );
+                QByteArray sampleName = sampleNames.at( padNum ).toLatin1().leftJustified( MPC1000_PGM::SAMPLE_NAME_SIZE, PAD_BYTE, true );
 
                 const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE );
 
