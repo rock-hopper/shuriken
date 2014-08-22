@@ -339,6 +339,28 @@ void MainWindow::setupUI()
     mUI->comboBox_HopSize->setCurrentIndex( 0 ); // "50%"
 
 
+    // Populate "Time Signature" combo boxes
+    QStringList timeSigNumeratorTextList;
+    QStringList timeSigDenominatorTextList;
+
+    timeSigNumeratorTextList << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12" << "13" << "14" << "15" << "16";
+    timeSigDenominatorTextList << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12" << "13" << "14" << "15" << "16";
+
+    mUI->comboBox_TimeSigNumerator->addItems( timeSigNumeratorTextList );
+    mUI->comboBox_TimeSigDenominator->addItems( timeSigDenominatorTextList );
+
+    mUI->comboBox_TimeSigNumerator->setCurrentIndex( 3 );   // 4
+    mUI->comboBox_TimeSigDenominator->setCurrentIndex( 3 ); // 4
+
+
+    // Populate "Units" combo box
+    QStringList unitsTextList;
+
+    unitsTextList << "Bars" << "Beats";
+
+    mUI->comboBox_Units->addItems( unitsTextList );
+
+
     // Hide widgets
     mUI->label_JackSync->setVisible( false );
     mUI->checkBox_TimeStretch->setVisible( false );
