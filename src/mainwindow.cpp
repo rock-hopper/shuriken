@@ -388,17 +388,23 @@ void MainWindow::setupUI()
         int formWidth = mHelpForm->size().width();
         int formHeight = mHelpForm->size().height();
 
+        int maxWidth = mHelpForm->maximumWidth();
+        int maxHeight = mHelpForm->maximumHeight();
+
         if ( frameWidth > desktopWidth )
         {
             formWidth = desktopWidth - ( frameWidth - formWidth );
+            maxWidth = formWidth;
         }
 
         if ( frameHeight > desktopHeight )
         {
             formHeight = desktopHeight - ( frameHeight - formHeight );
+            maxHeight = formHeight;
         }
 
         mHelpForm->resize( formWidth, formHeight );
+        mHelpForm->setMaximumSize( maxWidth, maxHeight );
 
         // Centre form in desktop
         mHelpForm->setGeometry

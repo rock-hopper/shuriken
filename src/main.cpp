@@ -78,7 +78,7 @@ int main( int argc, char* argv[] )
                       Qt::BlockingQueuedConnection );
 
 
-    // Set up window geometry
+    // Make sure window isn't larger than desktop
     const int desktopWidth = app.desktop()->availableGeometry().width();
     const int desktopHeight = app.desktop()->availableGeometry().height();
 
@@ -88,23 +88,31 @@ int main( int argc, char* argv[] )
     int windowWidth = window.size().width();
     int windowHeight = window.size().height();
 
+    int maxWidth = window.maximumWidth();
+    int maxHeight = window.maximumHeight();
+
     if ( frameWidth > desktopWidth )
     {
         windowWidth = desktopWidth - ( frameWidth - windowWidth );
+        maxWidth = windowWidth;
     }
 
     if ( frameHeight > desktopHeight )
     {
         windowHeight = desktopHeight - ( frameHeight - windowHeight );
+        maxHeight = windowHeight;
     }
 
     window.resize( windowWidth, windowHeight );
+    window.setMaximumSize( maxWidth, maxHeight );
 
+    // Centre window in desktop
     window.setGeometry
     (
         QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, window.size(), app.desktop()->availableGeometry() )
     );
 
+    // Show window
     window.show();
 
 
