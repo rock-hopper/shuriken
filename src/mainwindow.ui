@@ -457,6 +457,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <item>
        <widget class="QCheckBox" name="checkBox_LoopMarkers">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
@@ -466,7 +469,10 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBox">
+       <widget class="QCheckBox" name="checkBox_SnapToSlicePoints">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
@@ -491,6 +497,9 @@
       </item>
       <item>
        <widget class="QComboBox" name="comboBox_TimeSigNumerator">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
@@ -505,6 +514,9 @@
       </item>
       <item>
        <widget class="QComboBox" name="comboBox_TimeSigDenominator">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
@@ -518,7 +530,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinBox_Length"/>
+       <widget class="QSpinBox" name="spinBox_Length">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QLabel" name="label_Units">
@@ -529,6 +545,9 @@
       </item>
       <item>
        <widget class="QComboBox" name="comboBox_Units">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>

@@ -129,6 +129,7 @@ public slots:
     void reorderSampleRangeList( QList<int> oldOrderPositions, const int numPlacesMoved );
 
 private slots:
+    void on_checkBox_LoopMarkers_clicked( const bool isChecked );
     void on_pushButton_TimestretchOptions_clicked();
     void on_actionAudition_triggered();
     void on_actionSelect_triggered();

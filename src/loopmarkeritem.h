@@ -20,39 +20,29 @@
 
 */
 
-#include "slicepointitem.h"
-#include <QBrush>
-//#include <QDebug>
+#ifndef LOOPMARKERITEM_H
+#define LOOPMARKERITEM_H
+
+#include "JuceHeader.h"
+#include "framemarkeritem.h"
 
 
-//==================================================================================================
-// Public:
-
-SlicePointItem::SlicePointItem( const qreal height, QGraphicsItem* parent ) :
-    FrameMarkerItem( QColor( Qt::red ), QColor(255, 192, 0, 255), height, HANDLE_TOP_BOTTOM, parent )
+class LoopMarkerItem : public FrameMarkerItem
 {
-}
+    Q_OBJECT
+
+public:
+    enum { Type = UserTypes::LOOP_MARKER };
+
+    enum MarkerType { LEFT_MARKER, RIGHT_MARKER };
+
+    LoopMarkerItem( const MarkerType markerType, const qreal height, QGraphicsItem* parent = NULL );
+
+    int type() const    { return Type; }
+
+private:
+    JUCE_LEAK_DETECTOR( FrameMarkerItem );
+};
 
 
-
-//==================================================================================================
-// Protected:
-
-void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
-{
-    FrameMarkerItem::mousePressEvent( event );
-
-    mScenePosBeforeMove = pos().x();
-}
-
-
-
-void SlicePointItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
-{
-    QGraphicsItem::mouseReleaseEvent( event );
-
-    if ( mScenePosBeforeMove != pos().x() )
-    {
-        emit scenePosChanged( this );
-    }
-}
+#endif // LOOPMARKERITEM_H

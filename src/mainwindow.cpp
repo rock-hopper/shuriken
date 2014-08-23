@@ -478,6 +478,7 @@ void MainWindow::enableUI()
     mUI->horizontalSlider_Threshold->setEnabled( true );
     mUI->pushButton_FindOnsets->setEnabled( true );
     mUI->pushButton_FindBeats->setEnabled( true );
+    mUI->checkBox_LoopMarkers->setEnabled( true );
 
     mUI->actionSave_As->setEnabled( true );
     mUI->actionClose_Project->setEnabled( true );
@@ -516,6 +517,8 @@ void MainWindow::disableUI()
     mUI->horizontalSlider_Threshold->setEnabled( false );
     mUI->pushButton_FindOnsets->setEnabled( false );
     mUI->pushButton_FindBeats->setEnabled( false );
+    mUI->checkBox_LoopMarkers->setEnabled( false );
+    mUI->checkBox_LoopMarkers->setChecked( false );
 
     mUI->actionSave_Project->setEnabled( false );
     mUI->actionSave_As->setEnabled( false );
@@ -1571,4 +1574,18 @@ void MainWindow::on_pushButton_TimestretchOptions_clicked()
     mOptionsDialog->move( pos );
     mOptionsDialog->setCurrentTab( OptionsDialog::TIMESTRETCH );
     mOptionsDialog->show();
+}
+
+
+
+void MainWindow::on_checkBox_LoopMarkers_clicked( const bool isChecked )
+{
+    if ( isChecked )
+    {
+        mUI->waveGraphicsView->showLoopMarkers();
+    }
+    else
+    {
+        mUI->waveGraphicsView->hideLoopMarkers();
+    }
 }

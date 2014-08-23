@@ -36,7 +36,9 @@ class FrameMarkerItem : public QObject, public QGraphicsPolygonItem
 public:
     enum { Type = UserTypes::FRAME_MARKER };
 
-    FrameMarkerItem( const QBrush brush, const QBrush selectedBrush, const qreal height, QGraphicsItem* parent = NULL );
+    enum Handle { HANDLE_TOP_BOTTOM, HANDLE_CENTRE_RIGHT, HANDLE_CENTRE_LEFT };
+
+    FrameMarkerItem( const QBrush brush, const QBrush selectedBrush, const qreal height, const Handle handle, QGraphicsItem* parent = NULL );
 
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
     void setHeight( const qreal height );
@@ -53,6 +55,7 @@ protected:
 
 private:
     const QBrush mSelectedBrush;
+    const Handle mHandle;
 
     int mFrameNum;
 

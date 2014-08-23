@@ -20,39 +20,18 @@
 
 */
 
-#include "slicepointitem.h"
+#include "loopmarkeritem.h"
 #include <QBrush>
-//#include <QDebug>
 
 
 //==================================================================================================
 // Public:
 
-SlicePointItem::SlicePointItem( const qreal height, QGraphicsItem* parent ) :
-    FrameMarkerItem( QColor( Qt::red ), QColor(255, 192, 0, 255), height, HANDLE_TOP_BOTTOM, parent )
+LoopMarkerItem::LoopMarkerItem( const MarkerType markerType, const qreal height, QGraphicsItem* parent ) :
+    FrameMarkerItem( QColor( Qt::yellow ),
+                     QColor(255, 192, 0, 255),
+                     height,
+                     markerType == LEFT_MARKER ? HANDLE_CENTRE_RIGHT : HANDLE_CENTRE_LEFT,
+                     parent )
 {
-}
-
-
-
-//==================================================================================================
-// Protected:
-
-void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
-{
-    FrameMarkerItem::mousePressEvent( event );
-
-    mScenePosBeforeMove = pos().x();
-}
-
-
-
-void SlicePointItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
-{
-    QGraphicsItem::mouseReleaseEvent( event );
-
-    if ( mScenePosBeforeMove != pos().x() )
-    {
-        emit scenePosChanged( this );
-    }
 }
