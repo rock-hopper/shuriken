@@ -132,7 +132,7 @@ QVariant FrameMarkerItem::itemChange( GraphicsItemChange change, const QVariant 
 
 void FrameMarkerItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
-    // Always unset the Ctrl-key modifier to prevent multiple slice point items from being selected
+    // Always unset the Ctrl-key modifier to prevent multiple frame marker items from being selected
     const Qt::KeyboardModifiers modifiers = event->modifiers() & ~Qt::ControlModifier;
     event->setModifiers( modifiers );
 

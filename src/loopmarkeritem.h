@@ -38,7 +38,20 @@ public:
 
     LoopMarkerItem( const MarkerType markerType, const qreal height, QGraphicsItem* parent = NULL );
 
-    int type() const    { return Type; }
+    int type() const                            { return Type; }
+    MarkerType getMarkerType() const            { return mMarkerType; }
+
+protected:
+    QVariant itemChange( GraphicsItemChange change, const QVariant &value );
+    void mousePressEvent( QGraphicsSceneMouseEvent* event );
+    void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
+
+private:
+    const MarkerType mMarkerType;
+    qreal mScenePosBeforeMove;
+
+signals:
+    void scenePosChanged( LoopMarkerItem* const item );
 
 private:
     JUCE_LEAK_DETECTOR( FrameMarkerItem );

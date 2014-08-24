@@ -22,6 +22,8 @@
 
 #include "loopmarkeritem.h"
 #include <QBrush>
+#include <QGraphicsScene>
+#include <QDebug>
 
 
 //==================================================================================================
@@ -34,6 +36,71 @@ LoopMarkerItem::LoopMarkerItem( const MarkerType markerType,
                      QColor( 255, 255, 150, 255 ),
                      height,
                      markerType == LEFT_MARKER ? HANDLE_CENTRE_RIGHT : HANDLE_CENTRE_LEFT,
-                     parent )
+                     parent ),
+    mMarkerType( markerType )
 {
+}
+
+
+
+//==================================================================================================
+// Protected:
+
+QVariant LoopMarkerItem::itemChange( GraphicsItemChange change, const QVariant &value )
+{
+    if ( change == ItemPositionChange && scene() != NULL )
+    {
+        QPointF newPos = value.toPointF();
+
+        // Prevent loop markers from going past each other
+        foreach ( QGraphicsItem* item, scene()->items() )
+        {
+            if ( item != this && item->type() == LoopMarkerItem::Type )
+            {
+                LoopMarkerItem* const otherLoopMarker = qgraphicsitem_cast<LoopMarkerItem*>( item );
+
+                const QPointF otherItemPos = otherLoopMarker->scenePos();
+
+                if ( otherLoopMarker->getMarkerType() == LEFT_MARKER )
+                {
+                    if ( newPos.x() <= otherItemPos.x() )
+                    {
+                        newPos.setX( otherItemPos.x() + 1 );
+                    }
+                }
+                else // otherLoopMarker->getMarkerType() == RIGHT_MARKER
+                {
+                    if ( newPos.x() >= otherItemPos.x() )
+                    {
+                        newPos.setX( otherItemPos.x() - 1 );
+                    }
+                }
+            }
+        }
+
+        return FrameMarkerItem::itemChange( change, newPos );
+    }
+
+    return FrameMarkerItem::itemChange( change, value );
+}
+
+
+
+void LoopMarkerItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
+{
+    FrameMarkerItem::mousePressEvent( event );
+
+    mScenePosBeforeMove = pos().x();
+}
+
+
+
+void LoopMarkerItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
+{
+    QGraphicsItem::mouseReleaseEvent( event );
+
+    if ( mScenePosBeforeMove != pos().x() )
+    {
+        emit scenePosChanged( this );
+    }
 }

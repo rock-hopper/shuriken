@@ -769,6 +769,12 @@ void WaveGraphicsView::createLoopMarkers()
 
     mLoopMarkerLeft->setZValue( ZValues::LOOP_MARKER );
     mLoopMarkerRight->setZValue( ZValues::LOOP_MARKER );
+
+    QObject::connect( mLoopMarkerLeft, SIGNAL( scenePosChanged(LoopMarkerItem*const) ),
+                      this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*const) ) );
+
+    QObject::connect( mLoopMarkerRight, SIGNAL( scenePosChanged(LoopMarkerItem*const) ),
+                      this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*const) ) );
 }
 
 
@@ -887,6 +893,17 @@ void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem
     sharedSlicePoint->setFrameNum( newFrameNum );
 
     emit slicePointOrderChanged( sharedSlicePoint, oldFrameNum, newFrameNum );
+}
+
+
+
+void WaveGraphicsView::updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem )
+{
+    const int oldFrameNum = movedItem->getFrameNum();
+    const int newFrameNum = getFrameNum( movedItem->pos().x() );
+    movedItem->setFrameNum( newFrameNum );
+
+//    emit loopMarkerPosChanged( movedItem, oldFrameNum, newFrameNum );
 }
 
 

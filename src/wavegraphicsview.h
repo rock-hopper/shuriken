@@ -151,6 +151,7 @@ private slots:
 
     void slideWaveformItemIntoPlace( const int orderPos );
     void updateSlicePointFrameNum( SlicePointItem* const movedItem );
+    void updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem );
     void relayMaxDetailLevelReached();
     void removePlayhead();
 

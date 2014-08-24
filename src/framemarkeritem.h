@@ -47,9 +47,11 @@ public:
     int type() const                            { return Type; }
 
 protected:
+    // Subclasses that reimplement this method MUST ALWAYS call "return FrameMarkerItem::itemChange"
+    // in their reimplementation
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
 
-    // Subclasses which reimplement this method MUST call FrameMarkerItem::mousePressEvent( event )
+    // Subclasses that reimplement this method MUST call FrameMarkerItem::mousePressEvent
     // at the start of the reimplementation
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
 
