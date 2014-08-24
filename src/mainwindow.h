@@ -175,12 +175,17 @@ private slots:
 
 
     void recordWaveformItemMove( QList<int> oldOrderPositions, const int numPlacesMoved );
+
     void recordSlicePointItemMove( const SharedSlicePointItem slicePointItem,
                                    const int oldFrameNum,
                                    const int newFrameNum );
+
     void playSampleRange( const int waveformItemStartFrame,
                           const int waveformItemNumFrames,
                           const QPointF mouseScenePos );
+
+    void setLoopPoints( const int startFrameNum, const int endFrameNum );
+
     void disableZoomIn();
     void disableZoomOut();
 

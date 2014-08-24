@@ -370,6 +370,9 @@ void MainWindow::setupUI()
     QObject::connect( mUI->waveGraphicsView, SIGNAL( slicePointOrderChanged(SharedSlicePointItem,int,int) ),
                       this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int) ) );
 
+    QObject::connect( mUI->waveGraphicsView, SIGNAL( loopMarkerPositionsChanged(int,int) ),
+                      this, SLOT( setLoopPoints(int,int) ) );
+
     QObject::connect( mUI->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
                       this, SLOT( disableZoomOut() ) );
 
@@ -714,6 +717,13 @@ void MainWindow::playSampleRange( const int waveformItemStartFrame, const int wa
     sampleRange->numFrames = endFrame - sampleRange->startFrame;
 
     mSamplerAudioSource->playRange( sampleRange );
+}
+
+
+
+void MainWindow::setLoopPoints( const int startFrameNum, const int endFrameNum )
+{
+    qDebug() << startFrameNum << " " << endFrameNum;
 }
 
 

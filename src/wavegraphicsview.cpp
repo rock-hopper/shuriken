@@ -494,6 +494,8 @@ void WaveGraphicsView::clearAll()
 
     mWaveformItemList.clear();
     mSlicePointItemList.clear();
+    mLoopMarkerLeft = NULL;
+    mLoopMarkerRight = NULL;
 }
 
 
@@ -756,7 +758,7 @@ void WaveGraphicsView::createLoopMarkers()
     const int endFrame = mSampleBuffer->getNumFrames() - 1;
 
     mLoopMarkerLeft->setFrameNum( startFrame );
-    mLoopMarkerLeft->setFrameNum( endFrame );
+    mLoopMarkerRight->setFrameNum( endFrame );
 
     mLoopMarkerLeft->setPos( 0.0, 0.0 );
     mLoopMarkerRight->setPos( getScenePosX( endFrame ), 0.0 );
@@ -899,11 +901,10 @@ void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem
 
 void WaveGraphicsView::updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem )
 {
-    const int oldFrameNum = movedItem->getFrameNum();
     const int newFrameNum = getFrameNum( movedItem->pos().x() );
     movedItem->setFrameNum( newFrameNum );
 
-//    emit loopMarkerPosChanged( movedItem, oldFrameNum, newFrameNum );
+    emit loopMarkerPositionsChanged( mLoopMarkerLeft->getFrameNum(), mLoopMarkerRight->getFrameNum() );
 }
 
 
