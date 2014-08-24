@@ -48,8 +48,8 @@ namespace ZValues
 {
     static const int WAVEFORM           = 0;
     static const int SELECTED_WAVEFORM  = 1;
-    static const int LOOP_MARKER        = 2;
-    static const int FRAME_MARKER       = 3;
+    static const int FRAME_MARKER       = 2;
+    static const int LOOP_MARKER        = 3;
     static const int PLAYHEAD           = 5;
 }
 

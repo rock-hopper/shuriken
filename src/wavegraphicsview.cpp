@@ -705,7 +705,7 @@ void WaveGraphicsView::resizePlayhead()
 
 void WaveGraphicsView::resizeLoopMarkers( const qreal scaleFactorX )
 {
-    if ( ! mWaveformItemList.isEmpty() )
+    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
     {
         mLoopMarkerLeft->setHeight( scene()->height() - 1 );
         mLoopMarkerRight->setHeight( scene()->height() - 1 );
@@ -752,8 +752,20 @@ void WaveGraphicsView::createLoopMarkers()
     mLoopMarkerLeft = new LoopMarkerItem( LoopMarkerItem::LEFT_MARKER, scene()->height() - 1 );
     mLoopMarkerRight = new LoopMarkerItem( LoopMarkerItem::RIGHT_MARKER, scene()->height() - 1 );
 
+    const int startFrame = 0;
+    const int endFrame = mSampleBuffer->getNumFrames() - 1;
+
+    mLoopMarkerLeft->setFrameNum( startFrame );
+    mLoopMarkerLeft->setFrameNum( endFrame );
+
     mLoopMarkerLeft->setPos( 0.0, 0.0 );
-    mLoopMarkerRight->setPos( scene()->width() - 1, 0.0 );
+    mLoopMarkerRight->setPos( getScenePosX( endFrame ), 0.0 );
+
+    QTransform matrix;
+    const qreal currentScaleFactor = transform().m11(); // m11() returns horizontal scale factor
+    matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // loop marker remains correct width if view is scaled
+    mLoopMarkerLeft->setTransform( matrix );
+    mLoopMarkerRight->setTransform( matrix );
 
     mLoopMarkerLeft->setZValue( ZValues::LOOP_MARKER );
     mLoopMarkerRight->setZValue( ZValues::LOOP_MARKER );

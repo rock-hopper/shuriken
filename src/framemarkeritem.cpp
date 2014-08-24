@@ -81,7 +81,7 @@ void FrameMarkerItem::setHeight( const qreal height )
     else if ( mHandle == HANDLE_CENTRE_RIGHT )
     {
         const qreal triangleWidth = 16.0;
-        const qreal triangleHeight = 24.0;
+        const qreal triangleHeight = 32.0;
 
         polygon << QPointF( 0.0, 0.0 ) << QPointF( 0.0, (height * 0.5) - (triangleHeight * 0.5) )
                 << QPointF( triangleWidth, height * 0.5 ) << QPointF( 0.0, (height * 0.5) + (triangleHeight * 0.5) )
@@ -90,7 +90,7 @@ void FrameMarkerItem::setHeight( const qreal height )
     else if ( mHandle == HANDLE_CENTRE_LEFT )
     {
         const qreal triangleWidth = 16.0;
-        const qreal triangleHeight = 24.0;
+        const qreal triangleHeight = 32.0;
 
         polygon << QPointF( 0.0, 0.0 ) << QPointF( 0.0, (height * 0.5) - (triangleHeight * 0.5) )
                 << QPointF( -triangleWidth, height * 0.5 ) << QPointF( 0.0, (height * 0.5) + (triangleHeight * 0.5) )

@@ -27,9 +27,11 @@
 //==================================================================================================
 // Public:
 
-LoopMarkerItem::LoopMarkerItem( const MarkerType markerType, const qreal height, QGraphicsItem* parent ) :
+LoopMarkerItem::LoopMarkerItem( const MarkerType markerType,
+                                const qreal height,
+                                QGraphicsItem* parent ) :
     FrameMarkerItem( QColor( Qt::yellow ),
-                     QColor(255, 192, 0, 255),
+                     QColor( 255, 255, 150, 255 ),
                      height,
                      markerType == LEFT_MARKER ? HANDLE_CENTRE_RIGHT : HANDLE_CENTRE_LEFT,
                      parent )
