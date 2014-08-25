@@ -141,7 +141,10 @@ private:
 
 signals:
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );
-    void loopMarkerPositionsChanged( const int leftMarkerFrameNum, const int rightMarkerFrameNum );
+    void loopMarkerPosChanged( const int leftMarkerFrameNum,
+                               const int rightMarkerFrameNum,
+                               const int startWaveformOrderPos,
+                               const int endWaveformOrderPos );
     void minDetailLevelReached();
     void maxDetailLevelReached();
 

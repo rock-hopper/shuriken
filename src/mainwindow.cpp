@@ -370,8 +370,8 @@ void MainWindow::setupUI()
     QObject::connect( mUI->waveGraphicsView, SIGNAL( slicePointOrderChanged(SharedSlicePointItem,int,int) ),
                       this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int) ) );
 
-    QObject::connect( mUI->waveGraphicsView, SIGNAL( loopMarkerPositionsChanged(int,int) ),
-                      this, SLOT( setLoopPoints(int,int) ) );
+    QObject::connect( mUI->waveGraphicsView, SIGNAL( loopMarkerPosChanged(int,int,int,int) ),
+                      this, SLOT( setLoopPoints(int,int,int,int) ) );
 
     QObject::connect( mUI->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
                       this, SLOT( disableZoomOut() ) );
@@ -721,9 +721,50 @@ void MainWindow::playSampleRange( const int waveformItemStartFrame, const int wa
 
 
 
-void MainWindow::setLoopPoints( const int startFrameNum, const int endFrameNum )
+void MainWindow::setLoopPoints( const int leftMarkerFrameNum,
+                                const int rightMarkerFrameNum,
+                                const int startWaveformOrderPos,
+                                const int endWaveformOrderPos )
 {
-    qDebug() << startFrameNum << " " << endFrameNum;
+    qDebug() << "loopStartFrame        " << leftMarkerFrameNum;
+    qDebug() << "loopEndFrame          " << rightMarkerFrameNum;
+    qDebug() << "startWaveformOrderPos " << startWaveformOrderPos;
+    qDebug() << "endWaveformOrderPos   " << endWaveformOrderPos << "\n";
+
+    QList<SharedSampleRange> newSampleRangeList;
+
+    for ( int orderPos = startWaveformOrderPos; orderPos <= endWaveformOrderPos; orderPos++ )
+    {
+        SharedSampleRange range = mSampleRangeList.at( orderPos );
+        SharedSampleRange newRange( new SampleRange );
+
+        if ( leftMarkerFrameNum > range->startFrame &&
+             leftMarkerFrameNum < range->startFrame + range->numFrames - 1 )
+        {
+            newRange->startFrame = leftMarkerFrameNum;
+        }
+        else
+        {
+            newRange->startFrame = range->startFrame;
+        }
+
+        if ( rightMarkerFrameNum > range->startFrame &&
+             rightMarkerFrameNum < range->startFrame + range->numFrames )
+        {
+            newRange->numFrames = rightMarkerFrameNum - newRange->startFrame;
+        }
+        else
+        {
+            newRange->numFrames = range->numFrames - ( newRange->startFrame - range->startFrame );
+        }
+
+        qDebug() << "newRange->startFrame " << newRange->startFrame;
+        qDebug() << "newRange->numFrames  " << newRange->numFrames << "\n";
+
+        newSampleRangeList << newRange;
+    }
+
+    mSamplerAudioSource->setSampleRanges( newSampleRangeList );
 }
 
 

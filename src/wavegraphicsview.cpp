@@ -405,18 +405,16 @@ void WaveGraphicsView::showLoopMarkers()
         createLoopMarkers();
     }
 
-    scene()->addItem( mLoopMarkerLeft );
-    scene()->addItem( mLoopMarkerRight );
-    scene()->update();
+    mLoopMarkerLeft->setVisible( true );
+    mLoopMarkerRight->setVisible( true );
 }
 
 
 
 void WaveGraphicsView::hideLoopMarkers()
 {
-    scene()->removeItem( mLoopMarkerLeft );
-    scene()->removeItem( mLoopMarkerRight );
-    scene()->update();
+    mLoopMarkerLeft->setVisible( false );
+    mLoopMarkerRight->setVisible( false );
 }
 
 
@@ -452,7 +450,18 @@ void WaveGraphicsView::startPlayhead()
 
     if ( sampleRate > 0.0 )
     {
-        const int numFrames = mSampleBuffer->getNumFrames();
+        int numFrames = mSampleBuffer->getNumFrames();
+
+        qreal startPosX = 0.0;
+        qreal endPosX   = scene()->width() - 1;
+
+        if ( mLoopMarkerLeft != NULL && mLoopMarkerLeft->isVisible() )
+        {
+            numFrames = mLoopMarkerRight->getFrameNum() - mLoopMarkerLeft->getFrameNum();
+            startPosX = mLoopMarkerLeft->scenePos().x();
+            endPosX   = mLoopMarkerRight->scenePos().x();
+        }
+
         const int millis = roundToInt( (numFrames / sampleRate) * 1000 );
 
         if ( isPlayheadScrolling() )
@@ -460,8 +469,8 @@ void WaveGraphicsView::startPlayhead()
             stopPlayhead();
         }
 
-        mAnimation->setPosAt( 0.0, QPointF( 0.0, 0.0 ) );
-        mAnimation->setPosAt( 1.0, QPointF( scene()->width() - 1, 0.0 ) );
+        mAnimation->setPosAt( 0.0, QPointF( startPosX, 0.0 ) );
+        mAnimation->setPosAt( 1.0, QPointF( endPosX,   0.0 ) );
 
         mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
         scene()->addItem( mPlayhead );
@@ -777,6 +786,10 @@ void WaveGraphicsView::createLoopMarkers()
 
     QObject::connect( mLoopMarkerRight, SIGNAL( scenePosChanged(LoopMarkerItem*const) ),
                       this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*const) ) );
+
+    scene()->addItem( mLoopMarkerLeft );
+    scene()->addItem( mLoopMarkerRight );
+    scene()->update();
 }
 
 
@@ -901,10 +914,62 @@ void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem
 
 void WaveGraphicsView::updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem )
 {
-    const int newFrameNum = getFrameNum( movedItem->pos().x() );
+    int newFrameNum = 0;
+
+    if ( mWaveformItemList.size() > 1 )
+    {
+        foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
+        {
+            if ( movedItem->scenePos().x() >= waveformItem->scenePos().x() &&
+                 movedItem->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
+            {
+                const int startFrame = waveformItem->getSampleRange()->startFrame;
+                const int numFrames = getFrameNum( movedItem->scenePos().x() - waveformItem->scenePos().x() );
+
+                newFrameNum = startFrame + numFrames;
+
+                break;
+            }
+        }
+    }
+    else
+    {
+        newFrameNum = getFrameNum( movedItem->pos().x() );
+    }
+
     movedItem->setFrameNum( newFrameNum );
 
-    emit loopMarkerPositionsChanged( mLoopMarkerLeft->getFrameNum(), mLoopMarkerRight->getFrameNum() );
+
+    int startWaveformOrderPos = -1;
+    int endWaveformOrderPos = -1;
+
+    foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
+    {
+        if ( mLoopMarkerLeft->scenePos().x() >= waveformItem->scenePos().x() &&
+             mLoopMarkerLeft->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
+        {
+            startWaveformOrderPos = waveformItem->getOrderPos();
+        }
+
+        if ( mLoopMarkerRight->scenePos().x() >= waveformItem->scenePos().x() &&
+             mLoopMarkerRight->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
+        {
+            endWaveformOrderPos = waveformItem->getOrderPos();
+        }
+
+        if ( startWaveformOrderPos != -1 && endWaveformOrderPos != -1 )
+        {
+            break;
+        }
+    }
+
+    if ( startWaveformOrderPos != -1 && endWaveformOrderPos != -1 )
+    {
+        emit loopMarkerPosChanged( mLoopMarkerLeft->getFrameNum(),
+                                   mLoopMarkerRight->getFrameNum(),
+                                   startWaveformOrderPos,
+                                   endWaveformOrderPos );
+    }
 }
 
 
