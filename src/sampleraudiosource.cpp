@@ -65,6 +65,8 @@ void SamplerAudioSource::setSample( const SharedSampleBuffer sampleBuffer, const
     mFileSampleRate = sampleRate;
 
     mSampleRangeList << sampleRange;
+
+    updateNoteOnFrameNumList();
 }
 
 

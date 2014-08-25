@@ -790,6 +790,8 @@ void WaveGraphicsView::createLoopMarkers()
     scene()->addItem( mLoopMarkerLeft );
     scene()->addItem( mLoopMarkerRight );
     scene()->update();
+
+    updateLoopMarkerFrameNum( mLoopMarkerLeft );
 }
 
 

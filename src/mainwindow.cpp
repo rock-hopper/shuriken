@@ -616,6 +616,7 @@ void MainWindow::closeProject()
     mCurrentSampleBuffer.clear();
     mCurrentSampleHeader.clear();
     mSampleRangeList.clear();
+    mLoopSampleRangeList.clear();
     tearDownSampler();
 
     mUI->waveGraphicsView->clearAll();
@@ -731,7 +732,7 @@ void MainWindow::setLoopPoints( const int leftMarkerFrameNum,
     qDebug() << "startWaveformOrderPos " << startWaveformOrderPos;
     qDebug() << "endWaveformOrderPos   " << endWaveformOrderPos << "\n";
 
-    QList<SharedSampleRange> newSampleRangeList;
+    mLoopSampleRangeList.clear();
 
     for ( int orderPos = startWaveformOrderPos; orderPos <= endWaveformOrderPos; orderPos++ )
     {
@@ -761,10 +762,10 @@ void MainWindow::setLoopPoints( const int leftMarkerFrameNum,
         qDebug() << "newRange->startFrame " << newRange->startFrame;
         qDebug() << "newRange->numFrames  " << newRange->numFrames << "\n";
 
-        newSampleRangeList << newRange;
+        mLoopSampleRangeList << newRange;
     }
 
-    mSamplerAudioSource->setSampleRanges( newSampleRangeList );
+    mSamplerAudioSource->setSampleRanges( mLoopSampleRangeList );
 }
 
 
@@ -1633,10 +1634,21 @@ void MainWindow::on_checkBox_LoopMarkers_clicked( const bool isChecked )
 {
     if ( isChecked )
     {
+        mSamplerAudioSource->setSampleRanges( mLoopSampleRangeList );
+
         mUI->waveGraphicsView->showLoopMarkers();
     }
     else
     {
         mUI->waveGraphicsView->hideLoopMarkers();
+        
+        if ( mSampleRangeList.size() > 1 )
+        {
+            mSamplerAudioSource->setSampleRanges( mSampleRangeList );
+        }
+        else
+        {
+            mSamplerAudioSource->setSample( mCurrentSampleBuffer, mCurrentSampleHeader->sampleRate );
+        }
     }
 }
