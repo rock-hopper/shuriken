@@ -419,6 +419,49 @@ void WaveGraphicsView::hideLoopMarkers()
 
 
 
+QList<SharedSampleRange> WaveGraphicsView::getSampleRangesBetweenLoopMarkers( const QList<SharedSampleRange> currentSampleRangeList )
+{
+    const int leftMarkerFrameNum = mLoopMarkerLeft->getFrameNum();
+    const int rightMarkerFrameNum = mLoopMarkerRight->getFrameNum();
+
+    const int leftWaveformOrderPos = getWaveformOrderPosUnderLoopMarker( mLoopMarkerLeft );
+    const int rightWaveformOrderPos = getWaveformOrderPosUnderLoopMarker( mLoopMarkerRight );
+
+    QList<SharedSampleRange> newSampleRangeList;
+
+    for ( int orderPos = leftWaveformOrderPos; orderPos <= rightWaveformOrderPos; orderPos++ )
+    {
+        SharedSampleRange range = currentSampleRangeList.at( orderPos );
+        SharedSampleRange newRange( new SampleRange );
+
+        if ( leftMarkerFrameNum > range->startFrame &&
+             leftMarkerFrameNum < range->startFrame + range->numFrames - 1 )
+        {
+            newRange->startFrame = leftMarkerFrameNum;
+        }
+        else
+        {
+            newRange->startFrame = range->startFrame;
+        }
+
+        if ( rightMarkerFrameNum > range->startFrame &&
+             rightMarkerFrameNum < range->startFrame + range->numFrames )
+        {
+            newRange->numFrames = rightMarkerFrameNum - newRange->startFrame;
+        }
+        else
+        {
+            newRange->numFrames = range->numFrames - ( newRange->startFrame - range->startFrame );
+        }
+
+        newSampleRangeList << newRange;
+    }
+
+    return newSampleRangeList;
+}
+
+
+
 void WaveGraphicsView::selectNone()
 {
     foreach ( SharedSlicePointItem item, mSlicePointItemList )
@@ -457,7 +500,7 @@ void WaveGraphicsView::startPlayhead()
 
         if ( mLoopMarkerLeft != NULL && mLoopMarkerLeft->isVisible() )
         {
-            numFrames = mLoopMarkerRight->getFrameNum() - mLoopMarkerLeft->getFrameNum();
+            numFrames = getFrameNum( mLoopMarkerRight->scenePos().x() - mLoopMarkerLeft->scenePos().x() );
             startPosX = mLoopMarkerLeft->scenePos().x();
             endPosX   = mLoopMarkerRight->scenePos().x();
         }
@@ -796,6 +839,65 @@ void WaveGraphicsView::createLoopMarkers()
 
 
 
+void WaveGraphicsView::setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker )
+{
+    int newFrameNum = 0;
+
+    if ( mWaveformItemList.size() > 1 )
+    {
+        foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
+        {
+            if ( loopMarker->scenePos().x() >= waveformItem->scenePos().x() &&
+                 loopMarker->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
+            {
+                const int startFrame = waveformItem->getSampleRange()->startFrame;
+                const int numFrames = getFrameNum( loopMarker->scenePos().x() - waveformItem->scenePos().x() );
+
+                newFrameNum = startFrame + numFrames;
+
+                break;
+            }
+        }
+    }
+    else
+    {
+        newFrameNum = getFrameNum( loopMarker->pos().x() );
+    }
+
+    loopMarker->setFrameNum( newFrameNum );
+}
+
+
+
+int WaveGraphicsView::getWaveformOrderPosUnderLoopMarker( LoopMarkerItem* const loopMarker )
+{
+    int orderPos = 0;
+
+    foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
+    {
+        if ( loopMarker->scenePos().x() >= waveformItem->scenePos().x() &&
+             loopMarker->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
+        {
+            orderPos = waveformItem->getOrderPos();
+            break;
+        }
+    }
+
+    return orderPos;
+}
+
+
+
+void WaveGraphicsView::updateLoopMarkerFrameNums()
+{
+    setLoopMarkerFrameNum( mLoopMarkerLeft );
+    setLoopMarkerFrameNum( mLoopMarkerRight );
+
+    emit loopMarkerPosChanged();
+}
+
+
+
 //==================================================================================================
 // Private Slots:
 
@@ -887,7 +989,9 @@ void WaveGraphicsView::slideWaveformItemIntoPlace( const int orderPos )
         }
     }
 
-    mWaveformItemList[ orderPos ]->setPos( newScenePosX, 0.0 );
+    mWaveformItemList.at( orderPos )->setPos( newScenePosX, 0.0 );
+
+    updateLoopMarkerFrameNums();
 }
 
 
@@ -916,62 +1020,8 @@ void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem
 
 void WaveGraphicsView::updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem )
 {
-    int newFrameNum = 0;
-
-    if ( mWaveformItemList.size() > 1 )
-    {
-        foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
-        {
-            if ( movedItem->scenePos().x() >= waveformItem->scenePos().x() &&
-                 movedItem->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
-            {
-                const int startFrame = waveformItem->getSampleRange()->startFrame;
-                const int numFrames = getFrameNum( movedItem->scenePos().x() - waveformItem->scenePos().x() );
-
-                newFrameNum = startFrame + numFrames;
-
-                break;
-            }
-        }
-    }
-    else
-    {
-        newFrameNum = getFrameNum( movedItem->pos().x() );
-    }
-
-    movedItem->setFrameNum( newFrameNum );
-
-
-    int startWaveformOrderPos = -1;
-    int endWaveformOrderPos = -1;
-
-    foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
-    {
-        if ( mLoopMarkerLeft->scenePos().x() >= waveformItem->scenePos().x() &&
-             mLoopMarkerLeft->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
-        {
-            startWaveformOrderPos = waveformItem->getOrderPos();
-        }
-
-        if ( mLoopMarkerRight->scenePos().x() >= waveformItem->scenePos().x() &&
-             mLoopMarkerRight->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
-        {
-            endWaveformOrderPos = waveformItem->getOrderPos();
-        }
-
-        if ( startWaveformOrderPos != -1 && endWaveformOrderPos != -1 )
-        {
-            break;
-        }
-    }
-
-    if ( startWaveformOrderPos != -1 && endWaveformOrderPos != -1 )
-    {
-        emit loopMarkerPosChanged( mLoopMarkerLeft->getFrameNum(),
-                                   mLoopMarkerRight->getFrameNum(),
-                                   startWaveformOrderPos,
-                                   endWaveformOrderPos );
-    }
+    setLoopMarkerFrameNum( movedItem );
+    emit loopMarkerPosChanged();
 }
 
 

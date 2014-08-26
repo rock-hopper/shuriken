@@ -91,6 +91,7 @@ public:
 
     void showLoopMarkers();
     void hideLoopMarkers();
+    QList<SharedSampleRange> getSampleRangesBetweenLoopMarkers( const QList<SharedSampleRange> currentSampleRangeList );
 
     void selectNone();
     void selectAll();
@@ -126,6 +127,9 @@ private:
     void scaleItems( const qreal scaleFactorX );
 
     void createLoopMarkers();
+    void setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker );
+    int getWaveformOrderPosUnderLoopMarker( LoopMarkerItem* const loopMarker );
+    void updateLoopMarkerFrameNums();
 
     QList<SharedWaveformItem> mWaveformItemList;
     QList<SharedSlicePointItem> mSlicePointItemList;
@@ -141,10 +145,7 @@ private:
 
 signals:
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );
-    void loopMarkerPosChanged( const int leftMarkerFrameNum,
-                               const int rightMarkerFrameNum,
-                               const int startWaveformOrderPos,
-                               const int endWaveformOrderPos );
+    void loopMarkerPosChanged();
     void minDetailLevelReached();
     void maxDetailLevelReached();
 

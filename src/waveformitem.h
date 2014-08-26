@@ -133,7 +133,7 @@ private:
     static const qreal DETAIL_LEVEL_HIGH_CUTOFF = 10.0;
 
 signals:
-    // As waveform items are being dragged their old order positions are emitted along with
+    // As waveform items are being dragged, their old order positions are emitted along with
     // the no. of places which they have moved, allowing other waveform items to be reshuffled.
     // 'orderPositions' is sorted
     // 'oldOrderPositions' is negative if the items have moved left, or positive if the items have moved right

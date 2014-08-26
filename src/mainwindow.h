@@ -185,10 +185,7 @@ private slots:
                           const int waveformItemNumFrames,
                           const QPointF mouseScenePos );
 
-    void setLoopPoints( const int leftMarkerFrameNum,
-                        const int rightMarkerFrameNum,
-                        const int startWaveformOrderPos,
-                        const int endWaveformOrderPos );
+    void setLoopSampleRanges();
 
     void disableZoomIn();
     void disableZoomOut();
