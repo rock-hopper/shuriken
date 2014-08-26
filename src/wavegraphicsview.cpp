@@ -841,6 +841,11 @@ void WaveGraphicsView::createLoopMarkers()
 
 void WaveGraphicsView::setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker )
 {
+    if ( loopMarker == NULL )
+    {
+        return;
+    }
+
     int newFrameNum = 0;
 
     if ( mWaveformItemList.size() > 1 )
@@ -890,10 +895,13 @@ int WaveGraphicsView::getWaveformOrderPosUnderLoopMarker( LoopMarkerItem* const 
 
 void WaveGraphicsView::updateLoopMarkerFrameNums()
 {
-    setLoopMarkerFrameNum( mLoopMarkerLeft );
-    setLoopMarkerFrameNum( mLoopMarkerRight );
+    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
+    {
+        setLoopMarkerFrameNum( mLoopMarkerLeft );
+        setLoopMarkerFrameNum( mLoopMarkerRight );
 
-    emit loopMarkerPosChanged();
+        emit loopMarkerPosChanged();
+    }
 }
 
 

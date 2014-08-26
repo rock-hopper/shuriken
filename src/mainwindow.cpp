@@ -83,7 +83,7 @@ void MainWindow::connectWaveformToMainWindow( const SharedWaveformItem item )
                       this, SLOT( reorderSampleRangeList(QList<int>,int) ) );
 
     QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                      this, SLOT( on_pushButton_Stop_clicked() ) );
+                      this, SLOT( stopPlayback() ) );
 
     QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
                       this, SLOT( playSampleRange(int,int,QPointF) ) );
@@ -146,14 +146,7 @@ void MainWindow::keyPressEvent( QKeyEvent* event )
 {
     if ( event->key() == Qt::Key_Space && ! event->isAutoRepeat() && mSamplerAudioSource != NULL )
     {
-        if ( mUI->waveGraphicsView->isPlayheadScrolling() )
-        {
-            on_pushButton_Stop_clicked();
-        }
-        else
-        {
-            on_pushButton_Play_clicked();
-        }
+        on_pushButton_PlayStop_clicked();
     }
     else
     {
@@ -454,8 +447,7 @@ void MainWindow::enableUI()
 {
     if ( mIsAudioInitialised )
     {
-        mUI->pushButton_Play->setEnabled( true );
-        mUI->pushButton_Stop->setEnabled( true );
+        mUI->pushButton_PlayStop->setEnabled( true );
         mUI->pushButton_TimestretchOptions->setEnabled( true );
 
         if ( mOptionsDialog->isRealtimeModeEnabled() )
@@ -501,8 +493,7 @@ void MainWindow::enableUI()
 
 void MainWindow::disableUI()
 {
-    mUI->pushButton_Play->setEnabled( false );
-    mUI->pushButton_Stop->setEnabled( false );
+    mUI->pushButton_PlayStop->setEnabled( false );
     mUI->doubleSpinBox_OriginalBPM->setValue( 0.0 );
     mUI->doubleSpinBox_OriginalBPM->setEnabled( false );
     mUI->doubleSpinBox_NewBPM->setValue( 0.0 );
@@ -718,6 +709,14 @@ void MainWindow::playSampleRange( const int waveformItemStartFrame, const int wa
     sampleRange->numFrames = endFrame - sampleRange->startFrame;
 
     mSamplerAudioSource->playRange( sampleRange );
+}
+
+
+
+void MainWindow::stopPlayback()
+{
+    mSamplerAudioSource->stop();
+    mUI->waveGraphicsView->stopPlayhead();
 }
 
 
@@ -1483,18 +1482,27 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
 
 
 
-void MainWindow::on_pushButton_Play_clicked()
+void MainWindow::on_pushButton_PlayStop_clicked()
 {
-    mSamplerAudioSource->playAll();
-    mUI->waveGraphicsView->startPlayhead();
+    if ( mUI->waveGraphicsView->isPlayheadScrolling() )
+    {
+        mSamplerAudioSource->stop();
+        mUI->waveGraphicsView->stopPlayhead();
+        mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
+    }
+    else
+    {
+        mSamplerAudioSource->playAll();
+        mUI->waveGraphicsView->startPlayhead();
+        mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
+    }
 }
 
 
 
-void MainWindow::on_pushButton_Stop_clicked()
+void MainWindow::on_pushButton_Loop_clicked()
 {
-    mSamplerAudioSource->stop();
-    mUI->waveGraphicsView->stopPlayhead();
+
 }
 
 

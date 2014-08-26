@@ -18,7 +18,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QPushButton" name="pushButton_Play">
+       <widget class="QPushButton" name="pushButton_PlayStop">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -38,7 +38,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_Stop">
+       <widget class="QPushButton" name="pushButton_Loop">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -47,7 +47,10 @@
         </property>
         <property name="icon">
          <iconset resource="../resources.qrc">
-          <normaloff>:/resources/images/media-playback-stop.png</normaloff>:/resources/images/media-playback-stop.png</iconset>
+          <normaloff>:/resources/images/view-refresh.png</normaloff>:/resources/images/view-refresh.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

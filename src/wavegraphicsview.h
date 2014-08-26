@@ -103,6 +103,7 @@ public:
     void clearAll();
     void clearWaveform();
 
+    // These methods do not take the ordering of waveform items into account
     qreal getScenePosX( const int frameNum ) const;
     int getFrameNum( qreal scenePosX ) const;
 
