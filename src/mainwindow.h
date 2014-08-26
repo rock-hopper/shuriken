@@ -187,6 +187,8 @@ private slots:
 
     void stopPlayback();
 
+    void resetPlayStopButtonIcon();
+
     void setLoopSampleRanges();
 
     void disableZoomIn();

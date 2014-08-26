@@ -372,6 +372,9 @@ void MainWindow::setupUI()
     QObject::connect( mUI->waveGraphicsView, SIGNAL( maxDetailLevelReached() ),
                       this, SLOT( disableZoomIn() ) );
 
+    QObject::connect( mUI->waveGraphicsView, SIGNAL( playheadFinishedScrolling() ),
+                      this, SLOT( resetPlayStopButtonIcon() ) );
+
     QObject::connect( mUI->waveGraphicsView->scene(), SIGNAL( selectionChanged() ),
                       this, SLOT( enableEditActions() ) );
 
@@ -721,13 +724,23 @@ void MainWindow::stopPlayback()
 
 
 
+void MainWindow::resetPlayStopButtonIcon()
+{
+    mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
+}
+
+
+
 void MainWindow::setLoopSampleRanges()
 {
     mLoopSampleRangeList.clear();
 
     mLoopSampleRangeList = mUI->waveGraphicsView->getSampleRangesBetweenLoopMarkers( mSampleRangeList );
 
-    mSamplerAudioSource->setSampleRanges( mLoopSampleRangeList );
+    if ( ! mLoopSampleRangeList.isEmpty() && mUI->checkBox_LoopMarkers->isChecked() )
+    {
+        mSamplerAudioSource->setSampleRanges( mLoopSampleRangeList );
+    }
 }
 
 
@@ -1603,6 +1616,8 @@ void MainWindow::on_pushButton_TimestretchOptions_clicked()
 
 void MainWindow::on_checkBox_LoopMarkers_clicked( const bool isChecked )
 {
+    stopPlayback();
+
     if ( isChecked )
     {
         mSamplerAudioSource->setSampleRanges( mLoopSampleRangeList );

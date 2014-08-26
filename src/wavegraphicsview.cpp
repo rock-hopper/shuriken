@@ -58,6 +58,9 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
 
     QObject::connect( mTimer, SIGNAL( finished() ),
                       this, SLOT( removePlayhead() ) );
+
+    QObject::connect( mTimer, SIGNAL( finished() ),
+                      this, SIGNAL( playheadFinishedScrolling() ) );
 }
 
 
@@ -421,40 +424,43 @@ void WaveGraphicsView::hideLoopMarkers()
 
 QList<SharedSampleRange> WaveGraphicsView::getSampleRangesBetweenLoopMarkers( const QList<SharedSampleRange> currentSampleRangeList )
 {
-    const int leftMarkerFrameNum = mLoopMarkerLeft->getFrameNum();
-    const int rightMarkerFrameNum = mLoopMarkerRight->getFrameNum();
-
-    const int leftWaveformOrderPos = getWaveformOrderPosUnderLoopMarker( mLoopMarkerLeft );
-    const int rightWaveformOrderPos = getWaveformOrderPosUnderLoopMarker( mLoopMarkerRight );
-
     QList<SharedSampleRange> newSampleRangeList;
 
-    for ( int orderPos = leftWaveformOrderPos; orderPos <= rightWaveformOrderPos; orderPos++ )
+    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL)
     {
-        SharedSampleRange range = currentSampleRangeList.at( orderPos );
-        SharedSampleRange newRange( new SampleRange );
+        const int leftMarkerFrameNum = mLoopMarkerLeft->getFrameNum();
+        const int rightMarkerFrameNum = mLoopMarkerRight->getFrameNum();
 
-        if ( leftMarkerFrameNum > range->startFrame &&
-             leftMarkerFrameNum < range->startFrame + range->numFrames - 1 )
-        {
-            newRange->startFrame = leftMarkerFrameNum;
-        }
-        else
-        {
-            newRange->startFrame = range->startFrame;
-        }
+        const int leftWaveformOrderPos = getWaveformOrderPosUnderLoopMarker( mLoopMarkerLeft );
+        const int rightWaveformOrderPos = getWaveformOrderPosUnderLoopMarker( mLoopMarkerRight );
 
-        if ( rightMarkerFrameNum > range->startFrame &&
-             rightMarkerFrameNum < range->startFrame + range->numFrames )
+        for ( int orderPos = leftWaveformOrderPos; orderPos <= rightWaveformOrderPos; orderPos++ )
         {
-            newRange->numFrames = rightMarkerFrameNum - newRange->startFrame;
-        }
-        else
-        {
-            newRange->numFrames = range->numFrames - ( newRange->startFrame - range->startFrame );
-        }
+            SharedSampleRange range = currentSampleRangeList.at( orderPos );
+            SharedSampleRange newRange( new SampleRange );
 
-        newSampleRangeList << newRange;
+            if ( leftMarkerFrameNum > range->startFrame &&
+                 leftMarkerFrameNum < range->startFrame + range->numFrames - 1 )
+            {
+                newRange->startFrame = leftMarkerFrameNum;
+            }
+            else
+            {
+                newRange->startFrame = range->startFrame;
+            }
+
+            if ( rightMarkerFrameNum > range->startFrame &&
+                 rightMarkerFrameNum < range->startFrame + range->numFrames )
+            {
+                newRange->numFrames = rightMarkerFrameNum - newRange->startFrame;
+            }
+            else
+            {
+                newRange->numFrames = range->numFrames - ( newRange->startFrame - range->startFrame );
+            }
+
+            newSampleRangeList << newRange;
+        }
     }
 
     return newSampleRangeList;
@@ -841,35 +847,33 @@ void WaveGraphicsView::createLoopMarkers()
 
 void WaveGraphicsView::setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker )
 {
-    if ( loopMarker == NULL )
+    if ( loopMarker != NULL )
     {
-        return;
-    }
+        int newFrameNum = 0;
 
-    int newFrameNum = 0;
-
-    if ( mWaveformItemList.size() > 1 )
-    {
-        foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
+        if ( mWaveformItemList.size() > 1 )
         {
-            if ( loopMarker->scenePos().x() >= waveformItem->scenePos().x() &&
-                 loopMarker->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
+            foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
             {
-                const int startFrame = waveformItem->getSampleRange()->startFrame;
-                const int numFrames = getFrameNum( loopMarker->scenePos().x() - waveformItem->scenePos().x() );
+                if ( loopMarker->scenePos().x() >= waveformItem->scenePos().x() &&
+                     loopMarker->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
+                {
+                    const int startFrame = waveformItem->getSampleRange()->startFrame;
+                    const int numFrames = getFrameNum( loopMarker->scenePos().x() - waveformItem->scenePos().x() );
 
-                newFrameNum = startFrame + numFrames;
+                    newFrameNum = startFrame + numFrames;
 
-                break;
+                    break;
+                }
             }
         }
-    }
-    else
-    {
-        newFrameNum = getFrameNum( loopMarker->pos().x() );
-    }
+        else
+        {
+            newFrameNum = getFrameNum( loopMarker->pos().x() );
+        }
 
-    loopMarker->setFrameNum( newFrameNum );
+        loopMarker->setFrameNum( newFrameNum );
+    }
 }
 
 

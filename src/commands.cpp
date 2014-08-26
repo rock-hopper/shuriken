@@ -194,6 +194,8 @@ void SliceCommand::undo()
 
     mGraphicsView->showSlicePoints();
 
+    mMainWindow->setLoopSampleRanges();
+
     mSliceButton->setEnabled( true );
     mFindOnsetsButton->setEnabled( true );
     mFindBeatsButton->setEnabled( true );
@@ -228,6 +230,8 @@ void SliceCommand::redo()
     {
         mMainWindow->connectWaveformToMainWindow( item );
     }
+
+    mMainWindow->setLoopSampleRanges();
 
     mSliceButton->setEnabled( false );
     mFindOnsetsButton->setEnabled( false );
@@ -266,8 +270,8 @@ MoveWaveformItemCommand::MoveWaveformItemCommand( const QList<int> oldOrderPosit
 
 void MoveWaveformItemCommand::undo()
 {
-    mGraphicsView->moveWaveforms( mNewOrderPositions, -mNumPlacesMoved );
     mMainWindow->reorderSampleRangeList( mNewOrderPositions, -mNumPlacesMoved );
+    mGraphicsView->moveWaveforms( mNewOrderPositions, -mNumPlacesMoved );
 }
 
 
@@ -276,8 +280,8 @@ void MoveWaveformItemCommand::redo()
 {
     if ( ! mIsFirstRedoCall )
     {
-        mGraphicsView->moveWaveforms( mOldOrderPositions, mNumPlacesMoved );
         mMainWindow->reorderSampleRangeList( mOldOrderPositions, mNumPlacesMoved );
+        mGraphicsView->moveWaveforms( mOldOrderPositions, mNumPlacesMoved );
     }
     mIsFirstRedoCall = false;
 }

@@ -149,6 +149,7 @@ signals:
     void loopMarkerPosChanged();
     void minDetailLevelReached();
     void maxDetailLevelReached();
+    void playheadFinishedScrolling();
 
 private slots:
     // 'oldOrderPositions' is assumed to be sorted
