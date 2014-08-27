@@ -175,7 +175,8 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
 
             incomingMidi.addEvent( message, noteOnFrameNum );
 
-            mFrameCounter = mSampleRangeList.at( mNoteCounter )->numFrames;
+            const int numFrames = mSampleRangeList.at( mNoteCounter )->numFrames;
+            mFrameCounter = roundToInt( numFrames * (mPlaybackSampleRate / mFileSampleRate) );
             mFrameCounter -= bufferToFill.numSamples - noteOnFrameNum;
 
             mNoteCounter++;
