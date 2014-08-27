@@ -721,6 +721,9 @@ void ApplyTimeStretchCommand::undo()
     updateSampleRanges( timeRatio, numFrames );
     mMainWindow->resetSampler();
 
+    updateLoopMarkers( timeRatio );
+    mMainWindow->setLoopSampleRanges();
+
     updateSlicePoints( timeRatio );
     mGraphicsView->forceRedraw();
 
@@ -755,6 +758,9 @@ void ApplyTimeStretchCommand::redo()
 
         updateSampleRanges( timeRatio, newTotalNumFrames );
         mMainWindow->resetSampler();
+
+        updateLoopMarkers( timeRatio );
+        mMainWindow->setLoopSampleRanges();
 
         updateSlicePoints( timeRatio );
         mGraphicsView->forceRedraw();
@@ -952,5 +958,26 @@ void ApplyTimeStretchCommand::updateSlicePoints( const qreal timeRatio )
     {
         const int newFrameNum = roundToInt( slicePoint->getFrameNum() * timeRatio );
         slicePoint->setFrameNum( newFrameNum );
+    }
+}
+
+
+
+void ApplyTimeStretchCommand::updateLoopMarkers( const qreal timeRatio )
+{
+    LoopMarkerItem* loopMarkerLeft = mGraphicsView->getLeftLoopMarker();
+
+    if ( loopMarkerLeft != NULL )
+    {
+        const int newFrameNum = roundToInt( loopMarkerLeft->getFrameNum() * timeRatio );
+        loopMarkerLeft->setFrameNum( newFrameNum );
+    }
+
+    LoopMarkerItem* loopMarkerRight = mGraphicsView->getRightLoopMarker();
+
+    if ( loopMarkerRight != NULL )
+    {
+        const int newFrameNum = roundToInt( loopMarkerRight->getFrameNum() * timeRatio );
+        loopMarkerRight->setFrameNum( newFrameNum );
     }
 }

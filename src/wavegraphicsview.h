@@ -91,6 +91,8 @@ public:
 
     void showLoopMarkers();
     void hideLoopMarkers();
+    LoopMarkerItem* getLeftLoopMarker() const               { return mLoopMarkerLeft; }
+    LoopMarkerItem* getRightLoopMarker() const              { return mLoopMarkerRight; }
     QList<SharedSampleRange> getSampleRangesBetweenLoopMarkers( const QList<SharedSampleRange> currentSampleRangeList );
 
     void selectNone();
