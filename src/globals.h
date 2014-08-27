@@ -41,6 +41,7 @@ namespace UserTypes
     static const int WAVEFORM       = QGraphicsItem::UserType + 1;
     static const int FRAME_MARKER   = QGraphicsItem::UserType + 2;
     static const int SLICE_POINT    = QGraphicsItem::UserType + 3;
+    static const int LOOP_MARKER    = QGraphicsItem::UserType + 4;
 }
 
 namespace ZValues
@@ -48,14 +49,15 @@ namespace ZValues
     static const int WAVEFORM           = 0;
     static const int SELECTED_WAVEFORM  = 1;
     static const int FRAME_MARKER       = 2;
+    static const int LOOP_MARKER        = 3;
     static const int PLAYHEAD           = 5;
 }
 
 
 namespace Midi
 {
-    static const int MIDDLE_C               = 60;
-    static const int MAX_POLYPHONY          = 128;
+    static const int MIDDLE_C       = 60;
+    static const int MAX_POLYPHONY  = 128;
 }
 
 

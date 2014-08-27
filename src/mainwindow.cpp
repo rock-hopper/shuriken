@@ -83,7 +83,7 @@ void MainWindow::connectWaveformToMainWindow( const SharedWaveformItem item )
                       this, SLOT( reorderSampleRangeList(QList<int>,int) ) );
 
     QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                      this, SLOT( on_pushButton_Stop_clicked() ) );
+                      this, SLOT( stopPlayback() ) );
 
     QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
                       this, SLOT( playSampleRange(int,int,QPointF) ) );
@@ -146,14 +146,7 @@ void MainWindow::keyPressEvent( QKeyEvent* event )
 {
     if ( event->key() == Qt::Key_Space && ! event->isAutoRepeat() && mSamplerAudioSource != NULL )
     {
-        if ( mUI->waveGraphicsView->isPlayheadScrolling() )
-        {
-            on_pushButton_Stop_clicked();
-        }
-        else
-        {
-            on_pushButton_Play_clicked();
-        }
+        on_pushButton_PlayStop_clicked();
     }
     else
     {
@@ -339,6 +332,28 @@ void MainWindow::setupUI()
     mUI->comboBox_HopSize->setCurrentIndex( 0 ); // "50%"
 
 
+    // Populate "Time Signature" combo boxes
+    QStringList timeSigNumeratorTextList;
+    QStringList timeSigDenominatorTextList;
+
+    timeSigNumeratorTextList << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12" << "13" << "14" << "15" << "16";
+    timeSigDenominatorTextList << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12" << "13" << "14" << "15" << "16";
+
+    mUI->comboBox_TimeSigNumerator->addItems( timeSigNumeratorTextList );
+    mUI->comboBox_TimeSigDenominator->addItems( timeSigDenominatorTextList );
+
+    mUI->comboBox_TimeSigNumerator->setCurrentIndex( 3 );   // 4
+    mUI->comboBox_TimeSigDenominator->setCurrentIndex( 3 ); // 4
+
+
+    // Populate "Units" combo box
+    QStringList unitsTextList;
+
+    unitsTextList << "Bars" << "Beats";
+
+    mUI->comboBox_Units->addItems( unitsTextList );
+
+
     // Hide widgets
     mUI->label_JackSync->setVisible( false );
     mUI->checkBox_TimeStretch->setVisible( false );
@@ -348,11 +363,17 @@ void MainWindow::setupUI()
     QObject::connect( mUI->waveGraphicsView, SIGNAL( slicePointOrderChanged(SharedSlicePointItem,int,int) ),
                       this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int) ) );
 
+    QObject::connect( mUI->waveGraphicsView, SIGNAL( loopMarkerPosChanged() ),
+                      this, SLOT( setLoopSampleRanges() ) );
+
     QObject::connect( mUI->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
                       this, SLOT( disableZoomOut() ) );
 
     QObject::connect( mUI->waveGraphicsView, SIGNAL( maxDetailLevelReached() ),
                       this, SLOT( disableZoomIn() ) );
+
+    QObject::connect( mUI->waveGraphicsView, SIGNAL( playheadFinishedScrolling() ),
+                      this, SLOT( resetPlayStopButtonIcon() ) );
 
     QObject::connect( mUI->waveGraphicsView->scene(), SIGNAL( selectionChanged() ),
                       this, SLOT( enableEditActions() ) );
@@ -435,8 +456,8 @@ void MainWindow::enableUI()
 {
     if ( mIsAudioInitialised )
     {
-        mUI->pushButton_Play->setEnabled( true );
-        mUI->pushButton_Stop->setEnabled( true );
+        mUI->pushButton_PlayStop->setEnabled( true );
+        mUI->pushButton_Loop->setEnabled( true );
         mUI->pushButton_TimestretchOptions->setEnabled( true );
 
         if ( mOptionsDialog->isRealtimeModeEnabled() )
@@ -462,6 +483,7 @@ void MainWindow::enableUI()
     mUI->horizontalSlider_Threshold->setEnabled( true );
     mUI->pushButton_FindOnsets->setEnabled( true );
     mUI->pushButton_FindBeats->setEnabled( true );
+    mUI->checkBox_LoopMarkers->setEnabled( true );
 
     mUI->actionSave_As->setEnabled( true );
     mUI->actionClose_Project->setEnabled( true );
@@ -481,8 +503,8 @@ void MainWindow::enableUI()
 
 void MainWindow::disableUI()
 {
-    mUI->pushButton_Play->setEnabled( false );
-    mUI->pushButton_Stop->setEnabled( false );
+    mUI->pushButton_PlayStop->setEnabled( false );
+    mUI->pushButton_Loop->setEnabled( false );
     mUI->doubleSpinBox_OriginalBPM->setValue( 0.0 );
     mUI->doubleSpinBox_OriginalBPM->setEnabled( false );
     mUI->doubleSpinBox_NewBPM->setValue( 0.0 );
@@ -500,6 +522,8 @@ void MainWindow::disableUI()
     mUI->horizontalSlider_Threshold->setEnabled( false );
     mUI->pushButton_FindOnsets->setEnabled( false );
     mUI->pushButton_FindBeats->setEnabled( false );
+    mUI->checkBox_LoopMarkers->setEnabled( false );
+    mUI->checkBox_LoopMarkers->setChecked( false );
 
     mUI->actionSave_Project->setEnabled( false );
     mUI->actionSave_As->setEnabled( false );
@@ -594,6 +618,7 @@ void MainWindow::closeProject()
     mCurrentSampleBuffer.clear();
     mCurrentSampleHeader.clear();
     mSampleRangeList.clear();
+    mLoopSampleRangeList.clear();
     tearDownSampler();
 
     mUI->waveGraphicsView->clearAll();
@@ -695,6 +720,35 @@ void MainWindow::playSampleRange( const int waveformItemStartFrame, const int wa
     sampleRange->numFrames = endFrame - sampleRange->startFrame;
 
     mSamplerAudioSource->playRange( sampleRange );
+}
+
+
+
+void MainWindow::stopPlayback()
+{
+    mSamplerAudioSource->stop();
+    mUI->waveGraphicsView->stopPlayhead();
+}
+
+
+
+void MainWindow::resetPlayStopButtonIcon()
+{
+    mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
+}
+
+
+
+void MainWindow::setLoopSampleRanges()
+{
+    mLoopSampleRangeList.clear();
+
+    mLoopSampleRangeList = mUI->waveGraphicsView->getSampleRangesBetweenLoopMarkers( mSampleRangeList );
+
+    if ( ! mLoopSampleRangeList.isEmpty() && mUI->checkBox_LoopMarkers->isChecked() )
+    {
+        mSamplerAudioSource->setSampleRanges( mLoopSampleRangeList );
+    }
 }
 
 
@@ -1449,18 +1503,27 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
 
 
 
-void MainWindow::on_pushButton_Play_clicked()
+void MainWindow::on_pushButton_PlayStop_clicked()
 {
-    mSamplerAudioSource->playAll();
-    mUI->waveGraphicsView->startPlayhead();
+    if ( mUI->waveGraphicsView->isPlayheadScrolling() )
+    {
+        mSamplerAudioSource->stop();
+        mUI->waveGraphicsView->stopPlayhead();
+        mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
+    }
+    else
+    {
+        mSamplerAudioSource->playAll();
+        mUI->waveGraphicsView->startPlayhead( mUI->pushButton_Loop->isChecked() );
+        mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
+    }
 }
 
 
 
-void MainWindow::on_pushButton_Stop_clicked()
+void MainWindow::on_pushButton_Loop_clicked( const bool isChecked )
 {
-    mSamplerAudioSource->stop();
-    mUI->waveGraphicsView->stopPlayhead();
+    mSamplerAudioSource->enableLooping( isChecked );
 }
 
 
@@ -1555,4 +1618,31 @@ void MainWindow::on_pushButton_TimestretchOptions_clicked()
     mOptionsDialog->move( pos );
     mOptionsDialog->setCurrentTab( OptionsDialog::TIMESTRETCH );
     mOptionsDialog->show();
+}
+
+
+
+void MainWindow::on_checkBox_LoopMarkers_clicked( const bool isChecked )
+{
+    stopPlayback();
+
+    if ( isChecked )
+    {
+        mSamplerAudioSource->setSampleRanges( mLoopSampleRangeList );
+
+        mUI->waveGraphicsView->showLoopMarkers();
+    }
+    else
+    {
+        mUI->waveGraphicsView->hideLoopMarkers();
+        
+        if ( mSampleRangeList.size() > 1 )
+        {
+            mSamplerAudioSource->setSampleRanges( mSampleRangeList );
+        }
+        else
+        {
+            mSamplerAudioSource->setSample( mCurrentSampleBuffer, mCurrentSampleHeader->sampleRate );
+        }
+    }
 }

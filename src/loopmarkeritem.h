@@ -20,50 +20,42 @@
 
 */
 
-#ifndef FRAMEMARKERITEM_H
-#define FRAMEMARKERITEM_H
+#ifndef LOOPMARKERITEM_H
+#define LOOPMARKERITEM_H
 
-#include <QObject>
-#include <QGraphicsPolygonItem>
-#include <QPainter>
-#include <QStyleOptionGraphicsItem>
 #include "JuceHeader.h"
-#include "globals.h"
+#include "framemarkeritem.h"
 
 
-class FrameMarkerItem : public QObject, public QGraphicsPolygonItem
+class LoopMarkerItem : public FrameMarkerItem
 {
+    Q_OBJECT
+
 public:
-    enum { Type = UserTypes::FRAME_MARKER };
+    enum { Type = UserTypes::LOOP_MARKER };
 
-    enum Handle { HANDLE_TOP_BOTTOM, HANDLE_CENTRE_RIGHT, HANDLE_CENTRE_LEFT };
+    enum MarkerType { LEFT_MARKER, RIGHT_MARKER };
 
-    FrameMarkerItem( const QBrush brush, const QBrush selectedBrush, const qreal height, const Handle handle, QGraphicsItem* parent = NULL );
+    LoopMarkerItem( const MarkerType markerType, const qreal height, QGraphicsItem* parent = NULL );
 
-    void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
-    void setHeight( const qreal height );
-    int getFrameNum() const                     { return mFrameNum; }
-    void setFrameNum( const int frameNum )      { mFrameNum = frameNum; }
     int type() const                            { return Type; }
+    MarkerType getMarkerType() const            { return mMarkerType; }
 
 protected:
-    // Subclasses that reimplement this method MUST ALWAYS call "return FrameMarkerItem::itemChange"
-    // in their reimplementation
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
-
-    // Subclasses that reimplement this method MUST call FrameMarkerItem::mousePressEvent
-    // at the start of the reimplementation
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
+    void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
 private:
-    const QBrush mSelectedBrush;
-    const Handle mHandle;
+    const MarkerType mMarkerType;
+    qreal mScenePosBeforeMove;
 
-    int mFrameNum;
+signals:
+    void scenePosChanged( LoopMarkerItem* const item );
 
 private:
     JUCE_LEAK_DETECTOR( FrameMarkerItem );
 };
 
 
-#endif // FRAMEMARKERITEM_H
+#endif // LOOPMARKERITEM_H

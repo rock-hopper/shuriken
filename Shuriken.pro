@@ -171,7 +171,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/framemarkeritem.cpp \
     src/akaifilehandler.cpp \
     src/midifilehandler.cpp \
-    src/mainwindowfilehandling.cpp
+    src/mainwindowfilehandling.cpp \
+    src/loopmarkeritem.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -383,7 +384,8 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/textfilehandler.h \
     src/framemarkeritem.h \
     src/akaifilehandler.h \
-    src/midifilehandler.h
+    src/midifilehandler.h \
+    src/loopmarkeritem.h
 FORMS += src/mainwindow.ui \
     src/optionsdialog.ui \
     src/helpform.ui \

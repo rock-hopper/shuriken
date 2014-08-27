@@ -308,6 +308,7 @@ private:
     int stretch( const qreal timeRatio, const qreal pitchScale );
     void updateSampleRanges( const qreal timeRatio, const int newTotalNumFrames );
     void updateSlicePoints( const qreal timeRatio );
+    void updateLoopMarkers( const qreal timeRatio );
 
     MainWindow* const mMainWindow;
     WaveGraphicsView* const mGraphicsView;

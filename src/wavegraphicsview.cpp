@@ -32,6 +32,7 @@
 WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
     QGraphicsView( parent )
 {
+    // Set up view and scene
     setViewport( new QGLWidget( QGLFormat(QGL::SampleBuffers) ) );
     setRenderHint( QPainter::HighQualityAntialiasing, false );
     setViewportUpdateMode( QGraphicsView::FullViewportUpdate );
@@ -41,6 +42,7 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
 
     setScene( new QGraphicsScene( 0.0, 0.0, 1024.0, 768.0 ) );
 
+    // Set up playhead
     mPlayhead = new QGraphicsLineItem( 0.0, 0.0, 0.0, scene()->height() - 1 );
     mPlayhead->setPen( QColor( Qt::red ) );
     mPlayhead->setZValue( ZValues::PLAYHEAD );
@@ -56,6 +58,9 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
 
     QObject::connect( mTimer, SIGNAL( finished() ),
                       this, SLOT( removePlayhead() ) );
+
+    QObject::connect( mTimer, SIGNAL( finished() ),
+                      this, SIGNAL( playheadFinishedScrolling() ) );
 }
 
 
@@ -274,7 +279,7 @@ SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
 
     QTransform matrix;
     const qreal currentScaleFactor = transform().m11(); // m11() returns horizontal scale factor
-    matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // slice point remains same width when view is scaled
+    matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // slice point remains correct width if view is scaled
     slicePointItem->setTransform( matrix );
 
     sharedSlicePoint = SharedSlicePointItem( slicePointItem );
@@ -396,6 +401,73 @@ QList<int> WaveGraphicsView::getSlicePointFrameNumList() const
 
 
 
+void WaveGraphicsView::showLoopMarkers()
+{
+    if ( mLoopMarkerLeft == NULL && mLoopMarkerRight == NULL )
+    {
+        createLoopMarkers();
+    }
+
+    mLoopMarkerLeft->setVisible( true );
+    mLoopMarkerRight->setVisible( true );
+}
+
+
+
+void WaveGraphicsView::hideLoopMarkers()
+{
+    mLoopMarkerLeft->setVisible( false );
+    mLoopMarkerRight->setVisible( false );
+}
+
+
+
+QList<SharedSampleRange> WaveGraphicsView::getSampleRangesBetweenLoopMarkers( const QList<SharedSampleRange> currentSampleRangeList )
+{
+    QList<SharedSampleRange> newSampleRangeList;
+
+    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL)
+    {
+        const int leftMarkerFrameNum = mLoopMarkerLeft->getFrameNum();
+        const int rightMarkerFrameNum = mLoopMarkerRight->getFrameNum();
+
+        const int leftWaveformOrderPos = getWaveformOrderPosUnderLoopMarker( mLoopMarkerLeft );
+        const int rightWaveformOrderPos = getWaveformOrderPosUnderLoopMarker( mLoopMarkerRight );
+
+        for ( int orderPos = leftWaveformOrderPos; orderPos <= rightWaveformOrderPos; orderPos++ )
+        {
+            SharedSampleRange range = currentSampleRangeList.at( orderPos );
+            SharedSampleRange newRange( new SampleRange );
+
+            if ( leftMarkerFrameNum > range->startFrame &&
+                 leftMarkerFrameNum < range->startFrame + range->numFrames - 1 )
+            {
+                newRange->startFrame = leftMarkerFrameNum;
+            }
+            else
+            {
+                newRange->startFrame = range->startFrame;
+            }
+
+            if ( rightMarkerFrameNum > range->startFrame &&
+                 rightMarkerFrameNum < range->startFrame + range->numFrames )
+            {
+                newRange->numFrames = rightMarkerFrameNum - newRange->startFrame;
+            }
+            else
+            {
+                newRange->numFrames = range->numFrames - ( newRange->startFrame - range->startFrame );
+            }
+
+            newSampleRangeList << newRange;
+        }
+    }
+
+    return newSampleRangeList;
+}
+
+
+
 void WaveGraphicsView::selectNone()
 {
     foreach ( SharedSlicePointItem item, mSlicePointItemList )
@@ -421,13 +493,24 @@ void WaveGraphicsView::selectAll()
 
 
 
-void WaveGraphicsView::startPlayhead()
+void WaveGraphicsView::startPlayhead( const bool isLoopingEnabled )
 {
     const qreal sampleRate = mSampleHeader->sampleRate;
 
     if ( sampleRate > 0.0 )
     {
-        const int numFrames = mSampleBuffer->getNumFrames();
+        int numFrames = mSampleBuffer->getNumFrames();
+
+        qreal startPosX = 0.0;
+        qreal endPosX   = scene()->width() - 1;
+
+        if ( mLoopMarkerLeft != NULL && mLoopMarkerLeft->isVisible() )
+        {
+            numFrames = getFrameNum( mLoopMarkerRight->scenePos().x() - mLoopMarkerLeft->scenePos().x() );
+            startPosX = mLoopMarkerLeft->scenePos().x();
+            endPosX   = mLoopMarkerRight->scenePos().x();
+        }
+
         const int millis = roundToInt( (numFrames / sampleRate) * 1000 );
 
         if ( isPlayheadScrolling() )
@@ -435,12 +518,20 @@ void WaveGraphicsView::startPlayhead()
             stopPlayhead();
         }
 
-        mAnimation->setPosAt( 0.0, QPointF( 0.0, 0.0 ) );
-        mAnimation->setPosAt( 1.0, QPointF( scene()->width() - 1, 0.0 ) );
+        mAnimation->setPosAt( 0.0, QPointF( startPosX, 0.0 ) );
+        mAnimation->setPosAt( 1.0, QPointF( endPosX,   0.0 ) );
 
         mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
         scene()->addItem( mPlayhead );
 
+        if ( isLoopingEnabled )
+        {
+            mTimer->setLoopCount( 0 );
+        }
+        else
+        {
+            mTimer->setLoopCount( 1 );
+        }
         mTimer->setDuration( millis );
         mTimer->start();
     }
@@ -469,6 +560,8 @@ void WaveGraphicsView::clearAll()
 
     mWaveformItemList.clear();
     mSlicePointItemList.clear();
+    mLoopMarkerLeft = NULL;
+    mLoopMarkerRight = NULL;
 }
 
 
@@ -529,7 +622,7 @@ void WaveGraphicsView::zoomIn()
     matrix.scale( newXScaleFactor, 1.0 );
     setTransform( matrix );
 
-    scaleSlicePointItems( newXScaleFactor );
+    scaleItems( newXScaleFactor );
 }
 
 
@@ -542,7 +635,7 @@ void WaveGraphicsView::zoomOut()
     matrix.scale( newXScaleFactor, 1.0 );
     setTransform( matrix );
 
-    scaleSlicePointItems( newXScaleFactor );
+    scaleItems( newXScaleFactor );
 
     if ( newXScaleFactor == 1.0 )
     {
@@ -555,7 +648,7 @@ void WaveGraphicsView::zoomOut()
 void WaveGraphicsView::zoomOriginal()
 {
     resetTransform();
-    scaleSlicePointItems( 1.0 );
+    scaleItems( 1.0 );
 }
 
 
@@ -616,8 +709,21 @@ void WaveGraphicsView::resizeEvent ( QResizeEvent* event )
     const qreal scaleFactorX = scene()->width() / event->oldSize().width();
 //    const qreal scaleFactorY = scene()->height() / event->oldSize().height();
 
+    resizeWaveformItems( scaleFactorX );
+    resizeSlicePointItems( scaleFactorX );
+    resizePlayhead();
+    resizeLoopMarkers( scaleFactorX );
 
-    // Resize waveform items
+    QGraphicsView::resizeEvent( event );
+}
+
+
+
+//==================================================================================================
+// Private:
+
+void WaveGraphicsView::resizeWaveformItems( const qreal scaleFactorX )
+{
     if ( ! mWaveformItemList.isEmpty() )
     {
         foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
@@ -628,9 +734,12 @@ void WaveGraphicsView::resizeEvent ( QResizeEvent* event )
             waveformItem->setPos( newX, 0.0 );
         }
     }
+}
 
 
-    // Resize slice point items
+
+void WaveGraphicsView::resizeSlicePointItems( const qreal scaleFactorX )
+{
     if ( ! mSlicePointItemList.isEmpty() )
     {
         foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
@@ -640,9 +749,12 @@ void WaveGraphicsView::resizeEvent ( QResizeEvent* event )
             slicePointItem->setPos( newX, 0.0 );
         }
     }
+}
 
 
-    // Resize playhead
+
+void WaveGraphicsView::resizePlayhead()
+{
     if ( mTimer->state() == QTimeLine::Running )
     {
         mTimer->stop();
@@ -655,27 +767,152 @@ void WaveGraphicsView::resizeEvent ( QResizeEvent* event )
 
         mTimer->resume();
     }
-
-
-    QGraphicsView::resizeEvent( event );
 }
 
 
 
-//==================================================================================================
-// Private:
-
-void WaveGraphicsView::scaleSlicePointItems( const qreal newXScaleFactor )
+void WaveGraphicsView::resizeLoopMarkers( const qreal scaleFactorX )
 {
-    if ( ! mSlicePointItemList.isEmpty() && newXScaleFactor > 0.0 )
+    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
+    {
+        mLoopMarkerLeft->setHeight( scene()->height() - 1 );
+        mLoopMarkerRight->setHeight( scene()->height() - 1 );
+        {
+            const qreal newX = mLoopMarkerLeft->scenePos().x() * scaleFactorX;
+            mLoopMarkerLeft->setPos( newX, 0.0 );
+        }
+        {
+            const qreal newX = mLoopMarkerRight->scenePos().x() * scaleFactorX;
+            mLoopMarkerRight->setPos( newX, 0.0 );
+        }
+    }
+}
+
+
+
+void WaveGraphicsView::scaleItems( const qreal scaleFactorX )
+{
+    if ( scaleFactorX > 0.0 )
     {
         QTransform matrix;
-        matrix.scale( 1.0 / newXScaleFactor, 1.0 ); // Slice points remain same width when view is scaled
+        matrix.scale( 1.0 / scaleFactorX, 1.0 ); // Items remain same width when view is scaled
 
-        foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
+        if ( ! mSlicePointItemList.isEmpty() )
         {
-            slicePointItem->setTransform( matrix );
+            foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
+            {
+                slicePointItem->setTransform( matrix );
+            }
         }
+
+        if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
+        {
+            mLoopMarkerLeft->setTransform( matrix );
+            mLoopMarkerRight->setTransform( matrix );
+        }
+    }
+}
+
+
+
+void WaveGraphicsView::createLoopMarkers()
+{
+    mLoopMarkerLeft = new LoopMarkerItem( LoopMarkerItem::LEFT_MARKER, scene()->height() - 1 );
+    mLoopMarkerRight = new LoopMarkerItem( LoopMarkerItem::RIGHT_MARKER, scene()->height() - 1 );
+
+    const int startFrame = 0;
+    const int endFrame = mSampleBuffer->getNumFrames() - 1;
+
+    mLoopMarkerLeft->setFrameNum( startFrame );
+    mLoopMarkerRight->setFrameNum( endFrame );
+
+    mLoopMarkerLeft->setPos( 0.0, 0.0 );
+    mLoopMarkerRight->setPos( getScenePosX( endFrame ), 0.0 );
+
+    QTransform matrix;
+    const qreal currentScaleFactor = transform().m11(); // m11() returns horizontal scale factor
+    matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // loop marker remains correct width if view is scaled
+    mLoopMarkerLeft->setTransform( matrix );
+    mLoopMarkerRight->setTransform( matrix );
+
+    mLoopMarkerLeft->setZValue( ZValues::LOOP_MARKER );
+    mLoopMarkerRight->setZValue( ZValues::LOOP_MARKER );
+
+    QObject::connect( mLoopMarkerLeft, SIGNAL( scenePosChanged(LoopMarkerItem*const) ),
+                      this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*const) ) );
+
+    QObject::connect( mLoopMarkerRight, SIGNAL( scenePosChanged(LoopMarkerItem*const) ),
+                      this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*const) ) );
+
+    scene()->addItem( mLoopMarkerLeft );
+    scene()->addItem( mLoopMarkerRight );
+    scene()->update();
+
+    updateLoopMarkerFrameNum( mLoopMarkerLeft );
+}
+
+
+
+void WaveGraphicsView::setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker )
+{
+    if ( loopMarker != NULL )
+    {
+        int newFrameNum = 0;
+
+        if ( mWaveformItemList.size() > 1 )
+        {
+            foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
+            {
+                if ( loopMarker->scenePos().x() >= waveformItem->scenePos().x() &&
+                     loopMarker->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
+                {
+                    const int startFrame = waveformItem->getSampleRange()->startFrame;
+                    const int numFrames = getFrameNum( loopMarker->scenePos().x() - waveformItem->scenePos().x() );
+
+                    newFrameNum = startFrame + numFrames;
+
+                    break;
+                }
+            }
+        }
+        else
+        {
+            newFrameNum = getFrameNum( loopMarker->pos().x() );
+        }
+
+        loopMarker->setFrameNum( newFrameNum );
+    }
+}
+
+
+
+int WaveGraphicsView::getWaveformOrderPosUnderLoopMarker( LoopMarkerItem* const loopMarker )
+{
+    int orderPos = 0;
+
+    foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
+    {
+        if ( loopMarker->scenePos().x() >= waveformItem->scenePos().x() &&
+             loopMarker->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
+        {
+            orderPos = waveformItem->getOrderPos();
+            break;
+        }
+    }
+
+    return orderPos;
+}
+
+
+
+void WaveGraphicsView::updateLoopMarkerFrameNums()
+{
+    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
+    {
+        setLoopMarkerFrameNum( mLoopMarkerLeft );
+        setLoopMarkerFrameNum( mLoopMarkerRight );
+
+        emit loopMarkerPosChanged();
     }
 }
 
@@ -772,7 +1009,9 @@ void WaveGraphicsView::slideWaveformItemIntoPlace( const int orderPos )
         }
     }
 
-    mWaveformItemList[ orderPos ]->setPos( newScenePosX, 0.0 );
+    mWaveformItemList.at( orderPos )->setPos( newScenePosX, 0.0 );
+
+    updateLoopMarkerFrameNums();
 }
 
 
@@ -795,6 +1034,14 @@ void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem
     sharedSlicePoint->setFrameNum( newFrameNum );
 
     emit slicePointOrderChanged( sharedSlicePoint, oldFrameNum, newFrameNum );
+}
+
+
+
+void WaveGraphicsView::updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem )
+{
+    setLoopMarkerFrameNum( movedItem );
+    emit loopMarkerPosChanged();
 }
 
 

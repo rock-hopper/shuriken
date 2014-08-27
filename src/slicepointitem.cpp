@@ -29,7 +29,7 @@
 // Public:
 
 SlicePointItem::SlicePointItem( const qreal height, QGraphicsItem* parent ) :
-    FrameMarkerItem( QColor( Qt::red ), QColor(255, 192, 0, 255), height, parent )
+    FrameMarkerItem( QColor( Qt::red ), QColor(255, 192, 0, 255), height, HANDLE_TOP_BOTTOM, parent )
 {
 }
 

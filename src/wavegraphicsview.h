@@ -31,6 +31,7 @@
 #include "JuceHeader.h"
 #include "waveformitem.h"
 #include "slicepointitem.h"
+#include "loopmarkeritem.h"
 #include "samplebuffer.h"
 
 
@@ -42,13 +43,11 @@ public:
     WaveGraphicsView( QWidget* parent = NULL );
 
     // Creates a new waveform item and returns a shared pointer to it
-    // 'sampleRate' is the original audio file sample rate, not playback sample rate
     SharedWaveformItem createWaveform( const SharedSampleBuffer sampleBuffer,
                                        const SharedSampleHeader sampleHeader,
                                        const SharedSampleRange sampleRange );
 
     // Creates new waveform items and returns a list of shared pointers to them
-    // 'sampleRate' is the original audio file sample rate, not playback sample rate
     QList<SharedWaveformItem> createWaveforms( const SharedSampleBuffer sampleBuffer,
                                                const SharedSampleHeader sampleHeader,
                                                const QList<SharedSampleRange> sampleRangeList );
@@ -90,16 +89,23 @@ public:
     // Returns a list of all slice point items
     QList<SharedSlicePointItem> getSlicePointList() const   { return mSlicePointItemList; }
 
+    void showLoopMarkers();
+    void hideLoopMarkers();
+    LoopMarkerItem* getLeftLoopMarker() const               { return mLoopMarkerLeft; }
+    LoopMarkerItem* getRightLoopMarker() const              { return mLoopMarkerRight; }
+    QList<SharedSampleRange> getSampleRangesBetweenLoopMarkers( const QList<SharedSampleRange> currentSampleRangeList );
+
     void selectNone();
     void selectAll();
 
-    void startPlayhead();
+    void startPlayhead( const bool isLoopingEnabled );
     void stopPlayhead();
     bool isPlayheadScrolling() const        { return mTimer->state() == QTimeLine::Running; }
 
     void clearAll();
     void clearWaveform();
 
+    // These methods do not take the ordering of waveform items into account
     qreal getScenePosX( const int frameNum ) const;
     int getFrameNum( qreal scenePosX ) const;
 
@@ -116,7 +122,17 @@ protected:
     void resizeEvent( QResizeEvent* event );
 
 private:
-    void scaleSlicePointItems( const qreal newXScaleFactor );
+    void resizeWaveformItems( const qreal scaleFactorX );
+    void resizeSlicePointItems( const qreal scaleFactorX );
+    void resizePlayhead();
+    void resizeLoopMarkers( const qreal scaleFactorX );
+
+    void scaleItems( const qreal scaleFactorX );
+
+    void createLoopMarkers();
+    void setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker );
+    int getWaveformOrderPosUnderLoopMarker( LoopMarkerItem* const loopMarker );
+    void updateLoopMarkerFrameNums();
 
     QList<SharedWaveformItem> mWaveformItemList;
     QList<SharedSlicePointItem> mSlicePointItemList;
@@ -127,10 +143,15 @@ private:
     ScopedPointer<QTimeLine> mTimer;
     ScopedPointer<QGraphicsItemAnimation> mAnimation;
 
+    ScopedPointer<LoopMarkerItem> mLoopMarkerLeft;
+    ScopedPointer<LoopMarkerItem> mLoopMarkerRight;
+
 signals:
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );
+    void loopMarkerPosChanged();
     void minDetailLevelReached();
     void maxDetailLevelReached();
+    void playheadFinishedScrolling();
 
 private slots:
     // 'oldOrderPositions' is assumed to be sorted
@@ -139,6 +160,7 @@ private slots:
 
     void slideWaveformItemIntoPlace( const int orderPos );
     void updateSlicePointFrameNum( SlicePointItem* const movedItem );
+    void updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem );
     void relayMaxDetailLevelReached();
     void removePlayhead();
 

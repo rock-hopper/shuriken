@@ -89,6 +89,7 @@ void Synthesiser::addVoice (SynthesiserVoice* const newVoice)
 {
     const ScopedLock sl (lock);
     voices.add (newVoice);
+    newVoice->setCurrentPlaybackSampleRate (sampleRate);
 }
 
 void Synthesiser::removeVoice (const int index)

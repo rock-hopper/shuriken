@@ -108,6 +108,7 @@ private:
     SharedSampleBuffer mCurrentSampleBuffer;
     SharedSampleHeader mCurrentSampleHeader;
     QList<SharedSampleRange> mSampleRangeList;
+    QList<SharedSampleRange> mLoopSampleRangeList;
 
     ScopedPointer<SamplerAudioSource> mSamplerAudioSource;
     ScopedPointer<RubberbandAudioSource> mRubberbandAudioSource;
@@ -129,6 +130,7 @@ public slots:
     void reorderSampleRangeList( QList<int> oldOrderPositions, const int numPlacesMoved );
 
 private slots:
+    void on_checkBox_LoopMarkers_clicked( const bool isChecked );
     void on_pushButton_TimestretchOptions_clicked();
     void on_actionAudition_triggered();
     void on_actionSelect_triggered();
@@ -137,8 +139,8 @@ private slots:
     void on_actionZoom_Original_triggered();
     void on_actionZoom_Out_triggered();
     void on_actionZoom_In_triggered();
-    void on_pushButton_Stop_clicked();
-    void on_pushButton_Play_clicked();
+    void on_pushButton_Loop_clicked( const bool isChecked );
+    void on_pushButton_PlayStop_clicked();
     void on_checkBox_PitchCorrection_toggled( const bool isChecked );
     void on_checkBox_TimeStretch_toggled( const bool isChecked );
     void on_doubleSpinBox_NewBPM_valueChanged( const double newBPM );
@@ -174,12 +176,21 @@ private slots:
 
 
     void recordWaveformItemMove( QList<int> oldOrderPositions, const int numPlacesMoved );
+
     void recordSlicePointItemMove( const SharedSlicePointItem slicePointItem,
                                    const int oldFrameNum,
                                    const int newFrameNum );
+
     void playSampleRange( const int waveformItemStartFrame,
                           const int waveformItemNumFrames,
                           const QPointF mouseScenePos );
+
+    void stopPlayback();
+
+    void resetPlayStopButtonIcon();
+
+    void setLoopSampleRanges();
+
     void disableZoomIn();
     void disableZoomOut();
 
