@@ -58,9 +58,15 @@ public:
 private:
     static void interleaveSamples( const SharedSampleBuffer inputBuffer,
                                    const int numChans,
-                                   const int startFrame,
+                                   const int inputStartFrame,
                                    const int numFrames,
                                    Array<float>& outputBuffer );
+
+    static void deinterleaveSamples( Array<float>& inputBuffer,
+                                     const int numChans,
+                                     const int outputStartFrame,
+                                     const int numFrames,
+                                     SharedSampleBuffer outputBuffer );
 
     // Takes a buffer of non-interleaved samples, converts sample rate,
     // and outputs a buffer of interleaved samples
@@ -70,13 +76,13 @@ private:
 
     static bool sndfileSaveAudioFile( SNDFILE* fileID, const SharedSampleBuffer sampleBuffer, const int hopSize );
     static bool sndfileSaveAudioFile( SNDFILE* fileID, const Array<float> interleavedBuffer, const int hopSize );
-
     static void sndfileRecordWriteError( const int numSamplesToWrite, const int numSamplesWritten );
+    static SharedSampleBuffer sndfileLoadFile( const char* filePath, sf_count_t startFrame, sf_count_t numFramesToRead );
 
-    static int initSndLib();
-    static void recordSndLibError( int errorCode, char* errorMessage );
-
+    static int sndlibInit();
+    static void sndlibRecordError( int errorCode, char* errorMessage );
     static SharedSampleBuffer sndlibLoadFile( const char* filePath, mus_long_t startFrame, mus_long_t numFramesToRead );
+
     static SharedSampleBuffer aubioLoadFile( const char* filePath, uint_t startFrame, uint_t numFramesToRead );
 
     static QString sErrorTitle;

@@ -33,7 +33,7 @@ AudioFileHandler::AudioFileHandler()
 {
     // Initialise sndlib so we can read header info not available through aubio's API
     // and also open some audio file formats that may not be supported via aubio
-    const int errorCode = initSndLib();
+    const int errorCode = sndlibInit();
 
     if ( errorCode == MUS_ERROR )
     {
@@ -59,16 +59,17 @@ SharedSampleBuffer AudioFileHandler::getSampleData( const QString filePath, cons
 
     SharedSampleBuffer sampleBuffer;
 
-    // If file exists
-    if ( mus_file_probe( path ) )
-    {
-        // First try using aubio to load the file; if that fails, try using sndlib
-        sampleBuffer = aubioLoadFile( path, startFrame, numFramesToRead );
+#ifdef ENABLE_AUBIO_FILE_IO
+    // First try using aubio to load the file; if that fails, try using sndlib
+    sampleBuffer = aubioLoadFile( path, startFrame, numFramesToRead );
+#else
+    // First try using sndlib to load the file; if that fails, try using sndlib
+    sampleBuffer = sndfileLoadFile( path, startFrame, numFramesToRead );
+#endif
 
-        if ( sampleBuffer.isNull() )
-        {
-            sampleBuffer = sndlibLoadFile( path, startFrame, numFramesToRead );
-        }
+    if ( sampleBuffer.isNull() )
+    {
+        sampleBuffer = sndlibLoadFile( path, startFrame, numFramesToRead );
     }
 
     return sampleBuffer;
@@ -250,18 +251,39 @@ QString AudioFileHandler::sErrorInfo;
 
 void AudioFileHandler::interleaveSamples( const SharedSampleBuffer inputBuffer,
                                           const int numChans,
-                                          const int startFrame,
+                                          const int inputStartFrame,
                                           const int numFrames,
                                           Array<float>& outputBuffer )
 {
     for ( int chanNum = 0; chanNum < numChans; ++chanNum )
     {
-        float* sampleData = inputBuffer->getSampleData( chanNum, startFrame );
+        float* sampleData = inputBuffer->getSampleData( chanNum, inputStartFrame );
 
         for ( int frameNum = 0; frameNum < numFrames; ++frameNum )
         {
-            outputBuffer.set( numChans * frameNum + chanNum,  // Index
-                              sampleData[ frameNum ] );       // Value
+            outputBuffer.set( numChans * frameNum + chanNum,    // Index
+                              sampleData[ frameNum ] );         // Value
+        }
+    }
+}
+
+
+
+void AudioFileHandler::deinterleaveSamples( Array<float>& inputBuffer,
+                                            const int numChans,
+                                            const int outputStartFrame,
+                                            const int numFrames,
+                                            SharedSampleBuffer outputBuffer )
+{
+    const float* inputSampleData = inputBuffer.getRawDataPointer();
+
+    for ( int chanNum = 0; chanNum < numChans; ++chanNum )
+    {
+        float* outputSampleData = outputBuffer->getSampleData( chanNum, outputStartFrame );
+
+        for ( int frameNum = 0; frameNum < numFrames; ++frameNum )
+        {
+            outputSampleData[ frameNum ] = inputSampleData[ numChans * frameNum + chanNum ];
         }
     }
 }
@@ -402,21 +424,105 @@ void AudioFileHandler::sndfileRecordWriteError( const int numSamplesToWrite, con
 
 
 
-int AudioFileHandler::initSndLib()
+SharedSampleBuffer AudioFileHandler::sndfileLoadFile( const char* filePath, sf_count_t startFrame, sf_count_t numFramesToRead )
+{
+    const sf_count_t hopSize = 4096;
+
+    SharedSampleBuffer sampleBuffer;
+    Array<float> tempBuffer;
+
+    SF_INFO sfInfo;
+    memset( &sfInfo, 0, sizeof( SF_INFO ) );
+
+    SNDFILE* fileID = sf_open( filePath, SFM_READ, &sfInfo );
+
+    if ( fileID == NULL )
+    {
+        sErrorTitle = "Couldn't open file for reading!";
+        sErrorInfo = sf_strerror( NULL );
+        goto end;
+    }
+
+    if ( sfInfo.channels < 1 )
+    {
+        mus_error( MUS_NO_CHANNEL, "File has no audio channels!" );
+        goto end;
+    }
+    if ( sfInfo.channels > 2 )
+    {
+        mus_error( MUS_UNSUPPORTED_DATA_FORMAT, "Only mono and stereo samples are supported" );
+        goto end;
+    }
+
+    tempBuffer.resize( hopSize * sfInfo.channels );
+
+    // If caller has not set `numFramesToRead` assume whole file should be read
+
+    if ( numFramesToRead < 1 ) // Read whole file
+    {
+        startFrame = 0;
+        numFramesToRead = 0;
+        sf_count_t numFramesRead = 0;
+
+        // Find the no. of frames the long way
+        do
+        {
+            numFramesRead = sf_readf_float( fileID, tempBuffer.getRawDataPointer(), hopSize );
+            numFramesToRead += numFramesRead;
+        }
+        while ( numFramesRead > 0 );
+
+        sf_seek( fileID, 0, SEEK_SET );
+    }
+    else // Read part of file
+    {
+        sf_seek( fileID, startFrame, SEEK_SET );
+    }
+
+    try
+    {
+        sampleBuffer = SharedSampleBuffer( new SampleBuffer( sfInfo.channels, numFramesToRead ) );
+        sf_count_t numFramesRead = 0;
+        sf_count_t totalNumFramesRead = 0;
+
+        do
+        {
+            numFramesRead = sf_readf_float( fileID, tempBuffer.getRawDataPointer(), hopSize );
+
+            deinterleaveSamples( tempBuffer, sfInfo.channels, totalNumFramesRead, numFramesRead, sampleBuffer );
+
+            totalNumFramesRead += numFramesRead;
+        }
+        while ( numFramesRead > 0 && totalNumFramesRead < numFramesToRead );
+    }
+    catch ( std::bad_alloc& )
+    {
+        mus_error( MUS_MEMORY_ALLOCATION_FAILED, "Not enough memory to load audio file" );
+    }
+
+    sf_close( fileID );
+
+    end:
+    return sampleBuffer;
+}
+
+
+
+int AudioFileHandler::sndlibInit()
 {
     if ( mus_sound_initialize() == MUS_ERROR )
     {
         return MUS_ERROR;
     }
 
-    mus_error_set_handler( recordSndLibError );
+    mus_error_set_handler( sndlibRecordError );
 
     return MUS_NO_ERROR;
 }
 
 
 
-void AudioFileHandler::recordSndLibError( int errorCode, char* errorMessage )
+void AudioFileHandler::sndlibRecordError( int errorCode, char* errorMessage )
 {
     sErrorTitle = mus_error_type_to_string( errorCode );
     sErrorInfo = errorMessage;
