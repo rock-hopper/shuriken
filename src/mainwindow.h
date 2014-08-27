@@ -139,7 +139,7 @@ private slots:
     void on_actionZoom_Original_triggered();
     void on_actionZoom_Out_triggered();
     void on_actionZoom_In_triggered();
-    void on_pushButton_Loop_clicked();
+    void on_pushButton_Loop_clicked( const bool isChecked );
     void on_pushButton_PlayStop_clicked();
     void on_checkBox_PitchCorrection_toggled( const bool isChecked );
     void on_checkBox_TimeStretch_toggled( const bool isChecked );

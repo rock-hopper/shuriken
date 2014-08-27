@@ -42,8 +42,9 @@ public:
     void playRange( const SharedSampleRange sampleRange );
     void playAll();
     void stop();
+    void enableLooping( const bool isEnabled )          { mIsLoopingEnabled = isEnabled; }
 
-    MidiMessageCollector* getMidiMessageCollector()             { return &mMidiCollector; }
+    MidiMessageCollector* getMidiMessageCollector()     { return &mMidiCollector; }
 
     // For JUCE use only!
     void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;
@@ -58,8 +59,6 @@ private:
                        const qreal sampleRate );
     void clearSampleRanges();
 
-    void updateNoteOnFrameNumList();
-
     SharedSampleBuffer mSampleBuffer;
     QList<SharedSampleRange> mSampleRangeList;
 
@@ -72,8 +71,8 @@ private:
     int mNextFreeKey;
     int mStartKey;
 
-    QList<int> mNoteOnFrameNumList;
     volatile bool mIsPlaySeqEnabled;
+    volatile bool mIsLoopingEnabled;
     volatile int mNoteCounter;
     volatile int mFrameCounter;
 

@@ -96,7 +96,7 @@ public:
     void selectNone();
     void selectAll();
 
-    void startPlayhead();
+    void startPlayhead( const bool isLoopingEnabled );
     void stopPlayhead();
     bool isPlayheadScrolling() const        { return mTimer->state() == QTimeLine::Running; }
 

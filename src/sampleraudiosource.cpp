@@ -36,6 +36,7 @@ SamplerAudioSource::SamplerAudioSource() :
     mNextFreeKey( Midi::MIDDLE_C ),
     mStartKey( Midi::MIDDLE_C ),
     mIsPlaySeqEnabled( false ),
+    mIsLoopingEnabled( false ),
     mNoteCounter( 0 ),
     mFrameCounter( 0 )
 {
@@ -65,8 +66,6 @@ void SamplerAudioSource::setSample( const SharedSampleBuffer sampleBuffer, const
     mFileSampleRate = sampleRate;
 
     mSampleRangeList << sampleRange;
-
-    updateNoteOnFrameNumList();
 }
 
 
@@ -91,8 +90,6 @@ void SamplerAudioSource::setSampleRanges( const QList<SharedSampleRange> sampleR
             addNewSample( mSampleBuffer, sampleRangeList.at( i ), mFileSampleRate );
             i++;
         }
-
-        updateNoteOnFrameNumList();
     }
 }
 
@@ -143,7 +140,6 @@ void SamplerAudioSource::prepareToPlay( int /*samplesPerBlockExpected*/, double 
     mPlaybackSampleRate = sampleRate;
     mMidiCollector.reset( sampleRate );
     mSampler.setCurrentPlaybackSampleRate( sampleRate );
-    updateNoteOnFrameNumList();
 }
 
 
@@ -161,38 +157,43 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
     // The synth always adds its output to the audio buffer, so we have to clear it first
     bufferToFill.clearActiveBufferRegion();
 
+
     // Fill a MIDI buffer with incoming messages from the MIDI input
     MidiBuffer incomingMidi;
     mMidiCollector.removeNextBlockOfMessages( incomingMidi, bufferToFill.numSamples );
 
+
     // If requested, play back all sample ranges in sequence by adding appropriate MIDI messages to the buffer
     if ( mIsPlaySeqEnabled )
     {
-        int noteOnFrameNum = mNoteOnFrameNumList.at( mNoteCounter );
-
-        while ( noteOnFrameNum >= mFrameCounter &&
-                noteOnFrameNum < mFrameCounter + bufferToFill.numSamples )
+        if ( mFrameCounter < bufferToFill.numSamples )
         {
-            MidiMessage message = MidiMessage( MidiMessage::noteOn( 1,                          // MIDI channel
-                                                                    mStartKey + mNoteCounter,   // MIDI note no.
-                                                                    1.0f ));                    // Velocity
+            const MidiMessage message = MidiMessage::noteOn( 1,                           // MIDI channel
+                                                             mStartKey + mNoteCounter,    // MIDI note no.
+                                                             1.0f );                      // Velocity
+            const int noteOnFrameNum = mFrameCounter;
 
-            incomingMidi.addEvent( message, noteOnFrameNum % bufferToFill.numSamples );
+            incomingMidi.addEvent( message, noteOnFrameNum );
+
+            mFrameCounter = mSampleRangeList.at( mNoteCounter )->numFrames;
+            mFrameCounter -= bufferToFill.numSamples - noteOnFrameNum;
 
             mNoteCounter++;
 
-            if ( mNoteCounter < mNoteOnFrameNumList.size() )
+            if ( mNoteCounter == mSampleRangeList.size() )
             {
-                noteOnFrameNum = mNoteOnFrameNumList.at( mNoteCounter );
-            }
-            else
-            {
-                mIsPlaySeqEnabled = false;
-                break;
+                if ( mIsLoopingEnabled )
+                    mNoteCounter = 0;
+                else
+                    mIsPlaySeqEnabled = false;
             }
         }
-        mFrameCounter += bufferToFill.numSamples;
+        else
+        {
+            mFrameCounter -= bufferToFill.numSamples;
+        }
     }
+
 
     // Tell the sampler to process the MIDI events and generate its output
     mSampler.renderNextBlock( *bufferToFill.buffer, incomingMidi, 0, bufferToFill.numSamples );
@@ -237,26 +238,7 @@ void SamplerAudioSource::clearSampleRanges()
     mIsPlaySeqEnabled = false;
     mSampler.clearVoices();
     mSampler.clearSounds();
-    mNoteOnFrameNumList.clear();
     mSampleRangeList.clear();
     mNextFreeKey = Midi::MIDDLE_C;
     mStartKey = Midi::MIDDLE_C;
-}
-
-
-
-void SamplerAudioSource::updateNoteOnFrameNumList()
-{
-    Q_ASSERT( mFileSampleRate > 0.0 );
-
-    mNoteOnFrameNumList.clear();
-    int noteOnFrameNum = 0;
-
-    int i = 0;
-    while (  i < mSampleRangeList.size() && i < Midi::MAX_POLYPHONY )
-    {
-        mNoteOnFrameNumList.append( noteOnFrameNum );
-        noteOnFrameNum += mSampleRangeList.at( i )->numFrames * ( mPlaybackSampleRate / mFileSampleRate );
-        i++;
-    }
 }

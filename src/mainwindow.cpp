@@ -451,6 +451,7 @@ void MainWindow::enableUI()
     if ( mIsAudioInitialised )
     {
         mUI->pushButton_PlayStop->setEnabled( true );
+        mUI->pushButton_Loop->setEnabled( true );
         mUI->pushButton_TimestretchOptions->setEnabled( true );
 
         if ( mOptionsDialog->isRealtimeModeEnabled() )
@@ -497,6 +498,7 @@ void MainWindow::enableUI()
 void MainWindow::disableUI()
 {
     mUI->pushButton_PlayStop->setEnabled( false );
+    mUI->pushButton_Loop->setEnabled( false );
     mUI->doubleSpinBox_OriginalBPM->setValue( 0.0 );
     mUI->doubleSpinBox_OriginalBPM->setEnabled( false );
     mUI->doubleSpinBox_NewBPM->setValue( 0.0 );
@@ -1506,16 +1508,16 @@ void MainWindow::on_pushButton_PlayStop_clicked()
     else
     {
         mSamplerAudioSource->playAll();
-        mUI->waveGraphicsView->startPlayhead();
+        mUI->waveGraphicsView->startPlayhead( mUI->pushButton_Loop->isChecked() );
         mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
     }
 }
 
 
 
-void MainWindow::on_pushButton_Loop_clicked()
+void MainWindow::on_pushButton_Loop_clicked( const bool isChecked )
 {
-
+    mSamplerAudioSource->enableLooping( isChecked );
 }
 
 
