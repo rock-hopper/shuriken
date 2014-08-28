@@ -100,6 +100,8 @@ private:
 
     Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
+    enum LengthUnit { UNITS_BARS, UNITS_BEATS };
+
     ScopedPointer<OptionsDialog> mOptionsDialog;
     ScopedPointer<HelpForm> mHelpForm;
     ScopedPointer<ExportDialog> mExportDialog;

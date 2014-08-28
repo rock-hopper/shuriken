@@ -341,13 +341,13 @@ void MainWindow::setupUI()
     QStringList timeSigDenominatorTextList;
 
     timeSigNumeratorTextList << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12" << "13" << "14" << "15" << "16";
-    timeSigDenominatorTextList << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12" << "13" << "14" << "15" << "16";
+    timeSigDenominatorTextList << "1" << "2" << "4" << "8" << "16";
 
     mUI->comboBox_TimeSigNumerator->addItems( timeSigNumeratorTextList );
     mUI->comboBox_TimeSigDenominator->addItems( timeSigDenominatorTextList );
 
     mUI->comboBox_TimeSigNumerator->setCurrentIndex( 3 );   // 4
-    mUI->comboBox_TimeSigDenominator->setCurrentIndex( 3 ); // 4
+    mUI->comboBox_TimeSigDenominator->setCurrentIndex( 2 ); // 4
 
 
     // Populate "Units" combo box
@@ -529,6 +529,11 @@ void MainWindow::disableUI()
     mUI->checkBox_LoopMarkers->setEnabled( false );
     mUI->checkBox_LoopMarkers->setChecked( false );
     mUI->comboBox_SnapLoopMarkers->setEnabled( false );
+    mUI->comboBox_TimeSigNumerator->setEnabled( false );
+    mUI->comboBox_TimeSigDenominator->setEnabled( false );
+    mUI->spinBox_Length->setEnabled( false );
+    mUI->spinBox_Length->setValue( 0 );
+    mUI->comboBox_Units->setEnabled( false );
 
     mUI->actionSave_Project->setEnabled( false );
     mUI->actionSave_As->setEnabled( false );
@@ -1347,10 +1352,34 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    AudioAnalyser::DetectionSettings settings;
-    getDetectionSettings( settings );
+    qreal bpm = 0.0;
 
-    const qreal bpm = AudioAnalyser::calcBPM( mCurrentSampleBuffer, settings );
+    if ( mUI->checkBox_LoopMarkers->isChecked() && mUI->spinBox_Length->value() > 0 )
+    {
+        const int numFrames = mUI->waveGraphicsView->getNumFramesBetweenLoopMarkers();
+        const qreal numSeconds = numFrames / mCurrentSampleHeader->sampleRate;
+        const int numerator = mUI->comboBox_TimeSigNumerator->currentText().toInt();
+
+        int numBeats = 0;
+
+        if ( mUI->comboBox_Units->currentIndex() == UNITS_BARS )
+        {
+            numBeats = mUI->spinBox_Length->value() * numerator;
+        }
+        else // UNITS_BEATS
+        {
+            numBeats = mUI->spinBox_Length->value();
+        }
+
+        bpm = numBeats / ( numSeconds / 60 );
+    }
+    else
+    {
+        AudioAnalyser::DetectionSettings settings;
+        getDetectionSettings( settings );
+
+        bpm = AudioAnalyser::calcBPM( mCurrentSampleBuffer, settings );
+    }
 
     mUI->doubleSpinBox_OriginalBPM->setValue( bpm );
     mUI->doubleSpinBox_NewBPM->setValue( bpm );
@@ -1656,11 +1685,19 @@ void MainWindow::on_checkBox_LoopMarkers_clicked( const bool isChecked )
 
         mUI->waveGraphicsView->showLoopMarkers();
         mUI->comboBox_SnapLoopMarkers->setEnabled( true );
+        mUI->comboBox_TimeSigNumerator->setEnabled( true );
+        mUI->comboBox_TimeSigDenominator->setEnabled( true );
+        mUI->spinBox_Length->setEnabled( true );
+        mUI->comboBox_Units->setEnabled( true );
     }
     else
     {
         mUI->waveGraphicsView->hideLoopMarkers();
         mUI->comboBox_SnapLoopMarkers->setEnabled( false );
+        mUI->comboBox_TimeSigNumerator->setEnabled( false );
+        mUI->comboBox_TimeSigDenominator->setEnabled( false );
+        mUI->spinBox_Length->setEnabled( false );
+        mUI->comboBox_Units->setEnabled( false );
         
         if ( mSampleRangeList.size() > 1 )
         {

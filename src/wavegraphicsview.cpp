@@ -423,7 +423,7 @@ void WaveGraphicsView::hideLoopMarkers()
 
 
 
-QList<SharedSampleRange> WaveGraphicsView::getSampleRangesBetweenLoopMarkers( const QList<SharedSampleRange> currentSampleRangeList )
+QList<SharedSampleRange> WaveGraphicsView::getSampleRangesBetweenLoopMarkers( const QList<SharedSampleRange> currentSampleRangeList ) const
 {
     QList<SharedSampleRange> newSampleRangeList;
 
@@ -437,7 +437,7 @@ QList<SharedSampleRange> WaveGraphicsView::getSampleRangesBetweenLoopMarkers( co
 
         for ( int orderPos = leftWaveformOrderPos; orderPos <= rightWaveformOrderPos; orderPos++ )
         {
-            SharedSampleRange range = currentSampleRangeList.at( orderPos );
+            const SharedSampleRange range = currentSampleRangeList.at( orderPos );
             SharedSampleRange newRange( new SampleRange );
 
             if ( leftMarkerFrameNum > range->startFrame &&
@@ -465,6 +465,20 @@ QList<SharedSampleRange> WaveGraphicsView::getSampleRangesBetweenLoopMarkers( co
     }
 
     return newSampleRangeList;
+}
+
+
+
+int WaveGraphicsView::getNumFramesBetweenLoopMarkers() const
+{
+    int numFrames = 0;
+
+    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
+    {
+        numFrames = getFrameNum( mLoopMarkerRight->scenePos().x() - mLoopMarkerLeft->scenePos().x() );
+    }
+
+    return numFrames;
 }
 
 
@@ -887,7 +901,7 @@ void WaveGraphicsView::setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker )
 
 
 
-int WaveGraphicsView::getWaveformOrderPosUnderLoopMarker( LoopMarkerItem* const loopMarker )
+int WaveGraphicsView::getWaveformOrderPosUnderLoopMarker( LoopMarkerItem* const loopMarker ) const
 {
     int orderPos = 0;
 
