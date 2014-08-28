@@ -203,6 +203,8 @@ void SliceCommand::undo()
     mSelectItemsAction->setEnabled( false );
     mAuditionItemsAction->trigger();
 
+    mMainWindow->updateSnapLoopMarkersComboBox();
+
     QApplication::restoreOverrideCursor();
 }
 
@@ -238,6 +240,8 @@ void SliceCommand::redo()
     mFindBeatsButton->setEnabled( false );
     mAddSlicePointAction->setEnabled( false );
     mSelectItemsAction->setEnabled( true );
+
+    mMainWindow->updateSnapLoopMarkersComboBox();
 
     QApplication::restoreOverrideCursor();
 }

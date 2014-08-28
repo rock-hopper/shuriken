@@ -30,7 +30,8 @@
 // Public:
 
 WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
-    QGraphicsView( parent )
+    QGraphicsView( parent ),
+    mLoopMarkerSnapMode( SNAP_OFF )
 {
     // Set up view and scene
     setViewport( new QGLWidget( QGLFormat(QGL::SampleBuffers) ) );
@@ -890,13 +891,16 @@ int WaveGraphicsView::getWaveformOrderPosUnderLoopMarker( LoopMarkerItem* const 
 {
     int orderPos = 0;
 
-    foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
+    if ( loopMarker != NULL )
     {
-        if ( loopMarker->scenePos().x() >= waveformItem->scenePos().x() &&
-             loopMarker->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
+        foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
         {
-            orderPos = waveformItem->getOrderPos();
-            break;
+            if ( loopMarker->scenePos().x() >= waveformItem->scenePos().x() &&
+                 loopMarker->scenePos().x() < waveformItem->scenePos().x() + waveformItem->rect().width() )
+            {
+                orderPos = waveformItem->getOrderPos();
+                break;
+            }
         }
     }
 
@@ -913,6 +917,106 @@ void WaveGraphicsView::updateLoopMarkerFrameNums()
         setLoopMarkerFrameNum( mLoopMarkerRight );
 
         emit loopMarkerPosChanged();
+    }
+}
+
+
+
+void WaveGraphicsView::snapLoopMarkerToSlicePoint( LoopMarkerItem* const loopMarker )
+{
+    if ( loopMarker != NULL )
+    {
+        const qreal oldScenePosX = loopMarker->scenePos().x();
+        const qreal minSnapPointX = 0.0;
+        const qreal maxSnapPointX = getScenePosX( mSampleBuffer->getNumFrames() - 1 );
+
+        QList<qreal> snapPointList;
+
+        snapPointList << minSnapPointX;
+
+        foreach ( SharedSlicePointItem slicePoint, mSlicePointItemList )
+        {
+            const qreal scenePosX = slicePoint->scenePos().x();
+
+            if ( scenePosX > minSnapPointX && scenePosX < maxSnapPointX )
+                snapPointList << scenePosX;
+        }
+
+        snapPointList << maxSnapPointX;
+
+        qreal newScenePosX = 0.0;
+        qreal shortestDistance = scene()->width();
+
+        foreach ( qreal snapPointX, snapPointList )
+        {
+            const qreal distance = qAbs( oldScenePosX - snapPointX );
+
+            if ( distance < shortestDistance )
+            {
+                shortestDistance = distance;
+                newScenePosX = snapPointX;
+            }
+        }
+
+        loopMarker->setPos( newScenePosX, 0.0 );
+    }
+}
+
+
+
+void WaveGraphicsView::snapLoopMarkerToWaveform( LoopMarkerItem* const loopMarker )
+{
+    if ( loopMarker != NULL )
+    {
+        const qreal oldScenePosX = loopMarker->scenePos().x();
+
+        QList<qreal> snapPointList;
+
+        foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
+        {
+            snapPointList << waveformItem->scenePos().x();
+        }
+
+        snapPointList << getScenePosX( mSampleBuffer->getNumFrames() - 1 );
+
+        qreal newScenePosX = 0.0;
+        qreal shortestDistance = scene()->width();
+
+        foreach ( qreal snapPointX, snapPointList )
+        {
+            const qreal distance = qAbs( oldScenePosX - snapPointX );
+
+            if ( distance < shortestDistance )
+            {
+                shortestDistance = distance;
+                newScenePosX = snapPointX;
+            }
+        }
+
+        loopMarker->setPos( newScenePosX, 0.0 );
+    }
+}
+
+
+
+void WaveGraphicsView::snapSlicePointToLoopMarker( SlicePointItem* const slicePoint )
+{
+    if ( slicePoint != NULL && mLoopMarkerLeft != NULL && mLoopMarkerLeft->isVisible() )
+    {
+        const qreal snapThreshold = 30.0;
+
+        qreal scenePosX = slicePoint->scenePos().x();
+
+        if ( qAbs( scenePosX - mLoopMarkerLeft->scenePos().x() ) <= snapThreshold )
+        {
+            scenePosX = mLoopMarkerLeft->scenePos().x();
+        }
+        else if ( qAbs( scenePosX - mLoopMarkerRight->scenePos().x() ) <= snapThreshold )
+        {
+            scenePosX = mLoopMarkerRight->scenePos().x();
+        }
+
+        slicePoint->setPos( scenePosX, 0.0 );
     }
 }
 
@@ -1018,6 +1122,11 @@ void WaveGraphicsView::slideWaveformItemIntoPlace( const int orderPos )
 
 void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem )
 {
+    if ( mLoopMarkerSnapMode == SNAP_SLICES_TO_MARKERS )
+    {
+        snapSlicePointToLoopMarker( movedItem );
+    }
+
     SharedSlicePointItem sharedSlicePoint;
 
     foreach ( SharedSlicePointItem item, mSlicePointItemList )
@@ -1040,6 +1149,17 @@ void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem
 
 void WaveGraphicsView::updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem )
 {
+    if ( mLoopMarkerSnapMode == SNAP_MARKERS_TO_SLICES )
+    {
+        if ( mWaveformItemList.size() > 1 )
+        {
+            snapLoopMarkerToWaveform( movedItem );
+        }
+        else
+        {
+            snapLoopMarkerToSlicePoint( movedItem );
+        }
+    }
     setLoopMarkerFrameNum( movedItem );
     emit loopMarkerPosChanged();
 }

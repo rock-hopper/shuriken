@@ -75,6 +75,8 @@ private:
     void enableUI();
     void disableUI();
 
+    void updateSnapLoopMarkersComboBox();
+
     void getDetectionSettings( AudioAnalyser::DetectionSettings& settings );
     void getSampleRanges( QList<SharedSampleRange>& sampleRangeList );
 
@@ -130,6 +132,7 @@ public slots:
     void reorderSampleRangeList( QList<int> oldOrderPositions, const int numPlacesMoved );
 
 private slots:
+    void on_comboBox_SnapLoopMarkers_currentIndexChanged( const int index );
     void on_checkBox_LoopMarkers_clicked( const bool isChecked );
     void on_pushButton_TimestretchOptions_clicked();
     void on_actionAudition_triggered();

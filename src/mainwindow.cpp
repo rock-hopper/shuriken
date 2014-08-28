@@ -332,6 +332,10 @@ void MainWindow::setupUI()
     mUI->comboBox_HopSize->setCurrentIndex( 0 ); // "50%"
 
 
+    // Populate "Snap Loop Markers" combo box
+    updateSnapLoopMarkersComboBox();
+
+
     // Populate "Time Signature" combo boxes
     QStringList timeSigNumeratorTextList;
     QStringList timeSigDenominatorTextList;
@@ -524,6 +528,7 @@ void MainWindow::disableUI()
     mUI->pushButton_FindBeats->setEnabled( false );
     mUI->checkBox_LoopMarkers->setEnabled( false );
     mUI->checkBox_LoopMarkers->setChecked( false );
+    mUI->comboBox_SnapLoopMarkers->setEnabled( false );
 
     mUI->actionSave_Project->setEnabled( false );
     mUI->actionSave_As->setEnabled( false );
@@ -542,6 +547,25 @@ void MainWindow::disableUI()
     mUI->actionMove->setEnabled( false );
     mUI->actionSelect->setEnabled( false );
     mUI->actionAudition->setEnabled( false );
+}
+
+
+
+void MainWindow::updateSnapLoopMarkersComboBox()
+{
+    QStringList snapTextList;
+
+    if ( mSampleRangeList.size() > 1 )
+    {
+        snapTextList << "Off" << "Markers -> Slice Points";
+    }
+    else
+    {
+        snapTextList << "Off" << "Markers -> Slice Points" << "Slice Points -> Markers";
+    }
+
+    mUI->comboBox_SnapLoopMarkers->clear();
+    mUI->comboBox_SnapLoopMarkers->addItems( snapTextList );
 }
 
 
@@ -1631,10 +1655,12 @@ void MainWindow::on_checkBox_LoopMarkers_clicked( const bool isChecked )
         mSamplerAudioSource->setSampleRanges( mLoopSampleRangeList );
 
         mUI->waveGraphicsView->showLoopMarkers();
+        mUI->comboBox_SnapLoopMarkers->setEnabled( true );
     }
     else
     {
         mUI->waveGraphicsView->hideLoopMarkers();
+        mUI->comboBox_SnapLoopMarkers->setEnabled( false );
         
         if ( mSampleRangeList.size() > 1 )
         {
@@ -1644,5 +1670,25 @@ void MainWindow::on_checkBox_LoopMarkers_clicked( const bool isChecked )
         {
             mSamplerAudioSource->setSample( mCurrentSampleBuffer, mCurrentSampleHeader->sampleRate );
         }
+    }
+}
+
+
+
+void MainWindow::on_comboBox_SnapLoopMarkers_currentIndexChanged( const int index )
+{
+    switch ( index )
+    {
+    case WaveGraphicsView::SNAP_OFF :
+        mUI->waveGraphicsView->setLoopMarkerSnapMode( WaveGraphicsView::SNAP_OFF );
+        break;
+    case WaveGraphicsView::SNAP_MARKERS_TO_SLICES :
+        mUI->waveGraphicsView->setLoopMarkerSnapMode( WaveGraphicsView::SNAP_MARKERS_TO_SLICES );
+        break;
+    case WaveGraphicsView::SNAP_SLICES_TO_MARKERS :
+        mUI->waveGraphicsView->setLoopMarkerSnapMode( WaveGraphicsView::SNAP_SLICES_TO_MARKERS );
+        break;
+    default:
+        break;
     }
 }

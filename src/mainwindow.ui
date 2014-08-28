@@ -467,20 +467,24 @@
          <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
-         <string>Show Loop Markers</string>
+         <string>Loop Markers</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBox_SnapToSlicePoints">
+       <widget class="QLabel" name="label_Snap">
+        <property name="text">
+         <string>Snap:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBox_SnapLoopMarkers">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="text">
-         <string>Snap to Slice Points</string>
         </property>
        </widget>
       </item>

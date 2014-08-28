@@ -93,6 +93,10 @@ public:
     void hideLoopMarkers();
     LoopMarkerItem* getLeftLoopMarker() const               { return mLoopMarkerLeft; }
     LoopMarkerItem* getRightLoopMarker() const              { return mLoopMarkerRight; }
+
+    enum LoopMarkerSnapMode { SNAP_OFF, SNAP_MARKERS_TO_SLICES, SNAP_SLICES_TO_MARKERS };
+    void setLoopMarkerSnapMode( const LoopMarkerSnapMode mode )                 { mLoopMarkerSnapMode = mode; }
+
     QList<SharedSampleRange> getSampleRangesBetweenLoopMarkers( const QList<SharedSampleRange> currentSampleRangeList );
 
     void selectNone();
@@ -133,6 +137,9 @@ private:
     void setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker );
     int getWaveformOrderPosUnderLoopMarker( LoopMarkerItem* const loopMarker );
     void updateLoopMarkerFrameNums();
+    void snapLoopMarkerToSlicePoint( LoopMarkerItem* const loopMarker );
+    void snapLoopMarkerToWaveform( LoopMarkerItem* const loopMarker );
+    void snapSlicePointToLoopMarker( SlicePointItem* const slicePoint );
 
     QList<SharedWaveformItem> mWaveformItemList;
     QList<SharedSlicePointItem> mSlicePointItemList;
@@ -145,6 +152,8 @@ private:
 
     ScopedPointer<LoopMarkerItem> mLoopMarkerLeft;
     ScopedPointer<LoopMarkerItem> mLoopMarkerRight;
+
+    LoopMarkerSnapMode mLoopMarkerSnapMode;
 
 signals:
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );
