@@ -118,7 +118,7 @@ DeleteSlicePointItemCommand::DeleteSlicePointItemCommand( const SharedSlicePoint
     mGraphicsView( graphicsView ),
     mSliceButton( sliceButton )
 {
-    setText( "Add Slice Point" );
+    setText( "Delete Slice Point" );
 }
 
 
@@ -358,7 +358,7 @@ SplitCommand::SplitCommand( const int orderPos,
     mGraphicsView( graphicsView ),
     mMainWindow( mainWindow )
 {
-    setText( "Join" );
+    setText( "Split" );
 }
 
 

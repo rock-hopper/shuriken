@@ -81,7 +81,7 @@ SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sa
     mWaveformItemList.append( SharedWaveformItem( waveformItem ) );
 
     QObject::connect( waveformItem, SIGNAL( maxDetailLevelReached() ),
-                      this, SLOT( relayMaxDetailLevelReached() ) );
+                      this, SIGNAL( maxDetailLevelReached() ) );
 
     scene()->addItem( waveformItem );
     scene()->update();
@@ -123,7 +123,7 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const SharedSampleB
                           this, SLOT( slideWaveformItemIntoPlace(int) ) );
 
         QObject::connect( waveformItem, SIGNAL( maxDetailLevelReached() ),
-                          this, SLOT( relayMaxDetailLevelReached() ) );
+                          this, SIGNAL( maxDetailLevelReached() ) );
 
         scene()->addItem( waveformItem );
         scene()->update();
@@ -171,7 +171,7 @@ SharedWaveformItem WaveGraphicsView::joinWaveforms( const QList<int> orderPositi
                       this, SLOT( slideWaveformItemIntoPlace(int) ) );
 
     QObject::connect( waveformItem, SIGNAL( maxDetailLevelReached() ),
-                      this, SLOT( relayMaxDetailLevelReached() ) );
+                      this, SIGNAL( maxDetailLevelReached() ) );
 
     if ( dragMode() == RubberBandDrag )
     {
@@ -1176,13 +1176,6 @@ void WaveGraphicsView::updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem
     }
     setLoopMarkerFrameNum( movedItem );
     emit loopMarkerPosChanged();
-}
-
-
-
-void WaveGraphicsView::relayMaxDetailLevelReached()
-{
-    emit maxDetailLevelReached();
 }
 
 

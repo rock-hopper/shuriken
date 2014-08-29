@@ -33,9 +33,6 @@ public:
     SamplerAudioSource();
     ~SamplerAudioSource();
 
-    // 'setSample()' (and optionally 'setSampleRanges()') must be called before calling
-    // AudioDeviceManager::addAudioCallback() to ensure that the current playback
-    // sample rate is being set for each sampler voice
     void setSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
     void setSampleRanges( const QList<SharedSampleRange> sampleRangeList );
 
