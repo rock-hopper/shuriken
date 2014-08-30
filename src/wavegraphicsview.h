@@ -72,6 +72,8 @@ public:
 
     SharedWaveformItem getWaveformAt( const int orderPos ) const;
 
+    int getNumWaveformItems() const                         { return mWaveformItemList.size(); }
+
     // Create a new slice point item and add it to the scene
     SharedSlicePointItem createSlicePoint( const int frameNum );
 
@@ -99,8 +101,8 @@ public:
     void hideLoopMarkers();
 
     // The frame no. of each loop marker is set according to the ordering of waveform items
-    LoopMarkerItem* getLeftLoopMarker() const           { return mLoopMarkerLeft; }     // Frame no. is inclusive
-    LoopMarkerItem* getRightLoopMarker() const          { return mLoopMarkerRight; }    // Frame no. is exclusive
+    LoopMarkerItem* getLeftLoopMarker() const               { return mLoopMarkerLeft; }     // Frame no. is inclusive
+    LoopMarkerItem* getRightLoopMarker() const              { return mLoopMarkerRight; }    // Frame no. is exclusive
 
     enum LoopMarkerSnapMode { SNAP_OFF, SNAP_MARKERS_TO_SLICES, SNAP_SLICES_TO_MARKERS };
     void setLoopMarkerSnapMode( const LoopMarkerSnapMode mode )                 { mLoopMarkerSnapMode = mode; }
@@ -113,7 +115,7 @@ public:
 
     void startPlayhead( const bool isLoopingEnabled );
     void stopPlayhead();
-    bool isPlayheadScrolling() const        { return mTimer->state() == QTimeLine::Running; }
+    bool isPlayheadScrolling() const                        { return mTimer->state() == QTimeLine::Running; }
 
     void clearAll();
     void clearWaveform();

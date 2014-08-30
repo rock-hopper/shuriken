@@ -833,19 +833,18 @@ void MainWindow::resetSampler()
 
 void MainWindow::enableEditActions()
 {
-    const SharedSlicePointItem slicePointItem = mUI->waveGraphicsView->getSelectedSlicePoint();
-
-    if ( ! slicePointItem.isNull() )
-    {
-        mUI->actionDelete->setEnabled( true );
-    }
-    else
-    {
-        mUI->actionDelete->setEnabled( false );
-    }
-
-
+    const SharedSlicePointItem slicePoint = mUI->waveGraphicsView->getSelectedSlicePoint();
     const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+
+    mUI->actionDelete->setEnabled( false );
+
+    if ( ! slicePoint.isNull() || ! orderPositions.isEmpty() )
+    {
+        if ( orderPositions.size() < mUI->waveGraphicsView->getNumWaveformItems() )
+        {
+            mUI->actionDelete->setEnabled( true );
+        }
+    }
 
     if ( ! orderPositions.isEmpty() )
     {
@@ -853,7 +852,6 @@ void MainWindow::enableEditActions()
         mUI->actionApply_Gain_Ramp->setEnabled( true );
         mUI->actionNormalise->setEnabled( true );
         mUI->actionReverse->setEnabled( true );
-        mUI->actionDelete->setEnabled( true );
 
         bool isAnySelectedItemJoined = false;
         foreach ( int orderPos, orderPositions )
@@ -871,7 +869,6 @@ void MainWindow::enableEditActions()
         mUI->actionApply_Gain_Ramp->setEnabled( false );
         mUI->actionNormalise->setEnabled( false );
         mUI->actionReverse->setEnabled( false );
-        mUI->actionDelete->setEnabled( false );
         mUI->actionSplit->setEnabled( false );
     }
 
