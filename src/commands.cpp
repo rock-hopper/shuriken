@@ -992,11 +992,20 @@ void ApplyTimeStretchCommand::updateSampleRanges( const qreal timeRatio, const i
 
         for ( int i = 0; i < tempList.size(); i++ )
         {
-            const int newNumFrames = i + 1 < tempList.size() ?
-                                     tempList.at( i + 1 )->startFrame - tempList.at( i )->startFrame :
-                                     newTotalNumFrames - tempList.at( i )->startFrame;
+            const int approxNumFrames = roundToInt( tempList.at( i )->numFrames * timeRatio );
 
-            tempList.at( i )->numFrames = newNumFrames;
+            const int measuredNumFrames = i + 1 < tempList.size() ?
+                                          tempList.at( i + 1 )->startFrame - tempList.at( i )->startFrame :
+                                          newTotalNumFrames - tempList.at( i )->startFrame;
+
+            if ( measuredNumFrames >= approxNumFrames - 2 && measuredNumFrames <= approxNumFrames + 2 )
+            {
+                tempList.at( i )->numFrames = measuredNumFrames;
+            }
+            else
+            {
+                tempList.at( i )->numFrames = approxNumFrames;
+            }
         }
     }
     else
