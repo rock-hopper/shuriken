@@ -62,6 +62,12 @@ public:
 
     void moveWaveforms( const QList<int> oldOrderPositions, const int numPlacesMoved );
 
+    // Add waveform items to the scene
+    void addWaveforms( const QList<SharedWaveformItem> waveformItems );
+
+    // Remove waveform items from the scene
+    QList<SharedWaveformItem> removeWaveforms( const QList<int> waveformOrderPositions );
+
     QList<int> getSelectedWaveformsOrderPositions() const;
 
     SharedWaveformItem getWaveformAt( const int orderPos ) const;
@@ -136,6 +142,8 @@ private:
 
     void scaleItems( const qreal scaleFactorX );
 
+    int getTotalNumFrames() const;
+
     void createLoopMarkers();
     void setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker );
     int getWaveformOrderPosUnderLoopMarker( LoopMarkerItem* const loopMarker ) const;
@@ -146,7 +154,6 @@ private:
 
     QList<SharedWaveformItem> mWaveformItemList;
     QList<SharedSlicePointItem> mSlicePointItemList;
-    SharedSampleBuffer mSampleBuffer;
     SharedSampleHeader mSampleHeader;
 
     ScopedPointer<QGraphicsLineItem> mPlayhead;

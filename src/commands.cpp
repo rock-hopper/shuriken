@@ -294,6 +294,59 @@ void MoveWaveformItemCommand::redo()
 
 //==================================================================================================
 
+DeleteWaveformItemCommand::DeleteWaveformItemCommand( const QList<int> orderPositions,
+                                                      WaveGraphicsView* const graphicsView,
+                                                      MainWindow* const mainWindow,
+                                                      QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    mOrderPositions( orderPositions ),
+    mGraphicsView( graphicsView ),
+    mMainWindow( mainWindow )
+{
+    setText( "Delete Waveform Item" );
+}
+
+
+
+void DeleteWaveformItemCommand::undo()
+{
+    mGraphicsView->addWaveforms( mRemovedWaveforms );
+
+    const int firstOrderPos = mOrderPositions.first();
+
+    for ( int i = 0; i < mOrderPositions.size(); i++ )
+    {
+        mMainWindow->mSampleRangeList.insert( firstOrderPos + i, mRemovedSampleRanges.at( i ) );
+    }
+
+    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
+    mMainWindow->setLoopSampleRanges();
+}
+
+
+
+void DeleteWaveformItemCommand::redo()
+{
+    mRemovedWaveforms = mGraphicsView->removeWaveforms( mOrderPositions );
+
+    mRemovedSampleRanges.clear();
+
+    const int firstOrderPos = mOrderPositions.first();
+
+    for ( int i = 0; i < mOrderPositions.size(); i++ )
+    {
+        mRemovedSampleRanges << mMainWindow->mSampleRangeList.at( firstOrderPos );
+        mMainWindow->mSampleRangeList.removeAt( firstOrderPos );
+    }
+
+    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
+    mMainWindow->setLoopSampleRanges();
+}
+
+
+
+//==================================================================================================
+
 JoinCommand::JoinCommand( const QList<int> orderPositions,
                           WaveGraphicsView* const graphicsView,
                           MainWindow* const mainWindow,

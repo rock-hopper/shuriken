@@ -48,6 +48,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    friend class DeleteWaveformItemCommand;
     friend class SliceCommand;
     friend class JoinCommand;
     friend class SplitCommand;

@@ -148,6 +148,27 @@ private:
 
 
 
+class DeleteWaveformItemCommand : public QUndoCommand
+{
+public:
+    DeleteWaveformItemCommand( const QList<int> orderPositions,
+                               WaveGraphicsView* const graphicsView,
+                               MainWindow* const mainWindow,
+                               QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    const QList<int> mOrderPositions;
+    WaveGraphicsView* const mGraphicsView;
+    MainWindow* const mMainWindow;
+    QList<SharedSampleRange> mRemovedSampleRanges;
+    QList<SharedWaveformItem> mRemovedWaveforms;
+};
+
+
+
 class JoinCommand : public QUndoCommand
 {
 public:

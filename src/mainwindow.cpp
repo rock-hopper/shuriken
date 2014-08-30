@@ -853,6 +853,7 @@ void MainWindow::enableEditActions()
         mUI->actionApply_Gain_Ramp->setEnabled( true );
         mUI->actionNormalise->setEnabled( true );
         mUI->actionReverse->setEnabled( true );
+        mUI->actionDelete->setEnabled( true );
 
         bool isAnySelectedItemJoined = false;
         foreach ( int orderPos, orderPositions )
@@ -870,6 +871,7 @@ void MainWindow::enableEditActions()
         mUI->actionApply_Gain_Ramp->setEnabled( false );
         mUI->actionNormalise->setEnabled( false );
         mUI->actionReverse->setEnabled( false );
+        mUI->actionDelete->setEnabled( false );
         mUI->actionSplit->setEnabled( false );
     }
 
@@ -1103,6 +1105,23 @@ void MainWindow::on_actionDelete_triggered()
                                                                  mUI->waveGraphicsView,
                                                                  mUI->pushButton_Slice );
         mUndoStack.push( command );
+    }
+    else
+    {
+        const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+
+        if ( ! orderPositions.isEmpty() )
+        {
+            foreach ( int orderPos, orderPositions )
+            {
+                mUI->waveGraphicsView->getWaveformAt( orderPos )->setSelected( false );
+            }
+
+            QUndoCommand* command = new DeleteWaveformItemCommand( orderPositions,
+                                                                   mUI->waveGraphicsView,
+                                                                   this );
+            mUndoStack.push( command );
+        }
     }
 }
 
