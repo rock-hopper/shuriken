@@ -1241,18 +1241,9 @@ void WaveGraphicsView::slideWaveformItemIntoPlace( const int orderPos )
 {
     qreal newScenePosX = 0.0;
 
-    // New scene position for this item = sum of the widths of all WaveformItems to the left of this one
-    foreach ( QGraphicsItem* const item, scene()->items() )
+    for ( int i = 0; i < orderPos; i++ )
     {
-        if ( item->type() == WaveformItem::Type )
-        {
-            WaveformItem* const otherWaveformItem = qgraphicsitem_cast<WaveformItem*>( item );
-
-            if ( otherWaveformItem->getOrderPos() < orderPos )
-            {
-                newScenePosX += otherWaveformItem->rect().width();
-            }
-        }
+        newScenePosX += mWaveformItemList.at( i )->rect().width();
     }
 
     mWaveformItemList.at( orderPos )->setPos( newScenePosX, 0.0 );
