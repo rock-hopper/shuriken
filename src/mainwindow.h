@@ -187,9 +187,7 @@ private slots:
                                    const int oldFrameNum,
                                    const int newFrameNum );
 
-    void playSampleRange( const int waveformItemStartFrame,
-                          const int waveformItemNumFrames,
-                          const QPointF mouseScenePos );
+    void playSampleRange( const WaveformItem* waveformItem, const QPointF mouseScenePos );
 
     void stopPlayback();
 

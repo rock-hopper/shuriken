@@ -668,6 +668,33 @@ void WaveGraphicsView::startPlayhead( const bool isLoopingEnabled )
 
 
 
+void WaveGraphicsView::startPlayhead( const qreal startPosX, const qreal endPosX, const int numFrames )
+{
+    const qreal sampleRate = mSampleHeader->sampleRate;
+
+    if ( sampleRate > 0.0 )
+    {
+        const int millis = roundToInt( (numFrames / sampleRate) * 1000 );
+
+        if ( isPlayheadScrolling() )
+        {
+            stopPlayhead();
+        }
+
+        mAnimation->setPosAt( 0.0, QPointF( startPosX, 0.0 ) );
+        mAnimation->setPosAt( 1.0, QPointF( endPosX,   0.0 ) );
+
+        mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
+        scene()->addItem( mPlayhead );
+
+        mTimer->setLoopCount( 1 );
+        mTimer->setDuration( millis );
+        mTimer->start();
+    }
+}
+
+
+
 void WaveGraphicsView::stopPlayhead()
 {
     if ( isPlayheadScrolling() )

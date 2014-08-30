@@ -393,7 +393,7 @@ void WaveformItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
     }
     else
     {
-        emit playSampleRange( mSampleRange->startFrame, mSampleRange->numFrames, event->scenePos() );
+        emit clicked( this, event->scenePos() );
         event->ignore();
     }
 }

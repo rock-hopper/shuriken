@@ -147,9 +147,7 @@ signals:
 
     void finishedMoving( const int orderPos );
 
-    void playSampleRange( const int waveformItemStartFrame,
-                            const int waveformItemNumFrames,
-                            const QPointF mouseScenePos );
+    void clicked( const WaveformItem* waveformItem, const QPointF mouseScenePos );
 
     void maxDetailLevelReached();
 

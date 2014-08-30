@@ -114,6 +114,7 @@ public:
     void selectAll();
 
     void startPlayhead( const bool isLoopingEnabled );
+    void startPlayhead( const qreal startPosX, const qreal endPosX, const int numFrames );
     void stopPlayhead();
     bool isPlayheadScrolling() const                        { return mTimer->state() == QTimeLine::Running; }
 

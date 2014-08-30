@@ -85,8 +85,8 @@ void MainWindow::connectWaveformToMainWindow( const SharedWaveformItem item )
     QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
                       this, SLOT( stopPlayback() ) );
 
-    QObject::connect( item.data(), SIGNAL( playSampleRange(int,int,QPointF) ),
-                      this, SLOT( playSampleRange(int,int,QPointF) ) );
+    QObject::connect( item.data(), SIGNAL( clicked(const WaveformItem*,QPointF) ),
+                      this, SLOT( playSampleRange(const WaveformItem*,QPointF) ) );
 }
 
 
@@ -718,12 +718,15 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
 
 
 
-void MainWindow::playSampleRange( const int waveformItemStartFrame, const int waveformItemNumFrames, const QPointF mouseScenePos )
+void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPointF mouseScenePos )
 {
     SharedSampleRange sampleRange( new SampleRange );
-    sampleRange->startFrame = waveformItemStartFrame;
-    sampleRange->numFrames = waveformItemNumFrames;
-    int endFrame = waveformItemStartFrame + waveformItemNumFrames;
+    sampleRange->startFrame = waveformItem->getSampleRange()->startFrame;
+    sampleRange->numFrames = waveformItem->getSampleRange()->numFrames;
+    int endFrame = sampleRange->startFrame + sampleRange->numFrames;
+
+    qreal startPosX = waveformItem->scenePos().x();
+    qreal endPosX = startPosX + waveformItem->rect().width();
 
     const QList<int> slicePointFrameNumList = mUI->waveGraphicsView->getSlicePointFrameNumList();
 
@@ -744,11 +747,17 @@ void MainWindow::playSampleRange( const int waveformItemStartFrame, const int wa
                 break;
             }
         }
+
+        sampleRange->numFrames = endFrame - sampleRange->startFrame;
+
+        startPosX = mUI->waveGraphicsView->getScenePosX( sampleRange->startFrame );
+        endPosX = mUI->waveGraphicsView->getScenePosX( endFrame );
     }
 
-    sampleRange->numFrames = endFrame - sampleRange->startFrame;
-
+    // Play sample range and start playhead scrolling
     mSamplerAudioSource->playRange( sampleRange );
+    mUI->waveGraphicsView->startPlayhead( startPosX, endPosX, sampleRange->numFrames );
+    mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
 }
 
 
