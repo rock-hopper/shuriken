@@ -37,6 +37,8 @@ public:
                               const QList<SharedSampleRange> sampleRangeList,
                               const qreal sampleRate,
                               const qreal bpm,
+                              const int timeSigNumerator,
+                              const int timeSigDenominator,
                               const MidiFileType midiFileType,
                               const bool isOverwriteEnabled = true );
 

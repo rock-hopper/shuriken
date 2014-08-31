@@ -33,6 +33,8 @@ bool MidiFileHandler::SaveMidiFile( const QString fileBaseName,
                                     const QList<SharedSampleRange> sampleRangeList,
                                     const qreal sampleRate,
                                     const qreal bpm,
+                                    const int timeSigNumerator,
+                                    const int timeSigDenominator,
                                     const MidiFileType midiFileType,
                                     const bool isOverwriteEnabled )
 {
@@ -55,12 +57,12 @@ bool MidiFileHandler::SaveMidiFile( const QString fileBaseName,
     MidiFile midiFile;
     MidiMessageSequence midiSeq;
 
-    const int microsecsPerQuartNote = roundToInt( MICROSECS_PER_MINUTE / bpm );
+    const int microsecsPerQuartNote = roundToInt( qreal(timeSigDenominator * MICROSECS_PER_MINUTE) / (4 * bpm) );
     const int chanNum = 1;
 
     midiFile.setTicksPerQuarterNote( TICKS_PER_QUART_NOTE );
 
-    midiSeq.addEvent( MidiMessage::timeSignatureMetaEvent( 4, 4 ) );
+    midiSeq.addEvent( MidiMessage::timeSignatureMetaEvent( timeSigNumerator, timeSigDenominator ) );
     midiSeq.addEvent( MidiMessage::tempoMetaEvent( microsecsPerQuartNote ) );
 
     if ( midiFileType == MIDI_FILE_TYPE_1 )

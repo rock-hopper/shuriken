@@ -32,6 +32,7 @@
 #include "textfilehandler.h"
 #include "akaifilehandler.h"
 #include "midifilehandler.h"
+#include "confirmbpmdialog.h"
 #include <QDebug>
 
 
@@ -297,15 +298,31 @@ void MainWindow::exportAs( const QString tempDirPath,
     if ( isSuccessful && isExportTypeMidiFile )
     {
         const qreal bpm = mUI->doubleSpinBox_OriginalBPM->value();
-        const MidiFileHandler::MidiFileType type = (MidiFileHandler::MidiFileType) mExportDialog->getMidiFileType();
+        const ConfirmBpmDialog::TimeSigNumerator numerator = (ConfirmBpmDialog::TimeSigNumerator) mUI->comboBox_TimeSigNumerator->currentIndex();
+        const ConfirmBpmDialog::TimeSigDenominator denominator = (ConfirmBpmDialog::TimeSigDenominator) mUI->comboBox_TimeSigDenominator->currentIndex();
 
-        if ( isExportTypeAkaiPgm )
+        QApplication::restoreOverrideCursor();
+
+        ConfirmBpmDialog dialog( bpm, numerator, denominator );
+        const int result = dialog.exec();
+
+        if ( result == QDialog::Accepted )
         {
-            MidiFileHandler::SaveMidiFile( fileName, samplesDirPath, mSampleRangeList, mCurrentSampleHeader->sampleRate, bpm, type );
-        }
-        else
-        {
-            MidiFileHandler::SaveMidiFile( fileName, outputDirPath, mSampleRangeList, mCurrentSampleHeader->sampleRate, bpm, type );
+            QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+            const qreal bpm = dialog.getBpm();
+            const int timeSigNumerator = dialog.getTimeSigNumerator();
+            const int timeSigDenominator = dialog.getTimeSigDenominator();
+            const MidiFileHandler::MidiFileType type = (MidiFileHandler::MidiFileType) mExportDialog->getMidiFileType();
+
+            if ( isExportTypeAkaiPgm )
+            {
+                MidiFileHandler::SaveMidiFile( fileName, samplesDirPath, mSampleRangeList, mCurrentSampleHeader->sampleRate, bpm, timeSigNumerator, timeSigDenominator, type );
+            }
+            else
+            {
+                MidiFileHandler::SaveMidiFile( fileName, outputDirPath, mSampleRangeList, mCurrentSampleHeader->sampleRate, bpm, timeSigNumerator, timeSigDenominator, type );
+            }
         }
     }
 
@@ -649,13 +666,6 @@ void MainWindow::exportAsDialog()
     {
         MessageBoxes::showWarningDialog( tr( "Cannot export project!" ),
                                          tr( "Permission to write file(s) denied" ) );
-        return;
-    }
-
-    if ( isExportTypeMidiFile && mUI->doubleSpinBox_OriginalBPM->value() == 0.0 )
-    {
-        MessageBoxes::showWarningDialog( tr( "Cannot export MIDI file!" ),
-                                         tr( "BPM needs to be set to a value higher than 0" ) );
         return;
     }
 

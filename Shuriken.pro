@@ -172,7 +172,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/akaifilehandler.cpp \
     src/midifilehandler.cpp \
     src/mainwindowfilehandling.cpp \
-    src/loopmarkeritem.cpp
+    src/loopmarkeritem.cpp \
+    src/confirmbpmdialog.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -385,14 +386,16 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/framemarkeritem.h \
     src/akaifilehandler.h \
     src/midifilehandler.h \
-    src/loopmarkeritem.h
+    src/loopmarkeritem.h \
+    src/confirmbpmdialog.h
 FORMS += src/mainwindow.ui \
     src/optionsdialog.ui \
     src/helpform.ui \
     src/applygaindialog.ui \
     src/applygainrampdialog.ui \
     src/aboutdialog.ui \
-    src/exportdialog.ui
+    src/exportdialog.ui \
+    src/confirmbpmdialog.ui
 INCLUDEPATH += src \
     src/SndLibShuriken \
     src/JuceLibraryCode
