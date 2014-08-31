@@ -382,6 +382,14 @@ SharedWaveformItem WaveGraphicsView::getWaveformAt( const int orderPos ) const
 
 
 
+void WaveGraphicsView::redrawWaveforms()
+{
+    resizeWaveformItems( 1.0 );
+    viewport()->update();
+}
+
+
+
 SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
 {
     const qreal scenePosX = getScenePosX( frameNum );
@@ -805,17 +813,6 @@ void WaveGraphicsView::zoomOriginal()
 {
     resetTransform();
     scaleItems( 1.0 );
-}
-
-
-
-void WaveGraphicsView::forceRedraw()
-{
-    // Hack to force redraw of scene
-    QSize size( sceneRect().width(), sceneRect().height() );
-    QSize oldSize( sceneRect().width(), sceneRect().height() );
-    QResizeEvent event( size, oldSize );
-    resizeEvent( &event );
 }
 
 

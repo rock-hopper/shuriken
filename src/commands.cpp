@@ -495,7 +495,7 @@ void ApplyGainCommand::undo()
             sampleBuffer->copyFrom( chanNum, sampleRange->startFrame, *tempBuffer.data(), chanNum, 0, sampleRange->numFrames );
         }
 
-        mGraphicsView->forceRedraw();
+        mGraphicsView->redrawWaveforms();
     }
 }
 
@@ -522,7 +522,7 @@ void ApplyGainCommand::redo()
     {
         sampleBuffer->applyGain( sampleRange->startFrame, sampleRange->numFrames, mGain );
 
-        mGraphicsView->forceRedraw();
+        mGraphicsView->redrawWaveforms();
     }
     else
     {
@@ -573,7 +573,7 @@ void ApplyGainRampCommand::undo()
             sampleBuffer->copyFrom( chanNum, sampleRange->startFrame, *tempBuffer.data(), chanNum, 0, sampleRange->numFrames );
         }
 
-        mGraphicsView->forceRedraw();
+        mGraphicsView->redrawWaveforms();
     }
 }
 
@@ -600,7 +600,7 @@ void ApplyGainRampCommand::redo()
     {
         sampleBuffer->applyGainRamp( sampleRange->startFrame, sampleRange->numFrames, mStartGain, mEndGain );
 
-        mGraphicsView->forceRedraw();
+        mGraphicsView->redrawWaveforms();
     }
     else
     {
@@ -647,7 +647,7 @@ void NormaliseCommand::undo()
             sampleBuffer->copyFrom( chanNum, sampleRange->startFrame, *tempBuffer.data(), chanNum, 0, sampleRange->numFrames );
         }
 
-        mGraphicsView->forceRedraw();
+        mGraphicsView->redrawWaveforms();
     }
 }
 
@@ -677,7 +677,7 @@ void NormaliseCommand::redo()
         if ( magnitude > 0.0 )
         {
             sampleBuffer->applyGain( sampleRange->startFrame, sampleRange->numFrames, 1.0 / magnitude );
-            mGraphicsView->forceRedraw();
+            mGraphicsView->redrawWaveforms();
         }
     }
     else
@@ -710,7 +710,7 @@ void ReverseCommand::undo()
 
     sampleBuffer->reverse( sampleRange->startFrame, sampleRange->numFrames );
 
-    mGraphicsView->forceRedraw();
+    mGraphicsView->redrawWaveforms();
 }
 
 
@@ -723,7 +723,7 @@ void ReverseCommand::redo()
 
     sampleBuffer->reverse( sampleRange->startFrame, sampleRange->numFrames );
 
-    mGraphicsView->forceRedraw();
+    mGraphicsView->redrawWaveforms();
 }
 
 
@@ -782,7 +782,7 @@ void ApplyTimeStretchCommand::undo()
     mMainWindow->setLoopSampleRanges();
 
     updateSlicePoints( timeRatio );
-    mGraphicsView->forceRedraw();
+    mGraphicsView->redrawWaveforms();
 
     mSpinBoxOriginalBPM->setValue( mOriginalBPM );
     mSpinBoxNewBPM->setValue( mOriginalBPM );
@@ -820,7 +820,7 @@ void ApplyTimeStretchCommand::redo()
         mMainWindow->setLoopSampleRanges();
 
         updateSlicePoints( timeRatio );
-        mGraphicsView->forceRedraw();
+        mGraphicsView->redrawWaveforms();
 
         mSpinBoxOriginalBPM->setValue( mNewBPM );
         mSpinBoxNewBPM->setValue( mNewBPM );

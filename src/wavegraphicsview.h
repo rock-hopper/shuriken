@@ -74,6 +74,9 @@ public:
 
     int getNumWaveformItems() const                         { return mWaveformItemList.size(); }
 
+    // Redraw all waveform items
+    void redrawWaveforms();
+
     // Create a new slice point item and add it to the scene
     SharedSlicePointItem createSlicePoint( const int frameNum );
 
@@ -129,7 +132,7 @@ public:
     void zoomOut();
     void zoomOriginal();
 
-    void forceRedraw();
+
 
     enum InteractionMode { MOVE_ITEMS, SELECT_ITEMS, AUDITION_ITEMS };
     void setInteractionMode( const InteractionMode mode );
