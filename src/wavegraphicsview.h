@@ -171,6 +171,8 @@ private:
 
     LoopMarkerSnapMode mLoopMarkerSnapMode;
 
+    bool mIsViewZoomedIn;
+
 signals:
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );
     void loopMarkerPosChanged();
@@ -187,6 +189,7 @@ private slots:
     void updateSlicePointFrameNum( SlicePointItem* const movedItem );
     void updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem );
     void removePlayhead();
+    void relayMaxDetailLevelReached();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( WaveGraphicsView );

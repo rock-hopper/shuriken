@@ -31,7 +31,8 @@
 
 WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
     QGraphicsView( parent ),
-    mLoopMarkerSnapMode( SNAP_OFF )
+    mLoopMarkerSnapMode( SNAP_OFF ),
+    mIsViewZoomedIn( false )
 {
     // Set up view and scene
     setViewport( new QGLWidget( QGLFormat(QGL::SampleBuffers) ) );
@@ -80,7 +81,7 @@ SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sa
     mWaveformItemList.append( SharedWaveformItem( waveformItem ) );
 
     QObject::connect( waveformItem, SIGNAL( maxDetailLevelReached() ),
-                      this, SIGNAL( maxDetailLevelReached() ) );
+                      this, SLOT( relayMaxDetailLevelReached() ) );
 
     scene()->addItem( waveformItem );
     scene()->update();
@@ -121,7 +122,7 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const SharedSampleB
                           this, SLOT( slideWaveformItemIntoPlace(int) ) );
 
         QObject::connect( waveformItem, SIGNAL( maxDetailLevelReached() ),
-                          this, SIGNAL( maxDetailLevelReached() ) );
+                          this, SLOT( relayMaxDetailLevelReached() ) );
 
         scene()->addItem( waveformItem );
         scene()->update();
@@ -169,7 +170,7 @@ SharedWaveformItem WaveGraphicsView::joinWaveforms( const QList<int> orderPositi
                       this, SLOT( slideWaveformItemIntoPlace(int) ) );
 
     QObject::connect( waveformItem, SIGNAL( maxDetailLevelReached() ),
-                      this, SIGNAL( maxDetailLevelReached() ) );
+                      this, SLOT( relayMaxDetailLevelReached() ) );
 
     if ( dragMode() == RubberBandDrag )
     {
@@ -780,6 +781,8 @@ int WaveGraphicsView::getFrameNum( qreal scenePosX ) const
 
 void WaveGraphicsView::zoomIn()
 {
+    mIsViewZoomedIn = true;
+
     const qreal newXScaleFactor = transform().m11() * 2; // m11() returns the current horizontal scale factor
 
     QTransform matrix;
@@ -804,6 +807,7 @@ void WaveGraphicsView::zoomOut()
     if ( newXScaleFactor == 1.0 )
     {
         emit minDetailLevelReached();
+        mIsViewZoomedIn = false;
     }
 }
 
@@ -811,6 +815,8 @@ void WaveGraphicsView::zoomOut()
 
 void WaveGraphicsView::zoomOriginal()
 {
+    mIsViewZoomedIn = false;
+
     resetTransform();
     scaleItems( 1.0 );
 }
@@ -1327,4 +1333,14 @@ void WaveGraphicsView::removePlayhead()
 {
     scene()->removeItem( mPlayhead );
     scene()->update();
+}
+
+
+
+void WaveGraphicsView::relayMaxDetailLevelReached()
+{
+    if ( mIsViewZoomedIn )
+    {
+        emit maxDetailLevelReached();
+    }
 }
