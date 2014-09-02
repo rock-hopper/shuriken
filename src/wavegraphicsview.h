@@ -132,8 +132,6 @@ public:
     void zoomOut();
     void zoomOriginal();
 
-
-
     enum InteractionMode { MOVE_ITEMS, SELECT_ITEMS, AUDITION_ITEMS };
     void setInteractionMode( const InteractionMode mode );
 
@@ -148,7 +146,8 @@ private:
 
     void scaleItems( const qreal scaleFactorX );
 
-    int getTotalNumFrames() const;
+    int getTotalNumFrames( QList<SharedWaveformItem> items ) const;
+    int getTotalNumFrames( QList<SharedSampleRange> sampleRanges ) const;
 
     void createLoopMarkers();
     void setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker );
