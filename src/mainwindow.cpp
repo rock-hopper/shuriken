@@ -1602,7 +1602,8 @@ void MainWindow::on_pushButton_PlayStop_clicked()
 
 void MainWindow::on_pushButton_Loop_clicked( const bool isChecked )
 {
-    mSamplerAudioSource->enableLooping( isChecked );
+    mSamplerAudioSource->setLooping( isChecked );
+    mUI->waveGraphicsView->setPlayheadLooping( isChecked );
 }
 
 

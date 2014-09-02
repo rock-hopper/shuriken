@@ -634,7 +634,7 @@ void WaveGraphicsView::selectAll()
 
 
 
-void WaveGraphicsView::startPlayhead( const bool isLoopingEnabled )
+void WaveGraphicsView::startPlayhead( const bool isLoopingDesired )
 {
     const qreal sampleRate = mSampleHeader->sampleRate;
 
@@ -665,7 +665,7 @@ void WaveGraphicsView::startPlayhead( const bool isLoopingEnabled )
         mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
         scene()->addItem( mPlayhead );
 
-        if ( isLoopingEnabled )
+        if ( isLoopingDesired )
         {
             mTimer->setLoopCount( 0 );
         }
@@ -713,6 +713,20 @@ void WaveGraphicsView::stopPlayhead()
     {
         mTimer->stop();
         removePlayhead();
+    }
+}
+
+
+
+void WaveGraphicsView::setPlayheadLooping( const bool isLoopingDesired )
+{
+    if ( isLoopingDesired )
+    {
+        mTimer->setLoopCount( 0 );
+    }
+    else
+    {
+        mTimer->setLoopCount( 1 );
     }
 }
 

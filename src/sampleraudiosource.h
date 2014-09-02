@@ -39,7 +39,7 @@ public:
     void playRange( const SharedSampleRange sampleRange );
     void playAll();
     void stop();
-    void enableLooping( const bool isEnabled )          { mIsLoopingEnabled = isEnabled; }
+    void setLooping( const bool isLoopingDesired );
 
     MidiMessageCollector* getMidiMessageCollector()     { return &mMidiCollector; }
 

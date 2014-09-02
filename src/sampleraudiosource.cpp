@@ -135,6 +135,13 @@ void SamplerAudioSource::stop()
 
 
 
+void SamplerAudioSource::setLooping( const bool isLoopingDesired )
+{
+    mIsLoopingEnabled = isLoopingDesired;
+}
+
+
+
 void SamplerAudioSource::prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate )
 {
     mPlaybackSampleRate = sampleRate;
@@ -166,32 +173,45 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
     // If requested, play back all sample ranges in sequence by adding appropriate MIDI messages to the buffer
     if ( mIsPlaySeqEnabled )
     {
-        if ( mFrameCounter < bufferToFill.numSamples )
+        bool isEndOfSequence = false;
+
+        if ( mFrameCounter - 1 >= 0 && mFrameCounter - 1 < bufferToFill.numSamples )
         {
-            const MidiMessage message = MidiMessage::noteOn( 1,                           // MIDI channel
-                                                             mStartKey + mNoteCounter,    // MIDI note no.
-                                                             1.0f );                      // Velocity
-            const int noteOnFrameNum = mFrameCounter;
-
-            incomingMidi.addEvent( message, noteOnFrameNum );
-
-            const int numFrames = mSampleRangeList.at( mNoteCounter )->numFrames;
-            mFrameCounter = roundToInt( numFrames * (mPlaybackSampleRate / mFileSampleRate) );
-            mFrameCounter -= bufferToFill.numSamples - noteOnFrameNum;
-
             mNoteCounter++;
 
             if ( mNoteCounter == mSampleRangeList.size() )
             {
                 if ( mIsLoopingEnabled )
+                {
                     mNoteCounter = 0;
+                }
                 else
+                {
+                    isEndOfSequence = true;
                     mIsPlaySeqEnabled = false;
+                }
             }
         }
-        else
+
+        if ( ! isEndOfSequence )
         {
-            mFrameCounter -= bufferToFill.numSamples;
+            if ( mFrameCounter < bufferToFill.numSamples )
+            {
+                const MidiMessage message = MidiMessage::noteOn( 1,                           // MIDI channel
+                                                                 mStartKey + mNoteCounter,    // MIDI note no.
+                                                                 1.0f );                      // Velocity
+                const int noteOnFrameNum = mFrameCounter;
+
+                incomingMidi.addEvent( message, noteOnFrameNum );
+
+                const int numFrames = mSampleRangeList.at( mNoteCounter )->numFrames;
+                mFrameCounter = roundToInt( numFrames * (mPlaybackSampleRate / mFileSampleRate) );
+                mFrameCounter -= bufferToFill.numSamples - noteOnFrameNum;
+            }
+            else
+            {
+                mFrameCounter -= bufferToFill.numSamples;
+            }
         }
     }
 
