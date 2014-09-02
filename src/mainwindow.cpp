@@ -766,6 +766,7 @@ void MainWindow::stopPlayback()
 {
     mSamplerAudioSource->stop();
     mUI->waveGraphicsView->stopPlayhead();
+    mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
 }
 
 
