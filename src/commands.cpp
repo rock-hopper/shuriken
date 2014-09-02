@@ -177,6 +177,7 @@ void SliceCommand::undo()
 
     const qreal sampleRate = mMainWindow->mCurrentSampleHeader->sampleRate;
 
+    mMainWindow->stopPlayback();
     mMainWindow->mSamplerAudioSource->setSample( mMainWindow->mCurrentSampleBuffer, sampleRate );
     mMainWindow->mSampleRangeList.clear();
 
@@ -218,15 +219,15 @@ void SliceCommand::redo()
 
     Q_ASSERT( mMainWindow->mSampleRangeList.size() > 1 );
 
+    mMainWindow->stopPlayback();
     mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
 
     mGraphicsView->hideSlicePoints();
     mGraphicsView->clearWaveform();
 
-    const QList<SharedWaveformItem> waveformItemList =
-            mGraphicsView->createWaveforms( mMainWindow->mCurrentSampleBuffer,
-                                            mMainWindow->mCurrentSampleHeader,
-                                            mMainWindow->mSampleRangeList );
+    const QList<SharedWaveformItem> waveformItemList = mGraphicsView->createWaveforms( mMainWindow->mCurrentSampleBuffer,
+                                                                                       mMainWindow->mCurrentSampleHeader,
+                                                                                       mMainWindow->mSampleRangeList );
 
     foreach ( SharedWaveformItem item, waveformItemList )
     {
