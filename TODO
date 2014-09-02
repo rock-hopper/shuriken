@@ -8,11 +8,19 @@ Qt5 compatibility
 
 JACK Session, NSM
 
+Option to stream samples from disc
+
+Export Akai .snd files
+
+Copy and paste audio slices
+
+Display MIDI note mappings
+
+Pitch-shifting
+
 
 Dialogs
 -------
-Assign samples to MIDI keys dialog
-
 User interface dialog
 
 Audio outputs dialog
@@ -22,8 +30,7 @@ Envelope ADSR dialog
 
 UI Improvements
 ---------------
-Fix gaps in waveform when zoomed in to low detail level
-More efficient waveform drawing routine (possibly OpenGL solution)
+Fix gaps in waveform when zoomed in at low detail level
 
 Some kind of visual indicator for the threshold level
 
