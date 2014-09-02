@@ -33,8 +33,8 @@ SamplerAudioSource::SamplerAudioSource() :
     AudioSource(),
     mFileSampleRate( 0.0 ),
     mPlaybackSampleRate( 0.0 ),
-    mNextFreeKey( Midi::MIDDLE_C ),
-    mStartKey( Midi::MIDDLE_C ),
+    mNextFreeNote( Midi::MIDDLE_C ),
+    mStartNote( Midi::MIDDLE_C ),
     mIsPlaySeqEnabled( false ),
     mIsLoopingEnabled( false ),
     mNoteCounter( 0 ),
@@ -79,10 +79,10 @@ void SamplerAudioSource::setSampleRanges( const QList<SharedSampleRange> sampleR
 
         if ( sampleRangeList.size() > Midi::MAX_POLYPHONY - Midi::MIDDLE_C )
         {
-            mNextFreeKey = qMax( Midi::MAX_POLYPHONY - sampleRangeList.size(), 0 );
+            mNextFreeNote = qMax( Midi::MAX_POLYPHONY - sampleRangeList.size(), 0 );
         }
 
-        mStartKey = mNextFreeKey;
+        mStartNote = mNextFreeNote;
 
         int i = 0;
         while (  i < sampleRangeList.size() && i < Midi::MAX_POLYPHONY )
@@ -98,7 +98,7 @@ void SamplerAudioSource::setSampleRanges( const QList<SharedSampleRange> sampleR
 void SamplerAudioSource::playRange( const SharedSampleRange sampleRange )
 {
     const int midiChannel = 1;
-    const int midiNoteNum = mStartKey;
+    const int midiNoteNum = mStartNote;
     const float velocity = 1.0;
 
     SynthesiserSound* sound = mSampler.getSound( 0 );
@@ -175,6 +175,7 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
     {
         bool isEndOfSequence = false;
 
+        // End of note
         if ( mFrameCounter - 1 >= 0 && mFrameCounter - 1 < bufferToFill.numSamples )
         {
             mNoteCounter++;
@@ -195,11 +196,12 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
 
         if ( ! isEndOfSequence )
         {
+            // Start of note
             if ( mFrameCounter < bufferToFill.numSamples )
             {
-                const MidiMessage message = MidiMessage::noteOn( 1,                           // MIDI channel
-                                                                 mStartKey + mNoteCounter,    // MIDI note no.
-                                                                 1.0f );                      // Velocity
+                const MidiMessage message = MidiMessage::noteOn( 1,                         // MIDI channel
+                                                                 mStartNote + mNoteCounter, // MIDI note no.
+                                                                 1.0f );                    // Velocity
                 const int noteOnFrameNum = mFrameCounter;
 
                 incomingMidi.addEvent( message, noteOnFrameNum );
@@ -208,7 +210,7 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
                 mFrameCounter = roundToInt( numFrames * (mPlaybackSampleRate / mFileSampleRate) );
                 mFrameCounter -= bufferToFill.numSamples - noteOnFrameNum;
             }
-            else
+            else // Middle of note
             {
                 mFrameCounter -= bufferToFill.numSamples;
             }
@@ -231,21 +233,21 @@ bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer,
 {
     bool isSampleAssignedToKey = false;
 
-    if ( mNextFreeKey < Midi::MAX_POLYPHONY )
+    if ( mNextFreeNote < Midi::MAX_POLYPHONY )
     {
         mSampler.addVoice( new ShurikenSamplerVoice() );
 
-        BigInteger keyNum;
-        keyNum.clear();
-        keyNum.setBit( mNextFreeKey );
+        BigInteger noteNum;
+        noteNum.clear();
+        noteNum.setBit( mNextFreeNote );
 
         mSampler.addSound( new ShurikenSamplerSound( sampleBuffer,
                                                      sampleRange,
                                                      sampleRate,
-                                                     keyNum,              // MIDI key this sample should be mapped to
-                                                     mNextFreeKey ));     // Root/pitch-centre MIDI key
+                                                     noteNum,           // MIDI note this sample should be mapped to
+                                                     mNextFreeNote ));  // Root/pitch-centre MIDI note
 
-        mNextFreeKey++;
+        mNextFreeNote++;
         isSampleAssignedToKey = true;
     }
 
@@ -260,6 +262,6 @@ void SamplerAudioSource::clearSampleRanges()
     mSampler.clearVoices();
     mSampler.clearSounds();
     mSampleRangeList.clear();
-    mNextFreeKey = Midi::MIDDLE_C;
-    mStartKey = Midi::MIDDLE_C;
+    mNextFreeNote = Midi::MIDDLE_C;
+    mStartNote = Midi::MIDDLE_C;
 }

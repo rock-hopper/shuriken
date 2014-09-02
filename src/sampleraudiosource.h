@@ -65,8 +65,8 @@ private:
     MidiMessageCollector mMidiCollector;
     Synthesiser mSampler;
 
-    int mNextFreeKey;
-    int mStartKey;
+    int mNextFreeNote;
+    int mStartNote;
 
     volatile bool mIsPlaySeqEnabled;
     volatile bool mIsLoopingEnabled;
