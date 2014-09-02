@@ -12,8 +12,8 @@
 aubio's onset detection algorithms and Rubber Band's time stretching
 capabilities.&nbsp; A simple Qt4 interface makes it easy to slice up
 drum loops, assign individual drum hits to MIDI keys, and change the
-tempo of loops in real-time.&nbsp; JUCE takes care of handling audio and
-MIDI behind the scenes.</p>
+tempo of loops in real-time.&nbsp; The JUCE library takes care of handling 
+audio and MIDI behind the scenes.</p>
 
 <p>For more info on aubio, Rubber Band, and JUCE please see:</p>
 
@@ -33,7 +33,11 @@ MIDI behind the scenes.</p>
 
 <p><a href="#Detection_Options">Detection Options</a></p>
 
+<p><a href="#Calculating_BPM">Calculating BPM</a></p>
+
 <p><a href="#Time_Stretching">Time Stretching</a></p>
+
+<p><a href="#Export_Options">Export Options</a></p>
 
 <p><a href="#Session_Management">Session Management</a></p>
 
@@ -44,7 +48,7 @@ MIDI behind the scenes.</p>
 <h2><a name="Audio_Setup"></a>Audio Setup</h2>
 
 <p>The Audio Setup dialogue, launched from the Options menu, allows you to
-select your preferred sound card and audio back end (ALSA, JACK,
+select your preferred sound card and audio back-end (ALSA, JACK,
 etc.)&nbsp; It also lets you check that audio and MIDI connections are
 set up correctly with the aid of a simple test tone.</p>
 <p><br></p>
@@ -52,22 +56,13 @@ set up correctly with the aid of a simple test tone.</p>
 
 <h2><a name="Importing_Audio_Files"></a>Importing Audio Files</h2>
 
-<p>To get started, first import an audio file.&nbsp; Shuriken loads audio
-files into RAM before editing so the original files always remain
-untouched.&nbsp; Shuriken makes use of aubio's file handling features,
-which in turn calls on the abilities of libav and libsndfile.&nbsp;
-Between them, these libraries should allow you to open just about any
-audio file.&nbsp; For full details of supported file formats please see:</p>
+<p>To get started with Shuriken, first import an audio file.&nbsp; Audio samples are loaded
+into RAM before editing so the original files always remain untouched.</p>
 
+<p>Shuriken calls on the abilities of libsndfile when importing audio files.&nbsp;
+For full details of supported file formats please see: <a href="http://www.mega-nerd.com/libsndfile/#Features">http://www.mega-nerd.com/libsndfile/#Features</a></p>
 
-<p><a href="https://www.libav.org/general.html#Supported-File-Formats-and-Codecs">https://www.libav.org/general.html#Supported-File-Formats-and-Codecs</a></p>
-
-
-<p><a href="http://www.mega-nerd.com/libsndfile/#Features">http://www.mega-nerd.com/libsndfile/#Features</a></p>
-
-<p>Shuriken also comes with sndlib statically built in, so if for some
-reason your version of aubio doesn't have support for libav or
-libsndfile you won't be left high and dry.&nbsp; sndlib can read the
+<p>Shuriken also comes with sndlib statically built in.&nbsp; sndlib can read the
 following file formats:</p>
 
 <p>NeXT/Sun/DEC/Afsp, AIFF/AIFC, RIFF (WAV), RF64, IRCAM (old style),
@@ -139,6 +134,21 @@ This overlap can help to produce better results.</dd>
 routine.&nbsp; Lowering the threshold will result in more detections,
 raising it will result in fewer.</dd>
 </dl>
+<p><br></p>
+
+
+<h2><a name="Calculating_BPM"></a>Calculating BPM</h2>
+
+<p>There are two ways of calculating the BPM of a drum loop in Shuriken.</p>
+
+<p>If the loop markers are not present, then aubio will attempt to work out the BPM by 
+analysing the sample audio.&nbsp; This process is affected by the threshold and detection 
+settings, so if you find that the calculated BPM is wrong or cannot be found at all, try 
+lowering the threshold or changing the detection method.</p>
+
+<p>If the loop markers are present, then the time signature and loop length widgets become 
+available, allowing you to specify the length of the loop in bars or beats.&nbsp; Shuriken 
+then does the appropriate maths to calculate the BPM once the &#8220;Calc&#8221; button is clicked.</p>
 <p><br></p>
 
 
@@ -310,6 +320,19 @@ accurate for this to work well, so you may need to adjust it manually.</p>
 <p><br></p>
 
 
+<h2><a name="Export_Options"></a>Export Options</h2>
+
+<p>Shuriken allows audio slices to be exported as individual audio files in WAV, AIFF, AU, 
+FLAC or Ogg format, with options for encoding (e.g. 16-bit PCM) and sample rate.&nbsp; There are 
+also options for exporting a Hydrogen drumkit, SFZ, or Akai .pgm file.&nbsp; A standard MIDI file 
+may be exported either on its own or along with the audio files.&nbsp; When exporting a MIDI file, 
+you will be asked to confirm the BPM and time signature in case one or the other has not yet 
+been set in the main window.&nbsp; Note that MIDI files store tempo in terms of quarter notes 
+rather than beats per minute, so a drum loop at 140 BPM where the beat is an eighth note 
+would have a tempo of 70 quarter notes per minute.</p>
+<p><br></p>
+
+
 <h2><a name="Session_Management"></a>Session Management</h2>
 
 <p>Shuriken has support for LADISH L1 session management.  On receiving the SIGUSR1 Unix signal, 
@@ -318,7 +341,7 @@ the user if any unsaved changes should be saved, then exit cleanly.  Shuriken ca
 these signals being sent in quick succession and in any order; any save operation will 
 complete before the application shuts down.</p>
 
-<p>To fully comply with LADISH L1, the file path of a project can be given as an argument when 
+<p>To allow LADISH to open a saved project, the file path of the project can be given as an argument when 
 starting Shuriken from the command line, e.g.:</p>
 
 <p style="margin-bottom: 0cm; margin-left: 40px;">shuriken '/home/user/project.shuriken'</p>
