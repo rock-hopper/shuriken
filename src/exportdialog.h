@@ -76,6 +76,8 @@ protected:
 
 private:
     void setPlatformFileNameValidator();
+    void enableMidiFileTypeRadioButtons();
+    void disableMidiFileTypeRadioButtons();
 
     Ui::ExportDialog* mUI;
 
