@@ -146,9 +146,6 @@ private:
 
     void scaleItems( const qreal scaleFactorX );
 
-    int getTotalNumFrames( QList<SharedWaveformItem> items ) const;
-    int getTotalNumFrames( QList<SharedSampleRange> sampleRanges ) const;
-
     void createLoopMarkers();
     void setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker );
     int getWaveformOrderPosUnderLoopMarker( LoopMarkerItem* const loopMarker ) const;
@@ -171,6 +168,10 @@ private:
     LoopMarkerSnapMode mLoopMarkerSnapMode;
 
     bool mIsViewZoomedIn;
+
+private:
+    static int getTotalNumFrames( QList<SharedWaveformItem> items );
+    static int getTotalNumFrames( QList<SharedSampleRange> sampleRanges );
 
 signals:
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );

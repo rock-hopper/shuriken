@@ -979,34 +979,6 @@ void WaveGraphicsView::scaleItems( const qreal scaleFactorX )
 
 
 
-int WaveGraphicsView::getTotalNumFrames( QList<SharedWaveformItem> items ) const
-{
-    int numFrames = 0;
-
-    foreach ( SharedWaveformItem item, items )
-    {
-        numFrames += item->getSampleRange()->numFrames;
-    }
-
-    return numFrames;
-}
-
-
-
-int WaveGraphicsView::getTotalNumFrames( QList<SharedSampleRange> sampleRanges ) const
-{
-    int numFrames = 0;
-
-    foreach ( SharedSampleRange range, sampleRanges )
-    {
-        numFrames += range->numFrames;
-    }
-
-    return numFrames;
-}
-
-
-
 void WaveGraphicsView::createLoopMarkers()
 {
     mLoopMarkerLeft = new LoopMarkerItem( LoopMarkerItem::LEFT_MARKER, scene()->height() - 1 );
@@ -1209,6 +1181,37 @@ void WaveGraphicsView::snapSlicePointToLoopMarker( SlicePointItem* const slicePo
 
         slicePoint->setPos( scenePosX, 0.0 );
     }
+}
+
+
+
+//==================================================================================================
+// Private Static:
+
+int WaveGraphicsView::getTotalNumFrames( QList<SharedWaveformItem> items )
+{
+    int numFrames = 0;
+
+    foreach ( SharedWaveformItem item, items )
+    {
+        numFrames += item->getSampleRange()->numFrames;
+    }
+
+    return numFrames;
+}
+
+
+
+int WaveGraphicsView::getTotalNumFrames( QList<SharedSampleRange> sampleRanges )
+{
+    int numFrames = 0;
+
+    foreach ( SharedSampleRange range, sampleRanges )
+    {
+        numFrames += range->numFrames;
+    }
+
+    return numFrames;
 }
 
 
