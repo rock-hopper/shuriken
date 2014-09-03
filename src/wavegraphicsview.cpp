@@ -634,7 +634,7 @@ void WaveGraphicsView::selectAll()
 
 
 
-void WaveGraphicsView::startPlayhead( const bool isLoopingDesired )
+void WaveGraphicsView::startPlayhead( const bool isLoopingDesired, const qreal stretchRatio )
 {
     const qreal sampleRate = mSampleHeader->sampleRate;
 
@@ -652,7 +652,7 @@ void WaveGraphicsView::startPlayhead( const bool isLoopingDesired )
             endPosX   = mLoopMarkerRight->scenePos().x();
         }
 
-        const int millis = roundToInt( (numFrames / sampleRate) * 1000 );
+        const int millis = roundToInt( (numFrames / sampleRate) * 1000 * stretchRatio );
 
         if ( isPlayheadScrolling() )
         {
@@ -663,6 +663,7 @@ void WaveGraphicsView::startPlayhead( const bool isLoopingDesired )
         mAnimation->setPosAt( 1.0, QPointF( endPosX,   0.0 ) );
 
         mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
+        mPlayhead->setVisible( true );
         scene()->addItem( mPlayhead );
 
         if ( isLoopingDesired )
@@ -680,13 +681,13 @@ void WaveGraphicsView::startPlayhead( const bool isLoopingDesired )
 
 
 
-void WaveGraphicsView::startPlayhead( const qreal startPosX, const qreal endPosX, const int numFrames )
+void WaveGraphicsView::startPlayhead( const qreal startPosX, const qreal endPosX, const int numFrames, const qreal stretchRatio )
 {
     const qreal sampleRate = mSampleHeader->sampleRate;
 
     if ( sampleRate > 0.0 )
     {
-        const int millis = roundToInt( (numFrames / sampleRate) * 1000 );
+        const int millis = roundToInt( (numFrames / sampleRate) * 1000 * stretchRatio );
 
         if ( isPlayheadScrolling() )
         {
@@ -697,6 +698,7 @@ void WaveGraphicsView::startPlayhead( const qreal startPosX, const qreal endPosX
         mAnimation->setPosAt( 1.0, QPointF( endPosX,   0.0 ) );
 
         mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
+        mPlayhead->setVisible( true );
         scene()->addItem( mPlayhead );
 
         mTimer->setLoopCount( 1 );
@@ -727,6 +729,38 @@ void WaveGraphicsView::setPlayheadLooping( const bool isLoopingDesired )
     else
     {
         mTimer->setLoopCount( 1 );
+    }
+}
+
+
+
+void WaveGraphicsView::updatePlayheadSpeed( const qreal stretchRatio )
+{
+    if ( isPlayheadScrolling() )
+    {
+        mPlayhead->setVisible( false );
+
+        mTimer->stop();
+
+        const qreal sampleRate = mSampleHeader->sampleRate;
+        int numFrames = 0;
+
+        if ( mLoopMarkerLeft != NULL && mLoopMarkerLeft->isVisible() )
+        {
+            numFrames = getFrameNum( mLoopMarkerRight->scenePos().x() - mLoopMarkerLeft->scenePos().x() );
+        }
+        else
+        {
+            numFrames = getTotalNumFrames( mWaveformItemList );
+        }
+
+        const int newDuration = roundToInt( (numFrames / sampleRate) * 1000 * stretchRatio );
+//        const int newTime = roundToInt( mTimer->currentTime() * stretchRatio );
+
+        mTimer->setDuration( newDuration );
+//        mTimer->setCurrentTime( newTime );
+
+        mTimer->resume();
     }
 }
 

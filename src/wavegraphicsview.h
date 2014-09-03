@@ -116,11 +116,12 @@ public:
     void selectNone();
     void selectAll();
 
-    void startPlayhead( const bool isLoopingDesired );
-    void startPlayhead( const qreal startPosX, const qreal endPosX, const int numFrames );
+    void startPlayhead( const bool isLoopingDesired, const qreal stretchRatio = 1.0 );
+    void startPlayhead( const qreal startPosX, const qreal endPosX, const int numFrames, const qreal stretchRatio = 1.0 );
     void stopPlayhead();
     bool isPlayheadScrolling() const                        { return mTimer->state() == QTimeLine::Running; }
     void setPlayheadLooping( const bool isLoopingDesired );
+    void updatePlayheadSpeed( const qreal stretchRatio );
 
     void clearAll();
     void clearWaveform();

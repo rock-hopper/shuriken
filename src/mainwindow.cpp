@@ -756,8 +756,19 @@ void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPoint
 
     // Play sample range and start playhead scrolling
     mSamplerAudioSource->playRange( sampleRange );
-    mUI->waveGraphicsView->startPlayhead( startPosX, endPosX, sampleRange->numFrames );
     mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
+
+    if ( mUI->doubleSpinBox_NewBPM->isVisible() &&
+         mUI->doubleSpinBox_OriginalBPM->value() > 0.0 &&
+         mUI->doubleSpinBox_NewBPM->value() > 0.0 )
+    {
+        qreal stretchRatio = mUI->doubleSpinBox_OriginalBPM->value() / mUI->doubleSpinBox_NewBPM->value();
+        mUI->waveGraphicsView->startPlayhead( startPosX, endPosX, sampleRange->numFrames, stretchRatio );
+    }
+    else
+    {
+        mUI->waveGraphicsView->startPlayhead( startPosX, endPosX, sampleRange->numFrames );
+    }
 }
 
 
@@ -1521,6 +1532,8 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
             const qreal timeRatio = originalBPM / newBPM;
 
             mRubberbandAudioSource->setTimeRatio( timeRatio );
+
+            mUI->waveGraphicsView->updatePlayheadSpeed( timeRatio );
         }
     }
 }
@@ -1539,6 +1552,8 @@ void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
             const qreal timeRatio = originalBPM / newBPM;
 
             mRubberbandAudioSource->setTimeRatio( timeRatio );
+
+            mUI->waveGraphicsView->updatePlayheadSpeed( timeRatio );
         }
     }
 }
@@ -1584,6 +1599,9 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
 
 void MainWindow::on_pushButton_PlayStop_clicked()
 {
+
+
+
     if ( mUI->waveGraphicsView->isPlayheadScrolling() )
     {
         mSamplerAudioSource->stop();
@@ -1593,8 +1611,20 @@ void MainWindow::on_pushButton_PlayStop_clicked()
     else
     {
         mSamplerAudioSource->playAll();
-        mUI->waveGraphicsView->startPlayhead( mUI->pushButton_Loop->isChecked() );
         mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
+
+        // If real-time mode is enabled
+        if ( mUI->doubleSpinBox_NewBPM->isVisible() &&
+             mUI->doubleSpinBox_OriginalBPM->value() > 0.0 &&
+             mUI->doubleSpinBox_NewBPM->value() > 0.0 )
+        {
+            qreal stretchRatio = mUI->doubleSpinBox_OriginalBPM->value() / mUI->doubleSpinBox_NewBPM->value();
+            mUI->waveGraphicsView->startPlayhead( mUI->pushButton_Loop->isChecked(), stretchRatio );
+        }
+        else
+        {
+            mUI->waveGraphicsView->startPlayhead( mUI->pushButton_Loop->isChecked() );
+        }
     }
 }
 
