@@ -791,6 +791,8 @@ void MainWindow::resetPlayStopButtonIcon()
 
 void MainWindow::setLoopSampleRanges()
 {
+    stopPlayback();
+
     mLoopSampleRangeList.clear();
 
     mLoopSampleRangeList = mUI->waveGraphicsView->getSampleRangesBetweenLoopMarkers( mSampleRangeList );

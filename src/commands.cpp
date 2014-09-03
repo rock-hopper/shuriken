@@ -762,6 +762,8 @@ void ApplyTimeStretchCommand::undo()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
+    mMainWindow->stopPlayback();
+
     SharedSampleBuffer tempBuffer = mMainWindow->mFileHandler.getSampleData( mTempFilePath );
 
     const int numChans = tempBuffer->getNumChannels();
@@ -799,6 +801,8 @@ void ApplyTimeStretchCommand::undo()
 void ApplyTimeStretchCommand::redo()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+    mMainWindow->stopPlayback();
 
     mTempFilePath = mMainWindow->mFileHandler.saveAudioFile( mTempDirPath,
                                                              mFileBaseName,
