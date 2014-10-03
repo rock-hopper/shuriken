@@ -33,6 +33,7 @@
 WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
     QGraphicsView( parent ),
     mLoopMarkerSnapMode( SNAP_OFF ),
+    mInteractionMode( AUDITION_ITEMS ),
     mIsViewZoomedIn( false )
 {
     // Set up view and scene
@@ -93,6 +94,8 @@ SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sa
     scene()->addItem( waveformItem.data() );
     scene()->update();
 
+    setInteractionMode( mInteractionMode );
+
     return waveformItem;
 }
 
@@ -140,6 +143,8 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const QList<SharedS
         orderPos++;
     }
 
+    setInteractionMode( mInteractionMode );
+
     return newWaveformItems;
 }
 
@@ -180,11 +185,6 @@ SharedWaveformItem WaveGraphicsView::joinWaveforms( const QList<int> orderPositi
         mWaveformItemList.at( orderPos )->setOrderPos( orderPos );
     }
 
-    if ( dragMode() == RubberBandDrag )
-    {
-        joinedItem->setFlag( QGraphicsItem::ItemIsMovable, false );
-    }
-
     return joinedItem;
 }
 
@@ -208,21 +208,10 @@ QList<SharedWaveformItem> WaveGraphicsView::splitWaveform( const int orderPos, c
                                                                   itemToSplit->rect().width() );
 
     const int lastSplitItemOrderPos = waveformItemList.last()->getOrderPos();
+
     for ( int orderPos = lastSplitItemOrderPos + 1; orderPos < mWaveformItemList.size(); orderPos++ )
     {
         mWaveformItemList.at( orderPos )->setOrderPos( orderPos );
-    }
-
-    foreach ( SharedWaveformItem item, waveformItemList )
-    {
-        if ( dragMode() == RubberBandDrag )
-        {
-            item->setFlag( QGraphicsItem::ItemIsMovable, false );
-        }
-        else
-        {
-            item->setFlag( QGraphicsItem::ItemIsMovable, true );
-        }
     }
 
     return waveformItemList;
@@ -282,6 +271,8 @@ void WaveGraphicsView::insertWaveforms( const QList<SharedWaveformItem> waveform
         scene()->addItem( item.data() );
     }
     scene()->update();
+
+    setInteractionMode( mInteractionMode );
 
     // Reset loop markers
     if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
@@ -933,6 +924,8 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
     default:
         break;
     }
+
+    mInteractionMode = mode;
 }
 
 

@@ -179,6 +179,8 @@ private:
 
     LoopMarkerSnapMode mLoopMarkerSnapMode;
 
+    InteractionMode mInteractionMode;
+
     bool mIsViewZoomedIn;
 
 private:
