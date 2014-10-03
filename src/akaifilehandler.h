@@ -40,7 +40,7 @@ public:
 
     static QString getFileNameRegExpMPC1000()       { return QString( "\\w{1,16}" ); }
 
-    static bool writePgmFileMPC1000( const QStringList sampleNames,
+    static bool writePgmFileMPC1000( QStringList sampleNames,
                                      const QString fileBaseName,
                                      const QString outputDirPath,
                                      const QString tempDirPath,

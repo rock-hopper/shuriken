@@ -30,7 +30,8 @@
 
 bool MidiFileHandler::SaveMidiFile( const QString fileBaseName,
                                     const QString outputDirPath,
-                                    const QList<SharedSampleRange> sampleRangeList,
+                                    const QList<SharedSampleBuffer> sampleBufferList,
+                                    const int numSampleBuffers,
                                     const qreal sampleRate,
                                     const qreal bpm,
                                     const int timeSigNumerator,
@@ -38,7 +39,8 @@ bool MidiFileHandler::SaveMidiFile( const QString fileBaseName,
                                     const MidiFileType midiFileType,
                                     const bool isOverwriteEnabled )
 {
-    Q_ASSERT( sampleRangeList.size() != 0 );
+    Q_ASSERT( ! sampleBufferList.isEmpty() );
+    Q_ASSERT( numSampleBuffers <= sampleBufferList.size() );
     Q_ASSERT( sampleRate > 0.0 );
     Q_ASSERT( bpm > 0.0 );
 
@@ -78,31 +80,30 @@ bool MidiFileHandler::SaveMidiFile( const QString fileBaseName,
 
     int startNote = Midi::MIDDLE_C;
 
-    if ( sampleRangeList.size() > Midi::MAX_POLYPHONY - Midi::MIDDLE_C )
+    if ( numSampleBuffers > Midi::MAX_POLYPHONY - Midi::MIDDLE_C )
     {
-        startNote = qMax( Midi::MAX_POLYPHONY - sampleRangeList.size(), 0 );
+        startNote = qMax( Midi::MAX_POLYPHONY - numSampleBuffers, 0 );
     }
 
     const qreal secondsPerTick = ( SECONDS_PER_MINUTE / bpm ) / TICKS_PER_QUART_NOTE;
     const float velocity = 1.0f;
 
-    int noteCounter = 0;
+    qreal noteStart = 0.0;
     int i = 0;
 
-    while (  i < sampleRangeList.size() && i < Midi::MAX_POLYPHONY )
+    while (  i < numSampleBuffers && i < Midi::MAX_POLYPHONY )
     {
-        const qreal noteStart  = ( sampleRangeList.at( i )->startFrame / sampleRate ) / secondsPerTick;
-        const qreal noteLength = ( sampleRangeList.at( i )->numFrames / sampleRate ) / secondsPerTick;
+        const qreal noteLength = ( sampleBufferList.at( i )->getNumFrames() / sampleRate ) / secondsPerTick;
 
-        midiSeq.addEvent( MidiMessage::noteOn( chanNum, startNote + noteCounter, velocity ),
+        midiSeq.addEvent( MidiMessage::noteOn( chanNum, startNote + i, velocity ),
                           roundToInt( noteStart ) );
 
-        midiSeq.addEvent( MidiMessage::noteOff( chanNum, startNote + noteCounter ),
+        midiSeq.addEvent( MidiMessage::noteOff( chanNum, startNote + i ),
                           roundToInt( noteStart + noteLength ) );
 
         midiSeq.updateMatchedPairs();
 
-        noteCounter++;
+        noteStart += noteLength;
         i++;
     }
 

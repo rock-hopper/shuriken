@@ -30,7 +30,7 @@
 class AudioAnalyser
 {
 public:
-    static const qreal MIN_INTER_ONSET_SECS = 0.03;
+    static const qreal MIN_INTER_ONSET_SECS = 0.05;
 
     struct DetectionSettings
     {

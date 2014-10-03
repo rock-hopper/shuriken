@@ -34,7 +34,7 @@ SamplerAudioSource::SamplerAudioSource() :
     mFileSampleRate( 0.0 ),
     mPlaybackSampleRate( 0.0 ),
     mNextFreeNote( Midi::MIDDLE_C ),
-    mStartNote( Midi::MIDDLE_C ),
+    mFirstNote( Midi::MIDDLE_C ),
     mIsPlaySeqEnabled( false ),
     mIsLoopingEnabled( false ),
     mNoteCounter( 0 ),
@@ -52,56 +52,36 @@ SamplerAudioSource::~SamplerAudioSource()
 
 
 
-void SamplerAudioSource::setSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate )
+void SamplerAudioSource::setSamples( const QList<SharedSampleBuffer> sampleBufferList, const qreal sampleRate )
 {
-    clearSampleRanges();
-    mSampleBuffer.clear();
-
-    SharedSampleRange sampleRange( new SampleRange );
-    sampleRange->startFrame = 0;
-    sampleRange->numFrames = sampleBuffer->getNumFrames();
-
-    addNewSample( sampleBuffer, sampleRange, sampleRate );
-    mSampleBuffer = sampleBuffer;
+    clearSamples();
+    mSampleBufferList = sampleBufferList;
     mFileSampleRate = sampleRate;
 
-    mSampleRangeList << sampleRange;
-}
-
-
-
-void SamplerAudioSource::setSampleRanges( const QList<SharedSampleRange> sampleRangeList )
-{
-    if ( ! mSampleBuffer.isNull() )
+    if ( sampleBufferList.size() > Midi::MAX_POLYPHONY - Midi::MIDDLE_C )
     {
-        clearSampleRanges();
-        mSampleRangeList = sampleRangeList;
+        mNextFreeNote = qMax( Midi::MAX_POLYPHONY - sampleBufferList.size(), 0 );
+    }
 
-        if ( sampleRangeList.size() > Midi::MAX_POLYPHONY - Midi::MIDDLE_C )
-        {
-            mNextFreeNote = qMax( Midi::MAX_POLYPHONY - sampleRangeList.size(), 0 );
-        }
+    mFirstNote = mNextFreeNote;
 
-        mStartNote = mNextFreeNote;
-
-        int i = 0;
-        while (  i < sampleRangeList.size() && i < Midi::MAX_POLYPHONY )
-        {
-            addNewSample( mSampleBuffer, sampleRangeList.at( i ), mFileSampleRate );
-            i++;
-        }
+    int i = 0;
+    while (  i < sampleBufferList.size() && i < Midi::MAX_POLYPHONY )
+    {
+        addNewSample( sampleBufferList.at( i ), sampleRate );
+        i++;
     }
 }
 
 
 
-void SamplerAudioSource::playRange( const SharedSampleRange sampleRange )
+void SamplerAudioSource::playSample( const int sampleNum, const SharedSampleRange sampleRange )
 {
     const int midiChannel = 1;
-    const int midiNoteNum = mStartNote;
+    const int midiNoteNum = mFirstNote + sampleNum;
     const float velocity = 1.0;
 
-    SynthesiserSound* sound = mSampler.getSound( 0 );
+    SynthesiserSound* sound = mSampler.getSound( sampleNum );
 
     ShurikenSamplerSound* const samplerSound = dynamic_cast<ShurikenSamplerSound*>( sound );
 
@@ -115,9 +95,23 @@ void SamplerAudioSource::playRange( const SharedSampleRange sampleRange )
 
 
 
+void SamplerAudioSource::playSamples( const int firstSampleNum, const QList<SharedSampleRange> sampleRangeList )
+{
+    mTempSampleRangeList = sampleRangeList;
+    mSeqStartNote = mFirstNote + firstSampleNum;
+    mNoteCounter = 0;
+    mNoteCounterEnd = sampleRangeList.size();
+    mFrameCounter = 0;
+    mIsPlaySeqEnabled = true;
+}
+
+
+
 void SamplerAudioSource::playAll()
 {
+    mSeqStartNote = mFirstNote;
     mNoteCounter = 0;
+    mNoteCounterEnd = mSampleBufferList.size();
     mFrameCounter = 0;
     mIsPlaySeqEnabled = true;
 }
@@ -131,6 +125,7 @@ void SamplerAudioSource::stop()
 
     mIsPlaySeqEnabled = false;
     mSampler.allNotesOff( midiChannel, allowTailOff );
+    mTempSampleRangeList.clear();
 }
 
 
@@ -170,17 +165,15 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
     mMidiCollector.removeNextBlockOfMessages( incomingMidi, bufferToFill.numSamples );
 
 
-    // If requested, play back all sample ranges in sequence by adding appropriate MIDI messages to the buffer
+    // If requested, play all samples in sequence by adding appropriate MIDI messages to the buffer
     if ( mIsPlaySeqEnabled )
     {
-        bool isEndOfSequence = false;
-
         // End of note
         if ( mFrameCounter - 1 >= 0 && mFrameCounter - 1 < bufferToFill.numSamples )
         {
             mNoteCounter++;
 
-            if ( mNoteCounter == mSampleRangeList.size() )
+            if ( mNoteCounter == mNoteCounterEnd )
             {
                 if ( mIsLoopingEnabled )
                 {
@@ -188,25 +181,42 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
                 }
                 else
                 {
-                    isEndOfSequence = true;
-                    mIsPlaySeqEnabled = false;
+                    mIsPlaySeqEnabled = false;  // End of sequence reached
+                    mTempSampleRangeList.clear();
                 }
             }
         }
 
-        if ( ! isEndOfSequence )
+        if ( mIsPlaySeqEnabled )
         {
             // Start of note
             if ( mFrameCounter < bufferToFill.numSamples )
             {
-                const MidiMessage message = MidiMessage::noteOn( 1,                         // MIDI channel
-                                                                 mStartNote + mNoteCounter, // MIDI note no.
-                                                                 1.0f );                    // Velocity
+                const MidiMessage message = MidiMessage::noteOn( 1,                             // MIDI channel
+                                                                 mSeqStartNote + mNoteCounter,  // MIDI note no.
+                                                                 1.0f );                        // Velocity
                 const int noteOnFrameNum = mFrameCounter;
 
                 incomingMidi.addEvent( message, noteOnFrameNum );
 
-                const int numFrames = mSampleRangeList.at( mNoteCounter )->numFrames;
+                int numFrames = 0;
+
+                if ( ! mTempSampleRangeList.isEmpty() )
+                {
+                    SynthesiserSound* sound = mSampler.getSound( mSeqStartNote - mFirstNote + mNoteCounter );
+
+                    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
+
+                    if ( samplerSound != NULL )
+                    {
+                        samplerSound->setTempSampleRange( mTempSampleRangeList.at( mNoteCounter ) );
+                    }
+                    numFrames = mTempSampleRangeList.at( mNoteCounter )->numFrames;
+                }
+                else
+                {
+                    numFrames = mSampleBufferList.at( mNoteCounter )->getNumFrames();
+                }
                 mFrameCounter = roundToInt( numFrames * (mPlaybackSampleRate / mFileSampleRate) );
                 mFrameCounter -= bufferToFill.numSamples - noteOnFrameNum;
             }
@@ -227,9 +237,7 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
 //==================================================================================================
 // Private:
 
-bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer,
-                                       const SharedSampleRange sampleRange,
-                                       const qreal sampleRate )
+bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate )
 {
     bool isSampleAssignedToKey = false;
 
@@ -242,9 +250,8 @@ bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer,
         noteNum.setBit( mNextFreeNote );
 
         mSampler.addSound( new ShurikenSamplerSound( sampleBuffer,
-                                                     sampleRange,
                                                      sampleRate,
-                                                     noteNum,           // MIDI note this sample should be mapped to
+                                                     noteNum,           // MIDI note this sample should be assigned to
                                                      mNextFreeNote ));  // Root/pitch-centre MIDI note
 
         mNextFreeNote++;
@@ -256,12 +263,12 @@ bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer,
 
 
 
-void SamplerAudioSource::clearSampleRanges()
+void SamplerAudioSource::clearSamples()
 {
     mIsPlaySeqEnabled = false;
     mSampler.clearVoices();
     mSampler.clearSounds();
-    mSampleRangeList.clear();
+    mSampleBufferList.clear();
     mNextFreeNote = Midi::MIDDLE_C;
-    mStartNote = Midi::MIDDLE_C;
+    mFirstNote = Midi::MIDDLE_C;
 }

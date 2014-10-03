@@ -128,7 +128,7 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
     }
 
     // It's essential that the sample rate is known
-    if ( sampleHeader->sampleRate < 1.0 )
+    if ( ! sampleHeader.isNull() && sampleHeader->sampleRate < 1.0 )
     {
         sampleHeader.clear();
     }

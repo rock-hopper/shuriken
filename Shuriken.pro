@@ -173,7 +173,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/midifilehandler.cpp \
     src/mainwindowfilehandling.cpp \
     src/loopmarkeritem.cpp \
-    src/confirmbpmdialog.cpp
+    src/confirmbpmdialog.cpp \
+    src/samplebuffer.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \

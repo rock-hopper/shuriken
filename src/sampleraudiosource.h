@@ -33,10 +33,10 @@ public:
     SamplerAudioSource();
     ~SamplerAudioSource();
 
-    void setSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
-    void setSampleRanges( const QList<SharedSampleRange> sampleRangeList );
+    void setSamples( const QList<SharedSampleBuffer> sampleBufferList, const qreal sampleRate );
 
-    void playRange( const SharedSampleRange sampleRange );
+    void playSample( const int sampleNum, const SharedSampleRange sampleRange );
+    void playSamples( const int firstSampleNum, const QList<SharedSampleRange> sampleRangeList );
     void playAll();
     void stop();
     void setLooping( const bool isLoopingDesired );
@@ -48,29 +48,27 @@ public:
     void releaseResources() override;
     void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill ) override;
 
-
-
 private:
-    bool addNewSample( const SharedSampleBuffer sampleBuffer,
-                       const SharedSampleRange sampleRange,
-                       const qreal sampleRate );
-    void clearSampleRanges();
+    bool addNewSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
+    void clearSamples();
 
-    SharedSampleBuffer mSampleBuffer;
-    QList<SharedSampleRange> mSampleRangeList;
+    QList<SharedSampleBuffer> mSampleBufferList;
+    QList<SharedSampleRange> mTempSampleRangeList;
 
-    qreal mFileSampleRate;
+    volatile qreal mFileSampleRate;
     volatile qreal mPlaybackSampleRate;
 
     MidiMessageCollector mMidiCollector;
     Synthesiser mSampler;
 
     int mNextFreeNote;
-    int mStartNote;
+    volatile int mFirstNote;
 
     volatile bool mIsPlaySeqEnabled;
     volatile bool mIsLoopingEnabled;
+    volatile int mSeqStartNote;
     volatile int mNoteCounter;
+    volatile int mNoteCounterEnd;
     volatile int mFrameCounter;
 
 private:

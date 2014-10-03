@@ -96,7 +96,7 @@ QList<int> AudioAnalyser::findBeatFrameNums( const SharedSampleBuffer sampleBuff
 
     const int vectorSize = 2;
     const int beatData = 0;
-    const int onsetData = 1;
+//    const int onsetData = 1;
     int slicePointFrameNum = 0;
 
     // Create beat detector and detection result vector
@@ -149,7 +149,7 @@ qreal AudioAnalyser::calcBPM( const SharedSampleBuffer sampleBuffer, const Detec
 
     const int vectorSize = 2;
     const int beatData = 0;
-    const int onsetData = 1;
+//    const int onsetData = 1;
 
     const int confidenceThreshold = 0.2;
 

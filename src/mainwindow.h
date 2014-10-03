@@ -69,7 +69,7 @@ protected:
 
 private:
     void initialiseAudio();
-    void setUpSampler( const SharedSampleBuffer sampleBuffer, const SharedSampleHeader sampleHeader );
+    void setUpSampler();
     void tearDownSampler();
 
     void setupUI();
@@ -79,7 +79,6 @@ private:
     void updateSnapLoopMarkersComboBox();
 
     void getDetectionSettings( AudioAnalyser::DetectionSettings& settings );
-    void getSampleRanges( QList<SharedSampleRange>& sampleRangeList );
 
     void closeProject();
 
@@ -110,10 +109,9 @@ private:
     AudioDeviceManager mDeviceManager;
     AudioFileHandler mFileHandler;
 
-    SharedSampleBuffer mCurrentSampleBuffer;
-    SharedSampleHeader mCurrentSampleHeader;
-    QList<SharedSampleRange> mSampleRangeList;
-    QList<SharedSampleRange> mLoopSampleRangeList;
+    SharedSampleHeader mSampleHeader;
+    QList<SharedSampleBuffer> mSampleBufferList;
+    QList<SharedSampleBuffer> mLoopSampleBufferList;
 
     ScopedPointer<SamplerAudioSource> mSamplerAudioSource;
     ScopedPointer<RubberbandAudioSource> mRubberbandAudioSource;
@@ -132,7 +130,7 @@ private:
     bool mIsProjectOpen;
 
 public slots:
-    void reorderSampleRangeList( QList<int> oldOrderPositions, const int numPlacesMoved );
+    void reorderSampleBufferList( QList<int> oldOrderPositions, const int numPlacesMoved );
 
 private slots:
     void on_comboBox_SnapLoopMarkers_currentIndexChanged( const int index );
@@ -192,8 +190,6 @@ private slots:
     void stopPlayback();
 
     void resetPlayStopButtonIcon();
-
-    void setLoopSampleRanges();
 
     void disableZoomIn();
     void disableZoomOut();

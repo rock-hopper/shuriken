@@ -55,6 +55,8 @@ void MainWindow::openProject( const QString filePath )
         return;
     }
 
+    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
     Zipper::decompress( filePath, tempDirPath );
 
     const QFileInfo zipFileInfo( filePath );
@@ -70,54 +72,94 @@ void MainWindow::openProject( const QString filePath )
 
     if ( isSuccessful )
     {
-        QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
-
         closeProject();
 
-        mSampleRangeList.append( settings.sampleRangeList );
+        bool isOkToContinue = true;
 
-        const QString audioFilePath = projTempDir.absoluteFilePath( settings.audioFileName );
-        SharedSampleBuffer sampleBuffer = mFileHandler.getSampleData( audioFilePath );
-        SharedSampleHeader sampleHeader = mFileHandler.getSampleHeader( audioFilePath );
-
-        // If the audio file was loaded successfully
-        if ( ! sampleBuffer.isNull() && ! sampleHeader.isNull() )
+        // Try to load the audio files
+        foreach ( QString fileName, settings.audioFileNames )
         {
-            mCurrentSampleBuffer = sampleBuffer;
-            mCurrentSampleHeader = sampleHeader;
+            const QString audioFilePath = projTempDir.absoluteFilePath( fileName );
+            SharedSampleBuffer sampleBuffer = mFileHandler.getSampleData( audioFilePath );
 
-            // Only one sample range is defined - waveform has not been sliced
-            if ( mSampleRangeList.size() == 1 )
+            if ( ! sampleBuffer.isNull() )
             {
-                const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer,
-                                                                                       sampleHeader,
-                                                                                       mSampleRangeList.first() );
+                mSampleBufferList << sampleBuffer;
+            }
+            else
+            {
+                isOkToContinue = false;
+                break;
+            }
+        }
+
+        // Try to read the audio file header info
+        {
+            const QString audioFilePath = projTempDir.absoluteFilePath( settings.audioFileNames.first() );
+            mSampleHeader = mFileHandler.getSampleHeader( audioFilePath );
+        }
+
+        if ( mSampleHeader.isNull() )
+        {
+            isOkToContinue = false;
+        }
+
+        // If the audio files were read successfully
+        if ( isOkToContinue )
+        {
+            if ( ! settings.sampleRangeList.isEmpty() )
+            {
+                const int numChans = mSampleHeader->numChans;
+
+                QList<SharedSampleBuffer> tempSampleBuffers;
+
+                foreach ( SharedSampleRange range, settings.sampleRangeList )
+                {
+                    SharedSampleBuffer sampleBuffer( new SampleBuffer( numChans, range->numFrames ) );
+
+                    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+                    {
+                        sampleBuffer->copyFrom( chanNum, 0, *mSampleBufferList.first().data(), chanNum, range->startFrame, range->numFrames );
+                    }
+
+                    tempSampleBuffers << sampleBuffer;
+                }
+
+                mSampleBufferList = tempSampleBuffers;
+            }
+
+            // Only one sample buffer - waveform has not been sliced
+            if ( mSampleBufferList.size() == 1 )
+            {
+                const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( mSampleBufferList.first(),
+                                                                                       mSampleHeader );
                 connectWaveformToMainWindow( item );
 
-                setUpSampler( sampleBuffer, sampleHeader );
+                setUpSampler();
 
                 enableUI();
 
-                QUndoCommand* parentCommand = new QUndoCommand();
-
-                foreach ( int frameNum, settings.slicePointFrameNumList )
+                if ( ! settings.slicePointFrameNums.isEmpty() )
                 {
-                    new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, parentCommand );
+                    QUndoCommand* parentCommand = new QUndoCommand();
+
+                    foreach ( int frameNum, settings.slicePointFrameNums )
+                    {
+                        new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, parentCommand );
+                    }
+                    mUndoStack.push( parentCommand );
                 }
-                mUndoStack.push( parentCommand );
             }
-            else // Multiple sample ranges are defined - waveform has been sliced
+            else // Multiple sample buffers - waveform has been sliced
             {
-                const QList<SharedWaveformItem> waveformItemList = mUI->waveGraphicsView->createWaveforms( sampleBuffer,
-                                                                                                           sampleHeader,
-                                                                                                           mSampleRangeList );
+                const QList<SharedWaveformItem> waveformItemList = mUI->waveGraphicsView->createWaveforms( mSampleBufferList, mSampleHeader );
 
                 foreach ( SharedWaveformItem item, waveformItemList )
                 {
                     connectWaveformToMainWindow( item );
                 }
 
-                setUpSampler( sampleBuffer, sampleHeader );
+                setUpSampler();
 
                 enableUI();
                 mUI->actionAdd_Slice_Point->setEnabled( false );
@@ -157,9 +199,13 @@ void MainWindow::openProject( const QString filePath )
 
             QApplication::restoreOverrideCursor();
         }
-        else // Error loading audio file
+        else // Error loading audio files
         {
+            mSampleBufferList.clear();
+            mSampleHeader.clear();
+
             QApplication::restoreOverrideCursor();
+
             MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
         }
     }
@@ -218,20 +264,10 @@ void MainWindow::exportAs( const QString tempDirPath,
                 audioFileName.append( QString::number( i + 1 ).rightJustified( 2, '0' ) );
             }
 
-            const SharedSampleRange sampleRange = mSampleRangeList.at( i );
-            const int numChans = mCurrentSampleHeader->numChans;
-
-            SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
-
-            for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-            {
-                tempBuffer->copyFrom( chanNum, 0, *mCurrentSampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
-            }
-
             const QString path = mFileHandler.saveAudioFile( samplesDirPath,
                                                              audioFileName,
-                                                             tempBuffer,
-                                                             mCurrentSampleHeader->sampleRate,
+                                                             mSampleBufferList.at( i ),
+                                                             mSampleHeader->sampleRate,
                                                              outputSampleRate,
                                                              sndFileFormat );
 
@@ -239,11 +275,11 @@ void MainWindow::exportAs( const QString tempDirPath,
             {
                 if ( isExportTypeAkaiPgm )
                 {
-                    audioFileNames << audioFileName;
+                    audioFileNames << audioFileName;    // File base name, no extension
                 }
                 else
                 {
-                    audioFileNames << QFileInfo( path ).fileName();
+                    audioFileNames << QFileInfo( path ).fileName(); // File name including extension
                 }
             }
             else
@@ -317,11 +353,11 @@ void MainWindow::exportAs( const QString tempDirPath,
 
             if ( isExportTypeAkaiPgm )
             {
-                MidiFileHandler::SaveMidiFile( fileName, samplesDirPath, mSampleRangeList, mCurrentSampleHeader->sampleRate, bpm, timeSigNumerator, timeSigDenominator, type );
+                MidiFileHandler::SaveMidiFile( fileName, samplesDirPath, mSampleBufferList, numSamplesToExport, mSampleHeader->sampleRate, bpm, timeSigNumerator, timeSigDenominator, type );
             }
             else
             {
-                MidiFileHandler::SaveMidiFile( fileName, outputDirPath, mSampleRangeList, mCurrentSampleHeader->sampleRate, bpm, timeSigNumerator, timeSigDenominator, type );
+                MidiFileHandler::SaveMidiFile( fileName, outputDirPath, mSampleBufferList, numSamplesToExport, mSampleHeader->sampleRate, bpm, timeSigNumerator, timeSigDenominator, type );
             }
         }
     }
@@ -373,18 +409,36 @@ void MainWindow::saveProject( const QString filePath )
 
     const QString xmlFilePath = projTempDir.absoluteFilePath( "shuriken.xml" );
 
-    const QString audioFilePath = mFileHandler.saveAudioFile( projTempDir.absolutePath(),
-                                                              "audio",
-                                                              mCurrentSampleBuffer,
-                                                              mCurrentSampleHeader->sampleRate,
-                                                              mCurrentSampleHeader->sampleRate,
-                                                              AudioFileHandler::SAVE_FORMAT );
+    bool isOkToContinue = true;
+    QStringList audioFileNames;
 
-    if ( ! audioFilePath.isEmpty() )
+    for ( int i = 0; i < mSampleBufferList.size(); i++ )
+    {
+        const QString audioFilePath = mFileHandler.saveAudioFile( projTempDir.absolutePath(),
+                                                                  "audio" + QString::number( i ),
+                                                                  mSampleBufferList.at( i ),
+                                                                  mSampleHeader->sampleRate,
+                                                                  mSampleHeader->sampleRate,
+                                                                  AudioFileHandler::SAVE_FORMAT );
+
+        if ( ! audioFilePath.isEmpty() )
+        {
+            audioFileNames << QFileInfo( audioFilePath ).fileName();
+        }
+        else
+        {
+            isOkToContinue = false;
+            break;
+        }
+    }
+
+    if ( isOkToContinue )
     {
         const bool isRealtimeModeEnabled = mOptionsDialog->isRealtimeModeEnabled();
 
         TextFileHandler::ProjectSettings settings;
+
+        settings.projectName = projectName;
 
         if ( isRealtimeModeEnabled )
         {
@@ -404,9 +458,11 @@ void MainWindow::saveProject( const QString filePath )
         settings.options = mOptionsDialog->getStretcherOptions();
         settings.isJackSyncChecked = mOptionsDialog->isJackSyncEnabled();
 
-        const QList<int> slicePointFrameNumList = mUI->waveGraphicsView->getSlicePointFrameNumList();
+        settings.audioFileNames = audioFileNames;
 
-        TextFileHandler::createProjectXmlFile( xmlFilePath, projectName, settings, mSampleRangeList, slicePointFrameNumList );
+        settings.slicePointFrameNums = mUI->waveGraphicsView->getSlicePointFrameNums();
+
+        TextFileHandler::createProjectXmlFile( xmlFilePath, settings );
 
         Zipper::compress( projTempDir.absolutePath(), zipFilePath );
 
@@ -421,7 +477,7 @@ void MainWindow::saveProject( const QString filePath )
 
         QApplication::restoreOverrideCursor();
     }
-    else // An error occurred while writing the audio file
+    else // An error occurred while writing the audio files
     {
         QApplication::restoreOverrideCursor();
         MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
@@ -547,18 +603,13 @@ void MainWindow::importAudioFileDialog()
         {
             closeProject();
 
-            mCurrentSampleBuffer = sampleBuffer;
-            mCurrentSampleHeader = sampleHeader;
+            mSampleBufferList << sampleBuffer;
+            mSampleHeader = sampleHeader;
 
-            SharedSampleRange sampleRange( new SampleRange );
-            sampleRange->startFrame = 0;
-            sampleRange->numFrames = sampleBuffer->getNumFrames();
-            mSampleRangeList << sampleRange;
-
-            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer, sampleHeader, sampleRange );
+            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer, sampleHeader );
             connectWaveformToMainWindow( item );
 
-            setUpSampler( sampleBuffer, sampleHeader );
+            setUpSampler();
 
             enableUI();
 
@@ -634,10 +685,10 @@ void MainWindow::exportAsDialog()
 
     if ( outputSampleRate == ExportDialog::SAMPLE_RATE_KEEP_SAME )
     {
-        outputSampleRate = mCurrentSampleHeader->sampleRate;
+        outputSampleRate = mSampleHeader->sampleRate;
     }
 
-    int numSamplesToExport = mSampleRangeList.size();
+    int numSamplesToExport = mSampleBufferList.size();
 
     QStringList fullFileNamesList;
 

@@ -42,28 +42,34 @@ class WaveGraphicsView : public QGraphicsView
 public:
     WaveGraphicsView( QWidget* parent = NULL );
 
-    // Creates a new waveform item and returns a shared pointer to it
+    // Creates a new waveform item and adds it to the scene. If 'width' is not specified by the caller
+    // then the waveform's width will be the same as the scene width
     SharedWaveformItem createWaveform( const SharedSampleBuffer sampleBuffer,
                                        const SharedSampleHeader sampleHeader,
-                                       const SharedSampleRange sampleRange );
+                                       const qreal scenePosX = 0.0,
+                                       const int orderPos = 0,
+                                       qreal width = 0.0 );
 
-    // Creates new waveform items and returns a list of shared pointers to them
-    QList<SharedWaveformItem> createWaveforms( const SharedSampleBuffer sampleBuffer,
+    // Creates new waveform items and adds them to the scene. If 'width' is not specified by the caller
+    // then the combined widths of all waveforms will be the same as the scene width
+    QList<SharedWaveformItem> createWaveforms( const QList<SharedSampleBuffer> sampleBufferList,
                                                const SharedSampleHeader sampleHeader,
-                                               const QList<SharedSampleRange> sampleRangeList );
+                                               const qreal startScenePosX = 0.0,
+                                               const int startOrderPos = 0,
+                                               qreal totalWidth = 0.0 );
 
-    // Creates a new waveform item by joining several waveform items together. The new item's start frame,
-    // order position and scene position will be the same as the first item in the list. The new item's
-    // width and no. of frames will be the sum of the widths and no. of frames of all items in the list
+    // Creates a new waveform item by joining several waveform items together. The new item's order
+    // position and scene position will be the same as the first item in the list. The items'
+    // sample buffers are also joined
     SharedWaveformItem joinWaveforms( const QList<int> orderPositions );
 
-    // Splits a waveform item that has been created with 'joinWaveforms()'
-    QList<SharedWaveformItem> splitWaveform( const int orderPos );
+    // Splits a waveform item into several new waveform items. The item's sample buffer is also split
+    QList<SharedWaveformItem> splitWaveform( const int orderPos, const QList<int> slicePointFrameNums );
 
     void moveWaveforms( const QList<int> oldOrderPositions, const int numPlacesMoved );
 
-    // Add waveform items to the scene
-    void addWaveforms( const QList<SharedWaveformItem> waveformItems );
+    // Insert waveform items into the scene
+    void insertWaveforms( const QList<SharedWaveformItem> waveformItems );
 
     // Remove waveform items from the scene
     QList<SharedWaveformItem> removeWaveforms( const QList<int> waveformOrderPositions );
@@ -95,7 +101,7 @@ public:
     SharedSlicePointItem getSelectedSlicePoint();
 
     // Returns a sorted list containing the frame no. of every slice point item
-    QList<int> getSlicePointFrameNumList() const;
+    QList<int> getSlicePointFrameNums() const;
 
     // Returns a list of all slice point items
     QList<SharedSlicePointItem> getSlicePointList() const   { return mSlicePointItemList; }
@@ -103,21 +109,23 @@ public:
     void showLoopMarkers();
     void hideLoopMarkers();
 
-    // The frame no. of each loop marker is set according to the ordering of waveform items
-    LoopMarkerItem* getLeftLoopMarker() const               { return mLoopMarkerLeft; }     // Frame no. is inclusive
-    LoopMarkerItem* getRightLoopMarker() const              { return mLoopMarkerRight; }    // Frame no. is exclusive
+    LoopMarkerItem* getLeftLoopMarker() const               { return mLoopMarkerLeft; }
+    LoopMarkerItem* getRightLoopMarker() const              { return mLoopMarkerRight; }
 
     enum LoopMarkerSnapMode { SNAP_OFF, SNAP_MARKERS_TO_SLICES, SNAP_SLICES_TO_MARKERS };
-    void setLoopMarkerSnapMode( const LoopMarkerSnapMode mode )                 { mLoopMarkerSnapMode = mode; }
+    void setLoopMarkerSnapMode( const LoopMarkerSnapMode mode ) { mLoopMarkerSnapMode = mode; }
 
-    QList<SharedSampleRange> getSampleRangesBetweenLoopMarkers( const QList<SharedSampleRange> currentSampleRangeList ) const;
+    void getSampleRangesBetweenLoopMarkers( int& firstOrderPos, QList<SharedSampleRange>& sampleRanges ) const;
     int getNumFramesBetweenLoopMarkers() const;
 
     void selectNone();
     void selectAll();
 
     void startPlayhead( const bool isLoopingDesired, const qreal stretchRatio = 1.0 );
-    void startPlayhead( const qreal startPosX, const qreal endPosX, const int numFrames, const qreal stretchRatio = 1.0 );
+    void startPlayhead( const qreal startPosX,
+                        const qreal endPosX,
+                        const int numFrames,
+                        const qreal stretchRatio = 1.0 );
     void stopPlayhead();
     bool isPlayheadScrolling() const                        { return mTimer->state() == QTimeLine::Running; }
     void setPlayheadLooping( const bool isLoopingDesired );
@@ -126,7 +134,6 @@ public:
     void clearAll();
     void clearWaveform();
 
-    // These methods do not take the ordering of waveform items into account
     qreal getScenePosX( const int frameNum ) const;
     int getFrameNum( qreal scenePosX ) const;
 
@@ -150,11 +157,14 @@ private:
 
     void createLoopMarkers();
     void setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker );
-    int getWaveformOrderPosUnderLoopMarker( LoopMarkerItem* const loopMarker ) const;
+    int getRelativeLoopMarkerFrameNum( const LoopMarkerItem* const loopMarker ) const;
+    SharedWaveformItem getWaveformUnderLoopMarker( const LoopMarkerItem* const loopMarker ) const;
     void updateLoopMarkerFrameNums();
     void snapLoopMarkerToSlicePoint( LoopMarkerItem* const loopMarker );
     void snapLoopMarkerToWaveform( LoopMarkerItem* const loopMarker );
     void snapSlicePointToLoopMarker( SlicePointItem* const slicePoint );
+
+    void connectWaveformToGraphicsView( const SharedWaveformItem item );
 
     QList<SharedWaveformItem> mWaveformItemList;
     QList<SharedSlicePointItem> mSlicePointItemList;
@@ -172,8 +182,7 @@ private:
     bool mIsViewZoomedIn;
 
 private:
-    static int getTotalNumFrames( QList<SharedWaveformItem> items );
-    static int getTotalNumFrames( QList<SharedSampleRange> sampleRanges );
+    static int getTotalNumFrames( QList<SharedWaveformItem> waveformItemList );
 
 signals:
     void slicePointOrderChanged( const SharedSlicePointItem slicePoint, const int oldFrameNum, const int newFrameNum );

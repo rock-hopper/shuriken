@@ -49,7 +49,7 @@ void AddSlicePointItemCommand::undo()
 {
     mGraphicsView->removeSlicePoint( mSlicePointItem );
 
-    if ( mGraphicsView->getSlicePointFrameNumList().isEmpty() )
+    if ( mGraphicsView->getSlicePointFrameNums().isEmpty() )
     {
         mSliceButton->setEnabled( false );
     }
@@ -135,7 +135,7 @@ void DeleteSlicePointItemCommand::redo()
 {
     mGraphicsView->removeSlicePoint( mSlicePointItem );
 
-    if ( mGraphicsView->getSlicePointFrameNumList().isEmpty() )
+    if ( mGraphicsView->getSlicePointFrameNums().isEmpty() )
     {
         mSliceButton->setEnabled( false );
     }
@@ -175,27 +175,23 @@ void SliceCommand::undo()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    const qreal sampleRate = mMainWindow->mCurrentSampleHeader->sampleRate;
-
     mMainWindow->stopPlayback();
-    mMainWindow->mSamplerAudioSource->setSample( mMainWindow->mCurrentSampleBuffer, sampleRate );
-    mMainWindow->mSampleRangeList.clear();
 
-    SharedSampleRange sampleRange( new SampleRange );
-    sampleRange->startFrame = 0;
-    sampleRange->numFrames = mMainWindow->mCurrentSampleBuffer->getNumFrames();
-    mMainWindow->mSampleRangeList << sampleRange;
+    SharedSampleBuffer singleBuffer = SampleUtils::joinSampleBuffers( mMainWindow->mSampleBufferList );
+
+    mMainWindow->mSampleBufferList.clear();
+    mMainWindow->mSampleBufferList << singleBuffer;
+
+    mMainWindow->mSamplerAudioSource->setSamples( mMainWindow->mSampleBufferList,
+                                                  mMainWindow->mSampleHeader->sampleRate );
 
     mGraphicsView->clearWaveform();
 
-    SharedWaveformItem item = mGraphicsView->createWaveform( mMainWindow->mCurrentSampleBuffer,
-                                                             mMainWindow->mCurrentSampleHeader,
-                                                             sampleRange );
+    SharedWaveformItem item = mGraphicsView->createWaveform( mMainWindow->mSampleBufferList.first(),
+                                                             mMainWindow->mSampleHeader );
     mMainWindow->connectWaveformToMainWindow( item );
 
     mGraphicsView->showSlicePoints();
-
-    mMainWindow->setLoopSampleRanges();
 
     mSliceButton->setEnabled( true );
     mFindOnsetsButton->setEnabled( true );
@@ -215,26 +211,23 @@ void SliceCommand::redo()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    mMainWindow->getSampleRanges( mMainWindow->mSampleRangeList );
-
-    Q_ASSERT( mMainWindow->mSampleRangeList.size() > 1 );
-
     mMainWindow->stopPlayback();
-    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
+
+    mMainWindow->mSampleBufferList = SampleUtils::splitSampleBuffer( mMainWindow->mSampleBufferList.first(),
+                                                                     mGraphicsView->getSlicePointFrameNums() );
+
+    mMainWindow->mSamplerAudioSource->setSamples( mMainWindow->mSampleBufferList,
+                                                  mMainWindow->mSampleHeader->sampleRate );
 
     mGraphicsView->hideSlicePoints();
     mGraphicsView->clearWaveform();
 
-    const QList<SharedWaveformItem> waveformItemList = mGraphicsView->createWaveforms( mMainWindow->mCurrentSampleBuffer,
-                                                                                       mMainWindow->mCurrentSampleHeader,
-                                                                                       mMainWindow->mSampleRangeList );
-
+    const QList<SharedWaveformItem> waveformItemList = mGraphicsView->createWaveforms( mMainWindow->mSampleBufferList,
+                                                                                       mMainWindow->mSampleHeader );
     foreach ( SharedWaveformItem item, waveformItemList )
     {
         mMainWindow->connectWaveformToMainWindow( item );
     }
-
-    mMainWindow->setLoopSampleRanges();
 
     mSliceButton->setEnabled( false );
     mFindOnsetsButton->setEnabled( false );
@@ -275,7 +268,7 @@ MoveWaveformItemCommand::MoveWaveformItemCommand( const QList<int> oldOrderPosit
 
 void MoveWaveformItemCommand::undo()
 {
-    mMainWindow->reorderSampleRangeList( mNewOrderPositions, -mNumPlacesMoved );
+    mMainWindow->reorderSampleBufferList( mNewOrderPositions, -mNumPlacesMoved );
     mGraphicsView->moveWaveforms( mNewOrderPositions, -mNumPlacesMoved );
 }
 
@@ -285,7 +278,7 @@ void MoveWaveformItemCommand::redo()
 {
     if ( ! mIsFirstRedoCall )
     {
-        mMainWindow->reorderSampleRangeList( mOldOrderPositions, mNumPlacesMoved );
+        mMainWindow->reorderSampleBufferList( mOldOrderPositions, mNumPlacesMoved );
         mGraphicsView->moveWaveforms( mOldOrderPositions, mNumPlacesMoved );
     }
     mIsFirstRedoCall = false;
@@ -311,37 +304,41 @@ DeleteWaveformItemCommand::DeleteWaveformItemCommand( const QList<int> orderPosi
 
 void DeleteWaveformItemCommand::undo()
 {
-    mGraphicsView->addWaveforms( mRemovedWaveforms );
+    mMainWindow->stopPlayback();
+
+    mGraphicsView->insertWaveforms( mRemovedWaveforms );
 
     const int firstOrderPos = mOrderPositions.first();
 
     for ( int i = 0; i < mOrderPositions.size(); i++ )
     {
-        mMainWindow->mSampleRangeList.insert( firstOrderPos + i, mRemovedSampleRanges.at( i ) );
+        mMainWindow->mSampleBufferList.insert( firstOrderPos + i, mRemovedSampleBuffers.at( i ) );
     }
 
-    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
-    mMainWindow->setLoopSampleRanges();
+    mMainWindow->mSamplerAudioSource->setSamples( mMainWindow->mSampleBufferList,
+                                                  mMainWindow->mSampleHeader->sampleRate );
 }
 
 
 
 void DeleteWaveformItemCommand::redo()
 {
+    mMainWindow->stopPlayback();
+
     mRemovedWaveforms = mGraphicsView->removeWaveforms( mOrderPositions );
 
-    mRemovedSampleRanges.clear();
+    mRemovedSampleBuffers.clear();
 
     const int firstOrderPos = mOrderPositions.first();
 
     for ( int i = 0; i < mOrderPositions.size(); i++ )
     {
-        mRemovedSampleRanges << mMainWindow->mSampleRangeList.at( firstOrderPos );
-        mMainWindow->mSampleRangeList.removeAt( firstOrderPos );
+        mRemovedSampleBuffers << mMainWindow->mSampleBufferList.at( firstOrderPos );
+        mMainWindow->mSampleBufferList.removeAt( firstOrderPos );
     }
 
-    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
-    mMainWindow->setLoopSampleRanges();
+    mMainWindow->mSamplerAudioSource->setSamples( mMainWindow->mSampleBufferList,
+                                                  mMainWindow->mSampleHeader->sampleRate );
 }
 
 
@@ -364,39 +361,56 @@ JoinCommand::JoinCommand( const QList<int> orderPositions,
 
 void JoinCommand::undo()
 {
+    mMainWindow->stopPlayback();
     mGraphicsView->selectNone();
 
-    QList<SharedWaveformItem> items = mGraphicsView->splitWaveform( mJoinedItemOrderPos );
+    QList<SharedWaveformItem> items = mGraphicsView->splitWaveform( mJoinedItemOrderPos, mSlicePoints );
 
-    mMainWindow->mSampleRangeList.removeAt( mJoinedItemOrderPos );
+    mMainWindow->mSampleBufferList.removeAt( mJoinedItemOrderPos );
 
     foreach ( SharedWaveformItem item, items )
     {
-        mMainWindow->mSampleRangeList.insert( item->getOrderPos(), item->getSampleRange() );
+        mMainWindow->connectWaveformToMainWindow( item );
+        mMainWindow->mSampleBufferList.insert( item->getOrderPos(), item->getSampleBuffer() );
     }
 
-    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
+    mMainWindow->mSamplerAudioSource->setSamples( mMainWindow->mSampleBufferList,
+                                                  mMainWindow->mSampleHeader->sampleRate );
 }
 
 
 
 void JoinCommand::redo()
 {
+    mMainWindow->stopPlayback();
     mGraphicsView->selectNone();
 
     SharedWaveformItem item = mGraphicsView->joinWaveforms( mOrderPositions );
     mMainWindow->connectWaveformToMainWindow( item );
 
-    mJoinedItemOrderPos = item->getOrderPos();
+    mSlicePoints.clear();
+    int frameNum = 0;
 
-    foreach ( int orderPos, mOrderPositions )
+    for ( int i = 0; i < mOrderPositions.size() - 1; i++ )
     {
-        mMainWindow->mSampleRangeList.removeAt( mJoinedItemOrderPos );
+        const int orderPos = mOrderPositions.at( i );
+
+        frameNum += mMainWindow->mSampleBufferList.at( orderPos )->getNumFrames();
+
+        mSlicePoints << frameNum;
     }
 
-    mMainWindow->mSampleRangeList.insert( mJoinedItemOrderPos, item->getSampleRange() );
+    mJoinedItemOrderPos = item->getOrderPos();
 
-    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
+    for ( int i = 0; i < mOrderPositions.size(); i++ )
+    {
+        mMainWindow->mSampleBufferList.removeAt( mJoinedItemOrderPos );
+    }
+
+    mMainWindow->mSampleBufferList.insert( mJoinedItemOrderPos, item->getSampleBuffer() );
+
+    mMainWindow->mSamplerAudioSource->setSamples( mMainWindow->mSampleBufferList,
+                                                  mMainWindow->mSampleHeader->sampleRate );
 }
 
 
@@ -419,40 +433,44 @@ SplitCommand::SplitCommand( const int orderPos,
 
 void SplitCommand::undo()
 {
-    mGraphicsView->selectNone();
+    // TODO
 
-    SharedWaveformItem item = mGraphicsView->joinWaveforms( mOrderPositions );
-    mMainWindow->connectWaveformToMainWindow( item );
-
-    foreach ( int orderPos, mOrderPositions )
-    {
-        mMainWindow->mSampleRangeList.removeAt( mJoinedItemOrderPos );
-    }
-
-    mMainWindow->mSampleRangeList.insert( mJoinedItemOrderPos, item->getSampleRange() );
-
-    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
+//    mGraphicsView->selectNone();
+//
+//    SharedWaveformItem item = mGraphicsView->joinWaveforms( mOrderPositions );
+//    mMainWindow->connectWaveformToMainWindow( item );
+//
+//    foreach ( int orderPos, mOrderPositions )
+//    {
+//        mMainWindow->mSampleRangeList.removeAt( mJoinedItemOrderPos );
+//    }
+//
+//    mMainWindow->mSampleRangeList.insert( mJoinedItemOrderPos, item->getSampleRange() );
+//
+//    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
 }
 
 
 
 void SplitCommand::redo()
 {
-    mGraphicsView->selectNone();
+    // TODO
 
-    QList<SharedWaveformItem> items = mGraphicsView->splitWaveform( mJoinedItemOrderPos );
-
-    mMainWindow->mSampleRangeList.removeAt( mJoinedItemOrderPos );
-
-    mOrderPositions.clear();
-
-    foreach ( SharedWaveformItem item, items )
-    {
-        mOrderPositions << item->getOrderPos();
-        mMainWindow->mSampleRangeList.insert( item->getOrderPos(), item->getSampleRange() );
-    }
-
-    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
+//    mGraphicsView->selectNone();
+//
+//    QList<SharedWaveformItem> items = mGraphicsView->splitWaveform( mJoinedItemOrderPos );
+//
+//    mMainWindow->mSampleRangeList.removeAt( mJoinedItemOrderPos );
+//
+//    mOrderPositions.clear();
+//
+//    foreach ( SharedWaveformItem item, items )
+//    {
+//        mOrderPositions << item->getOrderPos();
+//        mMainWindow->mSampleRangeList.insert( item->getOrderPos(), item->getSampleRange() );
+//    }
+//
+//    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
 }
 
 
@@ -469,7 +487,7 @@ ApplyGainCommand::ApplyGainCommand( const float gain,
                                     QUndoCommand* parent ) :
     QUndoCommand( parent ),
     mGain( gain ),
-    mWaveformItemOrderPos( waveformItemOrderPos ),
+    mOrderPos( waveformItemOrderPos ),
     mGraphicsView( graphicsView ),
     mSampleRate( sampleRate ),
     mFileHandler( fileHandler ),
@@ -485,15 +503,18 @@ void ApplyGainCommand::undo()
 {
     if ( ! mFilePath.isEmpty() )
     {
-        const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
-        SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
-        SharedSampleRange sampleRange = item->getSampleRange();
+        const SharedWaveformItem waveformItem = mGraphicsView->getWaveformAt( mOrderPos );
 
-        SharedSampleBuffer tempBuffer = mFileHandler.getSampleData( mFilePath );
+        const SharedSampleBuffer origSampleBuffer = mFileHandler.getSampleData( mFilePath );
 
-        for ( int chanNum = 0; chanNum < sampleBuffer->getNumChannels(); chanNum++ )
+        const int numChans = origSampleBuffer->getNumChannels();
+        const int numFrames = origSampleBuffer->getNumFrames();
+
+        const SharedSampleBuffer sampleBuffer = waveformItem->getSampleBuffer();
+
+        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
         {
-            sampleBuffer->copyFrom( chanNum, sampleRange->startFrame, *tempBuffer.data(), chanNum, 0, sampleRange->numFrames );
+            sampleBuffer->copyFrom( chanNum, 0, *origSampleBuffer.data(), chanNum, 0, numFrames );
         }
 
         mGraphicsView->redrawWaveforms();
@@ -504,25 +525,19 @@ void ApplyGainCommand::undo()
 
 void ApplyGainCommand::redo()
 {
-    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
-    SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
-    SharedSampleRange sampleRange = item->getSampleRange();
+    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mOrderPos );
+    const SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
 
-    const int numChans = sampleBuffer->getNumChannels();
-
-    SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
-
-    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-    {
-        tempBuffer->copyFrom( chanNum, 0, *sampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
-    }
-
-    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleRate, mSampleRate, AudioFileHandler::TEMP_FORMAT );
+    mFilePath = mFileHandler.saveAudioFile( mTempDirPath,
+                                            mFileBaseName,
+                                            sampleBuffer,
+                                            mSampleRate,
+                                            mSampleRate,
+                                            AudioFileHandler::TEMP_FORMAT );
 
     if ( ! mFilePath.isEmpty() )
     {
-        sampleBuffer->applyGain( sampleRange->startFrame, sampleRange->numFrames, mGain );
-
+        sampleBuffer->applyGain( 0, sampleBuffer->getNumFrames(), mGain );
         mGraphicsView->redrawWaveforms();
     }
     else
@@ -547,7 +562,7 @@ ApplyGainRampCommand::ApplyGainRampCommand( const float startGain,
     QUndoCommand( parent ),
     mStartGain( startGain ),
     mEndGain( endGain ),
-    mWaveformItemOrderPos( waveformItemOrderPos ),
+    mOrderPos( waveformItemOrderPos ),
     mGraphicsView( graphicsView ),
     mSampleRate( sampleRate ),
     mFileHandler( fileHandler ),
@@ -563,15 +578,18 @@ void ApplyGainRampCommand::undo()
 {
     if ( ! mFilePath.isEmpty() )
     {
-        const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
-        SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
-        SharedSampleRange sampleRange = item->getSampleRange();
+        const SharedWaveformItem waveformItem = mGraphicsView->getWaveformAt( mOrderPos );
 
-        SharedSampleBuffer tempBuffer = mFileHandler.getSampleData( mFilePath );
+        const SharedSampleBuffer origSampleBuffer = mFileHandler.getSampleData( mFilePath );
 
-        for ( int chanNum = 0; chanNum < sampleBuffer->getNumChannels(); chanNum++ )
+        const int numChans = origSampleBuffer->getNumChannels();
+        const int numFrames = origSampleBuffer->getNumFrames();
+
+        const SharedSampleBuffer sampleBuffer = waveformItem->getSampleBuffer();
+
+        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
         {
-            sampleBuffer->copyFrom( chanNum, sampleRange->startFrame, *tempBuffer.data(), chanNum, 0, sampleRange->numFrames );
+            sampleBuffer->copyFrom( chanNum, 0, *origSampleBuffer.data(), chanNum, 0, numFrames );
         }
 
         mGraphicsView->redrawWaveforms();
@@ -582,25 +600,19 @@ void ApplyGainRampCommand::undo()
 
 void ApplyGainRampCommand::redo()
 {
-    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
-    SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
-    SharedSampleRange sampleRange = item->getSampleRange();
+    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mOrderPos );
+    const SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
 
-    const int numChans = sampleBuffer->getNumChannels();
-
-    SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
-
-    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-    {
-        tempBuffer->copyFrom( chanNum, 0, *sampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
-    }
-
-    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleRate, mSampleRate, AudioFileHandler::TEMP_FORMAT );
+    mFilePath = mFileHandler.saveAudioFile( mTempDirPath,
+                                            mFileBaseName,
+                                            sampleBuffer,
+                                            mSampleRate,
+                                            mSampleRate,
+                                            AudioFileHandler::TEMP_FORMAT );
 
     if ( ! mFilePath.isEmpty() )
     {
-        sampleBuffer->applyGainRamp( sampleRange->startFrame, sampleRange->numFrames, mStartGain, mEndGain );
-
+        sampleBuffer->applyGainRamp( 0, sampleBuffer->getNumFrames(), mStartGain, mEndGain );
         mGraphicsView->redrawWaveforms();
     }
     else
@@ -621,7 +633,7 @@ NormaliseCommand::NormaliseCommand( const int waveformItemOrderPos,
                                     const QString fileBaseName,
                                     QUndoCommand* parent ) :
     QUndoCommand( parent ),
-    mWaveformItemOrderPos( waveformItemOrderPos ),
+    mOrderPos( waveformItemOrderPos ),
     mGraphicsView( graphicsView ),
     mSampleRate( sampleRate ),
     mFileHandler( fileHandler ),
@@ -637,15 +649,18 @@ void NormaliseCommand::undo()
 {
     if ( ! mFilePath.isEmpty() )
     {
-        const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
-        SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
-        SharedSampleRange sampleRange = item->getSampleRange();
+        const SharedWaveformItem waveformItem = mGraphicsView->getWaveformAt( mOrderPos );
 
-        SharedSampleBuffer tempBuffer = mFileHandler.getSampleData( mFilePath );
+        const SharedSampleBuffer origSampleBuffer = mFileHandler.getSampleData( mFilePath );
 
-        for ( int chanNum = 0; chanNum < sampleBuffer->getNumChannels(); chanNum++ )
+        const int numChans = origSampleBuffer->getNumChannels();
+        const int numFrames = origSampleBuffer->getNumFrames();
+
+        const SharedSampleBuffer sampleBuffer = waveformItem->getSampleBuffer();
+
+        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
         {
-            sampleBuffer->copyFrom( chanNum, sampleRange->startFrame, *tempBuffer.data(), chanNum, 0, sampleRange->numFrames );
+            sampleBuffer->copyFrom( chanNum, 0, *origSampleBuffer.data(), chanNum, 0, numFrames );
         }
 
         mGraphicsView->redrawWaveforms();
@@ -656,28 +671,24 @@ void NormaliseCommand::undo()
 
 void NormaliseCommand::redo()
 {
-    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
-    SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
-    SharedSampleRange sampleRange = item->getSampleRange();
+    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mOrderPos );
+    const SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
 
-    const int numChans = sampleBuffer->getNumChannels();
-
-    SharedSampleBuffer tempBuffer( new SampleBuffer( numChans, sampleRange->numFrames ) );
-
-    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-    {
-        tempBuffer->copyFrom( chanNum, 0, *sampleBuffer.data(), chanNum, sampleRange->startFrame, sampleRange->numFrames );
-    }
-
-    mFilePath = mFileHandler.saveAudioFile( mTempDirPath, mFileBaseName, tempBuffer, mSampleRate, mSampleRate, AudioFileHandler::TEMP_FORMAT );
+    mFilePath = mFileHandler.saveAudioFile( mTempDirPath,
+                                            mFileBaseName,
+                                            sampleBuffer,
+                                            mSampleRate,
+                                            mSampleRate,
+                                            AudioFileHandler::TEMP_FORMAT );
 
     if ( ! mFilePath.isEmpty() )
     {
-        const float magnitude = sampleBuffer->getMagnitude( sampleRange->startFrame, sampleRange->numFrames );
+        const int numFrames = sampleBuffer->getNumFrames();
+        const float magnitude = sampleBuffer->getMagnitude( 0, numFrames );
 
         if ( magnitude > 0.0 )
         {
-            sampleBuffer->applyGain( sampleRange->startFrame, sampleRange->numFrames, 1.0 / magnitude );
+            sampleBuffer->applyGain( 0, numFrames, 1.0 / magnitude );
             mGraphicsView->redrawWaveforms();
         }
     }
@@ -695,7 +706,7 @@ ReverseCommand::ReverseCommand( const int waveformItemOrderPos,
                                 WaveGraphicsView* const graphicsView,
                                 QUndoCommand* parent ) :
     QUndoCommand( parent ),
-    mWaveformItemOrderPos( waveformItemOrderPos ),
+    mOrderPos( waveformItemOrderPos ),
     mGraphicsView( graphicsView )
 {
     setText( "Reverse" );
@@ -705,24 +716,17 @@ ReverseCommand::ReverseCommand( const int waveformItemOrderPos,
 
 void ReverseCommand::undo()
 {
-    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
-    SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
-    SharedSampleRange sampleRange = item->getSampleRange();
-
-    sampleBuffer->reverse( sampleRange->startFrame, sampleRange->numFrames );
-
-    mGraphicsView->redrawWaveforms();
+    redo();
 }
 
 
 
 void ReverseCommand::redo()
 {
-    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mWaveformItemOrderPos );
-    SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
-    SharedSampleRange sampleRange = item->getSampleRange();
+    const SharedWaveformItem item = mGraphicsView->getWaveformAt( mOrderPos );
+    const SharedSampleBuffer sampleBuffer = item->getSampleBuffer();
 
-    sampleBuffer->reverse( sampleRange->startFrame, sampleRange->numFrames );
+    sampleBuffer->reverse( 0, sampleBuffer->getNumFrames() );
 
     mGraphicsView->redrawWaveforms();
 }
@@ -764,26 +768,28 @@ void ApplyTimeStretchCommand::undo()
 
     mMainWindow->stopPlayback();
 
-    SharedSampleBuffer tempBuffer = mMainWindow->mFileHandler.getSampleData( mTempFilePath );
-
-    const int numChans = tempBuffer->getNumChannels();
-    const int numFrames = tempBuffer->getNumFrames();
-
-    mMainWindow->mCurrentSampleBuffer->setSize( numChans, numFrames );
-
-    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+    for ( int i = 0; i < mTempFilePaths.size(); i++ )
     {
-        mMainWindow->mCurrentSampleBuffer->copyFrom( chanNum, 0, *tempBuffer.data(), chanNum, 0, numFrames );
+        const QString filePath = mTempFilePaths.at( i );
+        const SharedSampleBuffer origSampleBuffer = mMainWindow->mFileHandler.getSampleData( filePath );
+
+        const int numChans = origSampleBuffer->getNumChannels();
+        const int origBufferSize = origSampleBuffer->getNumFrames();
+
+        const SharedSampleBuffer sampleBuffer = mMainWindow->mSampleBufferList.at( i );
+        sampleBuffer->setSize( numChans, origBufferSize );
+
+        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+        {
+            sampleBuffer->copyFrom( chanNum, 0, *origSampleBuffer.data(), chanNum, 0, origBufferSize );
+        }
     }
+
+    mMainWindow->resetSampler();
 
     const qreal timeRatio = 1.0 / ( mOriginalBPM / mNewBPM );
 
-    updateSampleRanges( timeRatio, numFrames );
-    mMainWindow->resetSampler();
-
     updateLoopMarkers( timeRatio );
-    mMainWindow->setLoopSampleRanges();
-
     updateSlicePoints( timeRatio );
     mGraphicsView->redrawWaveforms();
 
@@ -804,26 +810,42 @@ void ApplyTimeStretchCommand::redo()
 
     mMainWindow->stopPlayback();
 
-    mTempFilePath = mMainWindow->mFileHandler.saveAudioFile( mTempDirPath,
-                                                             mFileBaseName,
-                                                             mMainWindow->mCurrentSampleBuffer,
-                                                             mMainWindow->mCurrentSampleHeader->sampleRate,
-                                                             mMainWindow->mCurrentSampleHeader->sampleRate,
-                                                             AudioFileHandler::TEMP_FORMAT );
+    mTempFilePaths.clear();
 
-    if ( ! mTempFilePath.isEmpty() )
+    for ( int i = 0; i < mMainWindow->mSampleBufferList.size(); i++ )
+    {
+        const QString path = mMainWindow->mFileHandler.saveAudioFile( mTempDirPath,
+                                                                      mFileBaseName + "_" + QString::number( i ),
+                                                                      mMainWindow->mSampleBufferList.at( i ),
+                                                                      mMainWindow->mSampleHeader->sampleRate,
+                                                                      mMainWindow->mSampleHeader->sampleRate,
+                                                                      AudioFileHandler::TEMP_FORMAT );
+        if ( ! path.isEmpty() )
+        {
+            mTempFilePaths << path;
+        }
+        else
+        {
+            mTempFilePaths.clear();
+            break;
+        }
+    }
+
+    if ( ! mTempFilePaths.isEmpty() )
     {
         const qreal timeRatio = mOriginalBPM / mNewBPM;
         const qreal pitchScale = mIsPitchCorrectionEnabled ? 1.0 : mNewBPM / mOriginalBPM;
 
-        const int newTotalNumFrames = stretch( timeRatio, pitchScale );
+        int newTotalNumFrames = 0;
 
-        updateSampleRanges( timeRatio, newTotalNumFrames );
+        foreach ( SharedSampleBuffer sampleBuffer, mMainWindow->mSampleBufferList )
+        {
+            newTotalNumFrames += stretch( sampleBuffer, timeRatio, pitchScale );
+        }
+
         mMainWindow->resetSampler();
 
         updateLoopMarkers( timeRatio );
-        mMainWindow->setLoopSampleRanges();
-
         updateSlicePoints( timeRatio );
         mGraphicsView->redrawWaveforms();
 
@@ -846,15 +868,15 @@ void ApplyTimeStretchCommand::redo()
 
 
 
-int ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchScale )
+int ApplyTimeStretchCommand::stretch( const SharedSampleBuffer sampleBuffer, const qreal timeRatio, const qreal pitchScale )
 {
-    const int sampleRate = mMainWindow->mCurrentSampleHeader->sampleRate;
-    const int numChans = mMainWindow->mCurrentSampleHeader->numChans;
+    const int sampleRate = mMainWindow->mSampleHeader->sampleRate;
+    const int numChans = mMainWindow->mSampleHeader->numChans;
 
     RubberBandStretcher stretcher( sampleRate, numChans, mOptions, timeRatio, pitchScale );
 
-    // Copy current sample buffer to a temporary buffer
-    SharedSampleBuffer tempBuffer( new SampleBuffer( *(mMainWindow->mCurrentSampleBuffer.data()) ) );
+    // Copy sample buffer to a temporary buffer
+    SharedSampleBuffer tempBuffer( new SampleBuffer( *sampleBuffer.data() ) );
 
     const int origNumFrames = tempBuffer->getNumFrames();
     const int newBufferSize = roundToInt( origNumFrames * timeRatio );
@@ -864,22 +886,23 @@ int ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchSc
     int totalNumFramesRetrieved = 0;
 //            std::map<size_t, size_t> mapping;
 //
-//            if ( ! mMainWindow->mSampleRangeList.isEmpty() )
+//            if ( ! mMainWindow->mSampleBufferList.isEmpty() )
 //            {
-//                foreach ( SharedSampleRange range, mMainWindow->mSampleRangeList )
+//                foreach ( SharedSampleBuffer sampleBuffer, mMainWindow->mSampleBufferList )
 //                {
-//                    mapping[ range->startFrame ] = roundToInt( range->startFrame * timeRatio );
+//                    const int startFrame = sampleBuffer->getStartFrame()
+//                    mapping[ startFrame ] = roundToInt( startFrame * timeRatio );
 //                }
 //            }
 
     stretcher.setExpectedInputDuration( origNumFrames );
 
-    mMainWindow->mCurrentSampleBuffer->setSize( numChans, newBufferSize );
+    sampleBuffer->setSize( numChans, newBufferSize );
 
     for ( int chanNum = 0; chanNum < numChans; chanNum++ )
     {
         inFloatBuffer[ chanNum ] = tempBuffer->getArrayOfChannels()[ chanNum ];
-        outFloatBuffer[ chanNum ] = mMainWindow->mCurrentSampleBuffer->getArrayOfChannels()[ chanNum ];
+        outFloatBuffer[ chanNum ] = sampleBuffer->getArrayOfChannels()[ chanNum ];
     }
 
     stretcher.study( inFloatBuffer, origNumFrames, true );
@@ -904,15 +927,15 @@ int ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchSc
         if ( numAvailable > 0 )
         {
             // Ensure enough space to store output
-            if ( mMainWindow->mCurrentSampleBuffer->getNumFrames() < totalNumFramesRetrieved + numAvailable )
+            if ( sampleBuffer->getNumFrames() < totalNumFramesRetrieved + numAvailable )
             {
-                mMainWindow->mCurrentSampleBuffer->setSize( numChans,                                  // No. of channels
-                                                            totalNumFramesRetrieved + numAvailable,    // New no. of frames
-                                                            true );                                    // Keep existing content
+                sampleBuffer->setSize( numChans,                                  // No. of channels
+                                       totalNumFramesRetrieved + numAvailable,    // New no. of frames
+                                       true );                                    // Keep existing content
 
                 for ( int chanNum = 0; chanNum < numChans; chanNum++ )
                 {
-                    outFloatBuffer[ chanNum ] = mMainWindow->mCurrentSampleBuffer->getArrayOfChannels()[ chanNum ];
+                    outFloatBuffer[ chanNum ] = sampleBuffer->getArrayOfChannels()[ chanNum ];
                     outFloatBuffer[ chanNum ] += totalNumFramesRetrieved;
                 }
             }
@@ -940,15 +963,15 @@ int ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchSc
         if ( numAvailable > 0 )
         {
             // Ensure enough space to store output
-            if ( mMainWindow->mCurrentSampleBuffer->getNumFrames() < totalNumFramesRetrieved + numAvailable )
+            if ( sampleBuffer->getNumFrames() < totalNumFramesRetrieved + numAvailable )
             {
-                mMainWindow->mCurrentSampleBuffer->setSize( numChans,                                  // No. of channels
-                                                            totalNumFramesRetrieved + numAvailable,    // New no. of frames
-                                                            true );                                    // Keep existing content
+                sampleBuffer->setSize( numChans,                                  // No. of channels
+                                       totalNumFramesRetrieved + numAvailable,    // New no. of frames
+                                       true );                                    // Keep existing content
 
                 for ( int chanNum = 0; chanNum < numChans; chanNum++ )
                 {
-                    outFloatBuffer[ chanNum ] = mMainWindow->mCurrentSampleBuffer->getArrayOfChannels()[ chanNum ];
+                    outFloatBuffer[ chanNum ] = sampleBuffer->getArrayOfChannels()[ chanNum ];
                     outFloatBuffer[ chanNum ] += totalNumFramesRetrieved;
                 }
             }
@@ -967,56 +990,15 @@ int ApplyTimeStretchCommand::stretch( const qreal timeRatio, const qreal pitchSc
         }
     }
 
-    if ( mMainWindow->mCurrentSampleBuffer->getNumFrames() != totalNumFramesRetrieved )
+    if ( sampleBuffer->getNumFrames() != totalNumFramesRetrieved )
     {
-        mMainWindow->mCurrentSampleBuffer->setSize( numChans, totalNumFramesRetrieved, true );
+        sampleBuffer->setSize( numChans, totalNumFramesRetrieved, true );
     }
 
     delete[] inFloatBuffer;
     delete[] outFloatBuffer;
 
     return totalNumFramesRetrieved;
-}
-
-
-
-void ApplyTimeStretchCommand::updateSampleRanges( const qreal timeRatio, const int newTotalNumFrames )
-{
-    // Update start frame and length of all sample ranges while preserving current ordering of list
-    if ( mMainWindow->mSampleRangeList.size() > 1 )
-    {
-        QList<SharedSampleRange> tempList( mMainWindow->mSampleRangeList );
-
-        qSort( tempList.begin(), tempList.end(), SampleRange::isLessThan );
-
-        foreach ( SharedSampleRange range, tempList )
-        {
-            const int newStartFrame = roundToInt( range->startFrame * timeRatio );
-            range->startFrame = newStartFrame;
-        }
-
-        for ( int i = 0; i < tempList.size(); i++ )
-        {
-            const int approxNumFrames = roundToInt( tempList.at( i )->numFrames * timeRatio );
-
-            const int measuredNumFrames = i + 1 < tempList.size() ?
-                                          tempList.at( i + 1 )->startFrame - tempList.at( i )->startFrame :
-                                          newTotalNumFrames - tempList.at( i )->startFrame;
-
-            if ( measuredNumFrames >= approxNumFrames - 2 && measuredNumFrames <= approxNumFrames + 2 )
-            {
-                tempList.at( i )->numFrames = measuredNumFrames;
-            }
-            else
-            {
-                tempList.at( i )->numFrames = approxNumFrames;
-            }
-        }
-    }
-    else
-    {
-        mMainWindow->mSampleRangeList.first()->numFrames = newTotalNumFrames;
-    }
 }
 
 

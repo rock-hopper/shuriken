@@ -34,7 +34,8 @@ public:
 
     static bool SaveMidiFile( const QString fileBaseName,
                               const QString outputDirPath,
-                              const QList<SharedSampleRange> sampleRangeList,
+                              const QList<SharedSampleBuffer> sampleBufferList,
+                              const int numSampleBuffers,
                               const qreal sampleRate,
                               const qreal bpm,
                               const int timeSigNumerator,

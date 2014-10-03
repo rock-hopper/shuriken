@@ -163,7 +163,7 @@ private:
     const QList<int> mOrderPositions;
     WaveGraphicsView* const mGraphicsView;
     MainWindow* const mMainWindow;
-    QList<SharedSampleRange> mRemovedSampleRanges;
+    QList<SharedSampleBuffer> mRemovedSampleBuffers;
     QList<SharedWaveformItem> mRemovedWaveforms;
 };
 
@@ -185,6 +185,7 @@ private:
     WaveGraphicsView* const mGraphicsView;
     MainWindow* const mMainWindow;
     int mJoinedItemOrderPos;
+    QList<int> mSlicePoints;
 };
 
 
@@ -226,7 +227,7 @@ public:
 
 private:
     const float mGain;
-    const int mWaveformItemOrderPos;
+    const int mOrderPos;
     WaveGraphicsView* const mGraphicsView;
     const int mSampleRate;
     AudioFileHandler& mFileHandler;
@@ -256,7 +257,7 @@ public:
 private:
     const float mStartGain;
     const float mEndGain;
-    const int mWaveformItemOrderPos;
+    const int mOrderPos;
     WaveGraphicsView* const mGraphicsView;
     const int mSampleRate;
     AudioFileHandler& mFileHandler;
@@ -282,7 +283,7 @@ public:
     void redo();
 
 private:
-    const int mWaveformItemOrderPos;
+    const int mOrderPos;
     WaveGraphicsView* const mGraphicsView;
     const int mSampleRate;
     AudioFileHandler& mFileHandler;
@@ -304,7 +305,7 @@ public:
     void redo();
 
 private:
-    const int mWaveformItemOrderPos;
+    const int mOrderPos;
     WaveGraphicsView* const mGraphicsView;
 };
 
@@ -326,8 +327,7 @@ public:
     void redo();
 
 private:
-    int stretch( const qreal timeRatio, const qreal pitchScale );
-    void updateSampleRanges( const qreal timeRatio, const int newTotalNumFrames );
+    int stretch( const SharedSampleBuffer sampleBuffer, const qreal timeRatio, const qreal pitchScale );
     void updateSlicePoints( const qreal timeRatio );
     void updateLoopMarkers( const qreal timeRatio );
 
@@ -343,7 +343,7 @@ private:
     const RubberBandStretcher::Options mOptions;
     const QString mTempDirPath;
     const QString mFileBaseName;
-    QString mTempFilePath;
+    QStringList mTempFilePaths;
 };
 
 

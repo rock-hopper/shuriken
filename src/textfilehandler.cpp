@@ -29,14 +29,10 @@
 //==================================================================================================
 // Public Static:
 
-bool TextFileHandler::createProjectXmlFile( const QString filePath,
-                                            const QString projectName,
-                                            const ProjectSettings settings,
-                                            const QList<SharedSampleRange> sampleRangeList,
-                                            const QList<int> slicePointFrameNumList )
+bool TextFileHandler::createProjectXmlFile( const QString filePath, const ProjectSettings settings )
 {
     XmlElement docElement( "project" );
-    docElement.setAttribute( "name", projectName.toLocal8Bit().data() );
+    docElement.setAttribute( "name", settings.projectName.toLocal8Bit().data() );
 
     XmlElement* origBpmElement = new XmlElement( "original_bpm" );
     origBpmElement->setAttribute( "value", settings.originalBpm );
@@ -66,19 +62,14 @@ bool TextFileHandler::createProjectXmlFile( const QString filePath,
     jackSyncElement->setAttribute( "checked", settings.isJackSyncChecked );
     docElement.addChildElement( jackSyncElement );
 
-    XmlElement* sampleElement = new XmlElement( "sample" );
-    sampleElement->setAttribute( "filename", "audio.wav" );
-    docElement.addChildElement( sampleElement );
-
-    foreach ( SharedSampleRange sampleRange, sampleRangeList )
+    foreach ( QString fileName, settings.audioFileNames )
     {
-        XmlElement* rangeElement = new XmlElement( "sample_range" );
-        rangeElement->setAttribute( "start_frame", sampleRange->startFrame );
-        rangeElement->setAttribute( "num_frames", sampleRange->numFrames );
-        docElement.addChildElement( rangeElement );
+        XmlElement* sampleElement = new XmlElement( "sample" );
+        sampleElement->setAttribute( "filename", fileName.toLocal8Bit().data() );
+        docElement.addChildElement( sampleElement );
     }
 
-    foreach ( int slicePointFrameNum, slicePointFrameNumList )
+    foreach ( int slicePointFrameNum, settings.slicePointFrameNums )
     {
         XmlElement* slicePointElement = new XmlElement( "slice_point" );
         slicePointElement->setAttribute( "frame_num", slicePointFrameNum );
@@ -109,7 +100,7 @@ bool TextFileHandler::readProjectXmlFile( const QString filePath, ProjectSetting
 
             forEachXmlChildElement( *docElement, elem )
             {
-                if ( elem->hasTagName( "sample_range" ) )
+                if ( elem->hasTagName( "sample_range" ) )   // Use of "sample_range" tag is deprecated
                 {
                     SharedSampleRange sampleRange( new SampleRange );
 
@@ -120,11 +111,11 @@ bool TextFileHandler::readProjectXmlFile( const QString filePath, ProjectSetting
                 }
                 else if ( elem->hasTagName( "slice_point" ) )
                 {
-                    settings.slicePointFrameNumList << elem->getIntAttribute( "frame_num" );
+                    settings.slicePointFrameNums << elem->getIntAttribute( "frame_num" );
                 }
                 else if ( elem->hasTagName( "sample" ) )
                 {
-                    settings.audioFileName = elem->getStringAttribute( "filename" ).toRawUTF8();
+                    settings.audioFileNames << elem->getStringAttribute( "filename" ).toRawUTF8();
                 }
                 else if ( elem->hasTagName( "original_bpm" ) )
                 {

@@ -76,10 +76,6 @@ typedef ScopedPointer<SampleHeader> ScopedSampleHeader;
 
 
 
-struct SampleRange;
-typedef QSharedPointer<SampleRange> SharedSampleRange;
-typedef ScopedPointer<SampleRange> ScopedSampleRange;
-
 struct SampleRange
 {
     SampleRange() :
@@ -91,12 +87,24 @@ struct SampleRange
     int startFrame;
     int numFrames;
 
-    static bool isLessThan( const SharedSampleRange range1, const SharedSampleRange range2 )
-    {
-        return range1->startFrame < range2->startFrame;
-    }
-
     JUCE_LEAK_DETECTOR( SampleRange )
+};
+
+typedef QSharedPointer<SampleRange> SharedSampleRange;
+typedef ScopedPointer<SampleRange> ScopedSampleRange;
+
+
+
+class SampleUtils
+{
+public:
+    static SharedSampleBuffer joinSampleBuffers( const QList<SharedSampleBuffer> sampleBufferList );
+
+    // Slice points with a value greater than or equal to the sample buffer's no. of frames are ignored
+    static QList<SharedSampleBuffer> splitSampleBuffer( const SharedSampleBuffer sampleBuffer,
+                                                        QList<int> slicePointFrameNums );
+
+    static int getTotalNumFrames( QList<SharedSampleBuffer> sampleBufferList );
 };
 
 

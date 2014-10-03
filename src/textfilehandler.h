@@ -48,9 +48,9 @@ public:
         }
 
         QString projectName;
-        QList<SharedSampleRange> sampleRangeList;
-        QList<int> slicePointFrameNumList;
-        QString audioFileName;
+        QList<int> slicePointFrameNums;
+        QStringList audioFileNames;
+        QList<SharedSampleRange> sampleRangeList;   // Deprecated, exists only to provide backward compatibility
         qreal originalBpm;
         qreal newBpm;
         qreal appliedBpm;
@@ -60,12 +60,8 @@ public:
         RubberBandStretcher::Options options;
     };
 
-    static bool createProjectXmlFile( const QString filePath,
-                                      const QString projectName,
-                                      const ProjectSettings settings,
-                                      const QList<SharedSampleRange> sampleRangeList,
-                                      const QList<int> slicePointFrameNumList )
-    ;
+    static bool createProjectXmlFile( const QString filePath, const ProjectSettings settings );
+
     static bool readProjectXmlFile( const QString filePath, ProjectSettings& settings );
 
     static bool createH2DrumkitXmlFile( const QString dirPath, const QString kitName, const QStringList audioFileNames );

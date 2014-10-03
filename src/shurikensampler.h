@@ -57,7 +57,6 @@ class ShurikenSamplerSound : public SynthesiserSound
 {
 public:
     ShurikenSamplerSound( const SharedSampleBuffer sampleBuffer,
-                          const SharedSampleRange sampleRange,
                           const qreal sampleRate,
                           const BigInteger& midiNotes,
                           const int midiNoteForNormalPitch );
@@ -66,7 +65,7 @@ public:
 
     SharedSampleBuffer getAudioData() const     { return mData; }
 
-    // Set temporary sample range; lasts only for duration of note
+    // Set temporary sample range; only lasts for duration of one note
     void setTempSampleRange( const SharedSampleRange sampleRange );
 
     bool appliesToNote( const int midiNoteNumber ) override;
@@ -84,6 +83,8 @@ private:
     int mAttackSamples, mReleaseSamples;
 
     volatile int mStartFrame, mEndFrame;
+    volatile int mTempStartFrame, mTempEndFrame;
+    volatile bool mIsTempSampleRangeSet;
 };
 
 

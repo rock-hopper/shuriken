@@ -21,6 +21,7 @@
 */
 
 #include "akaifilehandler.h"
+#include "globals.h"
 #include <QFile>
 #include <QDir>
 #include <QDebug>
@@ -50,7 +51,7 @@ int AkaiFileHandler::getNumPads( const int modelID )
 
 
 
-bool AkaiFileHandler::writePgmFileMPC1000( const QStringList sampleNames,
+bool AkaiFileHandler::writePgmFileMPC1000( QStringList sampleNames,
                                            const QString fileBaseName,
                                            const QString outputDirPath,
                                            const QString tempDirPath,
@@ -63,15 +64,20 @@ bool AkaiFileHandler::writePgmFileMPC1000( const QStringList sampleNames,
         return false;
     }
 
+    while ( sampleNames.size() > MPC1000_Profile::NUM_PADS )
+    {
+        sampleNames.removeLast();
+    }
+
     QByteArray pgmData( MPC1000_PGM::FILE_SIZE, PAD_BYTE );
 
     bool isSuccessful = getTemplateDataMPC1000( pgmData );
 
     if ( isSuccessful )
     {
-        quint8 noteNum = 60; // MIDI note C4
+        quint8 noteNum = Midi::MIDDLE_C;
 
-        for ( quint8 padNum = 0; padNum < MPC1000_Profile::NUM_PADS && padNum < sampleNames.size(); padNum++ )
+        for ( quint8 padNum = 0; padNum < sampleNames.size(); padNum++ )
         {
             // Add sample names to PGM data
             {

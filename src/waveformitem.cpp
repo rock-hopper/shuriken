@@ -28,71 +28,33 @@
 // Public:
 
 WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer,
-                            const SharedSampleRange sampleRange,
-                            const qreal width, const qreal height,
-                            QGraphicsItem* parent ) :
-    QObject(),
-    QGraphicsRectItem( 0.0, 0.0, width, height, parent ),
-    mSampleBuffer( sampleBuffer ),
-    mSampleRange( sampleRange ),
-    mCurrentOrderPos( 0 ),
-    mScaleFactor( NOT_SET ),
-    mFirstCalculatedBin( NOT_SET ),
-    mLastCalculatedBin( NOT_SET )
-{
-    init();
-}
-
-
-
-WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer,
-                            const SharedSampleRange sampleRange,
                             const int orderPos,
                             const qreal width, const qreal height,
                             QGraphicsItem* parent ) :
     QObject(),
     QGraphicsRectItem( 0.0, 0.0, width, height, parent ),
     mSampleBuffer( sampleBuffer ),
-    mSampleRange( sampleRange ),
     mCurrentOrderPos( orderPos ),
     mScaleFactor( NOT_SET ),
     mFirstCalculatedBin( NOT_SET ),
     mLastCalculatedBin( NOT_SET )
 {
-    init();
-}
+    setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges | ItemUsesExtendedStyleOption );
 
+    setBackgroundGradient();
+    mWavePen  = QPen( QColor(23, 23, 135, 191) );
+    mCentreLinePen = QPen( QColor(127, 127, 127, 191) );
 
+    // Don't draw rect border
+    setPen( QPen( QColor(0, 0, 0, 0) ) );
 
-WaveformItem::WaveformItem( const QList<SharedWaveformItem> items, QGraphicsItem* parent ) :
-    QObject(),
-    QGraphicsRectItem( 0.0, 0.0, 1.0, 1.0, parent ),
-    mSampleBuffer( items.first()->getSampleBuffer() ),
-    mSampleRange( new SampleRange ),
-    mCurrentOrderPos( items.first()->getOrderPos() ),
-    mScaleFactor( NOT_SET ),
-    mFirstCalculatedBin( NOT_SET ),
-    mLastCalculatedBin( NOT_SET )
-{
-    mSampleRange->startFrame = items.first()->getSampleRange()->startFrame;
-
-    qreal width = 0.0;
-    int numFrames = 0;
-
-    foreach ( SharedWaveformItem item, items )
+    // Set up min/max sample "bins"
+    const int numChans = mSampleBuffer->getNumChannels();
+    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
     {
-        width += item->rect().width();
-        numFrames += item->getSampleRange()->numFrames;
-
-        mJoinedItems << item;
+        mMinSampleValues.add( new Array<float> );
+        mMaxSampleValues.add( new Array<float> );
     }
-
-    mSampleRange->numFrames = numFrames;
-
-    QGraphicsRectItem::setRect( 0.0, 0.0, width, items.first()->rect().height() );
-    setPos( items.first()->scenePos() );
-
-    init();
 }
 
 
@@ -148,12 +110,12 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
     }
     else // mDetailLevel == VERY_HIGH
     {
-        distanceBetweenFrames = rect().width() / mSampleRange->numFrames;
+        distanceBetweenFrames = rect().width() / mSampleBuffer->getNumFrames();
 
-        firstVisibleFrame = mSampleRange->startFrame + (int) floor( option->exposedRect.left() / distanceBetweenFrames );
+        firstVisibleFrame = (int) floor( option->exposedRect.left() / distanceBetweenFrames );
 
-        lastVisibleFrame = mSampleRange->startFrame + qMin( (int) ceil( option->exposedRect.right() / distanceBetweenFrames ),
-                                               mSampleRange->numFrames - 1 );
+        lastVisibleFrame = qMin( (int) ceil( option->exposedRect.right() / distanceBetweenFrames ),
+                                 mSampleBuffer->getNumFrames() - 1 );
 
         numVisibleFrames = lastVisibleFrame - firstVisibleFrame + 1;
     }
@@ -265,13 +227,6 @@ void WaveformItem::setRect( const qreal x, const qreal y, const qreal width, con
 //==================================================================================================
 // Public Static:
 
-bool WaveformItem::isLessThanStartFrame( const SharedWaveformItem item1, const SharedWaveformItem item2 )
-{
-    return item1->getSampleRange()->startFrame < item2->getSampleRange()->startFrame;
-}
-
-
-
 bool WaveformItem::isLessThanOrderPos( const WaveformItem* const item1, const WaveformItem* const item2 )
 {
     return item1->getOrderPos() < item2->getOrderPos();
@@ -279,7 +234,7 @@ bool WaveformItem::isLessThanOrderPos( const WaveformItem* const item1, const Wa
 
 
 
-QList<WaveformItem*> WaveformItem::getSortedListSelectedItems( const QGraphicsScene* const scene )
+QList<WaveformItem*> WaveformItem::getSelectedWaveformItems( const QGraphicsScene* const scene )
 {
     QList<WaveformItem*> selectedItems;
 
@@ -315,7 +270,7 @@ QVariant WaveformItem::itemChange( GraphicsItemChange change, const QVariant &va
         // minimum distance it must be from the left and right edges of the scene
         if ( isSelected() )
         {
-            QList<WaveformItem*> selectedItems = getSortedListSelectedItems( scene() );
+            QList<WaveformItem*> selectedItems = getSelectedWaveformItems( scene() );
 
             foreach( WaveformItem* item, selectedItems )
             {
@@ -404,7 +359,7 @@ void WaveformItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseMoveEvent( event );
 
-    QList<WaveformItem*> selectedItems = getSortedListSelectedItems( scene() );
+    QList<WaveformItem*> selectedItems = getSelectedWaveformItems( scene() );
 
     // If this item is being dragged to the left...
     if ( event->screenPos().x() < event->lastScreenPos().x() )
@@ -486,7 +441,7 @@ void WaveformItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseReleaseEvent( event );
 
-    QList<WaveformItem*> selectedItems = getSortedListSelectedItems( scene() );
+    QList<WaveformItem*> selectedItems = getSelectedWaveformItems( scene() );
 
     if ( mOrderPosBeforeMove != mCurrentOrderPos )
     {
@@ -512,46 +467,14 @@ void WaveformItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 //==================================================================================================
 // Private:
 
-void WaveformItem::init()
-{
-    setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges | ItemUsesExtendedStyleOption );
-
-    setBackgroundGradient();
-    mWavePen  = QPen( QColor(23, 23, 135, 191) );
-    mCentreLinePen = QPen( QColor(127, 127, 127, 191) );
-
-    // Don't draw rect border
-    setPen( QPen( QColor(0, 0, 0, 0) ) );
-
-    // Set up min/max sample "bins"
-    const int numChans = mSampleBuffer->getNumChannels();
-    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-    {
-        mMinSampleValues.add( new Array<float> );
-        mMaxSampleValues.add( new Array<float> );
-    }
-}
-
-
-
 void WaveformItem::setBackgroundGradient()
 {
     QLinearGradient gradient( 0.0, 0.0, rect().width(), 0.0 );
 
-    if ( isJoined() )
-    {
-        gradient.setColorAt( 0,     QColor::fromRgbF(1.0,   1.0,   1.0,   1.0) );
-        gradient.setColorAt( 0.125, QColor::fromRgbF(0.975, 0.975, 0.775, 1.0) );
-        gradient.setColorAt( 0.875, QColor::fromRgbF(0.975, 0.975, 0.775, 1.0) );
-        gradient.setColorAt( 1,     QColor::fromRgbF(0.9,   0.9,   0.6,   1.0) );
-    }
-    else
-    {
-        gradient.setColorAt( 0,     QColor::fromRgbF(1.0,   1.0,   1.0,   1.0) );
-        gradient.setColorAt( 0.125, QColor::fromRgbF(0.925, 0.925, 0.975, 1.0) );
-        gradient.setColorAt( 0.875, QColor::fromRgbF(0.925, 0.925, 0.975, 1.0) );
-        gradient.setColorAt( 1,     QColor::fromRgbF(0.8,   0.8,   0.9,   1.0) );
-    }
+    gradient.setColorAt( 0,     QColor::fromRgbF(1.0,   1.0,   1.0,   1.0) );
+    gradient.setColorAt( 0.125, QColor::fromRgbF(0.925, 0.925, 0.975, 1.0) );
+    gradient.setColorAt( 0.875, QColor::fromRgbF(0.925, 0.925, 0.975, 1.0) );
+    gradient.setColorAt( 1,     QColor::fromRgbF(0.8,   0.8,   0.9,   1.0) );
 
     setBrush( QBrush( gradient ) );
 }
@@ -566,7 +489,7 @@ void WaveformItem::resetSampleBins()
     mLastCalculatedBin = NOT_SET;
 
     mNumBins = rect().width() * mScaleFactor;
-    mBinSize = (qreal) mSampleRange->numFrames / ( rect().width() * mScaleFactor );
+    mBinSize = (qreal) mSampleBuffer->getNumFrames() / ( rect().width() * mScaleFactor );
 
     if ( mBinSize <= DETAIL_LEVEL_VERY_HIGH_CUTOFF )
     {
@@ -612,7 +535,7 @@ void WaveformItem::findMinMaxSamples( const int startBin, const int endBin )
         for ( int binNum = startBin; binNum <= endBin; binNum++ )
         {
             mSampleBuffer->findMinMax( chanNum,
-                                       mSampleRange->startFrame + int( binNum * mBinSize ),
+                                       int( binNum * mBinSize ),
                                        (int) mBinSize,
                                        min,
                                        max);

@@ -47,13 +47,12 @@
 
 
 ShurikenSamplerSound::ShurikenSamplerSound( const SharedSampleBuffer sampleBuffer,
-                                            const SharedSampleRange sampleRange,
                                             const qreal sampleRate,
                                             const BigInteger& notes,
                                             const int midiNoteForNormalPitch ) :
     mData( sampleBuffer ),
-    mOriginalStartFrame( sampleRange->startFrame ),
-    mOriginalEndFrame( sampleRange->startFrame + sampleRange->numFrames ),
+    mOriginalStartFrame( 0 ),
+    mOriginalEndFrame( sampleBuffer->getNumFrames() ),
     mSourceSampleRate( sampleRate ),
     mMidiNotes( notes ),
     mMidiRootNote( midiNoteForNormalPitch )
@@ -63,6 +62,11 @@ ShurikenSamplerSound::ShurikenSamplerSound( const SharedSampleBuffer sampleBuffe
 
     mStartFrame = mOriginalStartFrame;
     mEndFrame = mOriginalEndFrame;
+
+    mTempStartFrame = mOriginalStartFrame;
+    mTempEndFrame = mOriginalEndFrame;
+
+    mIsTempSampleRangeSet = false;
 }
 
 
@@ -75,8 +79,10 @@ ShurikenSamplerSound::~ShurikenSamplerSound()
 
 void ShurikenSamplerSound::setTempSampleRange( const SharedSampleRange sampleRange )
 {
-    mStartFrame = sampleRange->startFrame;
-    mEndFrame = sampleRange->startFrame + sampleRange->numFrames;
+    mTempStartFrame = sampleRange->startFrame;
+    mTempEndFrame = sampleRange->startFrame + sampleRange->numFrames;
+
+    mIsTempSampleRangeSet = true;
 }
 
 
@@ -125,10 +131,17 @@ void ShurikenSamplerVoice::startNote( const int midiNoteNumber,
                                       SynthesiserSound* s,
                                       const int /*currentPitchWheelPosition*/ )
 {
-    if ( const ShurikenSamplerSound* const sound = dynamic_cast<const ShurikenSamplerSound*>( s ) )
+    if ( ShurikenSamplerSound* const sound = dynamic_cast<ShurikenSamplerSound*>( s ) )
     {
         mPitchRatio = pow( 2.0, (midiNoteNumber - sound->mMidiRootNote) / 12.0 )
                         * sound->mSourceSampleRate / getSampleRate();
+
+        if ( sound->mIsTempSampleRangeSet )
+        {
+            sound->mStartFrame = sound->mTempStartFrame;
+            sound->mEndFrame = sound->mTempEndFrame;
+            sound->mIsTempSampleRangeSet = false;
+        }
 
         mSourceSamplePosition = sound->mStartFrame;
         mLeftGain = velocity;
@@ -137,7 +150,7 @@ void ShurikenSamplerVoice::startNote( const int midiNoteNumber,
         mIsInAttack =( sound->mAttackSamples > 0 );
         mIsInRelease = false;
 
-        if  (mIsInAttack )
+        if ( mIsInAttack )
         {
             mAttackReleaseLevel = 0.0f;
             mAttackDelta = (float) (mPitchRatio / sound->mAttackSamples);
@@ -164,7 +177,7 @@ void ShurikenSamplerVoice::startNote( const int midiNoteNumber,
 void ShurikenSamplerVoice::stopNote( const bool allowTailOff )
 {
     ShurikenSamplerSound* const playingSound =
-            static_cast<ShurikenSamplerSound*>( getCurrentlyPlayingSound().get() );
+             dynamic_cast<ShurikenSamplerSound*>( getCurrentlyPlayingSound().get() );
 
     if ( allowTailOff )
     {

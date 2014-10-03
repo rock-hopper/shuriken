@@ -47,46 +47,26 @@ public:
     enum { Type = UserTypes::WAVEFORM };
 
     WaveformItem( const SharedSampleBuffer sampleBuffer,
-                  const SharedSampleRange sampleRange,
-                  const qreal width, const qreal height,
-                  QGraphicsItem* parent = NULL );
-
-    WaveformItem( const SharedSampleBuffer sampleBuffer,
-                  const SharedSampleRange sampleRange,
                   const int orderPos,
                   const qreal width, const qreal height,
                   QGraphicsItem* parent = NULL );
 
-    // Create a new waveform item by joining several waveform items together. The new item's order position
-    // and scene position will be the same as the first item in the list and the new item's width will be
-    // the sum of the widths of all items in the list. A new SampleRange will also be created.
-    WaveformItem( const QList<SharedWaveformItem> items, QGraphicsItem* parent = NULL );
-
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
     void setRect( const qreal x, const qreal y, const qreal width, const qreal height );
 
-    int type() const                                    { return Type; }
+    int type() const                                                { return Type; }
 
-    SharedSampleBuffer getSampleBuffer() const          { return mSampleBuffer; }
-    SharedSampleRange getSampleRange() const            { return mSampleRange; }
+    SharedSampleBuffer getSampleBuffer() const                      { return mSampleBuffer; }
 
-    int getOrderPos() const                             { return mCurrentOrderPos; }
-    void setOrderPos( const int orderPos )              { mCurrentOrderPos = orderPos; }
-
-    // Returns true if this waveform item has been created by joining several waveform items together
-    bool isJoined() const                               { return ! mJoinedItems.isEmpty(); }
-
-    QList<SharedWaveformItem> getJoinedItems() const    { return mJoinedItems; }
+    int getOrderPos() const                                         { return mCurrentOrderPos; }
+    void setOrderPos( const int orderPos )                          { mCurrentOrderPos = orderPos; }
 
 public:
-    // For use with qSort(); sorts by start frame
-    static bool isLessThanStartFrame( const SharedWaveformItem item1, const SharedWaveformItem item2 );
-
     // For use with qSort(); sorts by order position
     static bool isLessThanOrderPos( const WaveformItem* const item1, const WaveformItem* const item2 );
 
     // Get list of currently selected waveform items sorted by order position
-    static QList<WaveformItem*> getSortedListSelectedItems( const QGraphicsScene* const scene );
+    static QList<WaveformItem*> getSelectedWaveformItems( const QGraphicsScene* const scene );
 
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
@@ -95,7 +75,6 @@ protected:
     void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
 private:
-    void init();
     void setBackgroundGradient();
 
     void resetSampleBins();
@@ -107,9 +86,6 @@ private:
     DetailLevel mDetailLevel;
 
     const SharedSampleBuffer mSampleBuffer;
-    const SharedSampleRange mSampleRange;
-
-    QList<SharedWaveformItem> mJoinedItems;
 
     QPen mWavePen;
     QPen mCentreLinePen;
