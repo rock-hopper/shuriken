@@ -188,6 +188,8 @@ void MainWindow::openProject( const QString filePath )
                 mUI->doubleSpinBox_NewBPM->setValue( settings.newBpm );
             }
 
+            updateSnapLoopMarkersComboBox();
+
             // Clean up temp dir
             File( projTempDir.absolutePath().toLocal8Bit().data() ).deleteRecursively();
 
@@ -613,20 +615,19 @@ void MainWindow::importAudioFileDialog()
 
             enableUI();
 
+            updateSnapLoopMarkersComboBox();
+
             // Set status bar message
-            QString chanString = sampleHeader->numChans == 1 ? "Mono" : "Stereo";
+            {
+                const QString channels = sampleHeader->numChans == 1 ? "Mono" : "Stereo";
 
-            QString bitsString;
-            bitsString.setNum( sampleHeader->bitsPerSample );
-            bitsString += " bits";
+                const QString bits = QString::number( sampleHeader->bitsPerSample ) + " bits";
 
-            QString rateString;
-            rateString.setNum( sampleHeader->sampleRate );
-            rateString += " Hz";
+                const QString rate = QString::number( sampleHeader->sampleRate ) + " Hz";
 
-            QString message = fileName + ", " + chanString + ", " + bitsString + ", " + rateString +
-                              ", " + sampleHeader->format;
-            mUI->statusBar->showMessage( message );
+                QString message = fileName + ", " + channels + ", " + bits + ", " + rate + ", " + sampleHeader->format;
+                mUI->statusBar->showMessage( message );
+            }
 
             mIsProjectOpen = true;
 
