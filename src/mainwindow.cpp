@@ -711,7 +711,8 @@ void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPoint
     mSamplerAudioSource->playSample( waveformItem->getOrderPos(), sampleRange );
     mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
 
-    if ( mUI->doubleSpinBox_NewBPM->isVisible() &&
+    if ( mOptionsDialog != NULL && mOptionsDialog->isRealtimeModeEnabled() &&
+         mUI->checkBox_TimeStretch->isChecked() &&
          mUI->doubleSpinBox_OriginalBPM->value() > 0.0 &&
          mUI->doubleSpinBox_NewBPM->value() > 0.0 )
     {
@@ -1553,8 +1554,8 @@ void MainWindow::on_pushButton_PlayStop_clicked()
         
         mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
 
-        // If real-time mode is enabled
-        if ( mUI->doubleSpinBox_NewBPM->isVisible() &&
+        if ( mOptionsDialog != NULL && mOptionsDialog->isRealtimeModeEnabled() &&
+             mUI->checkBox_TimeStretch->isChecked() &&
              mUI->doubleSpinBox_OriginalBPM->value() > 0.0 &&
              mUI->doubleSpinBox_NewBPM->value() > 0.0 )
         {
