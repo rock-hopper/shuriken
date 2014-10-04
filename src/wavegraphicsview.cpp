@@ -1253,17 +1253,21 @@ void WaveGraphicsView::snapSlicePointToLoopMarker( SlicePointItem* const slicePo
         const qreal snapThreshold = 30.0;
 
         qreal scenePosX = slicePoint->scenePos().x();
+        int frameNum = slicePoint->getFrameNum();
 
         if ( qAbs( scenePosX - mLoopMarkerLeft->scenePos().x() ) <= snapThreshold )
         {
             scenePosX = mLoopMarkerLeft->scenePos().x();
+            frameNum = mLoopMarkerLeft->getFrameNum();
         }
         else if ( qAbs( scenePosX - mLoopMarkerRight->scenePos().x() ) <= snapThreshold )
         {
             scenePosX = mLoopMarkerRight->scenePos().x();
+            frameNum = mLoopMarkerRight->getFrameNum();
         }
 
         slicePoint->setPos( scenePosX, 0.0 );
+        slicePoint->setFrameNum( frameNum );
     }
 }
 
@@ -1391,9 +1395,16 @@ void WaveGraphicsView::slideWaveformItemIntoPlace( const int orderPos )
 
 void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem )
 {
+    const int oldFrameNum = movedItem->getFrameNum();
+
     if ( mLoopMarkerSnapMode == SNAP_SLICES_TO_MARKERS )
     {
         snapSlicePointToLoopMarker( movedItem );
+    }
+    else
+    {
+        const int newFrameNum = getFrameNum( movedItem->pos().x() );
+        movedItem->setFrameNum( newFrameNum );
     }
 
     SharedSlicePointItem sharedSlicePoint;
@@ -1407,11 +1418,7 @@ void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem
         }
     }
 
-    const int oldFrameNum = sharedSlicePoint->getFrameNum();
-    const int newFrameNum = getFrameNum( sharedSlicePoint->pos().x() );
-    sharedSlicePoint->setFrameNum( newFrameNum );
-
-    emit slicePointOrderChanged( sharedSlicePoint, oldFrameNum, newFrameNum );
+    emit slicePointOrderChanged( sharedSlicePoint, oldFrameNum, sharedSlicePoint->getFrameNum() );
 }
 
 
