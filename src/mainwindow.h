@@ -117,8 +117,6 @@ private:
     ScopedPointer<RubberbandAudioSource> mRubberbandAudioSource;
     AudioSourcePlayer mAudioSourcePlayer;
 
-    bool mIsAudioInitialised;
-
     QString mLastOpenedImportDir;
     QString mLastOpenedProjDir;
     QString mCurrentProjectFilePath;
