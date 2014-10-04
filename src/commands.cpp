@@ -417,24 +417,22 @@ void JoinCommand::redo()
 
 //==================================================================================================
 
-SplitCommand::SplitCommand( const int orderPos,
-                           WaveGraphicsView* const graphicsView,
-                           MainWindow* const mainWindow,
-                           QUndoCommand* parent ) :
-    QUndoCommand( parent ),
-    mJoinedItemOrderPos( orderPos ),
-    mGraphicsView( graphicsView ),
-    mMainWindow( mainWindow )
-{
-    setText( "Split" );
-}
-
-
-
-void SplitCommand::undo()
-{
-    // TODO
-
+//SplitCommand::SplitCommand( const int orderPos,
+//                           WaveGraphicsView* const graphicsView,
+//                           MainWindow* const mainWindow,
+//                           QUndoCommand* parent ) :
+//    QUndoCommand( parent ),
+//    mJoinedItemOrderPos( orderPos ),
+//    mGraphicsView( graphicsView ),
+//    mMainWindow( mainWindow )
+//{
+//    setText( "Split" );
+//}
+//
+//
+//
+//void SplitCommand::undo()
+//{
 //    mGraphicsView->selectNone();
 //
 //    SharedWaveformItem item = mGraphicsView->joinWaveforms( mOrderPositions );
@@ -448,14 +446,12 @@ void SplitCommand::undo()
 //    mMainWindow->mSampleRangeList.insert( mJoinedItemOrderPos, item->getSampleRange() );
 //
 //    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
-}
-
-
-
-void SplitCommand::redo()
-{
-    // TODO
-
+//}
+//
+//
+//
+//void SplitCommand::redo()
+//{
 //    mGraphicsView->selectNone();
 //
 //    QList<SharedWaveformItem> items = mGraphicsView->splitWaveform( mJoinedItemOrderPos );
@@ -471,7 +467,7 @@ void SplitCommand::redo()
 //    }
 //
 //    mMainWindow->mSamplerAudioSource->setSampleRanges( mMainWindow->mSampleRangeList );
-}
+//}
 
 
 

@@ -190,23 +190,23 @@ private:
 
 
 
-class SplitCommand : public QUndoCommand
-{
-public:
-    SplitCommand( const int orderPos,
-                  WaveGraphicsView* const graphicsView,
-                  MainWindow* const mainWindow,
-                  QUndoCommand* parent = NULL );
-
-    void undo();
-    void redo();
-
-private:
-    const int mJoinedItemOrderPos;
-    WaveGraphicsView* const mGraphicsView;
-    MainWindow* const mMainWindow;
-    QList<int> mOrderPositions;
-};
+//class SplitCommand : public QUndoCommand
+//{
+//public:
+//    SplitCommand( const int orderPos,
+//                  WaveGraphicsView* const graphicsView,
+//                  MainWindow* const mainWindow,
+//                  QUndoCommand* parent = NULL );
+//
+//    void undo();
+//    void redo();
+//
+//private:
+//    const int mJoinedItemOrderPos;
+//    WaveGraphicsView* const mGraphicsView;
+//    MainWindow* const mMainWindow;
+//    QList<int> mOrderPositions;
+//};
 
 
 

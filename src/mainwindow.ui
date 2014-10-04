@@ -624,7 +624,6 @@
     <addaction name="actionNormalise"/>
     <addaction name="actionEnvelope"/>
     <addaction name="actionJoin"/>
-    <addaction name="actionSplit"/>
     <addaction name="actionReverse"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -995,17 +994,6 @@
    </property>
    <property name="shortcut">
     <string>2</string>
-   </property>
-  </action>
-  <action name="actionSplit">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Split</string>
-   </property>
-   <property name="shortcut">
-    <string>S</string>
    </property>
   </action>
   <action name="actionAudition">

@@ -538,7 +538,6 @@ void MainWindow::disableUI()
     mUI->actionAdd_Slice_Point->setEnabled( false );
     mUI->actionDelete->setEnabled( false );
     mUI->actionJoin->setEnabled( false );
-    mUI->actionSplit->setEnabled( false );
     mUI->actionReverse->setEnabled( false );
     mUI->actionZoom_Original->setEnabled( false );
     mUI->actionZoom_Out->setEnabled( false );
@@ -815,7 +814,6 @@ void MainWindow::enableEditActions()
         mUI->actionApply_Gain_Ramp->setEnabled( false );
         mUI->actionNormalise->setEnabled( false );
         mUI->actionReverse->setEnabled( false );
-        mUI->actionSplit->setEnabled( false );
     }
 
     if ( orderPositions.size() > 1 )
@@ -1223,29 +1221,6 @@ void MainWindow::on_actionJoin_triggered()
 
     QUndoCommand* command = new JoinCommand( orderPositions, mUI->waveGraphicsView, this );
     mUndoStack.push( command );
-}
-
-
-
-void MainWindow::on_actionSplit_triggered()
-{
-    // TODO
-
-//    const QList<int> orderPositions = mUI->waveGraphicsView->getSelectedWaveformsOrderPositions();
-//
-//    QUndoCommand* parentCommand = new QUndoCommand();
-//
-//    for ( int i = orderPositions.size() - 1; i >= 0; i-- )
-//    {
-//        const int orderPos = orderPositions.at( i );
-//
-//        if ( mUI->waveGraphicsView->getWaveformAt( orderPos )->isJoined() )
-//        {
-//            new SplitCommand( orderPos, mUI->waveGraphicsView, this, parentCommand );
-//        }
-//    }
-//
-//    mUndoStack.push( parentCommand );
 }
 
 
