@@ -221,7 +221,13 @@ void MainWindow::setUpSampler()
     if ( mIsAudioInitialised )
     {
         mSamplerAudioSource = new SamplerAudioSource();
-        mSamplerAudioSource->setSamples( mSampleBufferList, mSampleHeader->sampleRate );
+
+        if ( ! mSampleBufferList.isEmpty() && ! mSampleHeader.isNull() )
+        {
+            mSamplerAudioSource->setSamples( mSampleBufferList, mSampleHeader->sampleRate );
+        }
+
+        on_pushButton_Loop_clicked( mUI->pushButton_Loop->isChecked() );
 
         if ( mOptionsDialog->isRealtimeModeEnabled() ) // Realtime timestretch mode
         {
@@ -232,20 +238,20 @@ void MainWindow::setUpSampler()
             mRubberbandAudioSource = new RubberbandAudioSource( mSamplerAudioSource, numChans, options, isJackSyncEnabled );
             mAudioSourcePlayer.setSource( mRubberbandAudioSource );
 
-            QObject::connect( mOptionsDialog.get(), SIGNAL( transientsOptionChanged(RubberBandStretcher::Options) ),
-                              mRubberbandAudioSource.get(), SLOT( setTransientsOption(RubberBandStretcher::Options) ) );
+            QObject::connect( mOptionsDialog, SIGNAL( transientsOptionChanged(RubberBandStretcher::Options) ),
+                              mRubberbandAudioSource, SLOT( setTransientsOption(RubberBandStretcher::Options) ) );
 
-            QObject::connect( mOptionsDialog.get(), SIGNAL( phaseOptionChanged(RubberBandStretcher::Options) ),
-                              mRubberbandAudioSource.get(), SLOT( setPhaseOption(RubberBandStretcher::Options) ) );
+            QObject::connect( mOptionsDialog, SIGNAL( phaseOptionChanged(RubberBandStretcher::Options) ),
+                              mRubberbandAudioSource, SLOT( setPhaseOption(RubberBandStretcher::Options) ) );
 
-            QObject::connect( mOptionsDialog.get(), SIGNAL( formantOptionChanged(RubberBandStretcher::Options) ),
-                              mRubberbandAudioSource.get(), SLOT( setFormantOption(RubberBandStretcher::Options) ) );
+            QObject::connect( mOptionsDialog, SIGNAL( formantOptionChanged(RubberBandStretcher::Options) ),
+                              mRubberbandAudioSource, SLOT( setFormantOption(RubberBandStretcher::Options) ) );
 
-            QObject::connect( mOptionsDialog.get(), SIGNAL( pitchOptionChanged(RubberBandStretcher::Options) ),
-                              mRubberbandAudioSource.get(), SLOT( setPitchOption(RubberBandStretcher::Options) ) );
+            QObject::connect( mOptionsDialog, SIGNAL( pitchOptionChanged(RubberBandStretcher::Options) ),
+                              mRubberbandAudioSource, SLOT( setPitchOption(RubberBandStretcher::Options) ) );
 
-            QObject::connect( mOptionsDialog.get(), SIGNAL( jackSyncToggled(bool) ),
-                              mRubberbandAudioSource.get(), SLOT( enableJackSync(bool) ) );
+            QObject::connect( mOptionsDialog, SIGNAL( jackSyncToggled(bool) ),
+                              mRubberbandAudioSource, SLOT( enableJackSync(bool) ) );
 
             on_checkBox_TimeStretch_toggled( mUI->checkBox_TimeStretch->isChecked() );
         }
@@ -764,7 +770,7 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
         mUI->checkBox_TimeStretch->setVisible( true );
         mUI->pushButton_Apply->setVisible( false );
 
-        QObject::connect( mOptionsDialog.get(), SIGNAL( windowOptionChanged() ),
+        QObject::connect( mOptionsDialog, SIGNAL( windowOptionChanged() ),
                           this, SLOT( resetSampler() ) );
     }
     else // Offline mode
@@ -772,7 +778,7 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
         mUI->checkBox_TimeStretch->setVisible( false );
         mUI->pushButton_Apply->setVisible( true );
 
-        QObject::disconnect( mOptionsDialog.get(), SIGNAL( windowOptionChanged() ),
+        QObject::disconnect( mOptionsDialog, SIGNAL( windowOptionChanged() ),
                              this, SLOT( resetSampler() ) );
     }
 
@@ -783,11 +789,8 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
 
 void MainWindow::resetSampler()
 {
-    if ( ! mSampleBufferList.isEmpty() && ! mSampleHeader.isNull() )
-    {
-        tearDownSampler();
-        setUpSampler();
-    }
+    tearDownSampler();
+    setUpSampler();
 }
 
 
@@ -1573,7 +1576,10 @@ void MainWindow::on_pushButton_PlayStop_clicked()
 
 void MainWindow::on_pushButton_Loop_clicked( const bool isChecked )
 {
-    mSamplerAudioSource->setLooping( isChecked );
+    if ( mSamplerAudioSource != NULL )
+    {
+        mSamplerAudioSource->setLooping( isChecked );
+    }
     mUI->waveGraphicsView->setPlayheadLooping( isChecked );
 }
 

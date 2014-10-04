@@ -785,7 +785,8 @@ void ApplyTimeStretchCommand::undo()
         }
     }
 
-    mMainWindow->resetSampler();
+    mMainWindow->mSamplerAudioSource->setSamples( mMainWindow->mSampleBufferList,
+                                                  mMainWindow->mSampleHeader->sampleRate );
 
     const qreal timeRatio = 1.0 / ( mOriginalBPM / mNewBPM );
 
@@ -843,7 +844,8 @@ void ApplyTimeStretchCommand::redo()
             newTotalNumFrames += stretch( sampleBuffer, timeRatio, pitchScale );
         }
 
-        mMainWindow->resetSampler();
+        mMainWindow->mSamplerAudioSource->setSamples( mMainWindow->mSampleBufferList,
+                                                      mMainWindow->mSampleHeader->sampleRate );
 
         updateLoopMarkers( timeRatio );
         updateSlicePoints( timeRatio );
