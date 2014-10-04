@@ -106,8 +106,7 @@ the waveform.</p>
 <h2><a name="Detection_Options"></a>Detection Options</h2>
 
 <p>&#8220;Detection Method&#8221;, &#8220;Window Size&#8221;, &#8220;Hop Size&#8221;, and &#8220;Threshold&#8221; affect
-the accuracy of aubio's onset and beat detection routines (as well as
-the accuracy of the BPM calculator).&nbsp; The default settings should
+the accuracy of aubio's onset and beat detection routines.&nbsp; The default settings should
 give good results in many, though not all, situations.&nbsp;
 Experimenting with the settings may produce better results in some
 instances.</p>
@@ -139,16 +138,11 @@ raising it will result in fewer.</dd>
 
 <h2><a name="Calculating_BPM"></a>Calculating BPM</h2>
 
-<p>There are two ways of calculating the BPM of a drum loop in Shuriken.</p>
-
-<p>If the loop markers are not present, then aubio will attempt to work out the BPM by 
-analysing the sample audio.&nbsp; This process is affected by the threshold and detection 
-settings, so if you find that the calculated BPM is wrong or cannot be found at all, try 
-lowering the threshold or changing the detection method.</p>
-
-<p>If the loop markers are present, then the time signature and loop length widgets become 
-available, allowing you to specify the length of the loop in bars or beats.&nbsp; Shuriken 
+<p>The time signature and loop length widgets
+allow you to specify the length of an audio loop in bars or beats.&nbsp; Shuriken 
 then does the appropriate maths to calculate the BPM once the &#8220;Calc&#8221; button is clicked.</p>
+
+<p>If the loop markers are enabled, Shuriken assumes you are specifying the no. of bars/beats between the markers.</p>
 <p><br></p>
 
 
