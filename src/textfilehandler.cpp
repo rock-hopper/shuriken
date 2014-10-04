@@ -339,6 +339,11 @@ bool TextFileHandler::createSFZFile( const QString sfzFilePath, const QString sa
     {
         int key = 60;
 
+        if ( audioFileNames.size() > Midi::MAX_POLYPHONY - Midi::MIDDLE_C )
+        {
+            key = qMax( Midi::MAX_POLYPHONY - audioFileNames.size(), 0 );
+        }
+
         foreach ( QString fileName, audioFileNames )
         {
             QString groupText = "<group> key=" + QString::number( key ) + " loop_mode=one_shot\n";
