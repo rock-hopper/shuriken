@@ -271,6 +271,8 @@ void MainWindow::tearDownSampler()
 {
     if ( mIsAudioInitialised )
     {
+        stopPlayback();
+
         mAudioSourcePlayer.setSource( NULL );
 
         mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
@@ -735,7 +737,10 @@ void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPoint
 
 void MainWindow::stopPlayback()
 {
-    mSamplerAudioSource->stop();
+    if ( mSamplerAudioSource != NULL )
+    {
+        mSamplerAudioSource->stop();
+    }
     mUI->waveGraphicsView->stopPlayhead();
     mUI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
 }
