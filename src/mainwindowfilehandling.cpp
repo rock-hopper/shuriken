@@ -107,6 +107,7 @@ void MainWindow::openProject( const QString filePath )
         // If the audio files were read successfully
         if ( isOkToContinue )
         {
+            // Deal with sample ranges - provides backward compatibility with older save file format
             if ( ! settings.sampleRangeList.isEmpty() )
             {
                 const int numChans = mSampleHeader->numChans;
@@ -187,6 +188,17 @@ void MainWindow::openProject( const QString filePath )
             {
                 mUI->doubleSpinBox_NewBPM->setValue( settings.newBpm );
             }
+
+            {
+                const int i = mUI->comboBox_TimeSigNumerator->findText( QString::number( settings.timeSigNumerator ) );
+                mUI->comboBox_TimeSigNumerator->setCurrentIndex( i );
+            }
+            {
+                const int i = mUI->comboBox_TimeSigDenominator->findText( QString::number( settings.timeSigDenominator ) );
+                mUI->comboBox_TimeSigDenominator->setCurrentIndex( i );
+            }
+            mUI->spinBox_Length->setValue( settings.length );
+            mUI->comboBox_Units->setCurrentIndex( settings.units );
 
             updateSnapLoopMarkersComboBox();
 
@@ -436,13 +448,11 @@ void MainWindow::saveProject( const QString filePath )
 
     if ( isOkToContinue )
     {
-        const bool isRealtimeModeEnabled = mOptionsDialog->isRealtimeModeEnabled();
-
         TextFileHandler::ProjectSettings settings;
 
         settings.projectName = projectName;
 
-        if ( isRealtimeModeEnabled )
+        if ( mOptionsDialog->isRealtimeModeEnabled() )
         {
             settings.originalBpm = mUI->doubleSpinBox_OriginalBPM->value();
             settings.newBpm = mUI->doubleSpinBox_NewBPM->value();
@@ -459,6 +469,11 @@ void MainWindow::saveProject( const QString filePath )
         settings.isPitchCorrectionChecked = mUI->checkBox_PitchCorrection->isChecked();
         settings.options = mOptionsDialog->getStretcherOptions();
         settings.isJackSyncChecked = mOptionsDialog->isJackSyncEnabled();
+
+        settings.timeSigNumerator = mUI->comboBox_TimeSigNumerator->currentText().toInt();
+        settings.timeSigDenominator = mUI->comboBox_TimeSigDenominator->currentText().toInt();
+        settings.length = mUI->spinBox_Length->value();
+        settings.units = mUI->comboBox_Units->currentIndex();
 
         settings.audioFileNames = audioFileNames;
 

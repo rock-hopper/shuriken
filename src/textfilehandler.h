@@ -58,6 +58,10 @@ public:
         bool isPitchCorrectionChecked;
         bool isJackSyncChecked;
         RubberBandStretcher::Options options;
+        int timeSigNumerator;
+        int timeSigDenominator;
+        int length;
+        int units;
     };
 
     static bool createProjectXmlFile( const QString filePath, const ProjectSettings settings );

@@ -62,6 +62,22 @@ bool TextFileHandler::createProjectXmlFile( const QString filePath, const Projec
     jackSyncElement->setAttribute( "checked", settings.isJackSyncChecked );
     docElement.addChildElement( jackSyncElement );
 
+    XmlElement* numeratorElement = new XmlElement( "time_sig_numerator" );
+    numeratorElement->setAttribute( "value", settings.timeSigNumerator );
+    docElement.addChildElement( numeratorElement );
+
+    XmlElement* denominatorElement = new XmlElement( "time_sig_denominator" );
+    denominatorElement->setAttribute( "value", settings.timeSigDenominator );
+    docElement.addChildElement( denominatorElement );
+
+    XmlElement* lengthElement = new XmlElement( "length" );
+    lengthElement->setAttribute( "value", settings.length );
+    docElement.addChildElement( lengthElement );
+
+    XmlElement* unitsElement = new XmlElement( "units" );
+    unitsElement->setAttribute( "value", settings.units );
+    docElement.addChildElement( unitsElement );
+
     foreach ( QString fileName, settings.audioFileNames )
     {
         XmlElement* sampleElement = new XmlElement( "sample" );
@@ -144,6 +160,22 @@ bool TextFileHandler::readProjectXmlFile( const QString filePath, ProjectSetting
                 else if ( elem->hasTagName( "jack_sync" ) )
                 {
                     settings.isJackSyncChecked = elem->getBoolAttribute( "checked" );
+                }
+                else if ( elem->hasTagName( "time_sig_numerator" ) )
+                {
+                    settings.timeSigNumerator = elem->getIntAttribute( "value" );
+                }
+                else if ( elem->hasTagName( "time_sig_denominator" ) )
+                {
+                    settings.timeSigDenominator = elem->getIntAttribute( "value" );
+                }
+                else if ( elem->hasTagName( "length" ) )
+                {
+                    settings.length = elem->getIntAttribute( "value" );
+                }
+                else if ( elem->hasTagName( "units" ) )
+                {
+                    settings.units = elem->getIntAttribute( "value" );
                 }
             }
 
