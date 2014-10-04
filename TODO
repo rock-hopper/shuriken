@@ -14,9 +14,17 @@ Export Akai .snd files
 
 Copy and paste audio slices
 
+Split audio slices
+
 Display MIDI note mappings
 
 Pitch-shifting
+
+Zero-crossing detection
+
+DC offset removal
+
+Amplitude envelope / fade in/out
 
 
 Dialogs
@@ -31,7 +39,5 @@ Envelope ADSR dialog
 UI Improvements
 ---------------
 Fix gaps in waveform when zoomed in at low detail level
-
-Some kind of visual indicator for the threshold level
 
 Control zoom with mouse wheel
