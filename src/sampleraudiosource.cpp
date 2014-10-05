@@ -99,7 +99,7 @@ void SamplerAudioSource::playSamples( const int firstSampleNum, const QList<Shar
 {
     mTempSampleRangeList = sampleRangeList;
     mSeqStartNote = mFirstNote + firstSampleNum;
-    mNoteCounter = 0;
+    mNoteCounter = -1;
     mNoteCounterEnd = sampleRangeList.size();
     mFrameCounter = 0;
     mIsPlaySeqEnabled = true;
@@ -110,7 +110,7 @@ void SamplerAudioSource::playSamples( const int firstSampleNum, const QList<Shar
 void SamplerAudioSource::playAll()
 {
     mSeqStartNote = mFirstNote;
-    mNoteCounter = 0;
+    mNoteCounter = -1;
     mNoteCounterEnd = mSampleBufferList.size();
     mFrameCounter = 0;
     mIsPlaySeqEnabled = true;
@@ -169,7 +169,7 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
     if ( mIsPlaySeqEnabled )
     {
         // End of note
-        if ( mFrameCounter - 1 >= 0 && mFrameCounter - 1 < bufferToFill.numSamples )
+        if ( mFrameCounter + 1 < bufferToFill.numSamples )
         {
             mNoteCounter++;
 

@@ -52,7 +52,7 @@ ShurikenSamplerSound::ShurikenSamplerSound( const SharedSampleBuffer sampleBuffe
                                             const int midiNoteForNormalPitch ) :
     mData( sampleBuffer ),
     mOriginalStartFrame( 0 ),
-    mOriginalEndFrame( sampleBuffer->getNumFrames() ),
+    mOriginalEndFrame( sampleBuffer->getNumFrames() - 1 ),
     mSourceSampleRate( sampleRate ),
     mMidiNotes( notes ),
     mMidiRootNote( midiNoteForNormalPitch )
@@ -80,7 +80,7 @@ ShurikenSamplerSound::~ShurikenSamplerSound()
 void ShurikenSamplerSound::setTempSampleRange( const SharedSampleRange sampleRange )
 {
     mTempStartFrame = sampleRange->startFrame;
-    mTempEndFrame = sampleRange->startFrame + sampleRange->numFrames;
+    mTempEndFrame = sampleRange->startFrame + sampleRange->numFrames - 1;
 
     mIsTempSampleRangeSet = true;
 }
