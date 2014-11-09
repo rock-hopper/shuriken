@@ -45,45 +45,49 @@
 #ifndef SIMPLESYNTH_H
 #define SIMPLESYNTH_H
 
+#include "JuceHeader.h"
+
+
 // Basic sine wave sound
-class SineWaveSound : public SynthesiserSound
+struct SineWaveSound : public SynthesiserSound
 {
-public:
     SineWaveSound() {}
 
-    bool appliesToNote( const int /*midiNoteNumber*/ ) { return true; }
-    bool appliesToChannel( const int /*midiChannel*/ ) { return true; }
+    bool appliesToNote( const int /*midiNoteNumber*/ ) override        { return true; }
+    bool appliesToChannel( const int /*midiChannel*/ ) override        { return true; }
 };
 
 
 
 // Simple synth voice that generates sine waves
-class SineWaveVoice : public SynthesiserVoice
+struct SineWaveVoice : public SynthesiserVoice
 {
-public:
     SineWaveVoice() : currentAngle(0), angleDelta(0), level(0), tailOff(0)
     {
     }
 
-    bool canPlaySound( SynthesiserSound* sound )
+
+    bool canPlaySound( SynthesiserSound* sound ) override
     {
         return dynamic_cast<SineWaveSound*>( sound ) != NULL;
     }
 
+
     void startNote( const int midiNoteNumber, const float velocity,
-                    SynthesiserSound* /*sound*/, const int /*currentPitchWheelPosition*/ )
+                    SynthesiserSound* /*sound*/, const int /*currentPitchWheelPosition*/ ) override
     {
         currentAngle = 0.0;
         level = velocity * 0.15;
         tailOff = 0.0;
 
-        double cyclesPerSecond = MidiMessage::getMidiNoteInHertz (midiNoteNumber);
+        double cyclesPerSecond = MidiMessage::getMidiNoteInHertz( midiNoteNumber );
         double cyclesPerSample = cyclesPerSecond / getSampleRate();
 
         angleDelta = cyclesPerSample * 2.0 * double_Pi;
     }
 
-    void stopNote( const bool allowTailOff )
+
+    void stopNote( const float /*velocity*/, const bool allowTailOff ) override
     {
         if ( allowTailOff )
         {
@@ -103,17 +107,20 @@ public:
         }
     }
 
-    void pitchWheelMoved( const int /*newValue*/ )
+
+    void pitchWheelMoved( const int /*newValue*/ ) override
     {
         // Not implemented
     }
 
-    void controllerMoved( const int /*controllerNumber*/, const int /*newValue*/ )
+
+    void controllerMoved( const int /*controllerNumber*/, const int /*newValue*/ ) override
     {
         // Not implemented
     }
 
-    void renderNextBlock( AudioSampleBuffer& outputBuffer, int startSample, int numSamples )
+
+    void renderNextBlock( AudioSampleBuffer& outputBuffer, int startSample, int numSamples ) override
     {
         if ( angleDelta != 0.0 )
         {
@@ -124,7 +131,7 @@ public:
                     const float currentSample = (float)( sin (currentAngle) * level * tailOff );
 
                     for ( int i = outputBuffer.getNumChannels(); --i >= 0; )
-                        *outputBuffer.getSampleData (i, startSample) += currentSample;
+                        outputBuffer.addSample( i, startSample, currentSample );
 
                     currentAngle += angleDelta;
                     ++startSample;
@@ -147,7 +154,7 @@ public:
                     const float currentSample = (float)( sin (currentAngle) * level );
 
                     for ( int i = outputBuffer.getNumChannels(); --i >= 0; )
-                        *outputBuffer.getSampleData (i, startSample) += currentSample;
+                        outputBuffer.addSample( i, startSample, currentSample );
 
                     currentAngle += angleDelta;
                     ++startSample;
@@ -163,17 +170,8 @@ private:
 
 
 // An audio source that streams the output of the sine wave synthesiser
-class SynthAudioSource  : public AudioSource
+struct SynthAudioSource : public AudioSource
 {
-public:
-    // This collects real-time midi messages from the midi input device, and
-    // turns them into blocks that we can process in our audio callback
-    MidiMessageCollector midiCollector;
-
-    // The synth itself!
-    Synthesiser synth;
-
-
     SynthAudioSource()
     {
         // Add the sine wave voice to the synth
@@ -188,18 +186,21 @@ public:
         synth.addSound( new SineWaveSound() );
     }
 
-    void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate )
+
+    void prepareToPlay( const int /*samplesPerBlockExpected*/, const double sampleRate ) override
     {
         midiCollector.reset( sampleRate );
 
         synth.setCurrentPlaybackSampleRate( sampleRate );
     }
 
-    void releaseResources()
+
+    void releaseResources() override
     {
     }
 
-    void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill )
+
+    void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill ) override
     {
         // The synth always adds its output to the audio buffer, so we have to clear it first
         bufferToFill.clearActiveBufferRegion();
@@ -211,6 +212,14 @@ public:
         // Tell the synth to process the MIDI events and generate its output
         synth.renderNextBlock( *bufferToFill.buffer, incomingMidi, 0, bufferToFill.numSamples );
     }
+
+
+    // This collects real-time midi messages from the midi input device, and
+    // turns them into blocks that we can process in our audio callback
+    MidiMessageCollector midiCollector;
+
+    // The synth itself!
+    Synthesiser synth;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( SynthAudioSource );

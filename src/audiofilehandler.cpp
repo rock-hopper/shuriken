@@ -257,7 +257,7 @@ void AudioFileHandler::interleaveSamples( const SharedSampleBuffer inputBuffer,
 {
     for ( int chanNum = 0; chanNum < numChans; ++chanNum )
     {
-        float* sampleData = inputBuffer->getSampleData( chanNum, inputStartFrame );
+        const float* sampleData = inputBuffer->getReadPointer( chanNum, inputStartFrame );
 
         for ( int frameNum = 0; frameNum < numFrames; ++frameNum )
         {
@@ -279,7 +279,7 @@ void AudioFileHandler::deinterleaveSamples( Array<float>& inputBuffer,
 
     for ( int chanNum = 0; chanNum < numChans; ++chanNum )
     {
-        float* outputSampleData = outputBuffer->getSampleData( chanNum, outputStartFrame );
+        float* outputSampleData = outputBuffer->getWritePointer( chanNum, outputStartFrame );
 
         for ( int frameNum = 0; frameNum < numFrames; ++frameNum )
         {
@@ -601,7 +601,7 @@ SharedSampleBuffer AudioFileHandler::sndlibLoadFile( const char* filePath, mus_l
                                        0,
                                        numFramesToRead - 1,
                                        numChans,
-                                       sampleBuffer->getArrayOfChannels() );
+                                       sampleBuffer->getArrayOfWritePointers() );
 
         if ( numFramesRead == MUS_ERROR )
         {

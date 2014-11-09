@@ -220,7 +220,7 @@ void AudioAnalyser::fillAubioInputBuffer( fvec_t* inputBuffer, const SharedSampl
     // Fill up the input buffer, converting stereo to mono if necessary
     for ( int chanNum = 0; chanNum < numChans; chanNum++ )
     {
-        const float* sampleData = sampleBuffer->getSampleData( chanNum, sampleOffset );
+        const float* sampleData = sampleBuffer->getReadPointer( chanNum, sampleOffset );
 
         const int numFramesToAdd = ( sampleOffset + hopSize <= numFrames ? hopSize : numFrames - sampleOffset );
 

@@ -878,7 +878,7 @@ int ApplyTimeStretchCommand::stretch( const SharedSampleBuffer sampleBuffer, con
 
     const int origNumFrames = tempBuffer->getNumFrames();
     const int newBufferSize = roundToInt( origNumFrames * timeRatio );
-    float** inFloatBuffer = new float*[ numChans ];
+    const float** inFloatBuffer = new const float*[ numChans ];
     float** outFloatBuffer = new float*[ numChans ];
     int inFrameNum = 0;
     int totalNumFramesRetrieved = 0;
@@ -899,8 +899,8 @@ int ApplyTimeStretchCommand::stretch( const SharedSampleBuffer sampleBuffer, con
 
     for ( int chanNum = 0; chanNum < numChans; chanNum++ )
     {
-        inFloatBuffer[ chanNum ] = tempBuffer->getArrayOfChannels()[ chanNum ];
-        outFloatBuffer[ chanNum ] = sampleBuffer->getArrayOfChannels()[ chanNum ];
+        inFloatBuffer[ chanNum ] = tempBuffer->getReadPointer( chanNum );
+        outFloatBuffer[ chanNum ] = sampleBuffer->getWritePointer( chanNum );
     }
 
     stretcher.study( inFloatBuffer, origNumFrames, true );
@@ -933,7 +933,7 @@ int ApplyTimeStretchCommand::stretch( const SharedSampleBuffer sampleBuffer, con
 
                 for ( int chanNum = 0; chanNum < numChans; chanNum++ )
                 {
-                    outFloatBuffer[ chanNum ] = sampleBuffer->getArrayOfChannels()[ chanNum ];
+                    outFloatBuffer[ chanNum ] = sampleBuffer->getWritePointer( chanNum );
                     outFloatBuffer[ chanNum ] += totalNumFramesRetrieved;
                 }
             }
@@ -969,7 +969,7 @@ int ApplyTimeStretchCommand::stretch( const SharedSampleBuffer sampleBuffer, con
 
                 for ( int chanNum = 0; chanNum < numChans; chanNum++ )
                 {
-                    outFloatBuffer[ chanNum ] = sampleBuffer->getArrayOfChannels()[ chanNum ];
+                    outFloatBuffer[ chanNum ] = sampleBuffer->getWritePointer( chanNum );
                     outFloatBuffer[ chanNum ] += totalNumFramesRetrieved;
                 }
             }

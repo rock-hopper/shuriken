@@ -107,7 +107,7 @@ public:
 
         @param numberOfSlots Specifies the number of hash entries the map will use. This will be
                             the "upperLimit" parameter that is passed to your generateHash()
-                            function. The number of hash buckets will grow automatically if necessary,
+                            function. The number of hash slots will grow automatically if necessary,
                             or it can be remapped manually using remapTable().
         @param hashFunction An instance of HashFunctionType, which will be copied and
                             stored to use with the HashMap. This parameter can be omitted
@@ -117,7 +117,7 @@ public:
                       HashFunctionType hashFunction = HashFunctionType())
        : hashFunctionToUse (hashFunction), totalNumItems (0)
     {
-        buckets.insertMultiple (0, nullptr, numberOfSlots);
+        hashSlots.insertMultiple (0, nullptr, numberOfSlots);
     }
 
     /** Destructor. */
@@ -128,16 +128,16 @@ public:
 
     //==============================================================================
     /** Removes all values from the map.
-        Note that this will clear the content, but won't affect the number of buckets (see
+        Note that this will clear the content, but won't affect the number of slots (see
         remapTable and getNumSlots).
     */
     void clear()
     {
         const ScopedLockType sl (getLock());
 
-        for (int i = buckets.size(); --i >= 0;)
+        for (int i = hashSlots.size(); --i >= 0;)
         {
-            HashEntry* h = buckets.getUnchecked(i);
+            HashEntry* h = hashSlots.getUnchecked(i);
 
             while (h != nullptr)
             {
@@ -145,7 +145,7 @@ public:
                 h = h->nextEntry;
             }
 
-            buckets.set (i, nullptr);
+            hashSlots.set (i, nullptr);
         }
 
         totalNumItems = 0;
@@ -166,7 +166,7 @@ public:
     {
         const ScopedLockType sl (getLock());
 
-        for (const HashEntry* entry = buckets.getUnchecked (generateHashFor (keyToLookFor)); entry != nullptr; entry = entry->nextEntry)
+        for (const HashEntry* entry = hashSlots.getUnchecked (generateHashFor (keyToLookFor)); entry != nullptr; entry = entry->nextEntry)
             if (entry->key == keyToLookFor)
                 return entry->value;
 
@@ -179,7 +179,7 @@ public:
     {
         const ScopedLockType sl (getLock());
 
-        for (const HashEntry* entry = buckets.getUnchecked (generateHashFor (keyToLookFor)); entry != nullptr; entry = entry->nextEntry)
+        for (const HashEntry* entry = hashSlots.getUnchecked (generateHashFor (keyToLookFor)); entry != nullptr; entry = entry->nextEntry)
             if (entry->key == keyToLookFor)
                 return true;
 
@@ -192,7 +192,7 @@ public:
         const ScopedLockType sl (getLock());
 
         for (int i = getNumSlots(); --i >= 0;)
-            for (const HashEntry* entry = buckets.getUnchecked(i); entry != nullptr; entry = entry->nextEntry)
+            for (const HashEntry* entry = hashSlots.getUnchecked(i); entry != nullptr; entry = entry->nextEntry)
                 if (entry->value == valueToLookFor)
                     return true;
 
@@ -209,7 +209,7 @@ public:
         const ScopedLockType sl (getLock());
         const int hashIndex = generateHashFor (newKey);
 
-        HashEntry* const firstEntry = buckets.getUnchecked (hashIndex);
+        HashEntry* const firstEntry = hashSlots.getUnchecked (hashIndex);
 
         for (HashEntry* entry = firstEntry; entry != nullptr; entry = entry->nextEntry)
         {
@@ -220,7 +220,7 @@ public:
             }
         }
 
-        buckets.set (hashIndex, new HashEntry (newKey, newValue, firstEntry));
+        hashSlots.set (hashIndex, new HashEntry (newKey, newValue, firstEntry));
         ++totalNumItems;
 
         if (totalNumItems > (getNumSlots() * 3) / 2)
@@ -232,7 +232,7 @@ public:
     {
         const ScopedLockType sl (getLock());
         const int hashIndex = generateHashFor (keyToRemove);
-        HashEntry* entry = buckets.getUnchecked (hashIndex);
+        HashEntry* entry = hashSlots.getUnchecked (hashIndex);
         HashEntry* previous = nullptr;
 
         while (entry != nullptr)
@@ -246,7 +246,7 @@ public:
                 if (previous != nullptr)
                     previous->nextEntry = entry;
                 else
-                    buckets.set (hashIndex, entry);
+                    hashSlots.set (hashIndex, entry);
 
                 --totalNumItems;
             }
@@ -265,7 +265,7 @@ public:
 
         for (int i = getNumSlots(); --i >= 0;)
         {
-            HashEntry* entry = buckets.getUnchecked(i);
+            HashEntry* entry = hashSlots.getUnchecked(i);
             HashEntry* previous = nullptr;
 
             while (entry != nullptr)
@@ -279,7 +279,7 @@ public:
                     if (previous != nullptr)
                         previous->nextEntry = entry;
                     else
-                        buckets.set (i, entry);
+                        hashSlots.set (i, entry);
 
                     --totalNumItems;
                 }
@@ -292,7 +292,7 @@ public:
         }
     }
 
-    /** Remaps the hash-map to use a different number of buckets for its hash function.
+    /** Remaps the hash-map to use a different number of slots for its hash function.
         Each slot corresponds to a single hash-code, and each one can contain multiple items.
         @see getNumSlots()
     */
@@ -301,19 +301,19 @@ public:
         HashMap newTable (newNumberOfSlots);
 
         for (int i = getNumSlots(); --i >= 0;)
-            for (const HashEntry* entry = buckets.getUnchecked(i); entry != nullptr; entry = entry->nextEntry)
+            for (const HashEntry* entry = hashSlots.getUnchecked(i); entry != nullptr; entry = entry->nextEntry)
                 newTable.set (entry->key, entry->value);
 
         swapWith (newTable);
     }
 
-    /** Returns the number of buckets which are available for hashing.
+    /** Returns the number of slots which are available for hashing.
         Each slot corresponds to a single hash-code, and each one can contain multiple items.
         @see getNumSlots()
     */
     inline int getNumSlots() const noexcept
     {
-        return buckets.size();
+        return hashSlots.size();
     }
 
     //==============================================================================
@@ -324,7 +324,7 @@ public:
         const ScopedLockType lock1 (getLock());
         const typename OtherHashMapType::ScopedLockType lock2 (otherHashMap.getLock());
 
-        buckets.swapWith (otherHashMap.buckets);
+        hashSlots.swapWith (otherHashMap.hashSlots);
         std::swap (totalNumItems, otherHashMap.totalNumItems);
     }
 
@@ -400,7 +400,7 @@ public:
                 if (index >= hashMap.getNumSlots())
                     return false;
 
-                entry = hashMap.buckets.getUnchecked (index++);
+                entry = hashMap.hashSlots.getUnchecked (index++);
             }
 
             return true;
@@ -437,7 +437,7 @@ private:
     friend class Iterator;
 
     HashFunctionType hashFunctionToUse;
-    Array <HashEntry*> buckets;
+    Array<HashEntry*> hashSlots;
     int totalNumItems;
     TypeOfCriticalSectionToUse lock;
 

@@ -163,7 +163,7 @@ void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buf
         readNextBufferChunk();
     }
 
-    mStretcher->retrieve( bufferToFill.buffer->getArrayOfChannels(), bufferToFill.numSamples );
+    mStretcher->retrieve( bufferToFill.buffer->getArrayOfWritePointers(), bufferToFill.numSamples );
 }
 
 
@@ -184,10 +184,10 @@ void RubberbandAudioSource::readNextBufferChunk()
 
         mSource->getNextAudioBlock( info );
 
-        mStretcher->process( mInputBuffer.getArrayOfChannels(), info.numSamples, false );
+        mStretcher->process( mInputBuffer.getArrayOfReadPointers(), info.numSamples, false );
     }
     else
     {
-        mStretcher->process( mInputBuffer.getArrayOfChannels(), 0, false );
+        mStretcher->process( mInputBuffer.getArrayOfReadPointers(), 0, false );
     }
 }

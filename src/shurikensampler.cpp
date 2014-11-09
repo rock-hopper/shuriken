@@ -174,7 +174,7 @@ void ShurikenSamplerVoice::startNote( const int midiNoteNumber,
 
 
 
-void ShurikenSamplerVoice::stopNote( const bool allowTailOff )
+void ShurikenSamplerVoice::stopNote( const float /*velocity*/, const bool allowTailOff )
 {
     ShurikenSamplerSound* const playingSound =
              dynamic_cast<ShurikenSamplerSound*>( getCurrentlyPlayingSound().get() );
@@ -217,12 +217,12 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
     if ( const ShurikenSamplerSound* const playingSound =
          static_cast<ShurikenSamplerSound*>( getCurrentlyPlayingSound().get() ) )
     {
-        const float* const inL = playingSound->mData->getSampleData( 0, 0 );
+        const float* const inL = playingSound->mData->getReadPointer( 0 );
         const float* const inR = playingSound->mData->getNumChannels() > 1
-                                    ? playingSound->mData->getSampleData( 1, 0 ) : nullptr;
+                                    ? playingSound->mData->getReadPointer( 1 ) : nullptr;
 
-        float* outL = outputBuffer.getSampleData( 0, startSample );
-        float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getSampleData( 1, startSample ) : nullptr;
+        float* outL = outputBuffer.getWritePointer( 0, startSample );
+        float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer( 1, startSample ) : nullptr;
 
         while ( --numSamples >= 0 )
         {
@@ -259,7 +259,7 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
 
                 if ( mAttackReleaseLevel <= 0.0f )
                 {
-                    stopNote( false );
+                    stopNote( 0.0f, false );
                     break;
                 }
             }
@@ -278,7 +278,7 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
 
             if ( mSourceSamplePosition > playingSound->mEndFrame )
             {
-                stopNote( false );
+                stopNote( 0.0f, false );
                 break;
             }
         }

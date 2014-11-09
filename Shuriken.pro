@@ -246,6 +246,7 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/juce_core/memory/juce_WeakReference.h \
     src/JuceLibraryCode/modules/juce_core/memory/juce_Singleton.h \
     src/JuceLibraryCode/modules/juce_core/memory/juce_ScopedPointer.h \
+    src/JuceLibraryCode/modules/juce_core/memory/juce_SharedResourcePointer.h \
     src/JuceLibraryCode/modules/juce_core/memory/juce_ReferenceCountedObject.h \
     src/JuceLibraryCode/modules/juce_core/memory/juce_OptionalScopedPointer.h \
     src/JuceLibraryCode/modules/juce_core/memory/juce_MemoryBlock.h \
@@ -330,7 +331,6 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/juce_core/zip/zlib/crc32.h \
     src/JuceLibraryCode/modules/juce_core/javascript/juce_JSON.h \
     src/JuceLibraryCode/modules/juce_core/javascript/juce_Javascript.h \
-    src/JuceLibraryCode/modules/juce_audio_devices/native/linux_midi.h \
     src/JuceLibraryCode/modules/juce_data_structures/juce_data_structures.h \
     src/JuceLibraryCode/modules/juce_data_structures/app_properties/juce_PropertiesFile.h \
     src/JuceLibraryCode/modules/juce_data_structures/app_properties/juce_ApplicationProperties.h \

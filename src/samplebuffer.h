@@ -30,6 +30,11 @@
 class SampleBuffer : public AudioSampleBuffer
 {
 public:
+    SampleBuffer() :
+            AudioSampleBuffer()
+    {
+    }
+
     SampleBuffer( int numChannels, int numFrames ) :
             AudioSampleBuffer( numChannels, numFrames )
     {

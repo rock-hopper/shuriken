@@ -189,7 +189,7 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
             painter->setRenderHint( QPainter::Antialiasing, true );
 
             QPointF points[ numVisibleFrames ];
-            float* sampleData = mSampleBuffer->getSampleData( chanNum, firstVisibleFrame );
+            const float* sampleData = mSampleBuffer->getReadPointer( chanNum, firstVisibleFrame );
 
             for ( int frameCount = 0; frameCount < numVisibleFrames; frameCount++ )
             {
@@ -527,21 +527,17 @@ void WaveformItem::resetSampleBins()
 void WaveformItem::findMinMaxSamples( const int startBin, const int endBin )
 {
     const int numChans = mSampleBuffer->getNumChannels();
-    float min;
-    float max;
 
     for ( int chanNum = 0; chanNum < numChans; chanNum++ )
     {
         for ( int binNum = startBin; binNum <= endBin; binNum++ )
         {
-            mSampleBuffer->findMinMax( chanNum,
-                                       int( binNum * mBinSize ),
-                                       (int) mBinSize,
-                                       min,
-                                       max);
+            Range<float> range = mSampleBuffer->findMinMax( chanNum,
+                                                            int( binNum * mBinSize ),
+                                                            int( mBinSize ) );
 
-            mMinSampleValues[ chanNum ]->set( binNum, min );
-            mMaxSampleValues[ chanNum ]->set( binNum, max );
+            mMinSampleValues[ chanNum ]->set( binNum, range.getStart() );
+            mMaxSampleValues[ chanNum ]->set( binNum, range.getEnd() );
         }
     }
 }

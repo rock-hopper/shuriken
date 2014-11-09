@@ -39,7 +39,7 @@
 #include <jack/session.h>
 
 #include "jack_device.h"
-#include "linux_midi.h"
+//#include "linux_midi.h"
 #include "globals.h"
 
 
@@ -355,7 +355,7 @@ private:
         jack_transport_query (mJackClient, mPositionInfo);
         gCurrentJackBPM = mPositionInfo->beats_per_minute;
 
-        if (mMidiPortIn != nullptr && gJackMidiClient != nullptr)
+        if (mMidiPortIn != nullptr) // && gJackMidiClient != nullptr)
         {
             void* buf = jack_port_get_buffer (mMidiPortIn, numFrames);
             jack_nframes_t event_count = jack_midi_get_event_count (buf);
@@ -367,7 +367,7 @@ private:
                 //std::cerr << "add event : "<< (void*)*(const uint8_t*)in_event.buffer << ", sz=" << in_event.size << " sample: " << in_event.time << "\n";
 
                 const MidiMessage message ((const uint8*) in_event.buffer, in_event.size, Time::getMillisecondCounter() * 0.001);
-                gJackMidiClient->handleIncomingMidiMessage (message, 0);
+                //gJackMidiClient->handleIncomingMidiMessage (message, 0);
             }
         }
 
