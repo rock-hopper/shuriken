@@ -23,6 +23,9 @@ Makefile
 
 debug/*
 release/*
-config.log
-config.status
+src/SndLibShuriken/config.log
+src/SndLibShuriken/config.status
+src/SndLibShuriken/sndlib-config
+src/SndLibShuriken/sndlib.pc
+src/SndLibShuriken/unix-config.h
 
