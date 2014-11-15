@@ -3,15 +3,18 @@
 declare -ra ARGS=("$@")
 declare -ri NUM_ARGS=$#
 
-declare isDebugBuild=false
-declare isToBeMadeClean=false
+declare isShurikenWanted=true
+declare isDebugWanted=false
+declare isCleanWanted=false
 
 
 function showUsage() 
 {
     cat << EOF
 
-Usage:  build [debug]
+Usage:  build
+        build sndlib
+        build debug
         build clean
 
 EOF
@@ -28,7 +31,18 @@ function clean()
 }
 
 
-function build()
+function makeSndlib()
+{
+    mkdir -p lib
+    cd src/SndLibShuriken
+    ./configure --without-audio --without-s7
+    make -w
+    mv -v libsndlib_shuriken.a ../../lib/
+    cd ../..
+}
+
+
+function makeShuriken()
 {
     declare archString=""
     declare arch=""
@@ -40,19 +54,10 @@ function build()
         arch="-64"
     fi
 
-    if $isDebugBuild; then
+    if $isDebugWanted; then
         configOptions="CONFIG+=debug"
     fi
 
-    # configure and make sndlib
-    mkdir -p lib
-    cd src/SndLibShuriken
-    ./configure --without-audio --without-s7
-    make -w
-    mv -v libsndlib_shuriken.a ../../lib/
-    cd ../..
-
-    # make shuriken
     qmake-qt4 ./Shuriken.pro -r -spec linux-g++$arch $configOptions
     make -w
 
@@ -69,8 +74,9 @@ function processArgs()
     if (( NUM_ARGS > 0 )); then
         while (( i < NUM_ARGS )); do
             case ${ARGS[$i]} in
-                clean )             isToBeMadeClean=true;;
-                debug )             isDebugBuild=true;;
+                sndlib )            isShurikenWanted=false;;
+                debug )             isDebugWanted=true;;
+                clean )             isCleanWanted=true;;
                 -h )                showUsage; exit 0;;
                 --help )            showUsage; exit 0;;
                 * )                 echo -e "\nInvalid arg: \"${ARGS[$i]}\""; showUsage; exit 1;;
@@ -81,12 +87,17 @@ function processArgs()
 }
 
 
+# Script starts executing from here
 
 processArgs
 
-if $isToBeMadeClean; then
+if $isCleanWanted; then
     clean
 else
-    build
+    makeSndlib
+
+    if $isShurikenWanted; then
+        makeShuriken
+    fi
 fi
 
