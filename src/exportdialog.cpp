@@ -147,16 +147,14 @@ int ExportDialog::getExportType() const
 
 int ExportDialog::getMidiFileType() const
 {
-    return 1;
-
-//    if ( mUI->radioButton_MidiType0->isChecked() )
-//    {
-//        return 0;
-//    }
-//    else // mUI->radioButton_MidiType1->isChecked()
-//    {
-//        return 1;
-//    }
+    if ( mUI->radioButton_MidiType0->isChecked() )
+    {
+        return 0;
+    }
+    else // mUI->radioButton_MidiType1->isChecked()
+    {
+        return 1;
+    }
 }
 
 
@@ -317,7 +315,7 @@ void ExportDialog::enableMidiFileTypeRadioButtons()
     {
         foreach ( QAbstractButton* button, mUI->buttonGroup_Midi->buttons() )
         {
-//            button->setEnabled( true );
+            button->setEnabled( true );
         }
     }
 }
