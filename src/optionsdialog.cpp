@@ -495,16 +495,16 @@ void OptionsDialog::updateMidiInputListWidget()
 
         for ( int i = 0; i < numMidiDevices; ++i )
         {
-            const String midiInputName( MidiInput::getDevices()[ i ] );
+            const String midiDeviceName( MidiInput::getDevices()[ i ] );
 
-            if ( midiInputName != "jackmidi" )
+            if ( ! isJackMidiDevice( midiDeviceName ) )
             {
                 QListWidgetItem* const listItem = new QListWidgetItem();
 
-                listItem->setText( midiInputName.toRawUTF8() );
+                listItem->setText( midiDeviceName.toRawUTF8() );
                 listItem->setFlags( Qt::ItemIsUserCheckable | Qt::ItemIsEnabled );
 
-                if ( mDeviceManager.isMidiInputEnabled( midiInputName ) )
+                if ( mDeviceManager.isMidiInputEnabled( midiDeviceName ) )
                 {
                     listItem->setCheckState( Qt::Checked );
                 }
@@ -517,7 +517,7 @@ void OptionsDialog::updateMidiInputListWidget()
             }
             else
             {
-                if ( mDeviceManager.isMidiInputEnabled( "jackmidi" ) )
+                if ( mDeviceManager.isMidiInputEnabled( "jackmidi" ) || mDeviceManager.isMidiInputEnabled( "a2jmidid" ) )
                 {
                     // Prevent user from enabling ALSA MIDI inputs as they conflict with JACK MIDI inputs
                     mUI->listWidget_MidiInput->setEnabled( false );
@@ -575,23 +575,33 @@ void OptionsDialog::tearDownMidiInputTestSynth()
 
 void OptionsDialog::setJackMidiInput( const String deviceName )
 {
+    const StringArray deviceNames = MidiInput::getDevices();
+
     if ( deviceName.startsWith( "JACK" ) && deviceName.contains( "MIDI" ) )
     {
         // Disable ALSA MIDI inputs as they conflict with JACK MIDI inputs
-        const StringArray deviceNames = MidiInput::getDevices();
         for ( int i = 0; i < deviceNames.size(); ++i )
         {
-            if ( deviceNames[ i ] != "jackmidi")
+            if ( isJackMidiDevice( deviceNames[i] ) )
             {
-                mDeviceManager.setMidiInputEnabled( deviceNames[ i ], false );
+                mDeviceManager.setMidiInputEnabled( deviceNames[i], true );
+            }
+            else
+            {
+                mDeviceManager.setMidiInputEnabled( deviceNames[i], false );
             }
         }
-
-        mDeviceManager.setMidiInputEnabled( "jackmidi", true );
     }
     else
     {
-        mDeviceManager.setMidiInputEnabled( "jackmidi", false );
+        // Disable JACK MIDI inputs
+        for ( int i = 0; i < deviceNames.size(); ++i )
+        {
+            if ( isJackMidiDevice( deviceNames[i] ) )
+            {
+                mDeviceManager.setMidiInputEnabled( deviceNames[i], false );
+            }
+        }
     }
 }
 
@@ -660,6 +670,17 @@ String OptionsDialog::getNameForChannelPair( const String& name1, const String& 
     }
 
     return name1.trim() + " + " + name2.substring( commonBit.length() ).trim();
+}
+
+
+
+bool OptionsDialog::isJackMidiDevice( const String deviceName )
+{
+    if ( deviceName == "jackmidi" || deviceName == "a2jmidid" )
+    {
+        return true;
+    }
+    return false;
 }
 
 

@@ -106,6 +106,7 @@ private:
 private:
     static String getNameForChannelPair( const String& name1, const String& name2 );
     static QString getNoDeviceString() { return "<< " + tr("none") + " >>"; }
+    static bool isJackMidiDevice( String deviceName );
 
 signals:
     void timeStretchOptionsChanged();

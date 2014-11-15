@@ -255,7 +255,7 @@ void MainWindow::setUpSampler()
     }
 
     mDeviceManager.addAudioCallback( &mAudioSourcePlayer );
-    mDeviceManager.addMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
+    mDeviceManager.addMidiInputCallback( String::empty, mSamplerAudioSource->getMidiInputCallback() );
 }
 
 
@@ -267,7 +267,7 @@ void MainWindow::tearDownSampler()
     mAudioSourcePlayer.setSource( NULL );
 
     mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
-    mDeviceManager.removeMidiInputCallback( String::empty, mSamplerAudioSource->getMidiMessageCollector() );
+    mDeviceManager.removeMidiInputCallback( String::empty, mSamplerAudioSource->getMidiInputCallback() );
 
     mRubberbandAudioSource = NULL;
     mSamplerAudioSource = NULL;

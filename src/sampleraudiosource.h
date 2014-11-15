@@ -41,7 +41,7 @@ public:
     void stop();
     void setLooping( const bool isLoopingDesired );
 
-    MidiMessageCollector* getMidiMessageCollector()     { return &mMidiCollector; }
+    MidiMessageCollector* getMidiInputCallback()     { return &mMidiCollector; }
 
     // For JUCE use only!
     void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;

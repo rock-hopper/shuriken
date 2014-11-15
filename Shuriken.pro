@@ -210,7 +210,9 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/juce_audio_devices/midi_io/juce_MidiOutput.h \
     src/JuceLibraryCode/modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.h \
     src/JuceLibraryCode/modules/juce_audio_devices/midi_io/juce_MidiInput.h \
+    src/JuceLibraryCode/modules/juce_audio_devices/native/jack_device.h \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_MidiDataConcatenator.h \
+    src/JuceLibraryCode/modules/juce_audio_devices/native/linux_midi.h \
     src/JuceLibraryCode/modules/juce_audio_devices/sources/juce_AudioTransportSource.h \
     src/JuceLibraryCode/modules/juce_audio_devices/sources/juce_AudioSourcePlayer.h \
     src/JuceLibraryCode/modules/juce_core/juce_core.h \
@@ -359,7 +361,6 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/juce_events/native/juce_osx_MessageQueue.h \
     src/JuceLibraryCode/modules/juce_events/timers/juce_Timer.h \
     src/JuceLibraryCode/modules/juce_events/timers/juce_MultiTimer.h \
-    src/JuceLibraryCode/modules/juce_audio_devices/native/jack_device.h \
     src/mainwindow.h \
     src/wavegraphicsview.h \
     src/waveformitem.h \

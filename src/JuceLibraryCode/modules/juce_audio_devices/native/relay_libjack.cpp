@@ -2,7 +2,7 @@
   This file contains code originally written by "jpo"
   <http://www.juce.com/comment/296820#comment-296820>
 
-  All modifications to this file by Andrew M Taylor <a.m.taylor303@gmail.com>, 2014
+  All modifications to jpo's code by Andrew M Taylor <a.m.taylor303@gmail.com>, 2014
 
   This is free and unencumbered software released into the public domain.
   Please read UNLICENSE for more details, or refer to <http://unlicense.org/>
