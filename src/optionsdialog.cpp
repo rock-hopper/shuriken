@@ -35,31 +35,31 @@
 
 OptionsDialog::OptionsDialog( AudioDeviceManager& deviceManager, QWidget* parent ) :
     QDialog( parent ),
-    mUI( new Ui::OptionsDialog ),
-    mDeviceManager( deviceManager ),
-    mStretcherOptions( RubberBandStretcher::DefaultOptions )
+    m_UI( new Ui::OptionsDialog ),
+    m_deviceManager( deviceManager ),
+    m_stretcherOptions( RubberBandStretcher::DefaultOptions )
 {
     // Setup user interface
-    mUI->setupUi( this );
+    m_UI->setupUi( this );
 
 
     // Get available audio backends (ALSA, JACK, etc.)
-    const OwnedArray<AudioIODeviceType>& audioBackendTypes = mDeviceManager.getAvailableDeviceTypes();
+    const OwnedArray<AudioIODeviceType>& audioBackendTypes = m_deviceManager.getAvailableDeviceTypes();
 
 
     // Populate audio backend combo box
     for ( int i = 0; i < audioBackendTypes.size(); ++i )
     {
         const QString backendName = audioBackendTypes.getUnchecked( i )->getTypeName().toRawUTF8();
-        mUI->comboBox_AudioBackend->addItem( backendName );
+        m_UI->comboBox_AudioBackend->addItem( backendName );
     }
 
 
     // Select current audio backend
-    const QString backendName = mDeviceManager.getCurrentAudioDeviceType().toRawUTF8();
-    const int index = mUI->comboBox_AudioBackend->findText( backendName );
+    const QString backendName = m_deviceManager.getCurrentAudioDeviceType().toRawUTF8();
+    const int index = m_UI->comboBox_AudioBackend->findText( backendName );
 
-    mUI->comboBox_AudioBackend->setCurrentIndex( index );
+    m_UI->comboBox_AudioBackend->setCurrentIndex( index );
     on_comboBox_AudioBackend_activated( index ); // This will update all the other widgets
 
 
@@ -71,21 +71,21 @@ OptionsDialog::OptionsDialog( AudioDeviceManager& deviceManager, QWidget* parent
 
 OptionsDialog::~OptionsDialog()
 {
-    delete mUI;
+    delete m_UI;
 }
 
 
 
 void OptionsDialog::setCurrentTab( const Tab tab )
 {
-    mUI->tabWidget->setCurrentIndex( tab );
+    m_UI->tabWidget->setCurrentIndex( tab );
 }
 
 
 
 bool OptionsDialog::isRealtimeModeEnabled() const
 {
-    return mUI->radioButton_RealTime->isChecked();
+    return m_UI->radioButton_RealTime->isChecked();
 }
 
 
@@ -94,83 +94,83 @@ void OptionsDialog::setStretcherOptions( const RubberBandStretcher::Options opti
 {
     if ( options & RubberBandStretcher::OptionProcessRealTime )
     {
-        mUI->radioButton_RealTime->click();
+        m_UI->radioButton_RealTime->click();
     }
     else // RubberBandStretcher::OptionProcessOffline
     {
-        mUI->radioButton_Offline->click();
+        m_UI->radioButton_Offline->click();
     }
 
 
     if ( options & RubberBandStretcher::OptionStretchPrecise )
     {
-        mUI->radioButton_Precise->click();
+        m_UI->radioButton_Precise->click();
     }
     else // RubberBandStretcher::OptionStretchElastic
     {
-        mUI->radioButton_Elastic->click();
+        m_UI->radioButton_Elastic->click();
     }
 
 
     if ( options & RubberBandStretcher::OptionTransientsMixed )
     {
-        mUI->radioButton_Mixed->click();
+        m_UI->radioButton_Mixed->click();
     }
     else if ( options & RubberBandStretcher::OptionTransientsSmooth )
     {
-        mUI->radioButton_Smooth->click();
+        m_UI->radioButton_Smooth->click();
     }
     else // RubberBandStretcher::OptionTransientsCrisp
     {
-        mUI->radioButton_Crisp->click();
+        m_UI->radioButton_Crisp->click();
     }
 
 
     if ( options & RubberBandStretcher::OptionPhaseIndependent )
     {
-        mUI->radioButton_Independent->click();
+        m_UI->radioButton_Independent->click();
     }
     else // RubberBandStretcher::OptionPhaseLaminar
     {
-        mUI->radioButton_Laminar->click();
+        m_UI->radioButton_Laminar->click();
     }
 
 
     if ( options & RubberBandStretcher::OptionWindowShort )
     {
-        mUI->radioButton_Short->click();
+        m_UI->radioButton_Short->click();
     }
     else if ( options & RubberBandStretcher::OptionWindowLong )
     {
-        mUI->radioButton_Long->click();
+        m_UI->radioButton_Long->click();
     }
     else // RubberBandStretcher::OptionWindowStandard
     {
-        mUI->radioButton_Standard->click();
+        m_UI->radioButton_Standard->click();
     }
 
 
     if ( options & RubberBandStretcher::OptionFormantPreserved )
     {
-        mUI->radioButton_Preserved->click();
+        m_UI->radioButton_Preserved->click();
     }
     else // RubberBandStretcher::OptionFormantShifted
     {
-        mUI->radioButton_Shifted->click();
+        m_UI->radioButton_Shifted->click();
     }
 
 
     if ( options & RubberBandStretcher::OptionPitchHighQuality )
     {
-        mUI->radioButton_HighQuality->click();
+        m_UI->radioButton_HighQuality->click();
     }
     else if ( options & RubberBandStretcher::OptionPitchHighConsistency )
     {
-        mUI->radioButton_HighConsistency->click();
+        m_UI->radioButton_HighConsistency->click();
     }
     else // RubberBandStretcher::OptionPitchHighSpeed
     {
-        mUI->radioButton_HighSpeed->click();
+        m_UI->radioButton_HighSpeed->click();
     }
 }
 
@@ -178,14 +178,14 @@ void OptionsDialog::setStretcherOptions( const RubberBandStretcher::Options opti
 
 bool OptionsDialog::isJackSyncEnabled() const
 {
-    return mUI->checkBox_JackSync->isChecked();
+    return m_UI->checkBox_JackSync->isChecked();
 }
 
 
 
 void OptionsDialog::enableJackSync()
 {
-    mUI->checkBox_JackSync->setChecked( true );
+    m_UI->checkBox_JackSync->setChecked( true );
 }
 
 
@@ -200,7 +200,7 @@ void OptionsDialog::changeEvent( QEvent* event )
     switch ( event->type() )
     {
     case QEvent::LanguageChange:
-        mUI->retranslateUi( this );
+        m_UI->retranslateUi( this );
         break;
     default:
         break;
@@ -216,13 +216,13 @@ void OptionsDialog::showEvent( QShowEvent* event )
     {
         // Get current audio settings and store them so that any changes
         // can be reverted if the user later clicks "Cancel"
-        mDeviceManager.getAudioDeviceSetup( mOriginalConfig );
+        m_deviceManager.getAudioDeviceSetup( m_originalConfig );
 
-        const QString backendName = mDeviceManager.getCurrentAudioDeviceType().toRawUTF8();
-        mOriginalBackendIndex = mUI->comboBox_AudioBackend->findText( backendName );
+        const QString backendName = m_deviceManager.getCurrentAudioDeviceType().toRawUTF8();
+        m_originalBackendIndex = m_UI->comboBox_AudioBackend->findText( backendName );
 
 
-        if ( mUI->checkBox_MidiInputTestTone->isChecked() )
+        if ( m_UI->checkBox_MidiInputTestTone->isChecked() )
         {
             setUpMidiInputTestSynth();
         }
@@ -268,13 +268,13 @@ void OptionsDialog::setTempDirPath()
     }
 
     // Set up validator
-    mDirectoryValidator = new DirectoryValidator();
-    mUI->lineEdit_TempDir->setValidator( mDirectoryValidator );
+    m_directoryValidator = new DirectoryValidator();
+    m_UI->lineEdit_TempDir->setValidator( m_directoryValidator );
 
-    QObject::connect( mDirectoryValidator, SIGNAL( isValid(bool) ),
+    QObject::connect( m_directoryValidator, SIGNAL( isValid(bool) ),
                       this, SLOT( displayDirValidityText(bool) ) );
 
-    mUI->lineEdit_TempDir->setText( tempDirPath );
+    m_UI->lineEdit_TempDir->setText( tempDirPath );
 
     // Create a sub-dir with a unique name; there may be multiple instances of Shuriken running
     QDir tempDir( tempDirPath );
@@ -293,7 +293,7 @@ void OptionsDialog::setTempDirPath()
 
     if ( isSuccessful )
     {
-        mTempDirPath = tempDir.absoluteFilePath( subDirName );
+        m_tempDirPath = tempDir.absoluteFilePath( subDirName );
     }
 }
 
@@ -301,14 +301,14 @@ void OptionsDialog::setTempDirPath()
 
 bool OptionsDialog::isJackAudioEnabled() const
 {
-    return ( mDeviceManager.getCurrentAudioDeviceType() == "JACK" );
+    return ( m_deviceManager.getCurrentAudioDeviceType() == "JACK" );
 }
 
 
 
 void OptionsDialog::updateAudioDeviceComboBox()
 {
-    AudioIODeviceType* const audioBackendType = mDeviceManager.getCurrentDeviceTypeObject();
+    AudioIODeviceType* const audioBackendType = m_deviceManager.getCurrentDeviceTypeObject();
 
     if ( audioBackendType != NULL )
     {
@@ -317,22 +317,22 @@ void OptionsDialog::updateAudioDeviceComboBox()
         const StringArray audioDeviceNames( audioBackendType->getDeviceNames( false ) );
 
         // Populate combo box
-        mUI->comboBox_AudioDevice->clear();
+        m_UI->comboBox_AudioDevice->clear();
 
         for ( int i = 0; i < audioDeviceNames.size(); ++i )
         {
-            mUI->comboBox_AudioDevice->addItem( audioDeviceNames[i].toRawUTF8() );
+            m_UI->comboBox_AudioDevice->addItem( audioDeviceNames[i].toRawUTF8() );
         }
 
-        mUI->comboBox_AudioDevice->addItem( getNoDeviceString() );
+        m_UI->comboBox_AudioDevice->addItem( getNoDeviceString() );
 
         // Select current audio device
-        AudioIODevice* const currentAudioDevice = mDeviceManager.getCurrentAudioDevice();
+        AudioIODevice* const currentAudioDevice = m_deviceManager.getCurrentAudioDevice();
 
         if ( currentAudioDevice != NULL )
         {
             const int index = audioBackendType->getIndexOfDevice( currentAudioDevice, false );
-            mUI->comboBox_AudioDevice->setCurrentIndex( index );
+            m_UI->comboBox_AudioDevice->setCurrentIndex( index );
         }
     }
 }
@@ -341,23 +341,23 @@ void OptionsDialog::updateAudioDeviceComboBox()
 
 void OptionsDialog::updateOutputChannelComboBox()
 {
-    mUI->comboBox_OutputChannels->clear();
+    m_UI->comboBox_OutputChannels->clear();
 
     if ( isJackAudioEnabled() )
     {
-        mUI->comboBox_OutputChannels->setVisible( false );
-        mUI->label_OutputChannels->setVisible( false );
+        m_UI->comboBox_OutputChannels->setVisible( false );
+        m_UI->label_OutputChannels->setVisible( false );
     }
     else
     {
-        mUI->comboBox_OutputChannels->setVisible( true );
-        mUI->label_OutputChannels->setVisible( true );
+        m_UI->comboBox_OutputChannels->setVisible( true );
+        m_UI->label_OutputChannels->setVisible( true );
 
-        AudioIODevice* const currentAudioDevice = mDeviceManager.getCurrentAudioDevice();
+        AudioIODevice* const currentAudioDevice = m_deviceManager.getCurrentAudioDevice();
 
         if ( currentAudioDevice != NULL )
         {
-            mUI->comboBox_OutputChannels->setEnabled( true );
+            m_UI->comboBox_OutputChannels->setEnabled( true );
 
             StringArray channelNames;
             channelNames = currentAudioDevice->getOutputChannelNames();
@@ -386,13 +386,13 @@ void OptionsDialog::updateOutputChannelComboBox()
                 BigInteger channels;
                 channels.setRange( startBit, numBits, shouldBeSet );
 
-                mUI->comboBox_OutputChannels->addItem( channelNames[i].toRawUTF8(), channels.toInt64() );
+                m_UI->comboBox_OutputChannels->addItem( channelNames[i].toRawUTF8(), channels.toInt64() );
             }
         }
         else
         {
-            mUI->comboBox_OutputChannels->addItem( getNoDeviceString() );
-            mUI->comboBox_OutputChannels->setEnabled( false );
+            m_UI->comboBox_OutputChannels->addItem( getNoDeviceString() );
+            m_UI->comboBox_OutputChannels->setEnabled( false );
         }
     }
 }
@@ -401,36 +401,36 @@ void OptionsDialog::updateOutputChannelComboBox()
 
 void OptionsDialog::updateSampleRateComboBox()
 {
-    mUI->comboBox_SampleRate->clear();
+    m_UI->comboBox_SampleRate->clear();
 
-    AudioIODevice* const currentAudioDevice = mDeviceManager.getCurrentAudioDevice();
+    AudioIODevice* const currentAudioDevice = m_deviceManager.getCurrentAudioDevice();
 
     if ( currentAudioDevice != NULL )
     {
-        mUI->comboBox_SampleRate->setEnabled( true );
+        m_UI->comboBox_SampleRate->setEnabled( true );
 
         const Array<double> sampleRates( currentAudioDevice->getAvailableSampleRates() );
 
         for ( int i = 0; i < sampleRates.size(); ++i )
         {
             const int sampleRate = roundToInt( sampleRates[i] );
-            mUI->comboBox_SampleRate->addItem( QString::number( sampleRate ) + " Hz", sampleRate );
+            m_UI->comboBox_SampleRate->addItem( QString::number( sampleRate ) + " Hz", sampleRate );
         }
 
         // Select current sample rate
         const int currentSampleRate = roundToInt( currentAudioDevice->getCurrentSampleRate() );
-        const int index = mUI->comboBox_SampleRate->findData( currentSampleRate );
-        mUI->comboBox_SampleRate->setCurrentIndex( index );
+        const int index = m_UI->comboBox_SampleRate->findData( currentSampleRate );
+        m_UI->comboBox_SampleRate->setCurrentIndex( index );
     }
     else
     {
-        mUI->comboBox_SampleRate->addItem( getNoDeviceString() );
-        mUI->comboBox_SampleRate->setEnabled( false );
+        m_UI->comboBox_SampleRate->addItem( getNoDeviceString() );
+        m_UI->comboBox_SampleRate->setEnabled( false );
     }
 
     if ( isJackAudioEnabled() )
     {
-        mUI->comboBox_SampleRate->setEnabled( false );
+        m_UI->comboBox_SampleRate->setEnabled( false );
     }
 }
 
@@ -438,13 +438,13 @@ void OptionsDialog::updateSampleRateComboBox()
 
 void OptionsDialog::updateBufferSizeComboBox()
 {
-    mUI->comboBox_BufferSize->clear();
+    m_UI->comboBox_BufferSize->clear();
 
-    AudioIODevice* const currentAudioDevice = mDeviceManager.getCurrentAudioDevice();
+    AudioIODevice* const currentAudioDevice = m_deviceManager.getCurrentAudioDevice();
 
     if ( currentAudioDevice != NULL )
     {
-        mUI->comboBox_BufferSize->setEnabled( true );
+        m_UI->comboBox_BufferSize->setEnabled( true );
 
         const Array<int> bufferSizes( currentAudioDevice->getAvailableBufferSizes() );
         double currentRate = currentAudioDevice->getCurrentSampleRate();
@@ -458,7 +458,7 @@ void OptionsDialog::updateBufferSizeComboBox()
         for ( int i = 0; i < bufferSizes.size(); ++i )
         {
             const int bufferSize = bufferSizes[i];
-            mUI->comboBox_BufferSize->addItem( QString::number( bufferSize )
+            m_UI->comboBox_BufferSize->addItem( QString::number( bufferSize )
                                               + " samples ("
                                               + QString::number( bufferSize * 1000.0 / currentRate, format, precision )
                                               + " ms)",
@@ -466,18 +466,18 @@ void OptionsDialog::updateBufferSizeComboBox()
         }
 
         // Select current buffer size
-        const int index = mUI->comboBox_BufferSize->findData( currentAudioDevice->getCurrentBufferSizeSamples() );
-        mUI->comboBox_BufferSize->setCurrentIndex( index );
+        const int index = m_UI->comboBox_BufferSize->findData( currentAudioDevice->getCurrentBufferSizeSamples() );
+        m_UI->comboBox_BufferSize->setCurrentIndex( index );
     }
     else
     {
-        mUI->comboBox_BufferSize->addItem( getNoDeviceString() );
-        mUI->comboBox_BufferSize->setEnabled( false );
+        m_UI->comboBox_BufferSize->addItem( getNoDeviceString() );
+        m_UI->comboBox_BufferSize->setEnabled( false );
     }
 
     if ( isJackAudioEnabled() )
     {
-        mUI->comboBox_BufferSize->setEnabled( false );
+        m_UI->comboBox_BufferSize->setEnabled( false );
     }
 }
 
@@ -485,13 +485,13 @@ void OptionsDialog::updateBufferSizeComboBox()
 
 void OptionsDialog::updateMidiInputListWidget()
 {
-    mUI->listWidget_MidiInput->clear();
+    m_UI->listWidget_MidiInput->clear();
 
     const int numMidiDevices = MidiInput::getDevices().size();
 
     if ( numMidiDevices > 0 )
     {
-        mUI->listWidget_MidiInput->setEnabled( true );
+        m_UI->listWidget_MidiInput->setEnabled( true );
 
         for ( int i = 0; i < numMidiDevices; ++i )
         {
@@ -504,7 +504,7 @@ void OptionsDialog::updateMidiInputListWidget()
                 listItem->setText( midiDeviceName.toRawUTF8() );
                 listItem->setFlags( Qt::ItemIsUserCheckable | Qt::ItemIsEnabled );
 
-                if ( mDeviceManager.isMidiInputEnabled( midiDeviceName ) )
+                if ( m_deviceManager.isMidiInputEnabled( midiDeviceName ) )
                 {
                     listItem->setCheckState( Qt::Checked );
                 }
@@ -513,14 +513,14 @@ void OptionsDialog::updateMidiInputListWidget()
                     listItem->setCheckState( Qt::Unchecked );
                 }
 
-                mUI->listWidget_MidiInput->addItem( listItem );
+                m_UI->listWidget_MidiInput->addItem( listItem );
             }
             else
             {
-                if ( mDeviceManager.isMidiInputEnabled( "jackmidi" ) || mDeviceManager.isMidiInputEnabled( "a2jmidid" ) )
+                if ( m_deviceManager.isMidiInputEnabled( "jackmidi" ) || m_deviceManager.isMidiInputEnabled( "a2jmidid" ) )
                 {
                     // Prevent user from enabling ALSA MIDI inputs as they conflict with JACK MIDI inputs
-                    mUI->listWidget_MidiInput->setEnabled( false );
+                    m_UI->listWidget_MidiInput->setEnabled( false );
                 }
             }
         }
@@ -528,8 +528,8 @@ void OptionsDialog::updateMidiInputListWidget()
     else
     {
         // No MIDI
-        mUI->listWidget_MidiInput->addItem( getNoDeviceString() );
-        mUI->listWidget_MidiInput->setEnabled( false );
+        m_UI->listWidget_MidiInput->addItem( getNoDeviceString() );
+        m_UI->listWidget_MidiInput->setEnabled( false );
     }
 }
 
@@ -537,38 +537,38 @@ void OptionsDialog::updateMidiInputListWidget()
 
 void OptionsDialog::disableAllWidgets()
 {
-    mUI->comboBox_AudioBackend->addItem( getNoDeviceString() );
-    mUI->comboBox_AudioDevice->addItem( getNoDeviceString() );
-    mUI->comboBox_OutputChannels->addItem( getNoDeviceString() );
-    mUI->comboBox_SampleRate->addItem( getNoDeviceString() );
-    mUI->comboBox_BufferSize->addItem( getNoDeviceString() );
-    mUI->listWidget_MidiInput->addItem( getNoDeviceString() );
+    m_UI->comboBox_AudioBackend->addItem( getNoDeviceString() );
+    m_UI->comboBox_AudioDevice->addItem( getNoDeviceString() );
+    m_UI->comboBox_OutputChannels->addItem( getNoDeviceString() );
+    m_UI->comboBox_SampleRate->addItem( getNoDeviceString() );
+    m_UI->comboBox_BufferSize->addItem( getNoDeviceString() );
+    m_UI->listWidget_MidiInput->addItem( getNoDeviceString() );
 
-    mUI->comboBox_AudioBackend->setEnabled( false );
-    mUI->comboBox_AudioDevice->setEnabled( false );
-    mUI->comboBox_OutputChannels->setEnabled( false );
-    mUI->comboBox_SampleRate->setEnabled( false );
-    mUI->comboBox_BufferSize->setEnabled( false );
-    mUI->listWidget_MidiInput->setEnabled( false );
+    m_UI->comboBox_AudioBackend->setEnabled( false );
+    m_UI->comboBox_AudioDevice->setEnabled( false );
+    m_UI->comboBox_OutputChannels->setEnabled( false );
+    m_UI->comboBox_SampleRate->setEnabled( false );
+    m_UI->comboBox_BufferSize->setEnabled( false );
+    m_UI->listWidget_MidiInput->setEnabled( false );
 }
 
 
 
 void OptionsDialog::setUpMidiInputTestSynth()
 {
-    mSynthAudioSource = new SynthAudioSource();
-    mAudioSourcePlayer.setSource( mSynthAudioSource );
-    mDeviceManager.addAudioCallback( &mAudioSourcePlayer );
-    mDeviceManager.addMidiInputCallback( String::empty, &(mSynthAudioSource->midiCollector) );
+    m_synthAudioSource = new SynthAudioSource();
+    m_audioSourcePlayer.setSource( m_synthAudioSource );
+    m_deviceManager.addAudioCallback( &m_audioSourcePlayer );
+    m_deviceManager.addMidiInputCallback( String::empty, &(m_synthAudioSource->m_midiCollector) );
 }
 
 
 
 void OptionsDialog::tearDownMidiInputTestSynth()
 {
-    mAudioSourcePlayer.setSource( NULL );
-    mDeviceManager.removeMidiInputCallback( String::empty, &(mSynthAudioSource->midiCollector) );
-    mDeviceManager.removeAudioCallback( &mAudioSourcePlayer );
+    m_audioSourcePlayer.setSource( NULL );
+    m_deviceManager.removeMidiInputCallback( String::empty, &(m_synthAudioSource->m_midiCollector) );
+    m_deviceManager.removeAudioCallback( &m_audioSourcePlayer );
 }
 
 
@@ -584,11 +584,11 @@ void OptionsDialog::setJackMidiInput( const String deviceName )
         {
             if ( isJackMidiDevice( deviceNames[i] ) )
             {
-                mDeviceManager.setMidiInputEnabled( deviceNames[i], true );
+                m_deviceManager.setMidiInputEnabled( deviceNames[i], true );
             }
             else
             {
-                mDeviceManager.setMidiInputEnabled( deviceNames[i], false );
+                m_deviceManager.setMidiInputEnabled( deviceNames[i], false );
             }
         }
     }
@@ -599,7 +599,7 @@ void OptionsDialog::setJackMidiInput( const String deviceName )
         {
             if ( isJackMidiDevice( deviceNames[i] ) )
             {
-                mDeviceManager.setMidiInputEnabled( deviceNames[i], false );
+                m_deviceManager.setMidiInputEnabled( deviceNames[i], false );
             }
         }
     }
@@ -609,14 +609,14 @@ void OptionsDialog::setJackMidiInput( const String deviceName )
 
 void OptionsDialog::enableStretcherOptions( const RubberBandStretcher::Options options )
 {
-    mStretcherOptions |= options;
+    m_stretcherOptions |= options;
 }
 
 
 
 void OptionsDialog::disableStretcherOptions( const RubberBandStretcher::Options options )
 {
-    mStretcherOptions &= ~options;
+    m_stretcherOptions &= ~options;
 }
 
 
@@ -624,7 +624,7 @@ void OptionsDialog::disableStretcherOptions( const RubberBandStretcher::Options 
 void OptionsDialog::saveConfig()
 {
     // Save audio setup config
-    ScopedPointer<XmlElement> stateXml( mDeviceManager.createStateXml() );
+    ScopedPointer<XmlElement> stateXml( m_deviceManager.createStateXml() );
 
     if ( stateXml != NULL )
     {
@@ -636,7 +636,7 @@ void OptionsDialog::saveConfig()
     // Save paths config
     XmlElement docElement( "paths" );
 
-    const QString tempDir = mUI->lineEdit_TempDir->text();
+    const QString tempDir = m_UI->lineEdit_TempDir->text();
 
     XmlElement* tempDirElem = new XmlElement( "temp_dir" );
     tempDirElem->setAttribute( "path", tempDir.toLocal8Bit().data() );
@@ -703,19 +703,19 @@ void OptionsDialog::reject()
 {
     tearDownMidiInputTestSynth();
 
-    mUI->comboBox_AudioBackend->setCurrentIndex( mOriginalBackendIndex );
-    on_comboBox_AudioBackend_activated( mOriginalBackendIndex ); // This will update all the other widgets
+    m_UI->comboBox_AudioBackend->setCurrentIndex( m_originalBackendIndex );
+    on_comboBox_AudioBackend_activated( m_originalBackendIndex ); // This will update all the other widgets
 
-    mDeviceManager.setAudioDeviceSetup( mOriginalConfig, true );
+    m_deviceManager.setAudioDeviceSetup( m_originalConfig, true );
 
     updateAudioDeviceComboBox();
     updateOutputChannelComboBox();
     updateSampleRateComboBox();
     updateBufferSizeComboBox();
 
-    QDir tempDir( mTempDirPath );
+    QDir tempDir( m_tempDirPath );
     tempDir.cdUp();
-    mUI->lineEdit_TempDir->setText( tempDir.absolutePath() );
+    m_UI->lineEdit_TempDir->setText( tempDir.absolutePath() );
 
     QDialog::reject();
 }
@@ -726,11 +726,11 @@ void OptionsDialog::displayDirValidityText( const bool isValid )
 {
     if ( isValid )
     {
-        mUI->label_DirValidity->clear();
+        m_UI->label_DirValidity->clear();
     }
     else
     {
-        mUI->label_DirValidity->setText( tr("Dir doesn't exist") );
+        m_UI->label_DirValidity->setText( tr("Dir doesn't exist") );
     }
 }
 
@@ -742,16 +742,16 @@ void OptionsDialog::displayDirValidityText( const bool isValid )
 void OptionsDialog::on_comboBox_AudioBackend_activated( const int index )
 {
     // Set audio backend
-    AudioIODeviceType* const audioBackendType = mDeviceManager.getAvailableDeviceTypes()[ index ];
+    AudioIODeviceType* const audioBackendType = m_deviceManager.getAvailableDeviceTypes()[ index ];
     const String audioBackendName = audioBackendType->getTypeName();
-    mDeviceManager.setCurrentAudioDeviceType( audioBackendName, true );
+    m_deviceManager.setCurrentAudioDeviceType( audioBackendName, true );
 
     // Get current audio settings
     AudioDeviceManager::AudioDeviceSetup config;
-    mDeviceManager.getAudioDeviceSetup( config );
+    m_deviceManager.getAudioDeviceSetup( config );
 
     // Set current settings again simply to get any error message that may be produced
-    String error = mDeviceManager.setAudioDeviceSetup( config, true );
+    String error = m_deviceManager.setAudioDeviceSetup( config, true );
 
     // If this is a JACK audio device then also enable JACK MIDI if required
     setJackMidiInput( config.outputDeviceName );
@@ -765,12 +765,12 @@ void OptionsDialog::on_comboBox_AudioBackend_activated( const int index )
 
     if ( isJackAudioEnabled() && isRealtimeModeEnabled() )
     {
-        mUI->checkBox_JackSync->setEnabled( true );
+        m_UI->checkBox_JackSync->setEnabled( true );
     }
     else
     {
-        mUI->checkBox_JackSync->setEnabled( false );
-        mUI->checkBox_JackSync->setChecked( false );
+        m_UI->checkBox_JackSync->setEnabled( false );
+        m_UI->checkBox_JackSync->setChecked( false );
     }
 
     if ( error.isNotEmpty() )
@@ -788,7 +788,7 @@ void OptionsDialog::on_comboBox_AudioDevice_activated( const QString deviceName 
 
     // Get current audio settings
     AudioDeviceManager::AudioDeviceSetup config;
-    mDeviceManager.getAudioDeviceSetup( config );
+    m_deviceManager.getAudioDeviceSetup( config );
     String error;
 
     // Update audio settings
@@ -805,7 +805,7 @@ void OptionsDialog::on_comboBox_AudioDevice_activated( const QString deviceName 
         }
 
         config.useDefaultOutputChannels = true;
-        error = mDeviceManager.setAudioDeviceSetup( config, true );
+        error = m_deviceManager.setAudioDeviceSetup( config, true );
 
         // If this is a JACK audio device then also enable JACK MIDI if required
         setJackMidiInput( outputDeviceName );
@@ -827,18 +827,18 @@ void OptionsDialog::on_comboBox_AudioDevice_activated( const QString deviceName 
 
 void OptionsDialog::on_pushButton_TestTone_clicked()
 {
-    mDeviceManager.playTestSound();
+    m_deviceManager.playTestSound();
 }
 
 
 
 void OptionsDialog::on_comboBox_OutputChannels_activated( const int index )
 {
-    const int64 channelBits = mUI->comboBox_OutputChannels->itemData( index ).toLongLong();
+    const int64 channelBits = m_UI->comboBox_OutputChannels->itemData( index ).toLongLong();
     const BigInteger channels( channelBits );
 
     AudioDeviceManager::AudioDeviceSetup config;
-    mDeviceManager.getAudioDeviceSetup( config );
+    m_deviceManager.getAudioDeviceSetup( config );
     String error;
 
     if ( channels != config.outputChannels )
@@ -846,7 +846,7 @@ void OptionsDialog::on_comboBox_OutputChannels_activated( const int index )
         config.useDefaultOutputChannels = false;
         config.outputChannels = channels;
 
-        error = mDeviceManager.setAudioDeviceSetup( config, true );
+        error = m_deviceManager.setAudioDeviceSetup( config, true );
     }
 
     if ( error.isNotEmpty() )
@@ -859,18 +859,18 @@ void OptionsDialog::on_comboBox_OutputChannels_activated( const int index )
 
 void OptionsDialog::on_comboBox_SampleRate_activated( const int index )
 {
-    const int sampleRate = mUI->comboBox_SampleRate->itemData( index ).toInt();
+    const int sampleRate = m_UI->comboBox_SampleRate->itemData( index ).toInt();
 
     // Get current audio settings
     AudioDeviceManager::AudioDeviceSetup config;
-    mDeviceManager.getAudioDeviceSetup( config );
+    m_deviceManager.getAudioDeviceSetup( config );
     String error;
 
     // Update audio settings
     if ( sampleRate != config.sampleRate )
     {
         config.sampleRate = sampleRate;
-        error = mDeviceManager.setAudioDeviceSetup( config, true );
+        error = m_deviceManager.setAudioDeviceSetup( config, true );
 
         // Update "Buffer Size" combo box to reflect the change in latency due to the new sample rate
         updateBufferSizeComboBox();
@@ -886,18 +886,18 @@ void OptionsDialog::on_comboBox_SampleRate_activated( const int index )
 
 void OptionsDialog::on_comboBox_BufferSize_activated( const int index )
 {
-    const int bufferSize = mUI->comboBox_BufferSize->itemData( index ).toInt();
+    const int bufferSize = m_UI->comboBox_BufferSize->itemData( index ).toInt();
 
     // Get current audio settings
     AudioDeviceManager::AudioDeviceSetup config;
-    mDeviceManager.getAudioDeviceSetup( config );
+    m_deviceManager.getAudioDeviceSetup( config );
     String error;
 
     // Update audio settings
     if ( bufferSize != config.bufferSize )
     {
         config.bufferSize = bufferSize;
-        error = mDeviceManager.setAudioDeviceSetup( config, true );
+        error = m_deviceManager.setAudioDeviceSetup( config, true );
     }
 
     if ( error.isNotEmpty() )
@@ -915,11 +915,11 @@ void OptionsDialog::on_listWidget_MidiInput_itemClicked( QListWidgetItem* item )
 
     if ( item->checkState() == Qt::Checked )
     {
-        mDeviceManager.setMidiInputEnabled( midiInputName, true );
+        m_deviceManager.setMidiInputEnabled( midiInputName, true );
     }
     else
     {
-        mDeviceManager.setMidiInputEnabled( midiInputName, false );
+        m_deviceManager.setMidiInputEnabled( midiInputName, false );
     }
 }
 
@@ -944,20 +944,20 @@ void OptionsDialog::on_checkBox_MidiInputTestTone_clicked( const bool isChecked 
 
 void OptionsDialog::on_radioButton_Offline_clicked()
 {
-    foreach ( QAbstractButton* button, mUI->buttonGroup_Timestretch->buttons() )
+    foreach ( QAbstractButton* button, m_UI->buttonGroup_Timestretch->buttons() )
     {
         button->setEnabled( true );
     }
-    mUI->radioButton_Elastic->setChecked( true );
+    m_UI->radioButton_Elastic->setChecked( true );
 
-    foreach ( QAbstractButton* button, mUI->buttonGroup_PitchShifting->buttons() )
+    foreach ( QAbstractButton* button, m_UI->buttonGroup_PitchShifting->buttons() )
     {
         button->setEnabled( false );
     }
-    mUI->radioButton_HighSpeed->setChecked( true );
+    m_UI->radioButton_HighSpeed->setChecked( true );
 
-    mUI->checkBox_JackSync->setEnabled( false );
-    mUI->checkBox_JackSync->setChecked( false );
+    m_UI->checkBox_JackSync->setEnabled( false );
+    m_UI->checkBox_JackSync->setChecked( false );
 
     disableStretcherOptions( RubberBandStretcher::OptionProcessRealTime );
     disableStretcherOptions( RubberBandStretcher::OptionStretchPrecise );
@@ -971,26 +971,26 @@ void OptionsDialog::on_radioButton_Offline_clicked()
 
 void OptionsDialog::on_radioButton_RealTime_clicked()
 {
-    foreach ( QAbstractButton* button, mUI->buttonGroup_Timestretch->buttons() )
+    foreach ( QAbstractButton* button, m_UI->buttonGroup_Timestretch->buttons() )
     {
         button->setEnabled( false );
     }
-    mUI->radioButton_Precise->setChecked( true );
+    m_UI->radioButton_Precise->setChecked( true );
 
-    foreach ( QAbstractButton* button, mUI->buttonGroup_PitchShifting->buttons() )
+    foreach ( QAbstractButton* button, m_UI->buttonGroup_PitchShifting->buttons() )
     {
         button->setEnabled( true );
     }
-    mUI->radioButton_HighConsistency->setChecked( true );
+    m_UI->radioButton_HighConsistency->setChecked( true );
 
     if ( isJackAudioEnabled() )
     {
-        mUI->checkBox_JackSync->setEnabled( true );
+        m_UI->checkBox_JackSync->setEnabled( true );
     }
     else
     {
-        mUI->checkBox_JackSync->setEnabled( false );
-        mUI->checkBox_JackSync->setChecked( false );
+        m_UI->checkBox_JackSync->setEnabled( false );
+        m_UI->checkBox_JackSync->setChecked( false );
     }
 
     enableStretcherOptions( RubberBandStretcher::OptionProcessRealTime );
@@ -1160,5 +1160,5 @@ void OptionsDialog::on_pushButton_ChooseTempDir_clicked()
     const QString dir = QFileDialog::getExistingDirectory( this, tr("Choose Directory"), "/",
                                                            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-    mUI->lineEdit_TempDir->setText( dir );
+    m_UI->lineEdit_TempDir->setText( dir );
 }

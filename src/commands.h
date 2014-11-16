@@ -45,10 +45,10 @@ public:
     void redo();
 
 private:
-    WaveGraphicsView* const mGraphicsView;
-    QPushButton* const mSliceButton;
-    SharedSlicePointItem mSlicePointItem;
-    bool mIsFirstRedoCall;
+    WaveGraphicsView* const m_graphicsView;
+    QPushButton* const m_sliceButton;
+    SharedSlicePointItem m_slicePointItem;
+    bool m_isFirstRedoCall;
 };
 
 
@@ -66,11 +66,11 @@ public:
     void redo();
 
 private:
-    const SharedSlicePointItem mSlicePointItem;
-    const int mOldFrameNum;
-    const int mNewFrameNum;
-    WaveGraphicsView* const mGraphicsView;
-    bool mIsFirstRedoCall;
+    const SharedSlicePointItem m_slicePointItem;
+    const int m_oldFrameNum;
+    const int m_newFrameNum;
+    WaveGraphicsView* const m_graphicsView;
+    bool m_isFirstRedoCall;
 };
 
 
@@ -87,9 +87,9 @@ public:
     void redo();
 
 private:
-    const SharedSlicePointItem mSlicePointItem;
-    WaveGraphicsView* const mGraphicsView;
-    QPushButton* const mSliceButton;
+    const SharedSlicePointItem m_slicePointItem;
+    WaveGraphicsView* const m_graphicsView;
+    QPushButton* const m_sliceButton;
 };
 
 
@@ -112,15 +112,15 @@ public:
     void redo();
 
 private:
-    MainWindow* const mMainWindow;
-    WaveGraphicsView* const mGraphicsView;
-    QPushButton* const mSliceButton;
-    QPushButton* const mFindOnsetsButton;
-    QPushButton* const mFindBeatsButton;
-    QAction* const mAddSlicePointAction;
-    QAction* const mMoveItemsAction;
-    QAction* const mSelectItemsAction;
-    QAction* const mAuditionItemsAction;
+    MainWindow* const m_mainWindow;
+    WaveGraphicsView* const m_graphicsView;
+    QPushButton* const m_sliceButton;
+    QPushButton* const m_findOnsetsButton;
+    QPushButton* const m_findBeatsButton;
+    QAction* const m_addSlicePointAction;
+    QAction* const m_moveItemsAction;
+    QAction* const m_selectItemsAction;
+    QAction* const m_auditionItemsAction;
 };
 
 
@@ -138,12 +138,12 @@ public:
     void redo();
 
 private:
-    const QList<int> mOldOrderPositions;
-    const int mNumPlacesMoved;
-    WaveGraphicsView* const mGraphicsView;
-    MainWindow* const mMainWindow;
-    QList<int> mNewOrderPositions;
-    bool mIsFirstRedoCall;
+    const QList<int> m_oldOrderPositions;
+    const int m_numPlacesMoved;
+    WaveGraphicsView* const m_graphicsView;
+    MainWindow* const m_mainWindow;
+    QList<int> m_newOrderPositions;
+    bool m_isFirstRedoCall;
 };
 
 
@@ -160,11 +160,11 @@ public:
     void redo();
 
 private:
-    const QList<int> mOrderPositions;
-    WaveGraphicsView* const mGraphicsView;
-    MainWindow* const mMainWindow;
-    QList<SharedSampleBuffer> mRemovedSampleBuffers;
-    QList<SharedWaveformItem> mRemovedWaveforms;
+    const QList<int> m_orderPositions;
+    WaveGraphicsView* const m_graphicsView;
+    MainWindow* const m_mainWindow;
+    QList<SharedSampleBuffer> m_removedSampleBuffers;
+    QList<SharedWaveformItem> m_removedWaveforms;
 };
 
 
@@ -181,11 +181,11 @@ public:
     void redo();
 
 private:
-    const QList<int> mOrderPositions;
-    WaveGraphicsView* const mGraphicsView;
-    MainWindow* const mMainWindow;
-    int mJoinedItemOrderPos;
-    QList<int> mSlicePoints;
+    const QList<int> m_orderPositions;
+    WaveGraphicsView* const m_graphicsView;
+    MainWindow* const m_mainWindow;
+    int m_joinedItemOrderPos;
+    QList<int> m_slicePoints;
 };
 
 
@@ -226,14 +226,14 @@ public:
     void redo();
 
 private:
-    const float mGain;
-    const int mOrderPos;
-    WaveGraphicsView* const mGraphicsView;
-    const int mSampleRate;
-    AudioFileHandler& mFileHandler;
-    const QString mTempDirPath;
-    const QString mFileBaseName;
-    QString mFilePath;
+    const float m_gain;
+    const int m_orderPos;
+    WaveGraphicsView* const m_graphicsView;
+    const int m_sampleRate;
+    AudioFileHandler& m_fileHandler;
+    const QString m_tempDirPath;
+    const QString m_fileBaseName;
+    QString m_filePath;
 };
 
 
@@ -255,15 +255,15 @@ public:
     void redo();
 
 private:
-    const float mStartGain;
-    const float mEndGain;
-    const int mOrderPos;
-    WaveGraphicsView* const mGraphicsView;
-    const int mSampleRate;
-    AudioFileHandler& mFileHandler;
-    const QString mTempDirPath;
-    const QString mFileBaseName;
-    QString mFilePath;
+    const float m_startGain;
+    const float m_endGain;
+    const int m_orderPos;
+    WaveGraphicsView* const m_graphicsView;
+    const int m_sampleRate;
+    AudioFileHandler& m_fileHandler;
+    const QString m_tempDirPath;
+    const QString m_fileBaseName;
+    QString m_filePath;
 };
 
 
@@ -283,13 +283,13 @@ public:
     void redo();
 
 private:
-    const int mOrderPos;
-    WaveGraphicsView* const mGraphicsView;
-    const int mSampleRate;
-    AudioFileHandler& mFileHandler;
-    const QString mTempDirPath;
-    const QString mFileBaseName;
-    QString mFilePath;
+    const int m_orderPos;
+    WaveGraphicsView* const m_graphicsView;
+    const int m_sampleRate;
+    AudioFileHandler& m_fileHandler;
+    const QString m_tempDirPath;
+    const QString m_fileBaseName;
+    QString m_filePath;
 };
 
 
@@ -306,7 +306,7 @@ public:
 
 private:
     const int mOrderPos;
-    WaveGraphicsView* const mGraphicsView;
+    WaveGraphicsView* const m_graphicsView;
 };
 
 
@@ -331,19 +331,19 @@ private:
     void updateSlicePoints( const qreal timeRatio );
     void updateLoopMarkers( const qreal timeRatio );
 
-    MainWindow* const mMainWindow;
-    WaveGraphicsView* const mGraphicsView;
-    QDoubleSpinBox* const mSpinBoxOriginalBPM;
-    QDoubleSpinBox* const mSpinBoxNewBPM;
-    QCheckBox* const mCheckBoxPitchCorrection;
-    const qreal mOriginalBPM;
-    const qreal mNewBPM;
-    const qreal mPrevAppliedBPM;
-    const bool mIsPitchCorrectionEnabled;
-    const RubberBandStretcher::Options mOptions;
-    const QString mTempDirPath;
-    const QString mFileBaseName;
-    QStringList mTempFilePaths;
+    MainWindow* const m_mainWindow;
+    WaveGraphicsView* const m_graphicsView;
+    QDoubleSpinBox* const m_spinBoxOriginalBPM;
+    QDoubleSpinBox* const m_spinBoxNewBPM;
+    QCheckBox* const m_checkBoxPitchCorrection;
+    const qreal m_originalBPM;
+    const qreal m_newBPM;
+    const qreal m_prevAppliedBPM;
+    const bool m_isPitchCorrectionEnabled;
+    const RubberBandStretcher::Options m_options;
+    const QString m_tempDirPath;
+    const QString m_fileBaseName;
+    QStringList m_tempFilePaths;
 };
 
 

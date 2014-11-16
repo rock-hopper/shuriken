@@ -98,34 +98,34 @@ private:
     void importAudioFileDialog();
     void exportAsDialog();
 
-    Ui::MainWindow* mUI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
+    Ui::MainWindow* m_UI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
     enum LengthUnits { UNITS_BARS, UNITS_BEATS };
 
-    ScopedPointer<OptionsDialog> mOptionsDialog;
-    ScopedPointer<HelpForm> mHelpForm;
-    ScopedPointer<ExportDialog> mExportDialog;
+    ScopedPointer<OptionsDialog> m_optionsDialog;
+    ScopedPointer<HelpForm> m_helpForm;
+    ScopedPointer<ExportDialog> m_exportDialog;
 
-    AudioDeviceManager mDeviceManager;
-    AudioFileHandler mFileHandler;
+    AudioDeviceManager m_deviceManager;
+    AudioFileHandler m_fileHandler;
 
-    SharedSampleHeader mSampleHeader;
-    QList<SharedSampleBuffer> mSampleBufferList;
-    QList<SharedSampleBuffer> mLoopSampleBufferList;
+    SharedSampleHeader m_sampleHeader;
+    QList<SharedSampleBuffer> m_sampleBufferList;
+    QList<SharedSampleBuffer> m_loopSampleBufferList;
 
-    ScopedPointer<SamplerAudioSource> mSamplerAudioSource;
-    ScopedPointer<RubberbandAudioSource> mRubberbandAudioSource;
-    AudioSourcePlayer mAudioSourcePlayer;
+    ScopedPointer<SamplerAudioSource> m_samplerAudioSource;
+    ScopedPointer<RubberbandAudioSource> m_rubberbandAudioSource;
+    AudioSourcePlayer m_audioSourcePlayer;
 
-    QString mLastOpenedImportDir;
-    QString mLastOpenedProjDir;
-    QString mCurrentProjectFilePath;
+    QString m_lastOpenedImportDir;
+    QString m_lastOpenedProjDir;
+    QString m_currentProjectFilePath;
 
-    QUndoStack mUndoStack;
+    QUndoStack m_undoStack;
 
-    qreal mAppliedBPM;
+    qreal m_appliedBPM;
 
-    bool mIsProjectOpen;
+    bool m_isProjectOpen;
 
 public slots:
     void reorderSampleBufferList( QList<int> oldOrderPositions, const int numPlacesMoved );

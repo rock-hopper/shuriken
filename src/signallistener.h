@@ -48,10 +48,10 @@ signals:
     void quit();
 
 private:
-    ScopedPointer<QSocketNotifier> mSigusr1Notifier;
-    ScopedPointer<QSocketNotifier> mSigtermNotifier;
+    ScopedPointer<QSocketNotifier> m_sigusr1Notifier;
+    ScopedPointer<QSocketNotifier> m_sigtermNotifier;
 
-    volatile bool mIsAppQuitting;
+    volatile bool m_isAppQuitting;
 
     static const int WRITE = 0;
     static const int READ = 1;

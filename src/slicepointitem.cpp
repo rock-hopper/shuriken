@@ -42,7 +42,7 @@ void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
     FrameMarkerItem::mousePressEvent( event );
 
-    mScenePosBeforeMove = pos().x();
+    m_scenePosBeforeMove = pos().x();
 }
 
 
@@ -51,7 +51,7 @@ void SlicePointItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseReleaseEvent( event );
 
-    if ( mScenePosBeforeMove != pos().x() )
+    if ( m_scenePosBeforeMove != pos().x() )
     {
         emit scenePosChanged( this );
     }

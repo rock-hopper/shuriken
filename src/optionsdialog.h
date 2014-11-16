@@ -54,7 +54,7 @@ public:
 
     bool isRealtimeModeEnabled() const;
 
-    RubberBandStretcher::Options getStretcherOptions() const    { return mStretcherOptions; }
+    RubberBandStretcher::Options getStretcherOptions() const    { return m_stretcherOptions; }
     void setStretcherOptions( const RubberBandStretcher::Options options );
 
     bool isJackSyncEnabled() const;
@@ -62,7 +62,7 @@ public:
 
     // Returns the absolute path of the user-defined temp directory if
     // it is valid and writable, otherwise returns an empty string
-    QString getTempDirPath() const                              { return mTempDirPath; }
+    QString getTempDirPath() const                              { return m_tempDirPath; }
 
 protected:
     void changeEvent( QEvent* event );
@@ -88,20 +88,20 @@ private:
 
     void saveConfig();
 
-    Ui::OptionsDialog* mUI;
+    Ui::OptionsDialog* m_UI;
 
-    AudioDeviceManager& mDeviceManager;
-    AudioDeviceManager::AudioDeviceSetup mOriginalConfig;
-    int mOriginalBackendIndex;
+    AudioDeviceManager& m_deviceManager;
+    AudioDeviceManager::AudioDeviceSetup m_originalConfig;
+    int m_originalBackendIndex;
 
-    ScopedPointer<SynthAudioSource> mSynthAudioSource;
-    AudioSourcePlayer mAudioSourcePlayer;
+    ScopedPointer<SynthAudioSource> m_synthAudioSource;
+    AudioSourcePlayer m_audioSourcePlayer;
 
-    RubberBandStretcher::Options mStretcherOptions;
+    RubberBandStretcher::Options m_stretcherOptions;
 
-    ScopedPointer<DirectoryValidator> mDirectoryValidator;
+    ScopedPointer<DirectoryValidator> m_directoryValidator;
 
-    QString mTempDirPath;
+    QString m_tempDirPath;
 
 private:
     static String getNameForChannelPair( const String& name1, const String& name2 );

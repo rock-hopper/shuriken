@@ -54,7 +54,7 @@ protected:
     void changeEvent( QEvent* event );
 
 private:
-    Ui::ConfirmBpmDialog* mUI;
+    Ui::ConfirmBpmDialog* m_UI;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( ConfirmBpmDialog );
 };

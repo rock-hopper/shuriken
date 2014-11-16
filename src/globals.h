@@ -67,7 +67,7 @@ namespace Midi
 // and is read in:   rubberbandaudiosource.cpp
 //                   void getNextAudioBlock( AudioSourceChannelInfo& bufferToFill )
 //
-extern volatile double gCurrentJackBPM;
+extern volatile double g_currentJackBPM;
 
 
 #endif // GLOBALS_H

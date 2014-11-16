@@ -29,30 +29,30 @@
 
 ApplyGainRampDialog::ApplyGainRampDialog( QWidget* parent ) :
     QDialog( parent ),
-    mUI( new Ui::ApplyGainRampDialog )
+    m_UI( new Ui::ApplyGainRampDialog )
 {
-    mUI->setupUi( this );
+    m_UI->setupUi( this );
 }
 
 
 
 ApplyGainRampDialog::~ApplyGainRampDialog()
 {
-    delete mUI;
+    delete m_UI;
 }
 
 
 
 qreal ApplyGainRampDialog::getStartGainValue() const
 {
-    return mUI->doubleSpinBox_StartGain->value();
+    return m_UI->doubleSpinBox_StartGain->value();
 }
 
 
 
 qreal ApplyGainRampDialog::getEndGainValue() const
 {
-    return mUI->doubleSpinBox_EndGain->value();
+    return m_UI->doubleSpinBox_EndGain->value();
 }
 
 
@@ -67,7 +67,7 @@ void ApplyGainRampDialog::changeEvent( QEvent* event )
     switch ( event->type() )
     {
     case QEvent::LanguageChange:
-        mUI->retranslateUi(this);
+        m_UI->retranslateUi(this);
         break;
     default:
         break;
@@ -81,26 +81,26 @@ void ApplyGainRampDialog::changeEvent( QEvent* event )
 
 void ApplyGainRampDialog::on_dial_StartGain_valueChanged( const int value )
 {
-    mUI->doubleSpinBox_StartGain->setValue( value / 10.0 );
+    m_UI->doubleSpinBox_StartGain->setValue( value / 10.0 );
 }
 
 
 
 void ApplyGainRampDialog::on_doubleSpinBox_StartGain_valueChanged( const double value )
 {
-    mUI->dial_StartGain->setValue( value * 10 );
+    m_UI->dial_StartGain->setValue( value * 10 );
 }
 
 
 
 void ApplyGainRampDialog::on_dial_EndGain_valueChanged( const int value )
 {
-    mUI->doubleSpinBox_EndGain->setValue( value / 10.0 );
+    m_UI->doubleSpinBox_EndGain->setValue( value / 10.0 );
 }
 
 
 
 void ApplyGainRampDialog::on_doubleSpinBox_EndGain_valueChanged( const double value )
 {
-    mUI->dial_EndGain->setValue( value * 10 );
+    m_UI->dial_EndGain->setValue( value * 10 );
 }

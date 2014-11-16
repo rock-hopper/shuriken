@@ -78,7 +78,7 @@ public:
 
     SharedWaveformItem getWaveformAt( const int orderPos ) const;
 
-    int getNumWaveformItems() const                         { return mWaveformItemList.size(); }
+    int getNumWaveformItems() const                         { return m_waveformItemList.size(); }
 
     // Redraw all waveform items
     void redrawWaveforms();
@@ -104,16 +104,16 @@ public:
     QList<int> getSlicePointFrameNums() const;
 
     // Returns a list of all slice point items
-    QList<SharedSlicePointItem> getSlicePointList() const   { return mSlicePointItemList; }
+    QList<SharedSlicePointItem> getSlicePointList() const   { return m_slicePointItemList; }
 
     void showLoopMarkers();
     void hideLoopMarkers();
 
-    LoopMarkerItem* getLeftLoopMarker() const               { return mLoopMarkerLeft; }
-    LoopMarkerItem* getRightLoopMarker() const              { return mLoopMarkerRight; }
+    LoopMarkerItem* getLeftLoopMarker() const               { return m_loopMarkerLeft; }
+    LoopMarkerItem* getRightLoopMarker() const              { return m_loopMarkerRight; }
 
     enum LoopMarkerSnapMode { SNAP_OFF, SNAP_MARKERS_TO_SLICES, SNAP_SLICES_TO_MARKERS };
-    void setLoopMarkerSnapMode( const LoopMarkerSnapMode mode ) { mLoopMarkerSnapMode = mode; }
+    void setLoopMarkerSnapMode( const LoopMarkerSnapMode mode ) { m_loopMarkerSnapMode = mode; }
 
     void getSampleRangesBetweenLoopMarkers( int& firstOrderPos, QList<SharedSampleRange>& sampleRanges ) const;
     int getNumFramesBetweenLoopMarkers() const;
@@ -127,7 +127,7 @@ public:
                         const int numFrames,
                         const qreal stretchRatio = 1.0 );
     void stopPlayhead();
-    bool isPlayheadScrolling() const                        { return mTimer->state() == QTimeLine::Running; }
+    bool isPlayheadScrolling() const                        { return m_timer->state() == QTimeLine::Running; }
     void setPlayheadLooping( const bool isLoopingDesired );
     void updatePlayheadSpeed( const qreal stretchRatio );
 
@@ -166,22 +166,22 @@ private:
 
     void connectWaveformToGraphicsView( const SharedWaveformItem item );
 
-    QList<SharedWaveformItem> mWaveformItemList;
-    QList<SharedSlicePointItem> mSlicePointItemList;
-    SharedSampleHeader mSampleHeader;
+    QList<SharedWaveformItem> m_waveformItemList;
+    QList<SharedSlicePointItem> m_slicePointItemList;
+    SharedSampleHeader m_sampleHeader;
 
-    ScopedPointer<QGraphicsLineItem> mPlayhead;
-    ScopedPointer<QTimeLine> mTimer;
-    ScopedPointer<QGraphicsItemAnimation> mAnimation;
+    ScopedPointer<QGraphicsLineItem> m_playhead;
+    ScopedPointer<QTimeLine> m_timer;
+    ScopedPointer<QGraphicsItemAnimation> m_animation;
 
-    ScopedPointer<LoopMarkerItem> mLoopMarkerLeft;
-    ScopedPointer<LoopMarkerItem> mLoopMarkerRight;
+    ScopedPointer<LoopMarkerItem> m_loopMarkerLeft;
+    ScopedPointer<LoopMarkerItem> m_loopMarkerRight;
 
-    LoopMarkerSnapMode mLoopMarkerSnapMode;
+    LoopMarkerSnapMode m_loopMarkerSnapMode;
 
-    InteractionMode mInteractionMode;
+    InteractionMode m_interactionMode;
 
-    bool mIsViewZoomedIn;
+    bool m_isViewZoomedIn;
 
 private:
     static int getTotalNumFrames( QList<SharedWaveformItem> waveformItemList );

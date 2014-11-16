@@ -42,7 +42,7 @@ protected:
     void changeEvent( QEvent* event );
 
 private:
-    Ui::AboutDialog* mUI;
+    Ui::AboutDialog* m_UI;
 };
 
 #endif // ABOUTDIALOG_H

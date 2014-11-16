@@ -50,23 +50,23 @@ ShurikenSamplerSound::ShurikenSamplerSound( const SharedSampleBuffer sampleBuffe
                                             const qreal sampleRate,
                                             const BigInteger& notes,
                                             const int midiNoteForNormalPitch ) :
-    mData( sampleBuffer ),
-    mOriginalStartFrame( 0 ),
-    mOriginalEndFrame( sampleBuffer->getNumFrames() - 1 ),
-    mSourceSampleRate( sampleRate ),
-    mMidiNotes( notes ),
-    mMidiRootNote( midiNoteForNormalPitch )
+    m_data( sampleBuffer ),
+    m_originalStartFrame( 0 ),
+    m_originalEndFrame( sampleBuffer->getNumFrames() - 1 ),
+    m_sourceSampleRate( sampleRate ),
+    m_midiNotes( notes ),
+    m_midiRootNote( midiNoteForNormalPitch )
 {
-    mAttackSamples = 0;
-    mReleaseSamples = 0;
+    m_attackSamples = 0;
+    m_releaseSamples = 0;
 
-    mStartFrame = mOriginalStartFrame;
-    mEndFrame = mOriginalEndFrame;
+    m_startFrame = m_originalStartFrame;
+    m_endFrame = m_originalEndFrame;
 
-    mTempStartFrame = mOriginalStartFrame;
-    mTempEndFrame = mOriginalEndFrame;
+    m_tempStartFrame = m_originalStartFrame;
+    m_tempEndFrame = m_originalEndFrame;
 
-    mIsTempSampleRangeSet = false;
+    m_isTempSampleRangeSet = false;
 }
 
 
@@ -79,17 +79,17 @@ ShurikenSamplerSound::~ShurikenSamplerSound()
 
 void ShurikenSamplerSound::setTempSampleRange( const SharedSampleRange sampleRange )
 {
-    mTempStartFrame = sampleRange->startFrame;
-    mTempEndFrame = sampleRange->startFrame + sampleRange->numFrames - 1;
+    m_tempStartFrame = sampleRange->startFrame;
+    m_tempEndFrame = sampleRange->startFrame + sampleRange->numFrames - 1;
 
-    mIsTempSampleRangeSet = true;
+    m_isTempSampleRangeSet = true;
 }
 
 
 
 bool ShurikenSamplerSound::appliesToNote( const int midiNoteNumber )
 {
-    return mMidiNotes[ midiNoteNumber ];
+    return m_midiNotes[ midiNoteNumber ];
 }
 
 
@@ -103,11 +103,11 @@ bool ShurikenSamplerSound::appliesToChannel( const int /*midiChannel*/ )
 
 //==============================================================================
 ShurikenSamplerVoice::ShurikenSamplerVoice()
-    : mPitchRatio( 0.0 ),
-      mSourceSamplePosition( 0.0 ),
-      mLeftGain( 0.0f ), mRightGain( 0.0f ),
-      mAttackReleaseLevel( 0 ), mAttackDelta( 0 ), mReleaseDelta( 0 ),
-      mIsInAttack( false ), mIsInRelease( false )
+    : m_pitchRatio( 0.0 ),
+      m_sourceSamplePosition( 0.0 ),
+      m_leftGain( 0.0f ), m_rightGain( 0.0f ),
+      m_attackReleaseLevel( 0 ), m_attackDelta( 0 ), m_releaseDelta( 0 ),
+      m_isInAttack( false ), m_isInRelease( false )
 {
 }
 
@@ -133,38 +133,38 @@ void ShurikenSamplerVoice::startNote( const int midiNoteNumber,
 {
     if ( ShurikenSamplerSound* const sound = dynamic_cast<ShurikenSamplerSound*>( s ) )
     {
-        mPitchRatio = pow( 2.0, (midiNoteNumber - sound->mMidiRootNote) / 12.0 )
-                        * sound->mSourceSampleRate / getSampleRate();
+        m_pitchRatio = pow( 2.0, (midiNoteNumber - sound->m_midiRootNote) / 12.0 )
+                        * sound->m_sourceSampleRate / getSampleRate();
 
-        if ( sound->mIsTempSampleRangeSet )
+        if ( sound->m_isTempSampleRangeSet )
         {
-            sound->mStartFrame = sound->mTempStartFrame;
-            sound->mEndFrame = sound->mTempEndFrame;
-            sound->mIsTempSampleRangeSet = false;
+            sound->m_startFrame = sound->m_tempStartFrame;
+            sound->m_endFrame = sound->m_tempEndFrame;
+            sound->m_isTempSampleRangeSet = false;
         }
 
-        mSourceSamplePosition = sound->mStartFrame;
-        mLeftGain = velocity;
-        mRightGain = velocity;
+        m_sourceSamplePosition = sound->m_startFrame;
+        m_leftGain = velocity;
+        m_rightGain = velocity;
 
-        mIsInAttack =( sound->mAttackSamples > 0 );
-        mIsInRelease = false;
+        m_isInAttack =( sound->m_attackSamples > 0 );
+        m_isInRelease = false;
 
-        if ( mIsInAttack )
+        if ( m_isInAttack )
         {
-            mAttackReleaseLevel = 0.0f;
-            mAttackDelta = (float) (mPitchRatio / sound->mAttackSamples);
+            m_attackReleaseLevel = 0.0f;
+            m_attackDelta = (float) (m_pitchRatio / sound->m_attackSamples);
         }
         else
         {
-            mAttackReleaseLevel = 1.0f;
-            mAttackDelta = 0.0f;
+            m_attackReleaseLevel = 1.0f;
+            m_attackDelta = 0.0f;
         }
 
-        if ( sound->mReleaseSamples > 0 )
-            mReleaseDelta = (float) ( -mPitchRatio / sound->mReleaseSamples );
+        if ( sound->m_releaseSamples > 0 )
+            m_releaseDelta = (float) ( -m_pitchRatio / sound->m_releaseSamples );
         else
-            mReleaseDelta = 0.0f;
+            m_releaseDelta = 0.0f;
     }
     else
     {
@@ -181,8 +181,8 @@ void ShurikenSamplerVoice::stopNote( const float /*velocity*/, const bool allowT
 
     if ( allowTailOff )
     {
-        mIsInAttack = false;
-        mIsInRelease = true;
+        m_isInAttack = false;
+        m_isInRelease = true;
     }
     else
     {
@@ -191,8 +191,8 @@ void ShurikenSamplerVoice::stopNote( const float /*velocity*/, const bool allowT
 
     if ( playingSound != NULL )
     {
-        playingSound->mStartFrame = playingSound->mOriginalStartFrame;
-        playingSound->mEndFrame = playingSound->mOriginalEndFrame;
+        playingSound->m_startFrame = playingSound->m_originalStartFrame;
+        playingSound->m_endFrame = playingSound->m_originalEndFrame;
     }
 }
 
@@ -217,47 +217,47 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
     if ( const ShurikenSamplerSound* const playingSound =
          static_cast<ShurikenSamplerSound*>( getCurrentlyPlayingSound().get() ) )
     {
-        const float* const inL = playingSound->mData->getReadPointer( 0 );
-        const float* const inR = playingSound->mData->getNumChannels() > 1
-                                    ? playingSound->mData->getReadPointer( 1 ) : nullptr;
+        const float* const inL = playingSound->m_data->getReadPointer( 0 );
+        const float* const inR = playingSound->m_data->getNumChannels() > 1
+                                    ? playingSound->m_data->getReadPointer( 1 ) : nullptr;
 
         float* outL = outputBuffer.getWritePointer( 0, startSample );
         float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer( 1, startSample ) : nullptr;
 
         while ( --numSamples >= 0 )
         {
-            const int pos = (int) mSourceSamplePosition;
-            const float alpha = (float) ( mSourceSamplePosition - pos );
+            const int pos = (int) m_sourceSamplePosition;
+            const float alpha = (float) ( m_sourceSamplePosition - pos );
             const float invAlpha = 1.0f - alpha;
 
             // just using a very simple linear interpolation here..
             float l = ( inL [pos] * invAlpha + inL [pos + 1] * alpha );
             float r = ( inR != nullptr ) ? ( inR [pos] * invAlpha + inR [pos + 1] * alpha ) : l;
 
-            l *= mLeftGain;
-            r *= mRightGain;
+            l *= m_leftGain;
+            r *= m_rightGain;
 
-            if ( mIsInAttack )
+            if ( m_isInAttack )
             {
-                l *= mAttackReleaseLevel;
-                r *= mAttackReleaseLevel;
+                l *= m_attackReleaseLevel;
+                r *= m_attackReleaseLevel;
 
-                mAttackReleaseLevel += mAttackDelta;
+                m_attackReleaseLevel += m_attackDelta;
 
-                if ( mAttackReleaseLevel >= 1.0f )
+                if ( m_attackReleaseLevel >= 1.0f )
                 {
-                    mAttackReleaseLevel = 1.0f;
-                    mIsInAttack = false;
+                    m_attackReleaseLevel = 1.0f;
+                    m_isInAttack = false;
                 }
             }
-            else if ( mIsInRelease )
+            else if ( m_isInRelease )
             {
-                l *= mAttackReleaseLevel;
-                r *= mAttackReleaseLevel;
+                l *= m_attackReleaseLevel;
+                r *= m_attackReleaseLevel;
 
-                mAttackReleaseLevel += mReleaseDelta;
+                m_attackReleaseLevel += m_releaseDelta;
 
-                if ( mAttackReleaseLevel <= 0.0f )
+                if ( m_attackReleaseLevel <= 0.0f )
                 {
                     stopNote( 0.0f, false );
                     break;
@@ -274,9 +274,9 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
                 *outL++ += (l + r) * 0.5f;
             }
 
-            mSourceSamplePosition += mPitchRatio;
+            m_sourceSamplePosition += m_pitchRatio;
 
-            if ( mSourceSamplePosition > playingSound->mEndFrame )
+            if ( m_sourceSamplePosition > playingSound->m_endFrame )
             {
                 stopNote( 0.0f, false );
                 break;

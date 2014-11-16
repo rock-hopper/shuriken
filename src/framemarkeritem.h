@@ -42,8 +42,8 @@ public:
 
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
     void setHeight( const qreal height );
-    int getFrameNum() const                     { return mFrameNum; }
-    void setFrameNum( const int frameNum )      { mFrameNum = frameNum; }
+    int getFrameNum() const                     { return m_frameNum; }
+    void setFrameNum( const int frameNum )      { m_frameNum = frameNum; }
     int type() const                            { return Type; }
 
 protected:
@@ -56,10 +56,10 @@ protected:
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
 
 private:
-    const QBrush mSelectedBrush;
-    const Handle mHandle;
+    const QBrush m_selectedBrush;
+    const Handle m_handle;
 
-    int mFrameNum;
+    int m_frameNum;
 
 private:
     JUCE_LEAK_DETECTOR( FrameMarkerItem );

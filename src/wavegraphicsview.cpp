@@ -32,9 +32,9 @@
 
 WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
     QGraphicsView( parent ),
-    mLoopMarkerSnapMode( SNAP_OFF ),
-    mInteractionMode( AUDITION_ITEMS ),
-    mIsViewZoomedIn( false )
+    m_loopMarkerSnapMode( SNAP_OFF ),
+    m_interactionMode( AUDITION_ITEMS ),
+    m_isViewZoomedIn( false )
 {
     // Set up view and scene
     setViewport( new QGLWidget( QGLFormat(QGL::SampleBuffers) ) );
@@ -47,23 +47,23 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
     setScene( new QGraphicsScene( 0.0, 0.0, 1024.0, 768.0 ) );
 
     // Set up playhead
-    mPlayhead = new QGraphicsLineItem( 0.0, 0.0, 0.0, scene()->height() - 1 );
-    mPlayhead->setPen( QColor( Qt::red ) );
-    mPlayhead->setZValue( ZValues::PLAYHEAD );
+    m_playhead = new QGraphicsLineItem( 0.0, 0.0, 0.0, scene()->height() - 1 );
+    m_playhead->setPen( QColor( Qt::red ) );
+    m_playhead->setZValue( ZValues::PLAYHEAD );
 
-    mTimer = new QTimeLine();
-    mTimer->setFrameRange( 0, 100 );
-    mTimer->setCurveShape( QTimeLine::LinearCurve );
-    mTimer->setUpdateInterval( 17 );
+    m_timer = new QTimeLine();
+    m_timer->setFrameRange( 0, 100 );
+    m_timer->setCurveShape( QTimeLine::LinearCurve );
+    m_timer->setUpdateInterval( 17 );
 
-    mAnimation = new QGraphicsItemAnimation;
-    mAnimation->setItem( mPlayhead );
-    mAnimation->setTimeLine( mTimer );
+    m_animation = new QGraphicsItemAnimation;
+    m_animation->setItem( m_playhead );
+    m_animation->setTimeLine( m_timer );
 
-    QObject::connect( mTimer, SIGNAL( finished() ),
+    QObject::connect( m_timer, SIGNAL( finished() ),
                       this, SLOT( removePlayhead() ) );
 
-    QObject::connect( mTimer, SIGNAL( finished() ),
+    QObject::connect( m_timer, SIGNAL( finished() ),
                       this, SIGNAL( playheadFinishedScrolling() ) );
 }
 
@@ -77,7 +77,7 @@ SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sa
 {
     Q_ASSERT( sampleBuffer->getNumFrames() > 0 );
 
-    mSampleHeader = sampleHeader;
+    m_sampleHeader = sampleHeader;
 
     if ( width <= 0.0 )
     {
@@ -87,14 +87,14 @@ SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sa
     SharedWaveformItem waveformItem( new WaveformItem( sampleBuffer, orderPos, width, scene()->height() ) );
     waveformItem->setPos( scenePosX, 0.0 );
 
-    mWaveformItemList.insert( orderPos, waveformItem );
+    m_waveformItemList.insert( orderPos, waveformItem );
 
     connectWaveformToGraphicsView( waveformItem );
 
     scene()->addItem( waveformItem.data() );
     scene()->update();
 
-    setInteractionMode( mInteractionMode );
+    setInteractionMode( m_interactionMode );
 
     return waveformItem;
 }
@@ -107,7 +107,7 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const QList<SharedS
                                                              const int startOrderPos,
                                                              qreal totalWidth )
 {
-    mSampleHeader = sampleHeader;
+    m_sampleHeader = sampleHeader;
 
     const int numFrames = SampleUtils::getTotalNumFrames( sampleBufferList );
 
@@ -131,7 +131,7 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const QList<SharedS
                                                            scene()->height() ) );
         waveformItem->setPos( scenePosX, 0.0 );
 
-        mWaveformItemList.insert( orderPos, waveformItem );
+        m_waveformItemList.insert( orderPos, waveformItem );
         newWaveformItems << waveformItem;
 
         connectWaveformToGraphicsView( waveformItem );
@@ -143,7 +143,7 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const QList<SharedS
         orderPos++;
     }
 
-    setInteractionMode( mInteractionMode );
+    setInteractionMode( m_interactionMode );
 
     return newWaveformItems;
 }
@@ -157,7 +157,7 @@ SharedWaveformItem WaveGraphicsView::joinWaveforms( const QList<int> orderPositi
 
     foreach( int orderPos, orderPositions )
     {
-        itemsToJoin << mWaveformItemList.at( orderPos );
+        itemsToJoin << m_waveformItemList.at( orderPos );
     }
 
     qreal width = 0.0;
@@ -165,7 +165,7 @@ SharedWaveformItem WaveGraphicsView::joinWaveforms( const QList<int> orderPositi
     foreach ( SharedWaveformItem item, itemsToJoin )
     {
         scene()->removeItem( item.data() );
-        mWaveformItemList.removeOne( item );
+        m_waveformItemList.removeOne( item );
 
         sampleBufferList << item->getSampleBuffer();
         width += item->rect().width();
@@ -175,14 +175,14 @@ SharedWaveformItem WaveGraphicsView::joinWaveforms( const QList<int> orderPositi
     const int joinedItemOrderPos = itemsToJoin.first()->getOrderPos();
 
     SharedWaveformItem joinedItem = createWaveform( sampleBuffer,
-                                                    mSampleHeader,
+                                                    m_sampleHeader,
                                                     itemsToJoin.first()->scenePos().x(),
                                                     joinedItemOrderPos,
                                                     width );
 
-    for ( int orderPos = joinedItemOrderPos + 1; orderPos < mWaveformItemList.size(); orderPos++ )
+    for ( int orderPos = joinedItemOrderPos + 1; orderPos < m_waveformItemList.size(); orderPos++ )
     {
-        mWaveformItemList.at( orderPos )->setOrderPos( orderPos );
+        m_waveformItemList.at( orderPos )->setOrderPos( orderPos );
     }
 
     return joinedItem;
@@ -192,26 +192,26 @@ SharedWaveformItem WaveGraphicsView::joinWaveforms( const QList<int> orderPositi
 
 QList<SharedWaveformItem> WaveGraphicsView::splitWaveform( const int orderPos, const QList<int> slicePointFrameNums )
 {
-    SharedWaveformItem itemToSplit = mWaveformItemList.at( orderPos );
+    SharedWaveformItem itemToSplit = m_waveformItemList.at( orderPos );
 
     scene()->removeItem( itemToSplit.data() );
 
-    mWaveformItemList.removeOne( itemToSplit );
+    m_waveformItemList.removeOne( itemToSplit );
 
     QList<SharedSampleBuffer> sampleBufferList = SampleUtils::splitSampleBuffer( itemToSplit->getSampleBuffer(),
                                                                                  slicePointFrameNums );
 
     QList<SharedWaveformItem> waveformItemList = createWaveforms( sampleBufferList,
-                                                                  mSampleHeader,
+                                                                  m_sampleHeader,
                                                                   itemToSplit->scenePos().x(),
                                                                   itemToSplit->getOrderPos(),
                                                                   itemToSplit->rect().width() );
 
     const int lastSplitItemOrderPos = waveformItemList.last()->getOrderPos();
 
-    for ( int orderPos = lastSplitItemOrderPos + 1; orderPos < mWaveformItemList.size(); orderPos++ )
+    for ( int orderPos = lastSplitItemOrderPos + 1; orderPos < m_waveformItemList.size(); orderPos++ )
     {
-        mWaveformItemList.at( orderPos )->setOrderPos( orderPos );
+        m_waveformItemList.at( orderPos )->setOrderPos( orderPos );
     }
 
     return waveformItemList;
@@ -221,7 +221,7 @@ QList<SharedWaveformItem> WaveGraphicsView::splitWaveform( const int orderPos, c
 
 void WaveGraphicsView::moveWaveforms( const QList<int> oldOrderPositions, const int numPlacesMoved )
 {
-    Q_ASSERT( ! mWaveformItemList.isEmpty() );
+    Q_ASSERT( ! m_waveformItemList.isEmpty() );
 
     reorderWaveformItems( oldOrderPositions, numPlacesMoved );
 
@@ -240,22 +240,22 @@ void WaveGraphicsView::insertWaveforms( const QList<SharedWaveformItem> waveform
     const int firstOrderPos = waveformItems.first()->getOrderPos();
 
     // If necessary, set new order positions
-    for ( int i = firstOrderPos; i < mWaveformItemList.size(); i++ )
+    for ( int i = firstOrderPos; i < m_waveformItemList.size(); i++ )
     {
-        mWaveformItemList.at( i )->setOrderPos( i + numItemsToAdd );
+        m_waveformItemList.at( i )->setOrderPos( i + numItemsToAdd );
     }
 
     // Add new waveform items to list
     foreach ( SharedWaveformItem item, waveformItems )
     {
-        mWaveformItemList.insert( item->getOrderPos(), item );
+        m_waveformItemList.insert( item->getOrderPos(), item );
     }
 
     // Resize and reposition all waveform items
-    const int numFrames = getTotalNumFrames( mWaveformItemList );
+    const int numFrames = getTotalNumFrames( m_waveformItemList );
     qreal scenePosX = 0.0;
 
-    foreach ( SharedWaveformItem item, mWaveformItemList )
+    foreach ( SharedWaveformItem item, m_waveformItemList )
     {
         const qreal itemWidth = item->getSampleBuffer()->getNumFrames() * ( scene()->width() / numFrames );
 
@@ -272,19 +272,19 @@ void WaveGraphicsView::insertWaveforms( const QList<SharedWaveformItem> waveform
     }
     scene()->update();
 
-    setInteractionMode( mInteractionMode );
+    setInteractionMode( m_interactionMode );
 
     // Reset loop markers
-    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
+    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
     {
         const int startFrame = 0;
-        const int endFrame = getTotalNumFrames( mWaveformItemList ) - 1;
+        const int endFrame = getTotalNumFrames( m_waveformItemList ) - 1;
 
-        mLoopMarkerLeft->setFrameNum( startFrame );
-        mLoopMarkerRight->setFrameNum( endFrame );
+        m_loopMarkerLeft->setFrameNum( startFrame );
+        m_loopMarkerRight->setFrameNum( endFrame );
 
-        mLoopMarkerLeft->setPos( 0.0, 0.0 );
-        mLoopMarkerRight->setPos( getScenePosX( endFrame ), 0.0 );
+        m_loopMarkerLeft->setPos( 0.0, 0.0 );
+        m_loopMarkerRight->setPos( getScenePosX( endFrame ), 0.0 );
     }
 }
 
@@ -299,8 +299,8 @@ QList<SharedWaveformItem> WaveGraphicsView::removeWaveforms( const QList<int> wa
     // Remove waveform items from scene
     for ( int i = 0; i < waveformOrderPositions.size(); i++ )
     {
-        SharedWaveformItem item = mWaveformItemList.at( firstOrderPos );
-        mWaveformItemList.removeAt( firstOrderPos );
+        SharedWaveformItem item = m_waveformItemList.at( firstOrderPos );
+        m_waveformItemList.removeAt( firstOrderPos );
 
         scene()->removeItem( item.data() );
         removedWaveforms << item;
@@ -308,7 +308,7 @@ QList<SharedWaveformItem> WaveGraphicsView::removeWaveforms( const QList<int> wa
     scene()->update();
 
     // If necessary, set new order positions and remove gap between remaining items
-    if ( firstOrderPos < mWaveformItemList.size() )
+    if ( firstOrderPos < m_waveformItemList.size() )
     {
         qreal distanceToMove = 0.0;
 
@@ -317,19 +317,19 @@ QList<SharedWaveformItem> WaveGraphicsView::removeWaveforms( const QList<int> wa
             distanceToMove += item->rect().width();
         }
 
-        for ( int i = firstOrderPos; i < mWaveformItemList.size(); i++ )
+        for ( int i = firstOrderPos; i < m_waveformItemList.size(); i++ )
         {
-            mWaveformItemList.at( i )->setOrderPos( i );
+            m_waveformItemList.at( i )->setOrderPos( i );
 
-            const qreal oldScenePosX = mWaveformItemList.at( i )->scenePos().x();
-            mWaveformItemList.at( i )->setPos( oldScenePosX - distanceToMove, 0.0 );
+            const qreal oldScenePosX = m_waveformItemList.at( i )->scenePos().x();
+            m_waveformItemList.at( i )->setPos( oldScenePosX - distanceToMove, 0.0 );
         }
     }
 
     // Resize remaining waveform items
     qreal totalWidth = 0.0;
 
-    foreach ( SharedWaveformItem item, mWaveformItemList )
+    foreach ( SharedWaveformItem item, m_waveformItemList )
     {
         totalWidth += item->rect().width();
     }
@@ -337,16 +337,16 @@ QList<SharedWaveformItem> WaveGraphicsView::removeWaveforms( const QList<int> wa
     resizeWaveformItems( scene()->width() / totalWidth );
 
     // Reset loop markers
-    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
+    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
     {
         const int startFrame = 0;
-        const int endFrame = getTotalNumFrames( mWaveformItemList ) - 1;
+        const int endFrame = getTotalNumFrames( m_waveformItemList ) - 1;
 
-        mLoopMarkerLeft->setFrameNum( startFrame );
-        mLoopMarkerRight->setFrameNum( endFrame );
+        m_loopMarkerLeft->setFrameNum( startFrame );
+        m_loopMarkerRight->setFrameNum( endFrame );
 
-        mLoopMarkerLeft->setPos( 0.0, 0.0 );
-        mLoopMarkerRight->setPos( getScenePosX( endFrame ), 0.0 );
+        m_loopMarkerLeft->setPos( 0.0, 0.0 );
+        m_loopMarkerRight->setPos( getScenePosX( endFrame ), 0.0 );
     }
 
     return removedWaveforms;
@@ -371,7 +371,7 @@ QList<int> WaveGraphicsView::getSelectedWaveformsOrderPositions() const
 
 SharedWaveformItem WaveGraphicsView::getWaveformAt( const int orderPos ) const
 {
-    return mWaveformItemList.at( orderPos );
+    return m_waveformItemList.at( orderPos );
 }
 
 
@@ -400,7 +400,7 @@ SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
     slicePointItem->setTransform( matrix );
 
     sharedSlicePoint = SharedSlicePointItem( slicePointItem );
-    mSlicePointItemList.append( sharedSlicePoint );
+    m_slicePointItemList.append( sharedSlicePoint );
 
     QObject::connect( slicePointItem, SIGNAL( scenePosChanged(SlicePointItem*const) ),
                       this, SLOT( updateSlicePointFrameNum(SlicePointItem*const) ) );
@@ -426,7 +426,7 @@ void WaveGraphicsView::addSlicePoint( const SharedSlicePointItem slicePoint )
     slicePoint.data()->setHeight( scene()->height() - 1 );
     slicePoint.data()->setPos( scenePosX, 0.0 );
 
-    mSlicePointItemList.append( slicePoint );
+    m_slicePointItemList.append( slicePoint );
 
     scene()->addItem( slicePoint.data() );
     scene()->update();
@@ -439,7 +439,7 @@ void WaveGraphicsView::removeSlicePoint( const SharedSlicePointItem slicePointIt
     scene()->removeItem( slicePointItem.data() );
     scene()->update();
 
-    mSlicePointItemList.removeOne( slicePointItem );
+    m_slicePointItemList.removeOne( slicePointItem );
 }
 
 
@@ -456,7 +456,7 @@ void WaveGraphicsView::moveSlicePoint( const SharedSlicePointItem slicePointItem
 
 void WaveGraphicsView::hideSlicePoints()
 {
-    foreach ( SharedSlicePointItem item, mSlicePointItemList )
+    foreach ( SharedSlicePointItem item, m_slicePointItemList )
     {
         item->setVisible( false );
     }
@@ -466,7 +466,7 @@ void WaveGraphicsView::hideSlicePoints()
 
 void WaveGraphicsView::showSlicePoints()
 {
-    foreach ( SharedSlicePointItem item, mSlicePointItemList )
+    foreach ( SharedSlicePointItem item, m_slicePointItemList )
     {
         item->setVisible( true );
     }
@@ -487,7 +487,7 @@ SharedSlicePointItem WaveGraphicsView::getSelectedSlicePoint()
         {
             SlicePointItem* const slicePointItem = qgraphicsitem_cast<SlicePointItem*>( item );
 
-            foreach ( SharedSlicePointItem sharedSlicePointItem, mSlicePointItemList )
+            foreach ( SharedSlicePointItem sharedSlicePointItem, m_slicePointItemList )
             {
                 if ( sharedSlicePointItem == slicePointItem )
                 {
@@ -506,15 +506,15 @@ QList<int> WaveGraphicsView::getSlicePointFrameNums() const
 {
     QList<int> slicePointFrameNums;
 
-    foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
+    foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
     {
         slicePointFrameNums.append( slicePointItem->getFrameNum() );
     }
 
     qSort( slicePointFrameNums );
 
-    const int totalNumFrames = getTotalNumFrames( mWaveformItemList );
-    const int minFramesBetweenSlicePoints = roundToInt( mSampleHeader->sampleRate * AudioAnalyser::MIN_INTER_ONSET_SECS );
+    const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
+    const int minFramesBetweenSlicePoints = roundToInt( m_sampleHeader->sampleRate * AudioAnalyser::MIN_INTER_ONSET_SECS );
 
     QList<int> amendedFrameNumList;
     int prevFrameNum = 0;
@@ -539,43 +539,43 @@ QList<int> WaveGraphicsView::getSlicePointFrameNums() const
 
 void WaveGraphicsView::showLoopMarkers()
 {
-    if ( mLoopMarkerLeft == NULL && mLoopMarkerRight == NULL )
+    if ( m_loopMarkerLeft == NULL && m_loopMarkerRight == NULL )
     {
         createLoopMarkers();
     }
 
-    mLoopMarkerLeft->setVisible( true );
-    mLoopMarkerRight->setVisible( true );
+    m_loopMarkerLeft->setVisible( true );
+    m_loopMarkerRight->setVisible( true );
 }
 
 
 
 void WaveGraphicsView::hideLoopMarkers()
 {
-    mLoopMarkerLeft->setVisible( false );
-    mLoopMarkerRight->setVisible( false );
+    m_loopMarkerLeft->setVisible( false );
+    m_loopMarkerRight->setVisible( false );
 }
 
 
 
 void WaveGraphicsView::getSampleRangesBetweenLoopMarkers( int& firstOrderPos, QList<SharedSampleRange>& sampleRanges ) const
 {
-    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL)
+    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL)
     {
-        const int leftMarkerFrameNum = getRelativeLoopMarkerFrameNum( mLoopMarkerLeft );
-        const int rightMarkerFrameNum = getRelativeLoopMarkerFrameNum( mLoopMarkerRight );
+        const int leftMarkerFrameNum = getRelativeLoopMarkerFrameNum( m_loopMarkerLeft );
+        const int rightMarkerFrameNum = getRelativeLoopMarkerFrameNum( m_loopMarkerRight );
 
-        const int leftWaveformOrderPos = getWaveformUnderLoopMarker( mLoopMarkerLeft )->getOrderPos();
-        const int rightWaveformOrderPos = getWaveformUnderLoopMarker( mLoopMarkerRight )->getOrderPos();
+        const int leftWaveformOrderPos = getWaveformUnderLoopMarker( m_loopMarkerLeft )->getOrderPos();
+        const int rightWaveformOrderPos = getWaveformUnderLoopMarker( m_loopMarkerRight )->getOrderPos();
 
-        const int minNumFrames = roundToInt( mSampleHeader->sampleRate * AudioAnalyser::MIN_INTER_ONSET_SECS );
+        const int minNumFrames = roundToInt( m_sampleHeader->sampleRate * AudioAnalyser::MIN_INTER_ONSET_SECS );
 
         bool isFirstOrderPos = true;
 
         for ( int orderPos = leftWaveformOrderPos; orderPos <= rightWaveformOrderPos; orderPos++ )
         {
             int startFrame = 0;
-            int numFrames = mWaveformItemList.at( orderPos )->getSampleBuffer()->getNumFrames();
+            int numFrames = m_waveformItemList.at( orderPos )->getSampleBuffer()->getNumFrames();
 
             if ( orderPos == leftWaveformOrderPos )
             {
@@ -616,9 +616,9 @@ int WaveGraphicsView::getNumFramesBetweenLoopMarkers() const
 {
     int numFrames = 0;
 
-    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
+    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
     {
-        numFrames = mLoopMarkerRight->getFrameNum() - mLoopMarkerLeft->getFrameNum();
+        numFrames = m_loopMarkerRight->getFrameNum() - m_loopMarkerLeft->getFrameNum();
     }
 
     return numFrames;
@@ -628,12 +628,12 @@ int WaveGraphicsView::getNumFramesBetweenLoopMarkers() const
 
 void WaveGraphicsView::selectNone()
 {
-    foreach ( SharedSlicePointItem item, mSlicePointItemList )
+    foreach ( SharedSlicePointItem item, m_slicePointItemList )
     {
         item->setSelected( false );
     }
 
-    foreach ( SharedWaveformItem item, mWaveformItemList )
+    foreach ( SharedWaveformItem item, m_waveformItemList )
     {
         item->setSelected( false );
     }
@@ -643,7 +643,7 @@ void WaveGraphicsView::selectNone()
 
 void WaveGraphicsView::selectAll()
 {
-    foreach ( SharedWaveformItem item, mWaveformItemList )
+    foreach ( SharedWaveformItem item, m_waveformItemList )
     {
         item->setSelected( true );
     }
@@ -653,20 +653,20 @@ void WaveGraphicsView::selectAll()
 
 void WaveGraphicsView::startPlayhead( const bool isLoopingDesired, const qreal stretchRatio )
 {
-    const qreal sampleRate = mSampleHeader->sampleRate;
+    const qreal sampleRate = m_sampleHeader->sampleRate;
 
     if ( sampleRate > 0.0 )
     {
-        int numFrames = getTotalNumFrames( mWaveformItemList );
+        int numFrames = getTotalNumFrames( m_waveformItemList );
 
         qreal startPosX = 0.0;
         qreal endPosX   = scene()->width() - 1;
 
-        if ( mLoopMarkerLeft != NULL && mLoopMarkerLeft->isVisible() )
+        if ( m_loopMarkerLeft != NULL && m_loopMarkerLeft->isVisible() )
         {
-            numFrames = getFrameNum( mLoopMarkerRight->scenePos().x() - mLoopMarkerLeft->scenePos().x() );
-            startPosX = mLoopMarkerLeft->scenePos().x();
-            endPosX   = mLoopMarkerRight->scenePos().x();
+            numFrames = getFrameNum( m_loopMarkerRight->scenePos().x() - m_loopMarkerLeft->scenePos().x() );
+            startPosX = m_loopMarkerLeft->scenePos().x();
+            endPosX   = m_loopMarkerRight->scenePos().x();
         }
 
         const int millis = roundToInt( (numFrames / sampleRate) * 1000 * stretchRatio );
@@ -676,23 +676,23 @@ void WaveGraphicsView::startPlayhead( const bool isLoopingDesired, const qreal s
             stopPlayhead();
         }
 
-        mAnimation->setPosAt( 0.0, QPointF( startPosX, 0.0 ) );
-        mAnimation->setPosAt( 1.0, QPointF( endPosX,   0.0 ) );
+        m_animation->setPosAt( 0.0, QPointF( startPosX, 0.0 ) );
+        m_animation->setPosAt( 1.0, QPointF( endPosX,   0.0 ) );
 
-        mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
-        mPlayhead->setVisible( true );
-        scene()->addItem( mPlayhead );
+        m_playhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
+        m_playhead->setVisible( true );
+        scene()->addItem( m_playhead );
 
         if ( isLoopingDesired )
         {
-            mTimer->setLoopCount( 0 );
+            m_timer->setLoopCount( 0 );
         }
         else
         {
-            mTimer->setLoopCount( 1 );
+            m_timer->setLoopCount( 1 );
         }
-        mTimer->setDuration( millis );
-        mTimer->start();
+        m_timer->setDuration( millis );
+        m_timer->start();
     }
 }
 
@@ -700,7 +700,7 @@ void WaveGraphicsView::startPlayhead( const bool isLoopingDesired, const qreal s
 
 void WaveGraphicsView::startPlayhead( const qreal startPosX, const qreal endPosX, const int numFrames, const qreal stretchRatio )
 {
-    const qreal sampleRate = mSampleHeader->sampleRate;
+    const qreal sampleRate = m_sampleHeader->sampleRate;
 
     if ( sampleRate > 0.0 )
     {
@@ -711,16 +711,16 @@ void WaveGraphicsView::startPlayhead( const qreal startPosX, const qreal endPosX
             stopPlayhead();
         }
 
-        mAnimation->setPosAt( 0.0, QPointF( startPosX, 0.0 ) );
-        mAnimation->setPosAt( 1.0, QPointF( endPosX,   0.0 ) );
+        m_animation->setPosAt( 0.0, QPointF( startPosX, 0.0 ) );
+        m_animation->setPosAt( 1.0, QPointF( endPosX,   0.0 ) );
 
-        mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
-        mPlayhead->setVisible( true );
-        scene()->addItem( mPlayhead );
+        m_playhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
+        m_playhead->setVisible( true );
+        scene()->addItem( m_playhead );
 
-        mTimer->setLoopCount( 1 );
-        mTimer->setDuration( millis );
-        mTimer->start();
+        m_timer->setLoopCount( 1 );
+        m_timer->setDuration( millis );
+        m_timer->start();
     }
 }
 
@@ -730,7 +730,7 @@ void WaveGraphicsView::stopPlayhead()
 {
     if ( isPlayheadScrolling() )
     {
-        mTimer->stop();
+        m_timer->stop();
         removePlayhead();
     }
 }
@@ -741,11 +741,11 @@ void WaveGraphicsView::setPlayheadLooping( const bool isLoopingDesired )
 {
     if ( isLoopingDesired )
     {
-        mTimer->setLoopCount( 0 );
+        m_timer->setLoopCount( 0 );
     }
     else
     {
-        mTimer->setLoopCount( 1 );
+        m_timer->setLoopCount( 1 );
     }
 }
 
@@ -755,29 +755,29 @@ void WaveGraphicsView::updatePlayheadSpeed( const qreal stretchRatio )
 {
     if ( isPlayheadScrolling() )
     {
-        mPlayhead->setVisible( false );
+        m_playhead->setVisible( false );
 
-        mTimer->stop();
+        m_timer->stop();
 
-        const qreal sampleRate = mSampleHeader->sampleRate;
+        const qreal sampleRate = m_sampleHeader->sampleRate;
         int numFrames = 0;
 
-        if ( mLoopMarkerLeft != NULL && mLoopMarkerLeft->isVisible() )
+        if ( m_loopMarkerLeft != NULL && m_loopMarkerLeft->isVisible() )
         {
-            numFrames = getFrameNum( mLoopMarkerRight->scenePos().x() - mLoopMarkerLeft->scenePos().x() );
+            numFrames = getFrameNum( m_loopMarkerRight->scenePos().x() - m_loopMarkerLeft->scenePos().x() );
         }
         else
         {
-            numFrames = getTotalNumFrames( mWaveformItemList );
+            numFrames = getTotalNumFrames( m_waveformItemList );
         }
 
         const int newDuration = roundToInt( (numFrames / sampleRate) * 1000 * stretchRatio );
 //        const int newTime = roundToInt( mTimer->currentTime() * stretchRatio );
 
-        mTimer->setDuration( newDuration );
+        m_timer->setDuration( newDuration );
 //        mTimer->setCurrentTime( newTime );
 
-        mTimer->resume();
+        m_timer->resume();
     }
 }
 
@@ -791,10 +791,10 @@ void WaveGraphicsView::clearAll()
     }
     scene()->update();
 
-    mWaveformItemList.clear();
-    mSlicePointItemList.clear();
-    mLoopMarkerLeft = NULL;
-    mLoopMarkerRight = NULL;
+    m_waveformItemList.clear();
+    m_slicePointItemList.clear();
+    m_loopMarkerLeft = NULL;
+    m_loopMarkerRight = NULL;
 }
 
 
@@ -810,14 +810,14 @@ void WaveGraphicsView::clearWaveform()
     }
     scene()->update();
 
-    mWaveformItemList.clear();
+    m_waveformItemList.clear();
 }
 
 
 
 qreal WaveGraphicsView::getScenePosX( const int frameNum ) const
 {
-    const int numFrames = getTotalNumFrames( mWaveformItemList );
+    const int numFrames = getTotalNumFrames( m_waveformItemList );
 
     qreal scenePosX = frameNum * ( scene()->width() / numFrames );
 
@@ -834,7 +834,7 @@ qreal WaveGraphicsView::getScenePosX( const int frameNum ) const
 
 int WaveGraphicsView::getFrameNum( qreal scenePosX ) const
 {
-    const int numFrames = getTotalNumFrames( mWaveformItemList );
+    const int numFrames = getTotalNumFrames( m_waveformItemList );
 
     int frameNum = roundToInt( scenePosX / ( scene()->width() / numFrames ) );
 
@@ -851,7 +851,7 @@ int WaveGraphicsView::getFrameNum( qreal scenePosX ) const
 
 void WaveGraphicsView::zoomIn()
 {
-    mIsViewZoomedIn = true;
+    m_isViewZoomedIn = true;
 
     const qreal newXScaleFactor = transform().m11() * 2; // m11() returns the current horizontal scale factor
 
@@ -877,7 +877,7 @@ void WaveGraphicsView::zoomOut()
     if ( newXScaleFactor == 1.0 )
     {
         emit minDetailLevelReached();
-        mIsViewZoomedIn = false;
+        m_isViewZoomedIn = false;
     }
 }
 
@@ -885,7 +885,7 @@ void WaveGraphicsView::zoomOut()
 
 void WaveGraphicsView::zoomOriginal()
 {
-    mIsViewZoomedIn = false;
+    m_isViewZoomedIn = false;
 
     resetTransform();
     scaleItems( 1.0 );
@@ -898,7 +898,7 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
     switch ( mode )
     {
     case MOVE_ITEMS:
-        foreach ( SharedWaveformItem item, mWaveformItemList )
+        foreach ( SharedWaveformItem item, m_waveformItemList )
         {
             item->setFlag( QGraphicsItem::ItemIsMovable, true );
             item->setFlag( QGraphicsItem::ItemIsSelectable, true );
@@ -906,7 +906,7 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
         setDragMode( NoDrag );
         break;
     case SELECT_ITEMS:
-        foreach ( SharedWaveformItem item, mWaveformItemList )
+        foreach ( SharedWaveformItem item, m_waveformItemList )
         {
             item->setFlag( QGraphicsItem::ItemIsMovable, false );
             item->setFlag( QGraphicsItem::ItemIsSelectable, true );
@@ -914,7 +914,7 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
         setDragMode( RubberBandDrag );
         break;
     case AUDITION_ITEMS:
-        foreach ( SharedWaveformItem item, mWaveformItemList )
+        foreach ( SharedWaveformItem item, m_waveformItemList )
         {
             item->setFlag( QGraphicsItem::ItemIsMovable, false );
             item->setFlag( QGraphicsItem::ItemIsSelectable, false );
@@ -925,7 +925,7 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
         break;
     }
 
-    mInteractionMode = mode;
+    m_interactionMode = mode;
 }
 
 
@@ -955,9 +955,9 @@ void WaveGraphicsView::resizeEvent ( QResizeEvent* event )
 
 void WaveGraphicsView::resizeWaveformItems( const qreal scaleFactorX )
 {
-    if ( ! mWaveformItemList.isEmpty() )
+    if ( ! m_waveformItemList.isEmpty() )
     {
-        foreach ( SharedWaveformItem waveformItem, mWaveformItemList )
+        foreach ( SharedWaveformItem waveformItem, m_waveformItemList )
         {
             const qreal newWidth = waveformItem->rect().width() * scaleFactorX;
             waveformItem->setRect( 0.0, 0.0, newWidth, scene()->height() );
@@ -972,9 +972,9 @@ void WaveGraphicsView::resizeWaveformItems( const qreal scaleFactorX )
 
 void WaveGraphicsView::resizeSlicePointItems( const qreal scaleFactorX )
 {
-    if ( ! mSlicePointItemList.isEmpty() )
+    if ( ! m_slicePointItemList.isEmpty() )
     {
-        foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
+        foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
         {
             slicePointItem->setHeight( scene()->height() - 1 );
             const qreal newX = slicePointItem->scenePos().x() * scaleFactorX;
@@ -987,17 +987,17 @@ void WaveGraphicsView::resizeSlicePointItems( const qreal scaleFactorX )
 
 void WaveGraphicsView::resizePlayhead()
 {
-    if ( mTimer->state() == QTimeLine::Running )
+    if ( m_timer->state() == QTimeLine::Running )
     {
-        mTimer->stop();
+        m_timer->stop();
 
-        mAnimation->clear();
-        mAnimation->setPosAt( 0.0, QPointF( 0.0, 0.0 ) );
-        mAnimation->setPosAt( 1.0, QPointF( scene()->width() - 1, 0.0 ) );
+        m_animation->clear();
+        m_animation->setPosAt( 0.0, QPointF( 0.0, 0.0 ) );
+        m_animation->setPosAt( 1.0, QPointF( scene()->width() - 1, 0.0 ) );
 
-        mPlayhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
+        m_playhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
 
-        mTimer->resume();
+        m_timer->resume();
     }
 }
 
@@ -1005,17 +1005,17 @@ void WaveGraphicsView::resizePlayhead()
 
 void WaveGraphicsView::resizeLoopMarkers( const qreal scaleFactorX )
 {
-    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
+    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
     {
-        mLoopMarkerLeft->setHeight( scene()->height() - 1 );
-        mLoopMarkerRight->setHeight( scene()->height() - 1 );
+        m_loopMarkerLeft->setHeight( scene()->height() - 1 );
+        m_loopMarkerRight->setHeight( scene()->height() - 1 );
         {
-            const qreal newX = mLoopMarkerLeft->scenePos().x() * scaleFactorX;
-            mLoopMarkerLeft->setPos( newX, 0.0 );
+            const qreal newX = m_loopMarkerLeft->scenePos().x() * scaleFactorX;
+            m_loopMarkerLeft->setPos( newX, 0.0 );
         }
         {
-            const qreal newX = mLoopMarkerRight->scenePos().x() * scaleFactorX;
-            mLoopMarkerRight->setPos( newX, 0.0 );
+            const qreal newX = m_loopMarkerRight->scenePos().x() * scaleFactorX;
+            m_loopMarkerRight->setPos( newX, 0.0 );
         }
     }
 }
@@ -1029,18 +1029,18 @@ void WaveGraphicsView::scaleItems( const qreal scaleFactorX )
         QTransform matrix;
         matrix.scale( 1.0 / scaleFactorX, 1.0 ); // Items remain same width when view is scaled
 
-        if ( ! mSlicePointItemList.isEmpty() )
+        if ( ! m_slicePointItemList.isEmpty() )
         {
-            foreach ( SharedSlicePointItem slicePointItem, mSlicePointItemList )
+            foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
             {
                 slicePointItem->setTransform( matrix );
             }
         }
 
-        if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
+        if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
         {
-            mLoopMarkerLeft->setTransform( matrix );
-            mLoopMarkerRight->setTransform( matrix );
+            m_loopMarkerLeft->setTransform( matrix );
+            m_loopMarkerRight->setTransform( matrix );
         }
     }
 }
@@ -1049,39 +1049,39 @@ void WaveGraphicsView::scaleItems( const qreal scaleFactorX )
 
 void WaveGraphicsView::createLoopMarkers()
 {
-    mLoopMarkerLeft = new LoopMarkerItem( LoopMarkerItem::LEFT_MARKER, scene()->height() - 1 );
-    mLoopMarkerRight = new LoopMarkerItem( LoopMarkerItem::RIGHT_MARKER, scene()->height() - 1 );
+    m_loopMarkerLeft = new LoopMarkerItem( LoopMarkerItem::LEFT_MARKER, scene()->height() - 1 );
+    m_loopMarkerRight = new LoopMarkerItem( LoopMarkerItem::RIGHT_MARKER, scene()->height() - 1 );
 
     const int startFrame = 0;
-    const int endFrame = getTotalNumFrames( mWaveformItemList ) - 1;
+    const int endFrame = getTotalNumFrames( m_waveformItemList ) - 1;
 
-    mLoopMarkerLeft->setFrameNum( startFrame );
-    mLoopMarkerRight->setFrameNum( endFrame );
+    m_loopMarkerLeft->setFrameNum( startFrame );
+    m_loopMarkerRight->setFrameNum( endFrame );
 
-    mLoopMarkerLeft->setPos( 0.0, 0.0 );
-    mLoopMarkerRight->setPos( getScenePosX( endFrame ), 0.0 );
+    m_loopMarkerLeft->setPos( 0.0, 0.0 );
+    m_loopMarkerRight->setPos( getScenePosX( endFrame ), 0.0 );
 
     QTransform matrix;
     const qreal currentScaleFactor = transform().m11(); // m11() returns horizontal scale factor
     matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // loop marker remains correct width if view is scaled
-    mLoopMarkerLeft->setTransform( matrix );
-    mLoopMarkerRight->setTransform( matrix );
+    m_loopMarkerLeft->setTransform( matrix );
+    m_loopMarkerRight->setTransform( matrix );
 
-    mLoopMarkerLeft->setZValue( ZValues::LOOP_MARKER );
-    mLoopMarkerRight->setZValue( ZValues::LOOP_MARKER );
+    m_loopMarkerLeft->setZValue( ZValues::LOOP_MARKER );
+    m_loopMarkerRight->setZValue( ZValues::LOOP_MARKER );
 
-    QObject::connect( mLoopMarkerLeft, SIGNAL( scenePosChanged(LoopMarkerItem*const) ),
+    QObject::connect( m_loopMarkerLeft, SIGNAL( scenePosChanged(LoopMarkerItem*const) ),
                       this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*const) ) );
 
-    QObject::connect( mLoopMarkerRight, SIGNAL( scenePosChanged(LoopMarkerItem*const) ),
+    QObject::connect( m_loopMarkerRight, SIGNAL( scenePosChanged(LoopMarkerItem*const) ),
                       this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*const) ) );
 
-    scene()->addItem( mLoopMarkerLeft );
-    scene()->addItem( mLoopMarkerRight );
+    scene()->addItem( m_loopMarkerLeft );
+    scene()->addItem( m_loopMarkerRight );
     scene()->update();
 
-    updateLoopMarkerFrameNum( mLoopMarkerLeft );
-    updateLoopMarkerFrameNum( mLoopMarkerRight );
+    updateLoopMarkerFrameNum( m_loopMarkerLeft );
+    updateLoopMarkerFrameNum( m_loopMarkerRight );
 }
 
 
@@ -1106,7 +1106,7 @@ int WaveGraphicsView::getRelativeLoopMarkerFrameNum( const LoopMarkerItem* const
     {
         frameNum = loopMarker->getFrameNum();
 
-        foreach ( SharedWaveformItem item, mWaveformItemList )
+        foreach ( SharedWaveformItem item, m_waveformItemList )
         {
             const int numFrames = item->getSampleBuffer()->getNumFrames();
 
@@ -1132,7 +1132,7 @@ SharedWaveformItem WaveGraphicsView::getWaveformUnderLoopMarker( const LoopMarke
     {
         int frameNum = loopMarker->getFrameNum();
 
-        foreach ( SharedWaveformItem item, mWaveformItemList )
+        foreach ( SharedWaveformItem item, m_waveformItemList )
         {
             const int numFrames = item->getSampleBuffer()->getNumFrames();
 
@@ -1153,10 +1153,10 @@ SharedWaveformItem WaveGraphicsView::getWaveformUnderLoopMarker( const LoopMarke
 
 void WaveGraphicsView::updateLoopMarkerFrameNums()
 {
-    if ( mLoopMarkerLeft != NULL && mLoopMarkerRight != NULL )
+    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
     {
-        setLoopMarkerFrameNum( mLoopMarkerLeft );
-        setLoopMarkerFrameNum( mLoopMarkerRight );
+        setLoopMarkerFrameNum( m_loopMarkerLeft );
+        setLoopMarkerFrameNum( m_loopMarkerRight );
 
         emit loopMarkerPosChanged();
     }
@@ -1170,13 +1170,13 @@ void WaveGraphicsView::snapLoopMarkerToSlicePoint( LoopMarkerItem* const loopMar
     {
         const int oldFrameNum = loopMarker->getFrameNum();
         const int minFrameNum = 0;
-        const int maxFrameNum = getTotalNumFrames( mWaveformItemList ) - 1;
+        const int maxFrameNum = getTotalNumFrames( m_waveformItemList ) - 1;
 
         QList<int> frameNumList;
 
         frameNumList << minFrameNum;
 
-        foreach ( SharedSlicePointItem slicePoint, mSlicePointItemList )
+        foreach ( SharedSlicePointItem slicePoint, m_slicePointItemList )
         {
             const int frameNum = slicePoint->getFrameNum();
 
@@ -1217,10 +1217,10 @@ void WaveGraphicsView::snapLoopMarkerToWaveform( LoopMarkerItem* const loopMarke
 
         int frameNum = 0;
 
-        for ( int i = 0; i < mWaveformItemList.size(); i++ )
+        for ( int i = 0; i < m_waveformItemList.size(); i++ )
         {
             frameNumList << frameNum;
-            frameNum += mWaveformItemList.at( i )->getSampleBuffer()->getNumFrames();
+            frameNum += m_waveformItemList.at( i )->getSampleBuffer()->getNumFrames();
         }
 
         frameNumList << frameNum - 1;
@@ -1248,22 +1248,22 @@ void WaveGraphicsView::snapLoopMarkerToWaveform( LoopMarkerItem* const loopMarke
 
 void WaveGraphicsView::snapSlicePointToLoopMarker( SlicePointItem* const slicePoint )
 {
-    if ( slicePoint != NULL && mLoopMarkerLeft != NULL && mLoopMarkerLeft->isVisible() )
+    if ( slicePoint != NULL && m_loopMarkerLeft != NULL && m_loopMarkerLeft->isVisible() )
     {
         const qreal snapThreshold = 30.0;
 
         qreal scenePosX = slicePoint->scenePos().x();
         int frameNum = slicePoint->getFrameNum();
 
-        if ( qAbs( scenePosX - mLoopMarkerLeft->scenePos().x() ) <= snapThreshold )
+        if ( qAbs( scenePosX - m_loopMarkerLeft->scenePos().x() ) <= snapThreshold )
         {
-            scenePosX = mLoopMarkerLeft->scenePos().x();
-            frameNum = mLoopMarkerLeft->getFrameNum();
+            scenePosX = m_loopMarkerLeft->scenePos().x();
+            frameNum = m_loopMarkerLeft->getFrameNum();
         }
-        else if ( qAbs( scenePosX - mLoopMarkerRight->scenePos().x() ) <= snapThreshold )
+        else if ( qAbs( scenePosX - m_loopMarkerRight->scenePos().x() ) <= snapThreshold )
         {
-            scenePosX = mLoopMarkerRight->scenePos().x();
-            frameNum = mLoopMarkerRight->getFrameNum();
+            scenePosX = m_loopMarkerRight->scenePos().x();
+            frameNum = m_loopMarkerRight->getFrameNum();
         }
 
         slicePoint->setPos( scenePosX, 0.0 );
@@ -1315,7 +1315,7 @@ void WaveGraphicsView::reorderWaveformItems( QList<int> oldOrderPositions, const
 
     foreach ( int orderPos, oldOrderPositions )
     {
-        distanceToMove += mWaveformItemList.at( orderPos )->rect().width();
+        distanceToMove += m_waveformItemList.at( orderPos )->rect().width();
     }
 
     QList<int> itemsToMoveCurrentOrderPositions;
@@ -1332,18 +1332,18 @@ void WaveGraphicsView::reorderWaveformItems( QList<int> oldOrderPositions, const
 
         foreach ( int orderPos, itemsToMoveCurrentOrderPositions )
         {
-            const qreal currentScenePosX = mWaveformItemList.at( orderPos )->scenePos().x();
+            const qreal currentScenePosX = m_waveformItemList.at( orderPos )->scenePos().x();
 
-            mWaveformItemList.at( orderPos )->setPos( currentScenePosX + distanceToMove, 0.0 );
-            mWaveformItemList.at( orderPos )->setOrderPos( orderPos + numSelectedItems );
+            m_waveformItemList.at( orderPos )->setPos( currentScenePosX + distanceToMove, 0.0 );
+            m_waveformItemList.at( orderPos )->setOrderPos( orderPos + numSelectedItems );
         }
 
         for ( int i = 0; i < numSelectedItems; i++ )
         {
             const int orderPos = oldOrderPositions.at( i );
 
-            mWaveformItemList.at( orderPos )->setOrderPos( orderPos + numPlacesMoved );
-            mWaveformItemList.move( orderPos, orderPos + numPlacesMoved );
+            m_waveformItemList.at( orderPos )->setOrderPos( orderPos + numPlacesMoved );
+            m_waveformItemList.move( orderPos, orderPos + numPlacesMoved );
         }
     }
     else // If waveform items have been dragged to the right...
@@ -1357,10 +1357,10 @@ void WaveGraphicsView::reorderWaveformItems( QList<int> oldOrderPositions, const
 
         foreach ( int orderPos, itemsToMoveCurrentOrderPositions )
         {
-            const qreal currentScenePosX = mWaveformItemList.at( orderPos )->scenePos().x();
+            const qreal currentScenePosX = m_waveformItemList.at( orderPos )->scenePos().x();
 
-            mWaveformItemList.at( orderPos )->setPos( currentScenePosX - distanceToMove, 0.0 );
-            mWaveformItemList.at( orderPos )->setOrderPos( orderPos - numSelectedItems );
+            m_waveformItemList.at( orderPos )->setPos( currentScenePosX - distanceToMove, 0.0 );
+            m_waveformItemList.at( orderPos )->setOrderPos( orderPos - numSelectedItems );
         }
 
         const int lastIndex = numSelectedItems - 1;
@@ -1369,8 +1369,8 @@ void WaveGraphicsView::reorderWaveformItems( QList<int> oldOrderPositions, const
         {
             const int orderPos = oldOrderPositions.at( i );
 
-            mWaveformItemList.at( orderPos )->setOrderPos( orderPos + numPlacesMoved );
-            mWaveformItemList.move( orderPos, orderPos + numPlacesMoved );
+            m_waveformItemList.at( orderPos )->setOrderPos( orderPos + numPlacesMoved );
+            m_waveformItemList.move( orderPos, orderPos + numPlacesMoved );
         }
     }
 }
@@ -1383,10 +1383,10 @@ void WaveGraphicsView::slideWaveformItemIntoPlace( const int orderPos )
 
     for ( int i = 0; i < orderPos; i++ )
     {
-        newScenePosX += mWaveformItemList.at( i )->rect().width();
+        newScenePosX += m_waveformItemList.at( i )->rect().width();
     }
 
-    mWaveformItemList.at( orderPos )->setPos( newScenePosX, 0.0 );
+    m_waveformItemList.at( orderPos )->setPos( newScenePosX, 0.0 );
 
     updateLoopMarkerFrameNums();
 }
@@ -1397,7 +1397,7 @@ void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem
 {
     const int oldFrameNum = movedItem->getFrameNum();
 
-    if ( mLoopMarkerSnapMode == SNAP_SLICES_TO_MARKERS )
+    if ( m_loopMarkerSnapMode == SNAP_SLICES_TO_MARKERS )
     {
         snapSlicePointToLoopMarker( movedItem );
     }
@@ -1409,7 +1409,7 @@ void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem
 
     SharedSlicePointItem sharedSlicePoint;
 
-    foreach ( SharedSlicePointItem item, mSlicePointItemList )
+    foreach ( SharedSlicePointItem item, m_slicePointItemList )
     {
         if ( item == movedItem )
         {
@@ -1427,9 +1427,9 @@ void WaveGraphicsView::updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem
 {
     setLoopMarkerFrameNum( movedItem );
 
-    if ( mLoopMarkerSnapMode == SNAP_MARKERS_TO_SLICES )
+    if ( m_loopMarkerSnapMode == SNAP_MARKERS_TO_SLICES )
     {
-        if ( mWaveformItemList.size() > 1 )
+        if ( m_waveformItemList.size() > 1 )
         {
             snapLoopMarkerToWaveform( movedItem );
         }
@@ -1446,7 +1446,7 @@ void WaveGraphicsView::updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem
 
 void WaveGraphicsView::removePlayhead()
 {
-    scene()->removeItem( mPlayhead );
+    scene()->removeItem( m_playhead );
     scene()->update();
 }
 
@@ -1454,7 +1454,7 @@ void WaveGraphicsView::removePlayhead()
 
 void WaveGraphicsView::relayMaxDetailLevelReached()
 {
-    if ( mIsViewZoomedIn )
+    if ( m_isViewZoomedIn )
     {
         emit maxDetailLevelReached();
     }

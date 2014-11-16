@@ -37,7 +37,7 @@ LoopMarkerItem::LoopMarkerItem( const MarkerType markerType,
                      height,
                      markerType == LEFT_MARKER ? HANDLE_CENTRE_RIGHT : HANDLE_CENTRE_LEFT,
                      parent ),
-    mMarkerType( markerType )
+    m_markerType( markerType )
 {
 }
 
@@ -90,7 +90,7 @@ void LoopMarkerItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
     FrameMarkerItem::mousePressEvent( event );
 
-    mScenePosBeforeMove = pos().x();
+    m_scenePosBeforeMove = pos().x();
 }
 
 
@@ -99,7 +99,7 @@ void LoopMarkerItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseReleaseEvent( event );
 
-    if ( mScenePosBeforeMove != pos().x() )
+    if ( m_scenePosBeforeMove != pos().x() )
     {
         emit scenePosChanged( this );
     }

@@ -48,8 +48,8 @@ public:
                            const int sndFileFormat,
                            const bool isOverwriteEnabled = true );
 
-    QString getLastErrorTitle() const   { return sErrorTitle; }
-    QString getLastErrorInfo() const    { return sErrorInfo; }
+    QString getLastErrorTitle() const   { return s_errorTitle; }
+    QString getLastErrorInfo() const    { return s_errorInfo; }
 
 public:
     static const int SAVE_FORMAT = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
@@ -85,8 +85,8 @@ private:
 
     static SharedSampleBuffer aubioLoadFile( const char* filePath, uint_t startFrame, uint_t numFramesToRead );
 
-    static QString sErrorTitle;
-    static QString sErrorInfo;
+    static QString s_errorTitle;
+    static QString s_errorInfo;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( AudioFileHandler );

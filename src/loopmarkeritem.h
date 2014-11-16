@@ -39,7 +39,7 @@ public:
     LoopMarkerItem( const MarkerType markerType, const qreal height, QGraphicsItem* parent = NULL );
 
     int type() const                            { return Type; }
-    MarkerType getMarkerType() const            { return mMarkerType; }
+    MarkerType getMarkerType() const            { return m_markerType; }
 
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
@@ -47,8 +47,8 @@ protected:
     void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
 private:
-    const MarkerType mMarkerType;
-    qreal mScenePosBeforeMove;
+    const MarkerType m_markerType;
+    qreal m_scenePosBeforeMove;
 
 signals:
     void scenePosChanged( LoopMarkerItem* const item );

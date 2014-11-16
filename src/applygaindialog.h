@@ -46,7 +46,7 @@ protected:
     void changeEvent( QEvent* event );
 
 private:
-    Ui::ApplyGainDialog* mUI;
+    Ui::ApplyGainDialog* m_UI;
 
 private slots:
     void on_doubleSpinBox_Gain_valueChanged( const double value );

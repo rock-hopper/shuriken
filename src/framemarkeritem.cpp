@@ -33,8 +33,8 @@
 FrameMarkerItem::FrameMarkerItem( const QBrush brush, const QBrush selectedBrush, const qreal height, const Handle handle, QGraphicsItem* parent ) :
     QObject(),
     QGraphicsPolygonItem( parent ),
-    mSelectedBrush( selectedBrush ),
-    mHandle( handle )
+    m_selectedBrush( selectedBrush ),
+    m_handle( handle )
 {
     setBrush( brush );
     setHeight( height );
@@ -52,7 +52,7 @@ void FrameMarkerItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* 
 
     if ( option->state & QStyle::State_Selected )
     {
-        painter->setBrush( mSelectedBrush );
+        painter->setBrush( m_selectedBrush );
     }
     else
     {
@@ -68,7 +68,7 @@ void FrameMarkerItem::setHeight( const qreal height )
 {
     QPolygonF polygon;
 
-    if ( mHandle == HANDLE_TOP_BOTTOM )
+    if ( m_handle == HANDLE_TOP_BOTTOM )
     {
         const qreal triangleWidth = 16.0;
         const qreal triangleHeight = 16.0;
@@ -78,7 +78,7 @@ void FrameMarkerItem::setHeight( const qreal height )
                 << QPointF( -triangleWidth * 0.5, height ) << QPointF( triangleWidth * 0.5, height ) << QPointF( 0.0, height - triangleHeight )
                 << QPointF( 0.0, triangleHeight );
     }
-    else if ( mHandle == HANDLE_CENTRE_RIGHT )
+    else if ( m_handle == HANDLE_CENTRE_RIGHT )
     {
         const qreal triangleWidth = 16.0;
         const qreal triangleHeight = 32.0;
@@ -87,7 +87,7 @@ void FrameMarkerItem::setHeight( const qreal height )
                 << QPointF( triangleWidth, height * 0.5 ) << QPointF( 0.0, (height * 0.5) + (triangleHeight * 0.5) )
                 << QPointF( 0.0, (height * 0.5) - (triangleHeight * 0.5) ) << QPointF( 0.0, height );
     }
-    else if ( mHandle == HANDLE_CENTRE_LEFT )
+    else if ( m_handle == HANDLE_CENTRE_LEFT )
     {
         const qreal triangleWidth = 16.0;
         const qreal triangleHeight = 32.0;

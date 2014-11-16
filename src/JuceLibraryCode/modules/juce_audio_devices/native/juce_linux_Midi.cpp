@@ -141,7 +141,7 @@ void JackMidiClient::registerCallback (MidiPortAndCallback* cb)
     if (cb != nullptr)
     {
         activeCallback = cb;
-        gJackMidiClient = this;
+        g_jackMidiClient = this;
     }
 }
 
@@ -150,7 +150,7 @@ void JackMidiClient::unregisterCallback (MidiPortAndCallback* cb)
     jassert (activeCallback == cb);
     activeCallback = nullptr;
 
-    gJackMidiClient = nullptr;
+    g_jackMidiClient = nullptr;
 }
 
 

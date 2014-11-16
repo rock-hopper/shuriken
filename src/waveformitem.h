@@ -56,10 +56,10 @@ public:
 
     int type() const                                                { return Type; }
 
-    SharedSampleBuffer getSampleBuffer() const                      { return mSampleBuffer; }
+    SharedSampleBuffer getSampleBuffer() const                      { return m_sampleBuffer; }
 
-    int getOrderPos() const                                         { return mCurrentOrderPos; }
-    void setOrderPos( const int orderPos )                          { mCurrentOrderPos = orderPos; }
+    int getOrderPos() const                                         { return m_currentOrderPos; }
+    void setOrderPos( const int orderPos )                          { m_currentOrderPos = orderPos; }
 
 public:
     // For use with qSort(); sorts by order position
@@ -83,24 +83,24 @@ private:
     void findMinMaxSamples( const int startBin, const int endBin );
 
     enum DetailLevel { LOW, HIGH, VERY_HIGH };
-    DetailLevel mDetailLevel;
+    DetailLevel m_detailLevel;
 
-    const SharedSampleBuffer mSampleBuffer;
+    const SharedSampleBuffer m_sampleBuffer;
 
-    QPen mWavePen;
-    QPen mCentreLinePen;
+    QPen m_wavePen;
+    QPen m_centreLinePen;
 
-    int mCurrentOrderPos;
-    int mOrderPosBeforeMove;
+    int m_currentOrderPos;
+    int m_orderPosBeforeMove;
 
-    qreal mScaleFactor;
+    qreal m_scaleFactor;
 
-    int mNumBins;
-    qreal mBinSize;
-    int mFirstCalculatedBin;
-    int mLastCalculatedBin;
-    OwnedArray< Array<float> > mMinSampleValues;
-    OwnedArray< Array<float> > mMaxSampleValues;
+    int m_numBins;
+    qreal m_binSize;
+    int m_firstCalculatedBin;
+    int m_lastCalculatedBin;
+    OwnedArray< Array<float> > m_minSampleValues;
+    OwnedArray< Array<float> > m_maxSampleValues;
 
 private:
     static const int NOT_SET = -1;

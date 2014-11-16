@@ -54,39 +54,39 @@ class JackAudioIODevice : public AudioIODevice
 public:
     JackAudioIODevice (const String& deviceName, const JackClientConfig& config) :
         AudioIODevice (deviceName, "JACK"),
-        mConfig (config),
-        mIsDeviceOpen (false),
-        mIsDevicePlaying (false),
-        mIsClientActivated (false),
-        mAudioIOCallback (nullptr),
-        mJackClient (nullptr),
-        mMidiPortIn (nullptr),
-        mPositionInfo (new jack_position_t)
+        m_config (config),
+        m_isDeviceOpen (false),
+        m_isDevicePlaying (false),
+        m_isClientActivated (false),
+        m_audioIOCallback (nullptr),
+        m_jackClient (nullptr),
+        m_midiPortIn (nullptr),
+        m_positionInfo (new jack_position_t)
     {
-        for (int i=0; i < mConfig.inputChannels.size(); ++i)
+        for (int i=0; i < m_config.inputChannels.size(); ++i)
         {
-            if (mConfig.inputChannels[i].length() == 0) mConfig.inputChannels.set(i, "in_"+String(i+1));
+            if (m_config.inputChannels[i].length() == 0) m_config.inputChannels.set(i, "in_"+String(i+1));
         }
-        for (int i = 0; i < mConfig.outputChannels.size(); i++)
+        for (int i = 0; i < m_config.outputChannels.size(); i++)
         {
-            if (mConfig.outputChannels[i].length() == 0) mConfig.outputChannels.set(i, "out_"+String(i+1));
+            if (m_config.outputChannels[i].length() == 0) m_config.outputChannels.set(i, "out_"+String(i+1));
         }
 
         jack_set_error_function (JackAudioIODevice::errorCallback);
         jack_status_t status;
 
-        if (mConfig.session_uuid.isNotEmpty() && libjack_session_is_supported)
+        if (m_config.session_uuid.isNotEmpty() && libjack_session_is_supported)
         {
             //std::cerr << "JackAudioIODevice: opening with session_uuid: '" << config.session_uuid << "'\n";
-            mJackClient = jack_client_open (mConfig.clientName.toUTF8().getAddress(), JackSessionID, &status, mConfig.session_uuid.toUTF8().getAddress());
+            m_jackClient = jack_client_open (m_config.clientName.toUTF8().getAddress(), JackSessionID, &status, m_config.session_uuid.toUTF8().getAddress());
         }
         else
         {
             //std::cerr << "JackAudioIODevice: opening WITHOUT session_uuid: '" << config.session_uuid << "'\n";
-            mJackClient = jack_client_open (mConfig.clientName.toUTF8().getAddress(), JackNoStartServer, &status);
+            m_jackClient = jack_client_open (m_config.clientName.toUTF8().getAddress(), JackNoStartServer, &status);
         }
 
-        if (mJackClient == nullptr)
+        if (m_jackClient == nullptr)
         {
             if ((status & JackServerFailed) || (status & JackServerError))
                 printf ("Unable to connect to JACK server\n");
@@ -105,57 +105,57 @@ public:
         else
         {
 
-            for (int i=0; i < mConfig.inputChannels.size(); ++i)
+            for (int i=0; i < m_config.inputChannels.size(); ++i)
             {
                 jack_port_t* input =
-                        jack_port_register (mJackClient, mConfig.inputChannels[i].toUTF8().getAddress(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
-                mInputPorts.add (input);
+                        jack_port_register (m_jackClient, m_config.inputChannels[i].toUTF8().getAddress(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+                m_inputPorts.add (input);
             }
 
-            for (int i = 0; i < mConfig.outputChannels.size(); i++)
+            for (int i = 0; i < m_config.outputChannels.size(); i++)
             {
                 jack_port_t* output =
-                        jack_port_register (mJackClient, mConfig.outputChannels[i].toUTF8().getAddress(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
-                mOutputPorts.add (output);
+                        jack_port_register (m_jackClient, m_config.outputChannels[i].toUTF8().getAddress(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+                m_outputPorts.add (output);
             }
 
-            if (mConfig.isMidiEnabled)
+            if (m_config.isMidiEnabled)
             {
-                mMidiPortIn = jack_port_register(mJackClient, "midi_in", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
+                m_midiPortIn = jack_port_register(m_jackClient, "midi_in", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
             }
 
-            if (libjack_session_is_supported && mConfig.sessionCallback)
+            if (libjack_session_is_supported && m_config.sessionCallback)
             {
-                jack_set_session_callback(mJackClient, sessionCallback, this);
+                jack_set_session_callback(m_jackClient, sessionCallback, this);
             }
         }
 
-        mInChanBuffers  = (float**)malloc(mConfig.inputChannels.size() *sizeof(float*));
-        mOutChanBuffers = (float**)malloc(mConfig.outputChannels.size()*sizeof(float*));
+        m_inChanBuffers  = (float**)malloc(m_config.inputChannels.size() *sizeof(float*));
+        m_outChanBuffers = (float**)malloc(m_config.outputChannels.size()*sizeof(float*));
     }
 
 
 
     ~JackAudioIODevice()
     {
-        if (mJackClient)
+        if (m_jackClient)
         {
             close ();
 
-            jack_client_close (mJackClient);
-            mJackClient = nullptr;
+            jack_client_close (m_jackClient);
+            m_jackClient = nullptr;
         }
-        free(mInChanBuffers);
-        free(mOutChanBuffers);
+        free(m_inChanBuffers);
+        free(m_outChanBuffers);
     }
 
 
 
-    StringArray getOutputChannelNames() { return mConfig.outputChannels; }
+    StringArray getOutputChannelNames() { return m_config.outputChannels; }
 
 
 
-    StringArray getInputChannelNames() { return mConfig.inputChannels; }
+    StringArray getInputChannelNames() { return m_config.inputChannels; }
 
 
 
@@ -163,8 +163,8 @@ public:
     {
         Array<double> rates;
 
-        if (mJackClient != nullptr)
-            rates.add (jack_get_sample_rate (mJackClient));
+        if (m_jackClient != nullptr)
+            rates.add (jack_get_sample_rate (m_jackClient));
 
         return rates;
     }
@@ -175,8 +175,8 @@ public:
     {
         Array<int> sizes;
 
-        if (mJackClient != nullptr)
-            sizes.add (jack_get_buffer_size (mJackClient));
+        if (m_jackClient != nullptr)
+            sizes.add (jack_get_buffer_size (m_jackClient));
 
         return sizes;
     }
@@ -187,11 +187,11 @@ public:
 
 
 
-    int getCurrentBufferSizeSamples() override      { return mJackClient != nullptr ? jack_get_buffer_size (mJackClient) : 0; }
+    int getCurrentBufferSizeSamples() override      { return m_jackClient != nullptr ? jack_get_buffer_size (m_jackClient) : 0; }
 
 
 
-    double getCurrentSampleRate() override          { return mJackClient != nullptr ? jack_get_sample_rate (mJackClient) : 0; }
+    double getCurrentSampleRate() override          { return m_jackClient != nullptr ? jack_get_sample_rate (m_jackClient) : 0; }
 
 
 
@@ -200,7 +200,7 @@ public:
                  double /*sampleRate*/,
                  int /*bufferSizeSamples*/) override
     {
-        if (! mJackClient)
+        if (! m_jackClient)
         {
             return "Jack server is not running";
         }
@@ -208,21 +208,21 @@ public:
         close();
 
         // activate client !
-        jack_set_process_callback (mJackClient, JackAudioIODevice::processCallback, this);
-        jack_on_shutdown (mJackClient, JackAudioIODevice::shutdownCallback, this);
+        jack_set_process_callback (m_jackClient, JackAudioIODevice::processCallback, this);
+        jack_on_shutdown (m_jackClient, JackAudioIODevice::shutdownCallback, this);
 
-        jack_activate (mJackClient); mIsClientActivated = true;
+        jack_activate (m_jackClient); m_isClientActivated = true;
 
-        if (mConfig.isAutoConnectEnabled)
+        if (m_config.isAutoConnectEnabled)
         {
-            const char **ports = jack_get_ports (mJackClient, NULL, NULL, JackPortIsPhysical|JackPortIsInput);
-            for (int i=0; i < 2 && i < mOutputPorts.size() && ports[i]; ++i)
+            const char **ports = jack_get_ports (m_jackClient, NULL, NULL, JackPortIsPhysical|JackPortIsInput);
+            for (int i=0; i < 2 && i < m_outputPorts.size() && ports[i]; ++i)
             {
-                jack_connect(mJackClient, jack_port_name(mOutputPorts[i]), ports[i]);
+                jack_connect(m_jackClient, jack_port_name(m_outputPorts[i]), ports[i]);
             }
         }
 
-        mIsDeviceOpen = true;
+        m_isDeviceOpen = true;
 
         return String::empty;
     }
@@ -233,39 +233,39 @@ public:
     {
         stop();
 
-        if (mJackClient && mIsClientActivated)
+        if (m_jackClient && m_isClientActivated)
         {
-            jack_deactivate (mJackClient); mIsClientActivated = false;
+            jack_deactivate (m_jackClient); m_isClientActivated = false;
 
-            jack_set_process_callback (mJackClient, JackAudioIODevice::processCallback, nullptr);
-            jack_on_shutdown (mJackClient, JackAudioIODevice::shutdownCallback, nullptr);
+            jack_set_process_callback (m_jackClient, JackAudioIODevice::processCallback, nullptr);
+            jack_on_shutdown (m_jackClient, JackAudioIODevice::shutdownCallback, nullptr);
         }
 
-        mIsDeviceOpen = false;
+        m_isDeviceOpen = false;
 
-        gCurrentJackBPM = 0.0;
+        g_currentJackBPM = 0.0;
     }
 
 
 
     void start (AudioIODeviceCallback* callback) override
     {
-        if (! mIsDeviceOpen)
+        if (! m_isDeviceOpen)
             callback = nullptr;
 
-        mAudioIOCallback = callback;
+        m_audioIOCallback = callback;
 
-        if (mAudioIOCallback != nullptr)
-            mAudioIOCallback->audioDeviceAboutToStart (this);
+        if (m_audioIOCallback != nullptr)
+            m_audioIOCallback->audioDeviceAboutToStart (this);
 
-        mIsDevicePlaying = (mAudioIOCallback != nullptr);
+        m_isDevicePlaying = (m_audioIOCallback != nullptr);
     }
 
 
 
     void stop() override
     {
-        AudioIODeviceCallback* const oldCallback = mAudioIOCallback;
+        AudioIODeviceCallback* const oldCallback = m_audioIOCallback;
 
         start (nullptr);
 
@@ -277,14 +277,14 @@ public:
 
     bool isOpen() override
     {
-        return mIsDeviceOpen;
+        return m_isDeviceOpen;
     }
 
 
 
     bool isPlaying() override
     {
-        return mIsDevicePlaying;
+        return m_isDevicePlaying;
     }
 
 
@@ -306,7 +306,7 @@ public:
     BitArray getActiveOutputChannels() const override
     {
         BitArray outputBits;
-        outputBits.setRange(0, mOutputPorts.size(), true);
+        outputBits.setRange(0, m_outputPorts.size(), true);
         return outputBits;
     }
 
@@ -315,7 +315,7 @@ public:
     BitArray getActiveInputChannels() const override
     {
         BitArray inputBits;
-        inputBits.setRange(0, mInputPorts.size(), true);
+        inputBits.setRange(0, m_inputPorts.size(), true);
         return inputBits;
     }
 
@@ -325,8 +325,8 @@ public:
     {
         int latency = 0;
 
-        for (int i = 0; i < mOutputPorts.size(); i++)
-            latency = jmax (latency, (int) jack_port_get_total_latency (mJackClient, mOutputPorts [i]));
+        for (int i = 0; i < m_outputPorts.size(); i++)
+            latency = jmax (latency, (int) jack_port_get_total_latency (m_jackClient, m_outputPorts [i]));
 
         return latency;
     }
@@ -337,8 +337,8 @@ public:
     {
         int latency = 0;
 
-        for (int i = 0; i < mInputPorts.size(); i++)
-            latency = jmax (latency, (int) jack_port_get_total_latency (mJackClient, mInputPorts [i]));
+        for (int i = 0; i < m_inputPorts.size(); i++)
+            latency = jmax (latency, (int) jack_port_get_total_latency (m_jackClient, m_inputPorts [i]));
 
         return latency;
     }
@@ -352,12 +352,12 @@ public:
 private:
     void process (int numFrames)
     {
-        jack_transport_query (mJackClient, mPositionInfo);
-        gCurrentJackBPM = mPositionInfo->beats_per_minute;
+        jack_transport_query (m_jackClient, m_positionInfo);
+        g_currentJackBPM = m_positionInfo->beats_per_minute;
 
-        if (mMidiPortIn != nullptr && gJackMidiClient != nullptr)
+        if (m_midiPortIn != nullptr && g_jackMidiClient != nullptr)
         {
-            void* buffer = jack_port_get_buffer (mMidiPortIn, numFrames);
+            void* buffer = jack_port_get_buffer (m_midiPortIn, numFrames);
             jack_nframes_t event_count = jack_midi_get_event_count (buffer);
             jack_midi_event_t in_event;
 
@@ -368,40 +368,40 @@ private:
                 //std::cerr << "add event : "<< (void*)*(const uint8*)in_event.buffer << ", sz=" << in_event.size << " sample: " << in_event.time << "\n";
 
                 const MidiMessage message ((const uint8*) in_event.buffer, in_event.size, Time::getMillisecondCounterHiRes() * 0.001);
-                gJackMidiClient->handleIncomingMidiMessage (message, 0);
+                g_jackMidiClient->handleIncomingMidiMessage (message, 0);
             }
         }
 
         int i, numActiveInChans = 0, numActiveOutChans = 0;
 
-        for (i = 0; i < mInputPorts.size(); ++i)
+        for (i = 0; i < m_inputPorts.size(); ++i)
         {
             jack_default_audio_sample_t *in =
-                (jack_default_audio_sample_t *) jack_port_get_buffer (mInputPorts.getUnchecked(i), numFrames);
+                (jack_default_audio_sample_t *) jack_port_get_buffer (m_inputPorts.getUnchecked(i), numFrames);
             jassert (in != nullptr);
-            mInChanBuffers [numActiveInChans++] = (float*) in;
+            m_inChanBuffers [numActiveInChans++] = (float*) in;
         }
 
-        for (i = 0; i < mOutputPorts.size(); ++i)
+        for (i = 0; i < m_outputPorts.size(); ++i)
         {
             jack_default_audio_sample_t *out =
-                (jack_default_audio_sample_t *) jack_port_get_buffer (mOutputPorts.getUnchecked(i), numFrames);
+                (jack_default_audio_sample_t *) jack_port_get_buffer (m_outputPorts.getUnchecked(i), numFrames);
             jassert (out != nullptr);
-            mOutChanBuffers [numActiveOutChans++] = (float*) out;
+            m_outChanBuffers [numActiveOutChans++] = (float*) out;
         }
 
-        if (mAudioIOCallback != nullptr)
+        if (m_audioIOCallback != nullptr)
         {
-            mAudioIOCallback->audioDeviceIOCallback ((const float**) mInChanBuffers,
-                                             mInputPorts.size(),
-                                             mOutChanBuffers,
-                                             mOutputPorts.size(),
+            m_audioIOCallback->audioDeviceIOCallback ((const float**) m_inChanBuffers,
+                                             m_inputPorts.size(),
+                                             m_outChanBuffers,
+                                             m_outputPorts.size(),
                                              numFrames);
         }
         else
         {
-            for (i = 0; i < mOutputPorts.size(); ++i)
-                zeromem (mOutChanBuffers[i], sizeof (float) * numFrames);
+            for (i = 0; i < m_outputPorts.size(); ++i)
+                zeromem (m_outChanBuffers[i], sizeof (float) * numFrames);
         }
     }
 
@@ -466,7 +466,7 @@ private:
 
         if (device)
         {
-            device->mJackClient = 0;
+            device->m_jackClient = 0;
             device->close ();
         }
     }
@@ -486,22 +486,22 @@ private:
 
 
 
-    JackClientConfig mConfig;
-    bool mIsDeviceOpen, mIsDevicePlaying;
-    bool mIsClientActivated;
+    JackClientConfig m_config;
+    bool m_isDeviceOpen, m_isDevicePlaying;
+    bool m_isClientActivated;
 
-    AudioIODeviceCallback* mAudioIOCallback;
+    AudioIODeviceCallback* m_audioIOCallback;
 
-    float** mInChanBuffers;
-    float** mOutChanBuffers;
+    float** m_inChanBuffers;
+    float** m_outChanBuffers;
 
-    jack_client_t* mJackClient;
+    jack_client_t* m_jackClient;
 
-    Array<jack_port_t*> mInputPorts;
-    Array<jack_port_t*> mOutputPorts;
-    jack_port_t* mMidiPortIn;
+    Array<jack_port_t*> m_inputPorts;
+    Array<jack_port_t*> m_outputPorts;
+    jack_port_t* m_midiPortIn;
 
-    ScopedPointer<jack_position_t> mPositionInfo;
+    ScopedPointer<jack_position_t> m_positionInfo;
 };
 
 

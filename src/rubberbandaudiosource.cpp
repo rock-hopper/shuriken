@@ -34,26 +34,26 @@ RubberbandAudioSource::RubberbandAudioSource( AudioSource* const source,
                                               const bool isJackSyncEnabled ) :
     QObject(),
     AudioSource(),
-    mSource( source ),
-    mNumChans( numChans ),
-    mOptions( RubberBandStretcher::OptionProcessRealTime | options ),
-    mStretcher( NULL ),
-    mInputBuffer( numChans, 8192 ),
-    mTimeRatio( 1.0 ),
-    mPrevTimeRatio( 1.0 ),
-    mPitchScale( 1.0 ),
-    mPrevPitchScale( 1.0 ),
-    mIsPitchCorrectionEnabled( true ),
-    mTransientsOption( 0 ),
-    mPrevTransientsOption( 0 ),
-    mPhaseOption( 0 ),
-    mPrevPhaseOption( 0 ),
-    mFormantOption( 0 ),
-    mPrevFormantOption( 0 ),
-    mPitchOption( 0 ),
-    mPrevPitchOption( 0 ),
-    mOriginalBPM( 0.0 ),
-    mIsJackSyncEnabled( isJackSyncEnabled )
+    m_source( source ),
+    m_numChans( numChans ),
+    m_options( RubberBandStretcher::OptionProcessRealTime | options ),
+    m_stretcher( NULL ),
+    m_inputBuffer( numChans, 8192 ),
+    m_timeRatio( 1.0 ),
+    m_prevTimeRatio( 1.0 ),
+    m_pitchScale( 1.0 ),
+    m_prevPitchScale( 1.0 ),
+    m_isPitchCorrectionEnabled( true ),
+    m_transientsOption( 0 ),
+    m_prevTransientsOption( 0 ),
+    m_phaseOption( 0 ),
+    m_prevPhaseOption( 0 ),
+    m_formantOption( 0 ),
+    m_prevFormantOption( 0 ),
+    m_pitchOption( 0 ),
+    m_prevPitchOption( 0 ),
+    m_originalBPM( 0.0 ),
+    m_isJackSyncEnabled( isJackSyncEnabled )
 {
 }
 
@@ -68,33 +68,33 @@ RubberbandAudioSource::~RubberbandAudioSource()
 
 void RubberbandAudioSource::prepareToPlay( int samplesPerBlockExpected, double sampleRate )
 {
-    if ( mStretcher == NULL )
+    if ( m_stretcher == NULL )
     {
-        mStretcher = new RubberBandStretcher( sampleRate, mNumChans, mOptions );
-        mStretcher->reset();
+        m_stretcher = new RubberBandStretcher( sampleRate, m_numChans, m_options );
+        m_stretcher->reset();
 
-        mPrevTimeRatio = 1.0;
-        mPrevPitchScale = 1.0;
-        mPrevTransientsOption = 0;
-        mPrevPhaseOption = 0;
-        mPrevFormantOption = 0;
-        mPrevPitchOption = 0;
+        m_prevTimeRatio = 1.0;
+        m_prevPitchScale = 1.0;
+        m_prevTransientsOption = 0;
+        m_prevPhaseOption = 0;
+        m_prevFormantOption = 0;
+        m_prevPitchOption = 0;
     }
 
-    mSource->prepareToPlay( samplesPerBlockExpected, sampleRate );
+    m_source->prepareToPlay( samplesPerBlockExpected, sampleRate );
 }
 
 
 
 void RubberbandAudioSource::releaseResources()
 {
-    if ( mStretcher != NULL )
+    if ( m_stretcher != NULL )
     {
-        delete mStretcher;
-        mStretcher = NULL;
+        delete m_stretcher;
+        m_stretcher = NULL;
     }
 
-    mSource->releaseResources();
+    m_source->releaseResources();
 }
 
 
@@ -102,68 +102,68 @@ void RubberbandAudioSource::releaseResources()
 void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill )
 {
     // JACK Sync
-    if ( mIsJackSyncEnabled && gCurrentJackBPM > 0.0 && mOriginalBPM > 0.0 )
+    if ( m_isJackSyncEnabled && g_currentJackBPM > 0.0 && m_originalBPM > 0.0 )
     {
-          mTimeRatio = mOriginalBPM / gCurrentJackBPM;
+        m_timeRatio = m_originalBPM / g_currentJackBPM;
     }
 
     // Time ratio
-    if ( mTimeRatio != mPrevTimeRatio)
+    if ( m_timeRatio != m_prevTimeRatio)
     {
-        mStretcher->setTimeRatio( mTimeRatio );
-        mPrevTimeRatio = mTimeRatio;
+        m_stretcher->setTimeRatio( m_timeRatio );
+        m_prevTimeRatio = m_timeRatio;
     }
 
     // Pitch scale
-    if ( mIsPitchCorrectionEnabled )
+    if ( m_isPitchCorrectionEnabled )
     {
-        mPitchScale = 1.0;
+        m_pitchScale = 1.0;
     }
     else
     {
-        if ( mTimeRatio > 0.0 ) mPitchScale = 1 / mTimeRatio;
+        if ( m_timeRatio > 0.0 ) m_pitchScale = 1 / m_timeRatio;
     }
 
-    if ( mPitchScale != mPrevPitchScale)
+    if ( m_pitchScale != m_prevPitchScale)
     {
-        mStretcher->setPitchScale( mPitchScale );
-        mPrevPitchScale = mPitchScale;
+        m_stretcher->setPitchScale( m_pitchScale );
+        m_prevPitchScale = m_pitchScale;
     }
 
     // Options
-    if ( mTransientsOption != mPrevTransientsOption )
+    if ( m_transientsOption != m_prevTransientsOption )
     {
-        mStretcher->setTransientsOption( mTransientsOption );
-        mPrevTransientsOption = mTransientsOption;
+        m_stretcher->setTransientsOption( m_transientsOption );
+        m_prevTransientsOption = m_transientsOption;
     }
 
-    if ( mPhaseOption != mPrevPhaseOption )
+    if ( m_phaseOption != m_prevPhaseOption )
     {
-        mStretcher->setPhaseOption( mPhaseOption );
-        mPrevPhaseOption = mPhaseOption;
+        m_stretcher->setPhaseOption( m_phaseOption );
+        m_prevPhaseOption = m_phaseOption;
     }
 
-    if ( mFormantOption != mPrevFormantOption )
+    if ( m_formantOption != m_prevFormantOption )
     {
-        mStretcher->setFormantOption( mFormantOption );
-        mPrevFormantOption = mFormantOption;
+        m_stretcher->setFormantOption( m_formantOption );
+        m_prevFormantOption = m_formantOption;
     }
 
-    if ( mPitchOption != mPrevPitchOption )
+    if ( m_pitchOption != m_prevPitchOption )
     {
-        mStretcher->setPitchOption( mPitchOption );
-        mPrevPitchOption = mPitchOption;
+        m_stretcher->setPitchOption( m_pitchOption );
+        m_prevPitchOption = m_pitchOption;
     }
 
 //    const int latency = mStretcher->getLatency() + mReserveSize;
 //    std::cerr << "latency = " << latency << std::endl;
 
-    while ( mStretcher->available() < bufferToFill.numSamples )
+    while ( m_stretcher->available() < bufferToFill.numSamples )
     {
         readNextBufferChunk();
     }
 
-    mStretcher->retrieve( bufferToFill.buffer->getArrayOfWritePointers(), bufferToFill.numSamples );
+    m_stretcher->retrieve( bufferToFill.buffer->getArrayOfWritePointers(), bufferToFill.numSamples );
 }
 
 
@@ -173,21 +173,21 @@ void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buf
 
 void RubberbandAudioSource::readNextBufferChunk()
 {
-    const int numRequired = mStretcher->getSamplesRequired();
+    const int numRequired = m_stretcher->getSamplesRequired();
 
     if ( numRequired > 0 )
     {
         AudioSourceChannelInfo info;
-        info.buffer = &mInputBuffer;
+        info.buffer = &m_inputBuffer;
         info.startSample = 0;
-        info.numSamples = qMin( mInputBuffer.getNumFrames(), numRequired );
+        info.numSamples = qMin( m_inputBuffer.getNumFrames(), numRequired );
 
-        mSource->getNextAudioBlock( info );
+        m_source->getNextAudioBlock( info );
 
-        mStretcher->process( mInputBuffer.getArrayOfReadPointers(), info.numSamples, false );
+        m_stretcher->process( m_inputBuffer.getArrayOfReadPointers(), info.numSamples, false );
     }
     else
     {
-        mStretcher->process( mInputBuffer.getArrayOfReadPointers(), 0, false );
+        m_stretcher->process( m_inputBuffer.getArrayOfReadPointers(), 0, false );
     }
 }

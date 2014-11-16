@@ -20,4 +20,4 @@
 
 */
 
-volatile double gCurrentJackBPM = 0.0;
+volatile double g_currentJackBPM = 0.0;

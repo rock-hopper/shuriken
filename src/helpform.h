@@ -42,7 +42,7 @@ protected:
     void changeEvent( QEvent* event );
 
 private:
-    Ui::HelpForm* mUI;
+    Ui::HelpForm* m_UI;
 
 private slots:
     void on_pushButton_Forward_clicked();

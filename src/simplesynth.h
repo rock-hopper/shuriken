@@ -62,7 +62,7 @@ struct SineWaveSound : public SynthesiserSound
 // Simple synth voice that generates sine waves
 struct SineWaveVoice : public SynthesiserVoice
 {
-    SineWaveVoice() : currentAngle(0), angleDelta(0), level(0), tailOff(0)
+    SineWaveVoice() : m_currentAngle(0), m_angleDelta(0), m_level(0), m_tailOff(0)
     {
     }
 
@@ -76,14 +76,14 @@ struct SineWaveVoice : public SynthesiserVoice
     void startNote( const int midiNoteNumber, const float velocity,
                     SynthesiserSound* /*sound*/, const int /*currentPitchWheelPosition*/ ) override
     {
-        currentAngle = 0.0;
-        level = velocity * 0.15;
-        tailOff = 0.0;
+        m_currentAngle = 0.0;
+        m_level = velocity * 0.15;
+        m_tailOff = 0.0;
 
         double cyclesPerSecond = MidiMessage::getMidiNoteInHertz( midiNoteNumber );
         double cyclesPerSample = cyclesPerSecond / getSampleRate();
 
-        angleDelta = cyclesPerSample * 2.0 * double_Pi;
+        m_angleDelta = cyclesPerSample * 2.0 * double_Pi;
     }
 
 
@@ -96,14 +96,14 @@ struct SineWaveVoice : public SynthesiserVoice
 
             // We only need to begin a tail-off if it's not already doing so - the
             // stopNote method could be called more than once.
-            if ( tailOff == 0.0 )
-                tailOff = 1.0;
+            if ( m_tailOff == 0.0 )
+                m_tailOff = 1.0;
         }
         else
         {
             // we're being told to stop playing immediately, so reset everything..
             clearCurrentNote();
-            angleDelta = 0.0;
+            m_angleDelta = 0.0;
         }
     }
 
@@ -122,27 +122,27 @@ struct SineWaveVoice : public SynthesiserVoice
 
     void renderNextBlock( AudioSampleBuffer& outputBuffer, int startSample, int numSamples ) override
     {
-        if ( angleDelta != 0.0 )
+        if ( m_angleDelta != 0.0 )
         {
-            if ( tailOff > 0 )
+            if ( m_tailOff > 0 )
             {
                 while ( --numSamples >= 0 )
                 {
-                    const float currentSample = (float)( sin (currentAngle) * level * tailOff );
+                    const float currentSample = (float)( sin (m_currentAngle) * m_level * m_tailOff );
 
                     for ( int i = outputBuffer.getNumChannels(); --i >= 0; )
                         outputBuffer.addSample( i, startSample, currentSample );
 
-                    currentAngle += angleDelta;
+                    m_currentAngle += m_angleDelta;
                     ++startSample;
 
-                    tailOff *= 0.99;
+                    m_tailOff *= 0.99;
 
-                    if ( tailOff <= 0.005 )
+                    if ( m_tailOff <= 0.005 )
                     {
                         clearCurrentNote();
 
-                        angleDelta = 0.0;
+                        m_angleDelta = 0.0;
                         break;
                     }
                 }
@@ -151,12 +151,12 @@ struct SineWaveVoice : public SynthesiserVoice
             {
                 while ( --numSamples >= 0 )
                 {
-                    const float currentSample = (float)( sin (currentAngle) * level );
+                    const float currentSample = (float)( sin (m_currentAngle) * m_level );
 
                     for ( int i = outputBuffer.getNumChannels(); --i >= 0; )
                         outputBuffer.addSample( i, startSample, currentSample );
 
-                    currentAngle += angleDelta;
+                    m_currentAngle += m_angleDelta;
                     ++startSample;
                 }
             }
@@ -164,7 +164,7 @@ struct SineWaveVoice : public SynthesiserVoice
     }
 
 private:
-    double currentAngle, angleDelta, level, tailOff;
+    double m_currentAngle, m_angleDelta, m_level, m_tailOff;
 };
 
 
@@ -178,20 +178,20 @@ struct SynthAudioSource : public AudioSource
         const int polyphony = 10;
         for ( int voiceNum = 0; voiceNum < polyphony; voiceNum++ )
         {
-            synth.addVoice( new SineWaveVoice() );
+            m_synth.addVoice( new SineWaveVoice() );
         }
 
         // Add the sine wave sound
-        synth.clearSounds();
-        synth.addSound( new SineWaveSound() );
+        m_synth.clearSounds();
+        m_synth.addSound( new SineWaveSound() );
     }
 
 
     void prepareToPlay( const int /*samplesPerBlockExpected*/, const double sampleRate ) override
     {
-        midiCollector.reset( sampleRate );
+        m_midiCollector.reset( sampleRate );
 
-        synth.setCurrentPlaybackSampleRate( sampleRate );
+        m_synth.setCurrentPlaybackSampleRate( sampleRate );
     }
 
 
@@ -207,19 +207,19 @@ struct SynthAudioSource : public AudioSource
 
         // Fill a MIDI buffer with incoming messages from the MIDI input
         MidiBuffer incomingMidi;
-        midiCollector.removeNextBlockOfMessages( incomingMidi, bufferToFill.numSamples );
+        m_midiCollector.removeNextBlockOfMessages( incomingMidi, bufferToFill.numSamples );
 
         // Tell the synth to process the MIDI events and generate its output
-        synth.renderNextBlock( *bufferToFill.buffer, incomingMidi, 0, bufferToFill.numSamples );
+        m_synth.renderNextBlock( *bufferToFill.buffer, incomingMidi, 0, bufferToFill.numSamples );
     }
 
 
     // This collects real-time midi messages from the midi input device, and
     // turns them into blocks that we can process in our audio callback
-    MidiMessageCollector midiCollector;
+    MidiMessageCollector m_midiCollector;
 
     // The synth itself!
-    Synthesiser synth;
+    Synthesiser m_synth;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( SynthAudioSource );

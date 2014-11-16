@@ -29,25 +29,25 @@
 
 HelpForm::HelpForm( QWidget* parent ) :
     QWidget( parent ),
-    mUI( new Ui::HelpForm )
+    m_UI( new Ui::HelpForm )
 {
-    mUI->setupUi( this );
+    m_UI->setupUi( this );
 
-    QObject::connect( mUI->textBrowser, SIGNAL( backwardAvailable(bool) ),
-                      mUI->pushButton_Back, SLOT( setEnabled(bool) ) );
+    QObject::connect( m_UI->textBrowser, SIGNAL( backwardAvailable(bool) ),
+                      m_UI->pushButton_Back, SLOT( setEnabled(bool) ) );
 
-    QObject::connect( mUI->textBrowser, SIGNAL( forwardAvailable(bool) ),
-                      mUI->pushButton_Forward, SLOT( setEnabled(bool) ) );
+    QObject::connect( m_UI->textBrowser, SIGNAL( forwardAvailable(bool) ),
+                      m_UI->pushButton_Forward, SLOT( setEnabled(bool) ) );
 
-    mUI->textBrowser->setOpenExternalLinks( true );
-    mUI->textBrowser->setSource( QUrl( "qrc:/resources/docs/index.html" ) );
+    m_UI->textBrowser->setOpenExternalLinks( true );
+    m_UI->textBrowser->setSource( QUrl( "qrc:/resources/docs/index.html" ) );
 }
 
 
 
 HelpForm::~HelpForm()
 {
-    delete mUI;
+    delete m_UI;
 }
 
 
@@ -62,7 +62,7 @@ void HelpForm::changeEvent( QEvent* event )
     switch ( event->type() )
     {
     case QEvent::LanguageChange:
-        mUI->retranslateUi( this );
+        m_UI->retranslateUi( this );
         break;
     default:
         break;
@@ -76,19 +76,19 @@ void HelpForm::changeEvent( QEvent* event )
 
 void HelpForm::on_pushButton_Home_clicked()
 {
-    mUI->textBrowser->home();
+    m_UI->textBrowser->home();
 }
 
 
 
 void HelpForm::on_pushButton_Back_clicked()
 {
-    mUI->textBrowser->backward();
+    m_UI->textBrowser->backward();
 }
 
 
 
 void HelpForm::on_pushButton_Forward_clicked()
 {
-    mUI->textBrowser->forward();
+    m_UI->textBrowser->forward();
 }

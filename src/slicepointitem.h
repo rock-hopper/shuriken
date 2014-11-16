@@ -47,7 +47,7 @@ protected:
     void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
 private:
-    qreal mScenePosBeforeMove;
+    qreal m_scenePosBeforeMove;
 
 signals:
     void scenePosChanged( SlicePointItem* const item );

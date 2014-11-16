@@ -33,27 +33,27 @@ WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer,
                             QGraphicsItem* parent ) :
     QObject(),
     QGraphicsRectItem( 0.0, 0.0, width, height, parent ),
-    mSampleBuffer( sampleBuffer ),
-    mCurrentOrderPos( orderPos ),
-    mScaleFactor( NOT_SET ),
-    mFirstCalculatedBin( NOT_SET ),
-    mLastCalculatedBin( NOT_SET )
+    m_sampleBuffer( sampleBuffer ),
+    m_currentOrderPos( orderPos ),
+    m_scaleFactor( NOT_SET ),
+    m_firstCalculatedBin( NOT_SET ),
+    m_lastCalculatedBin( NOT_SET )
 {
     setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges | ItemUsesExtendedStyleOption );
 
     setBackgroundGradient();
-    mWavePen  = QPen( QColor(23, 23, 135, 191) );
-    mCentreLinePen = QPen( QColor(127, 127, 127, 191) );
+    m_wavePen  = QPen( QColor(23, 23, 135, 191) );
+    m_centreLinePen = QPen( QColor(127, 127, 127, 191) );
 
     // Don't draw rect border
     setPen( QPen( QColor(0, 0, 0, 0) ) );
 
     // Set up min/max sample "bins"
-    const int numChans = mSampleBuffer->getNumChannels();
+    const int numChans = m_sampleBuffer->getNumChannels();
     for ( int chanNum = 0; chanNum < numChans; chanNum++ )
     {
-        mMinSampleValues.add( new Array<float> );
-        mMaxSampleValues.add( new Array<float> );
+        m_minSampleValues.add( new Array<float> );
+        m_maxSampleValues.add( new Array<float> );
     }
 }
 
@@ -63,7 +63,7 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
 {
     Q_UNUSED( widget );
 
-    const int numChans = mSampleBuffer->getNumChannels();
+    const int numChans = m_sampleBuffer->getNumChannels();
 
     int firstVisibleBin = 0;
     int lastVisibleBin = 0;
@@ -75,47 +75,47 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
     int numVisibleFrames = 0;
 
     // If scale has changed since the last redraw then reset sample bins and establish new detail level
-    if ( mScaleFactor != painter->worldTransform().m11() )
+    if ( m_scaleFactor != painter->worldTransform().m11() )
     {
-        mScaleFactor = painter->worldTransform().m11(); // m11() returns the current horizontal scale factor
+        m_scaleFactor = painter->worldTransform().m11(); // m11() returns the current horizontal scale factor
         resetSampleBins();
     }
 
-    if ( mDetailLevel != VERY_HIGH )
+    if ( m_detailLevel != VERY_HIGH )
     {
         // Reduce no. of samples to draw by finding the min/max values in each consecutive sample "bin"
-        firstVisibleBin = qMax( (int) floor( option->exposedRect.left() * mScaleFactor ), 0 );
-        lastVisibleBin = qMin( (int) ceil( option->exposedRect.right() * mScaleFactor ), mNumBins - 1 );
+        firstVisibleBin = qMax( (int) floor( option->exposedRect.left() * m_scaleFactor ), 0 );
+        lastVisibleBin = qMin( (int) ceil( option->exposedRect.right() * m_scaleFactor ), m_numBins - 1 );
 
-        if ( mFirstCalculatedBin == NOT_SET || mLastCalculatedBin == NOT_SET )
+        if ( m_firstCalculatedBin == NOT_SET || m_lastCalculatedBin == NOT_SET )
         {
             findMinMaxSamples( firstVisibleBin, lastVisibleBin );
-            mFirstCalculatedBin = firstVisibleBin;
-            mLastCalculatedBin = lastVisibleBin;
+            m_firstCalculatedBin = firstVisibleBin;
+            m_lastCalculatedBin = lastVisibleBin;
         }
 
-        if ( firstVisibleBin < mFirstCalculatedBin )
+        if ( firstVisibleBin < m_firstCalculatedBin )
         {
-            findMinMaxSamples( firstVisibleBin, mFirstCalculatedBin - 1 );
-            mFirstCalculatedBin = firstVisibleBin;
+            findMinMaxSamples( firstVisibleBin, m_firstCalculatedBin - 1 );
+            m_firstCalculatedBin = firstVisibleBin;
         }
 
-        if ( lastVisibleBin > mLastCalculatedBin )
+        if ( lastVisibleBin > m_lastCalculatedBin )
         {
-            findMinMaxSamples( mLastCalculatedBin + 1, lastVisibleBin );
-            mLastCalculatedBin = lastVisibleBin;
+            findMinMaxSamples( m_lastCalculatedBin + 1, lastVisibleBin );
+            m_lastCalculatedBin = lastVisibleBin;
         }
 
         numVisibleBins = lastVisibleBin - firstVisibleBin + 1;
     }
     else // mDetailLevel == VERY_HIGH
     {
-        distanceBetweenFrames = rect().width() / mSampleBuffer->getNumFrames();
+        distanceBetweenFrames = rect().width() / m_sampleBuffer->getNumFrames();
 
         firstVisibleFrame = (int) floor( option->exposedRect.left() / distanceBetweenFrames );
 
         lastVisibleFrame = qMin( (int) ceil( option->exposedRect.right() / distanceBetweenFrames ),
-                                 mSampleBuffer->getNumFrames() - 1 );
+                                 m_sampleBuffer->getNumFrames() - 1 );
 
         numVisibleFrames = lastVisibleFrame - firstVisibleFrame + 1;
     }
@@ -132,7 +132,7 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
     // Draw centre line/lines
     painter->save();
     painter->translate( 0.0, 1.0 );
-    painter->setPen( mCentreLinePen );
+    painter->setPen( m_centreLinePen );
     for ( int chanNum = 0; chanNum < numChans; chanNum++ )
     {
         painter->drawLine( 0.0, 0.0, rect().width(), 0.0 );
@@ -142,9 +142,9 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
 
     // Draw waveform
     painter->translate( 0.0, 1.0 );
-    painter->setPen( mWavePen );
+    painter->setPen( m_wavePen );
 
-    const qreal lineWidth = 1.0 / mScaleFactor;
+    const qreal lineWidth = 1.0 / m_scaleFactor;
     const qreal leftEdge = option->exposedRect.left();
 
     float min;
@@ -152,14 +152,14 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
 
     for ( int chanNum = 0; chanNum < numChans; chanNum++ )
     {
-        if ( mDetailLevel == LOW )
+        if ( m_detailLevel == LOW )
         {
             painter->setRenderHint( QPainter::Antialiasing, false );
 
             for ( int binCount = 0; binCount < numVisibleBins; binCount++ )
             {
-                min = (*mMinSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
-                max = (*mMaxSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
+                min = (*m_minSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
+                max = (*m_maxSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
 
                 painter->drawLine
                 (
@@ -168,7 +168,7 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
                 );
             }
         }
-        else if ( mDetailLevel == HIGH )
+        else if ( m_detailLevel == HIGH )
         {
             painter->setRenderHint( QPainter::Antialiasing, true );
 
@@ -176,8 +176,8 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
 
             for ( int binCount = 0; binCount < numVisibleBins; binCount++ )
             {
-                min = (*mMinSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
-                max = (*mMaxSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
+                min = (*m_minSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
+                max = (*m_maxSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
 
                 points[ binCount * 2 ]       = QPointF( leftEdge + (binCount * lineWidth), -min );
                 points[ (binCount * 2) + 1 ] = QPointF( leftEdge + (binCount * lineWidth), -max );
@@ -189,7 +189,7 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
             painter->setRenderHint( QPainter::Antialiasing, true );
 
             QPointF points[ numVisibleFrames ];
-            const float* sampleData = mSampleBuffer->getReadPointer( chanNum, firstVisibleFrame );
+            const float* sampleData = m_sampleBuffer->getReadPointer( chanNum, firstVisibleFrame );
 
             for ( int frameCount = 0; frameCount < numVisibleFrames; frameCount++ )
             {
@@ -338,7 +338,7 @@ void WaveformItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
             else
             {
                 QGraphicsItem::mousePressEvent( event );
-                mOrderPosBeforeMove = mCurrentOrderPos;
+                m_orderPosBeforeMove = m_currentOrderPos;
             }
         }
         else
@@ -443,9 +443,9 @@ void WaveformItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 
     QList<WaveformItem*> selectedItems = getSelectedWaveformItems( scene() );
 
-    if ( mOrderPosBeforeMove != mCurrentOrderPos )
+    if ( m_orderPosBeforeMove != m_currentOrderPos )
     {
-        const int numPlacesMoved = mCurrentOrderPos - mOrderPosBeforeMove;
+        const int numPlacesMoved = m_currentOrderPos - m_orderPosBeforeMove;
         QList<int> oldOrderPositions;
 
         foreach ( WaveformItem* item, selectedItems )
@@ -483,41 +483,41 @@ void WaveformItem::setBackgroundGradient()
 
 void WaveformItem::resetSampleBins()
 {
-    const int numChans = mSampleBuffer->getNumChannels();
+    const int numChans = m_sampleBuffer->getNumChannels();
 
-    mFirstCalculatedBin = NOT_SET;
-    mLastCalculatedBin = NOT_SET;
+    m_firstCalculatedBin = NOT_SET;
+    m_lastCalculatedBin = NOT_SET;
 
-    mNumBins = rect().width() * mScaleFactor;
-    mBinSize = (qreal) mSampleBuffer->getNumFrames() / ( rect().width() * mScaleFactor );
+    m_numBins = rect().width() * m_scaleFactor;
+    m_binSize = (qreal) m_sampleBuffer->getNumFrames() / ( rect().width() * m_scaleFactor );
 
-    if ( mBinSize <= DETAIL_LEVEL_VERY_HIGH_CUTOFF )
+    if ( m_binSize <= DETAIL_LEVEL_VERY_HIGH_CUTOFF )
     {
-        mDetailLevel = VERY_HIGH;
+        m_detailLevel = VERY_HIGH;
 
-        if ( mBinSize <= DETAIL_LEVEL_MAX_CUTOFF )
+        if ( m_binSize <= DETAIL_LEVEL_MAX_CUTOFF )
         {
             emit maxDetailLevelReached();
         }
     }
-    else if ( mBinSize <= DETAIL_LEVEL_HIGH_CUTOFF )
+    else if ( m_binSize <= DETAIL_LEVEL_HIGH_CUTOFF )
     {
-        mDetailLevel = HIGH;
+        m_detailLevel = HIGH;
 
         for ( int chanNum = 0; chanNum < numChans; chanNum++ )
         {
-            mMinSampleValues[ chanNum ]->resize( mNumBins );
-            mMaxSampleValues[ chanNum ]->resize( mNumBins );
+            m_minSampleValues[ chanNum ]->resize( m_numBins );
+            m_maxSampleValues[ chanNum ]->resize( m_numBins );
         }
     }
     else
     {
-        mDetailLevel = LOW;
+        m_detailLevel = LOW;
 
         for ( int chanNum = 0; chanNum < numChans; chanNum++ )
         {
-            mMinSampleValues[ chanNum ]->resize( mNumBins );
-            mMaxSampleValues[ chanNum ]->resize( mNumBins );
+            m_minSampleValues[ chanNum ]->resize( m_numBins );
+            m_maxSampleValues[ chanNum ]->resize( m_numBins );
         }
     }
 }
@@ -526,18 +526,18 @@ void WaveformItem::resetSampleBins()
 
 void WaveformItem::findMinMaxSamples( const int startBin, const int endBin )
 {
-    const int numChans = mSampleBuffer->getNumChannels();
+    const int numChans = m_sampleBuffer->getNumChannels();
 
     for ( int chanNum = 0; chanNum < numChans; chanNum++ )
     {
         for ( int binNum = startBin; binNum <= endBin; binNum++ )
         {
-            Range<float> range = mSampleBuffer->findMinMax( chanNum,
-                                                            int( binNum * mBinSize ),
-                                                            int( mBinSize ) );
+            Range<float> range = m_sampleBuffer->findMinMax( chanNum,
+                                                            int( binNum * m_binSize ),
+                                                            int( m_binSize ) );
 
-            mMinSampleValues[ chanNum ]->set( binNum, range.getStart() );
-            mMaxSampleValues[ chanNum ]->set( binNum, range.getEnd() );
+            m_minSampleValues[ chanNum ]->set( binNum, range.getStart() );
+            m_maxSampleValues[ chanNum ]->set( binNum, range.getEnd() );
         }
     }
 }

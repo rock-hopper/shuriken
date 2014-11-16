@@ -179,7 +179,7 @@ private:
 // and gets called here: juce_linux_JackAudio.cpp
 //                       void process (int numFrames)
 //
-static JackMidiClient* volatile gJackMidiClient;
+static JackMidiClient* volatile g_jackMidiClient;
 
 
 //==============================================================================

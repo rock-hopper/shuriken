@@ -35,7 +35,7 @@ int SignalListener::sigtermSocketID[ 2 ];
 
 SignalListener::SignalListener( QObject* parent ) :
     QObject( parent ),
-    mIsAppQuitting( false )
+    m_isAppQuitting( false )
 {
     if ( socketpair( AF_UNIX, SOCK_STREAM, 0, sigusr1SocketID ) )
     {
@@ -47,14 +47,14 @@ SignalListener::SignalListener( QObject* parent ) :
         qFatal( "Couldn't create SIGTERM socketpair" );
     }
 
-    mSigusr1Notifier = new QSocketNotifier( sigusr1SocketID[ READ ], QSocketNotifier::Read, this );
+    m_sigusr1Notifier = new QSocketNotifier( sigusr1SocketID[ READ ], QSocketNotifier::Read, this );
 
-    QObject::connect( mSigusr1Notifier, SIGNAL( activated(int) ),
+    QObject::connect( m_sigusr1Notifier, SIGNAL( activated(int) ),
                       this, SLOT( handleSigusr1() ) );
 
-    mSigtermNotifier = new QSocketNotifier( sigtermSocketID[ READ ], QSocketNotifier::Read, this );
+    m_sigtermNotifier = new QSocketNotifier( sigtermSocketID[ READ ], QSocketNotifier::Read, this );
 
-    QObject::connect( mSigtermNotifier, SIGNAL( activated(int) ),
+    QObject::connect( m_sigtermNotifier, SIGNAL( activated(int) ),
                       this, SLOT( handleSigterm() ) );
 }
 
@@ -84,28 +84,28 @@ void SignalListener::sigtermHandler( int /* sigNum */ )
 
 void SignalListener::handleSigusr1()
 {
-    mSigusr1Notifier->setEnabled( false );
+    m_sigusr1Notifier->setEnabled( false );
     char c;
     read( sigusr1SocketID[ READ ], &c, sizeof( c ) );
 
-    if ( ! mIsAppQuitting )
+    if ( ! m_isAppQuitting )
     {
         emit save();
     }
 
-    mSigusr1Notifier->setEnabled( true );
+    m_sigusr1Notifier->setEnabled( true );
 }
 
 
 
 void SignalListener::handleSigterm()
 {
-    mSigtermNotifier->setEnabled( false );
+    m_sigtermNotifier->setEnabled( false );
     char c;
     read( sigtermSocketID[ READ ], &c, sizeof( c ) );
 
-    mIsAppQuitting = true;
+    m_isAppQuitting = true;
     emit quit();
 
-    mSigtermNotifier->setEnabled( true );
+    m_sigtermNotifier->setEnabled( true );
 }

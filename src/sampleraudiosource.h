@@ -41,7 +41,7 @@ public:
     void stop();
     void setLooping( const bool isLoopingDesired );
 
-    MidiMessageCollector* getMidiInputCallback()     { return &mMidiCollector; }
+    MidiMessageCollector* getMidiInputCallback()     { return &m_midiCollector; }
 
     // For JUCE use only!
     void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;
@@ -52,24 +52,24 @@ private:
     bool addNewSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
     void clearSamples();
 
-    QList<SharedSampleBuffer> mSampleBufferList;
-    QList<SharedSampleRange> mTempSampleRangeList;
+    QList<SharedSampleBuffer> m_sampleBufferList;
+    QList<SharedSampleRange> m_tempSampleRangeList;
 
-    volatile qreal mFileSampleRate;
-    volatile qreal mPlaybackSampleRate;
+    volatile qreal m_fileSampleRate;
+    volatile qreal m_playbackSampleRate;
 
-    MidiMessageCollector mMidiCollector;
-    Synthesiser mSampler;
+    MidiMessageCollector m_midiCollector;
+    Synthesiser m_sampler;
 
-    int mNextFreeNote;
-    volatile int mFirstNote;
+    int m_nextFreeNote;
+    volatile int m_firstNote;
 
-    volatile bool mIsPlaySeqEnabled;
-    volatile bool mIsLoopingEnabled;
-    volatile int mSeqStartNote;
-    volatile int mNoteCounter;
-    volatile int mNoteCounterEnd;
-    volatile int mFrameCounter;
+    volatile bool m_isPlaySeqEnabled;
+    volatile bool m_isLoopingEnabled;
+    volatile int m_seqStartNote;
+    volatile int m_noteCounter;
+    volatile int m_noteCounterEnd;
+    volatile int m_frameCounter;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( SamplerAudioSource );

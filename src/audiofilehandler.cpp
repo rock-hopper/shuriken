@@ -37,8 +37,8 @@ AudioFileHandler::AudioFileHandler()
 
     if ( errorCode == MUS_ERROR )
     {
-        sErrorTitle = "Error initialising sndlib!";
-        sErrorInfo = "It may not be possible to read some audio files";
+        s_errorTitle = "Error initialising sndlib!";
+        s_errorInfo = "It may not be possible to read some audio files";
     }
 }
 
@@ -219,15 +219,15 @@ QString AudioFileHandler::saveAudioFile( const QString dirPath,
             }
             else // Could not open file for writing
             {
-                sErrorTitle = "Couldn't open file for writing";
-                sErrorInfo = sf_strerror( NULL );
+                s_errorTitle = "Couldn't open file for writing";
+                s_errorInfo = sf_strerror( NULL );
                 isSuccessful = false;
             }
         }
         else // File already exists and overwriting is not enabled
         {
-            sErrorTitle = "Couldn't overwrite existing file";
-            sErrorInfo = "The file " + filePath + " already exists and could not be overwritten";
+            s_errorTitle = "Couldn't overwrite existing file";
+            s_errorInfo = "The file " + filePath + " already exists and could not be overwritten";
             isSuccessful = false;
         }
     }
@@ -245,8 +245,8 @@ QString AudioFileHandler::saveAudioFile( const QString dirPath,
 //==================================================================================================
 // Private Static:
 
-QString AudioFileHandler::sErrorTitle;
-QString AudioFileHandler::sErrorInfo;
+QString AudioFileHandler::s_errorTitle;
+QString AudioFileHandler::s_errorInfo;
 
 
 void AudioFileHandler::interleaveSamples( const SharedSampleBuffer inputBuffer,
@@ -326,8 +326,8 @@ bool AudioFileHandler::convertSampleRate( const SharedSampleBuffer inputBuffer,
 
     if ( errorCode > 0 )
     {
-        sErrorTitle = "Couldn't convert sample rate!";
-        sErrorInfo = src_strerror( errorCode );
+        s_errorTitle = "Couldn't convert sample rate!";
+        s_errorInfo = src_strerror( errorCode );
         isSuccessful = false;
     }
 
@@ -417,8 +417,8 @@ void AudioFileHandler::sndfileRecordWriteError( const int numSamplesToWrite, con
     const QString samplesToWrite = QString::number( numSamplesToWrite );
     const QString samplesWritten = QString::number( numSamplesWritten );
 
-    sErrorTitle = "Error while writing to audio file";
-    sErrorInfo = "no. of samples to write: " + samplesToWrite + ", " +
+    s_errorTitle = "Error while writing to audio file";
+    s_errorInfo = "no. of samples to write: " + samplesToWrite + ", " +
                  "no. of samples written: " + samplesWritten;
 }
 
@@ -438,8 +438,8 @@ SharedSampleBuffer AudioFileHandler::sndfileLoadFile( const char* filePath, sf_c
 
     if ( fileID == NULL )
     {
-        sErrorTitle = "Couldn't open file for reading!";
-        sErrorInfo = sf_strerror( NULL );
+        s_errorTitle = "Couldn't open file for reading!";
+        s_errorInfo = sf_strerror( NULL );
         goto end;
     }
 
@@ -524,8 +524,8 @@ int AudioFileHandler::sndlibInit()
 
 void AudioFileHandler::sndlibRecordError( int errorCode, char* errorMessage )
 {
-    sErrorTitle = mus_error_type_to_string( errorCode );
-    sErrorInfo = errorMessage;
+    s_errorTitle = mus_error_type_to_string( errorCode );
+    s_errorInfo = errorMessage;
 }
 
 

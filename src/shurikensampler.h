@@ -63,7 +63,7 @@ public:
 
     ~ShurikenSamplerSound();
 
-    SharedSampleBuffer getAudioData() const     { return mData; }
+    SharedSampleBuffer getAudioData() const     { return m_data; }
 
     // Set temporary sample range; only lasts for duration of one note
     void setTempSampleRange( const SharedSampleRange sampleRange );
@@ -75,16 +75,16 @@ public:
 private:
     friend class ShurikenSamplerVoice;
 
-    const SharedSampleBuffer mData;
-    const int mOriginalStartFrame, mOriginalEndFrame;
-    const qreal mSourceSampleRate;
-    BigInteger mMidiNotes;
-    int mMidiRootNote;
-    int mAttackSamples, mReleaseSamples;
+    const SharedSampleBuffer m_data;
+    const int m_originalStartFrame, m_originalEndFrame;
+    const qreal m_sourceSampleRate;
+    BigInteger m_midiNotes;
+    int m_midiRootNote;
+    int m_attackSamples, m_releaseSamples;
 
-    volatile int mStartFrame, mEndFrame;
-    volatile int mTempStartFrame, mTempEndFrame;
-    volatile bool mIsTempSampleRangeSet;
+    volatile int m_startFrame, m_endFrame;
+    volatile int m_tempStartFrame, m_tempEndFrame;
+    volatile bool m_isTempSampleRangeSet;
 };
 
 
@@ -110,10 +110,10 @@ public:
     void renderNextBlock( AudioSampleBuffer&, int startSample, int numSamples ) override;
 
 private:
-    qreal mPitchRatio;
-    qreal mSourceSamplePosition;
-    float mLeftGain, mRightGain, mAttackReleaseLevel, mAttackDelta, mReleaseDelta;
-    bool mIsInAttack, mIsInRelease;
+    qreal m_pitchRatio;
+    qreal m_sourceSamplePosition;
+    float m_leftGain, m_rightGain, m_attackReleaseLevel, m_attackDelta, m_releaseDelta;
+    bool m_isInAttack, m_isInRelease;
 };
 
 #endif // SHURIKENSAMPLER_H

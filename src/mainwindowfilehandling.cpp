@@ -41,12 +41,12 @@
 
 void MainWindow::openProject( const QString filePath )
 {
-    if ( mOptionsDialog == NULL )
+    if ( m_optionsDialog == NULL )
     {
         return;
     }
 
-    const QString tempDirPath = mOptionsDialog->getTempDirPath();
+    const QString tempDirPath = m_optionsDialog->getTempDirPath();
 
     if ( tempDirPath.isEmpty() )
     {
@@ -80,11 +80,11 @@ void MainWindow::openProject( const QString filePath )
         foreach ( QString fileName, settings.audioFileNames )
         {
             const QString audioFilePath = projTempDir.absoluteFilePath( fileName );
-            SharedSampleBuffer sampleBuffer = mFileHandler.getSampleData( audioFilePath );
+            SharedSampleBuffer sampleBuffer = m_fileHandler.getSampleData( audioFilePath );
 
             if ( ! sampleBuffer.isNull() )
             {
-                mSampleBufferList << sampleBuffer;
+                m_sampleBufferList << sampleBuffer;
             }
             else
             {
@@ -96,10 +96,10 @@ void MainWindow::openProject( const QString filePath )
         // Try to read the audio file header info
         {
             const QString audioFilePath = projTempDir.absoluteFilePath( settings.audioFileNames.first() );
-            mSampleHeader = mFileHandler.getSampleHeader( audioFilePath );
+            m_sampleHeader = m_fileHandler.getSampleHeader( audioFilePath );
         }
 
-        if ( mSampleHeader.isNull() )
+        if ( m_sampleHeader.isNull() )
         {
             isOkToContinue = false;
         }
@@ -110,7 +110,7 @@ void MainWindow::openProject( const QString filePath )
             // Deal with sample ranges - provides backward compatibility with older save file format
             if ( ! settings.sampleRangeList.isEmpty() )
             {
-                const int numChans = mSampleHeader->numChans;
+                const int numChans = m_sampleHeader->numChans;
 
                 QList<SharedSampleBuffer> tempSampleBuffers;
 
@@ -120,20 +120,20 @@ void MainWindow::openProject( const QString filePath )
 
                     for ( int chanNum = 0; chanNum < numChans; chanNum++ )
                     {
-                        sampleBuffer->copyFrom( chanNum, 0, *mSampleBufferList.first().data(), chanNum, range->startFrame, range->numFrames );
+                        sampleBuffer->copyFrom( chanNum, 0, *m_sampleBufferList.first().data(), chanNum, range->startFrame, range->numFrames );
                     }
 
                     tempSampleBuffers << sampleBuffer;
                 }
 
-                mSampleBufferList = tempSampleBuffers;
+                m_sampleBufferList = tempSampleBuffers;
             }
 
             // Only one sample buffer - waveform has not been sliced
-            if ( mSampleBufferList.size() == 1 )
+            if ( m_sampleBufferList.size() == 1 )
             {
-                const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( mSampleBufferList.first(),
-                                                                                       mSampleHeader );
+                const SharedWaveformItem item = m_UI->waveGraphicsView->createWaveform( m_sampleBufferList.first(),
+                                                                                       m_sampleHeader );
                 connectWaveformToMainWindow( item );
 
                 setUpSampler();
@@ -146,14 +146,14 @@ void MainWindow::openProject( const QString filePath )
 
                     foreach ( int frameNum, settings.slicePointFrameNums )
                     {
-                        new AddSlicePointItemCommand( frameNum, mUI->waveGraphicsView, mUI->pushButton_Slice, parentCommand );
+                        new AddSlicePointItemCommand( frameNum, m_UI->waveGraphicsView, m_UI->pushButton_Slice, parentCommand );
                     }
-                    mUndoStack.push( parentCommand );
+                    m_undoStack.push( parentCommand );
                 }
             }
             else // Multiple sample buffers - waveform has been sliced
             {
-                const QList<SharedWaveformItem> waveformItemList = mUI->waveGraphicsView->createWaveforms( mSampleBufferList, mSampleHeader );
+                const QList<SharedWaveformItem> waveformItemList = m_UI->waveGraphicsView->createWaveforms( m_sampleBufferList, m_sampleHeader );
 
                 foreach ( SharedWaveformItem item, waveformItemList )
                 {
@@ -163,64 +163,64 @@ void MainWindow::openProject( const QString filePath )
                 setUpSampler();
 
                 enableUI();
-                mUI->actionAdd_Slice_Point->setEnabled( false );
-                mUI->pushButton_FindBeats->setEnabled( false );
-                mUI->pushButton_FindOnsets->setEnabled( false );
+                m_UI->actionAdd_Slice_Point->setEnabled( false );
+                m_UI->pushButton_FindBeats->setEnabled( false );
+                m_UI->pushButton_FindOnsets->setEnabled( false );
             }
 
-            mAppliedBPM = settings.appliedBpm;
+            m_appliedBPM = settings.appliedBpm;
 
-            mOptionsDialog->setStretcherOptions( settings.options );
+            m_optionsDialog->setStretcherOptions( settings.options );
 
             if ( settings.isJackSyncChecked )
             {
-                mOptionsDialog->enableJackSync();
+                m_optionsDialog->enableJackSync();
             }
 
-            mUI->checkBox_TimeStretch->setChecked( settings.isTimeStretchChecked );
-            mUI->checkBox_PitchCorrection->setChecked( settings.isPitchCorrectionChecked );
+            m_UI->checkBox_TimeStretch->setChecked( settings.isTimeStretchChecked );
+            m_UI->checkBox_PitchCorrection->setChecked( settings.isPitchCorrectionChecked );
 
             if ( settings.originalBpm > 0.0 )
             {
-                mUI->doubleSpinBox_OriginalBPM->setValue( settings.originalBpm );
+                m_UI->doubleSpinBox_OriginalBPM->setValue( settings.originalBpm );
             }
             if ( settings.newBpm > 0.0 )
             {
-                mUI->doubleSpinBox_NewBPM->setValue( settings.newBpm );
+                m_UI->doubleSpinBox_NewBPM->setValue( settings.newBpm );
             }
 
             {
-                const int i = mUI->comboBox_TimeSigNumerator->findText( QString::number( settings.timeSigNumerator ) );
-                mUI->comboBox_TimeSigNumerator->setCurrentIndex( i );
+                const int i = m_UI->comboBox_TimeSigNumerator->findText( QString::number( settings.timeSigNumerator ) );
+                m_UI->comboBox_TimeSigNumerator->setCurrentIndex( i );
             }
             {
-                const int i = mUI->comboBox_TimeSigDenominator->findText( QString::number( settings.timeSigDenominator ) );
-                mUI->comboBox_TimeSigDenominator->setCurrentIndex( i );
+                const int i = m_UI->comboBox_TimeSigDenominator->findText( QString::number( settings.timeSigDenominator ) );
+                m_UI->comboBox_TimeSigDenominator->setCurrentIndex( i );
             }
-            mUI->spinBox_Length->setValue( settings.length );
-            mUI->comboBox_Units->setCurrentIndex( settings.units );
+            m_UI->spinBox_Length->setValue( settings.length );
+            m_UI->comboBox_Units->setCurrentIndex( settings.units );
 
             updateSnapLoopMarkersComboBox();
 
             // Clean up temp dir
             File( projTempDir.absolutePath().toLocal8Bit().data() ).deleteRecursively();
 
-            mCurrentProjectFilePath = filePath;
+            m_currentProjectFilePath = filePath;
 
-            mUI->statusBar->showMessage( tr("Project: ") + projectName );
+            m_UI->statusBar->showMessage( tr("Project: ") + projectName );
 
-            mIsProjectOpen = true;
+            m_isProjectOpen = true;
 
             QApplication::restoreOverrideCursor();
         }
         else // Error loading audio files
         {
-            mSampleBufferList.clear();
-            mSampleHeader.clear();
+            m_sampleBufferList.clear();
+            m_sampleHeader.clear();
 
             QApplication::restoreOverrideCursor();
 
-            MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+            MessageBoxes::showWarningDialog( m_fileHandler.getLastErrorTitle(), m_fileHandler.getLastErrorInfo() );
         }
     }
 }
@@ -269,7 +269,7 @@ void MainWindow::exportAs( const QString tempDirPath,
                 audioFileName.resize( 14 );
             }
 
-            if ( mExportDialog->getNumberingStyle() == ExportDialog::NUMBERING_PREFIX )
+            if ( m_exportDialog->getNumberingStyle() == ExportDialog::NUMBERING_PREFIX )
             {
                 audioFileName.prepend( QString::number( i + 1 ).rightJustified( 2, '0' ) );
             }
@@ -278,10 +278,10 @@ void MainWindow::exportAs( const QString tempDirPath,
                 audioFileName.append( QString::number( i + 1 ).rightJustified( 2, '0' ) );
             }
 
-            const QString path = mFileHandler.saveAudioFile( samplesDirPath,
+            const QString path = m_fileHandler.saveAudioFile( samplesDirPath,
                                                              audioFileName,
-                                                             mSampleBufferList.at( i ),
-                                                             mSampleHeader->sampleRate,
+                                                             m_sampleBufferList.at( i ),
+                                                             m_sampleHeader->sampleRate,
                                                              outputSampleRate,
                                                              sndFileFormat );
 
@@ -329,7 +329,7 @@ void MainWindow::exportAs( const QString tempDirPath,
     // Export Akai PGM
     else if ( isSuccessful && isExportTypeAkaiPgm )
     {
-        const int modelID = mExportDialog->getAkaiModelID();
+        const int modelID = m_exportDialog->getAkaiModelID();
 
         switch ( modelID )
         {
@@ -347,9 +347,9 @@ void MainWindow::exportAs( const QString tempDirPath,
     // Export MIDI file
     if ( isSuccessful && isExportTypeMidiFile )
     {
-        const qreal bpm = mUI->doubleSpinBox_OriginalBPM->value();
-        const ConfirmBpmDialog::TimeSigNumerator numerator = (ConfirmBpmDialog::TimeSigNumerator) mUI->comboBox_TimeSigNumerator->currentIndex();
-        const ConfirmBpmDialog::TimeSigDenominator denominator = (ConfirmBpmDialog::TimeSigDenominator) mUI->comboBox_TimeSigDenominator->currentIndex();
+        const qreal bpm = m_UI->doubleSpinBox_OriginalBPM->value();
+        const ConfirmBpmDialog::TimeSigNumerator numerator = (ConfirmBpmDialog::TimeSigNumerator) m_UI->comboBox_TimeSigNumerator->currentIndex();
+        const ConfirmBpmDialog::TimeSigDenominator denominator = (ConfirmBpmDialog::TimeSigDenominator) m_UI->comboBox_TimeSigDenominator->currentIndex();
 
         QApplication::restoreOverrideCursor();
 
@@ -363,15 +363,15 @@ void MainWindow::exportAs( const QString tempDirPath,
             const qreal bpm = dialog.getBpm();
             const int timeSigNumerator = dialog.getTimeSigNumerator();
             const int timeSigDenominator = dialog.getTimeSigDenominator();
-            const MidiFileHandler::MidiFileType type = (MidiFileHandler::MidiFileType) mExportDialog->getMidiFileType();
+            const MidiFileHandler::MidiFileType type = (MidiFileHandler::MidiFileType) m_exportDialog->getMidiFileType();
 
             if ( isExportTypeAkaiPgm )
             {
-                MidiFileHandler::SaveMidiFile( fileName, samplesDirPath, mSampleBufferList, numSamplesToExport, mSampleHeader->sampleRate, bpm, timeSigNumerator, timeSigDenominator, type );
+                MidiFileHandler::SaveMidiFile( fileName, samplesDirPath, m_sampleBufferList, numSamplesToExport, m_sampleHeader->sampleRate, bpm, timeSigNumerator, timeSigDenominator, type );
             }
             else
             {
-                MidiFileHandler::SaveMidiFile( fileName, outputDirPath, mSampleBufferList, numSamplesToExport, mSampleHeader->sampleRate, bpm, timeSigNumerator, timeSigDenominator, type );
+                MidiFileHandler::SaveMidiFile( fileName, outputDirPath, m_sampleBufferList, numSamplesToExport, m_sampleHeader->sampleRate, bpm, timeSigNumerator, timeSigDenominator, type );
             }
         }
     }
@@ -380,7 +380,7 @@ void MainWindow::exportAs( const QString tempDirPath,
 
     if ( ! isSuccessful )
     {
-        MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+        MessageBoxes::showWarningDialog( m_fileHandler.getLastErrorTitle(), m_fileHandler.getLastErrorInfo() );
     }
 }
 
@@ -388,12 +388,12 @@ void MainWindow::exportAs( const QString tempDirPath,
 
 void MainWindow::saveProject( const QString filePath )
 {
-    if ( mOptionsDialog == NULL )
+    if ( m_optionsDialog == NULL )
     {
         return;
     }
 
-    const QString tempDirPath = mOptionsDialog->getTempDirPath();
+    const QString tempDirPath = m_optionsDialog->getTempDirPath();
 
     if ( tempDirPath.isEmpty() )
     {
@@ -426,13 +426,13 @@ void MainWindow::saveProject( const QString filePath )
     bool isOkToContinue = true;
     QStringList audioFileNames;
 
-    for ( int i = 0; i < mSampleBufferList.size(); i++ )
+    for ( int i = 0; i < m_sampleBufferList.size(); i++ )
     {
-        const QString audioFilePath = mFileHandler.saveAudioFile( projTempDir.absolutePath(),
+        const QString audioFilePath = m_fileHandler.saveAudioFile( projTempDir.absolutePath(),
                                                                   "audio" + QString::number( i ),
-                                                                  mSampleBufferList.at( i ),
-                                                                  mSampleHeader->sampleRate,
-                                                                  mSampleHeader->sampleRate,
+                                                                  m_sampleBufferList.at( i ),
+                                                                  m_sampleHeader->sampleRate,
+                                                                  m_sampleHeader->sampleRate,
                                                                   AudioFileHandler::SAVE_FORMAT );
 
         if ( ! audioFilePath.isEmpty() )
@@ -452,32 +452,32 @@ void MainWindow::saveProject( const QString filePath )
 
         settings.projectName = projectName;
 
-        if ( mOptionsDialog->isRealtimeModeEnabled() )
+        if ( m_optionsDialog->isRealtimeModeEnabled() )
         {
-            settings.originalBpm = mUI->doubleSpinBox_OriginalBPM->value();
-            settings.newBpm = mUI->doubleSpinBox_NewBPM->value();
-            settings.appliedBpm = mAppliedBPM;
+            settings.originalBpm = m_UI->doubleSpinBox_OriginalBPM->value();
+            settings.newBpm = m_UI->doubleSpinBox_NewBPM->value();
+            settings.appliedBpm = m_appliedBPM;
         }
         else
         {
-            settings.originalBpm = mAppliedBPM;
-            settings.newBpm = mAppliedBPM;
-            settings.appliedBpm = mAppliedBPM;
+            settings.originalBpm = m_appliedBPM;
+            settings.newBpm = m_appliedBPM;
+            settings.appliedBpm = m_appliedBPM;
         }
 
-        settings.isTimeStretchChecked = mUI->checkBox_TimeStretch->isChecked();
-        settings.isPitchCorrectionChecked = mUI->checkBox_PitchCorrection->isChecked();
-        settings.options = mOptionsDialog->getStretcherOptions();
-        settings.isJackSyncChecked = mOptionsDialog->isJackSyncEnabled();
+        settings.isTimeStretchChecked = m_UI->checkBox_TimeStretch->isChecked();
+        settings.isPitchCorrectionChecked = m_UI->checkBox_PitchCorrection->isChecked();
+        settings.options = m_optionsDialog->getStretcherOptions();
+        settings.isJackSyncChecked = m_optionsDialog->isJackSyncEnabled();
 
-        settings.timeSigNumerator = mUI->comboBox_TimeSigNumerator->currentText().toInt();
-        settings.timeSigDenominator = mUI->comboBox_TimeSigDenominator->currentText().toInt();
-        settings.length = mUI->spinBox_Length->value();
-        settings.units = mUI->comboBox_Units->currentIndex();
+        settings.timeSigNumerator = m_UI->comboBox_TimeSigNumerator->currentText().toInt();
+        settings.timeSigDenominator = m_UI->comboBox_TimeSigDenominator->currentText().toInt();
+        settings.length = m_UI->spinBox_Length->value();
+        settings.units = m_UI->comboBox_Units->currentIndex();
 
         settings.audioFileNames = audioFileNames;
 
-        settings.slicePointFrameNums = mUI->waveGraphicsView->getSlicePointFrameNums();
+        settings.slicePointFrameNums = m_UI->waveGraphicsView->getSlicePointFrameNums();
 
         TextFileHandler::createProjectXmlFile( xmlFilePath, settings );
 
@@ -488,16 +488,16 @@ void MainWindow::saveProject( const QString filePath )
         QFile::remove( zipFilePath );
         File( projTempDir.absolutePath().toLocal8Bit().data() ).deleteRecursively();
 
-        mUndoStack.setClean();
+        m_undoStack.setClean();
 
-        mCurrentProjectFilePath = filePath;
+        m_currentProjectFilePath = filePath;
 
         QApplication::restoreOverrideCursor();
     }
     else // An error occurred while writing the audio files
     {
         QApplication::restoreOverrideCursor();
-        MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+        MessageBoxes::showWarningDialog( m_fileHandler.getLastErrorTitle(), m_fileHandler.getLastErrorInfo() );
     }
 }
 
@@ -508,7 +508,7 @@ void MainWindow::saveProjectDialog()
     // Save file dialog
     const QString filter = "Shuriken Project (*.shuriken)";
     QString selectedFilter;
-    QString filePath = QFileDialog::getSaveFileName( this, tr("Save Project"), mLastOpenedProjDir, filter, &selectedFilter );
+    QString filePath = QFileDialog::getSaveFileName( this, tr("Save Project"), m_lastOpenedProjDir, filter, &selectedFilter );
 
     // If user didn't click "Cancel"
     if ( ! filePath.isEmpty() )
@@ -563,7 +563,7 @@ void MainWindow::saveProjectDialog()
             if ( parentDir.isWritable() )
             {
                 saveProject( filePath );
-                mLastOpenedProjDir = projectFile.absolutePath();
+                m_lastOpenedProjDir = projectFile.absolutePath();
             }
             else
             {
@@ -579,14 +579,14 @@ void MainWindow::saveProjectDialog()
 void MainWindow::openProjectDialog()
 {
     // Open file dialog
-    const QString filePath = QFileDialog::getOpenFileName( this, tr( "Open Project" ), mLastOpenedProjDir,
+    const QString filePath = QFileDialog::getOpenFileName( this, tr( "Open Project" ), m_lastOpenedProjDir,
                                                            tr( "Shuriken Project (*.shuriken)" ) );
 
     // If user didn't click "Cancel"
     if ( ! filePath.isEmpty() )
     {
         openProject( filePath );
-        mLastOpenedProjDir = QFileInfo( filePath ).absolutePath();
+        m_lastOpenedProjDir = QFileInfo( filePath ).absolutePath();
     }
 }
 
@@ -595,7 +595,7 @@ void MainWindow::openProjectDialog()
 void MainWindow::importAudioFileDialog()
 {
     // Open file dialog
-    const QString filePath = QFileDialog::getOpenFileName( this, tr("Import Audio File"), mLastOpenedImportDir,
+    const QString filePath = QFileDialog::getOpenFileName( this, tr("Import Audio File"), m_lastOpenedImportDir,
                                                            tr("All Files (*.*)") );
 
     // If user didn't click "Cancel"
@@ -606,24 +606,24 @@ void MainWindow::importAudioFileDialog()
         const QFileInfo fileInfo( filePath );
         const QString fileName = fileInfo.fileName();
 
-        mLastOpenedImportDir = fileInfo.absolutePath();
+        m_lastOpenedImportDir = fileInfo.absolutePath();
 
-        SharedSampleBuffer sampleBuffer = mFileHandler.getSampleData( filePath );
-        SharedSampleHeader sampleHeader = mFileHandler.getSampleHeader( filePath );
+        SharedSampleBuffer sampleBuffer = m_fileHandler.getSampleData( filePath );
+        SharedSampleHeader sampleHeader = m_fileHandler.getSampleHeader( filePath );
 
         if ( sampleBuffer.isNull() || sampleHeader.isNull() )
         {
             QApplication::restoreOverrideCursor();
-            MessageBoxes::showWarningDialog( mFileHandler.getLastErrorTitle(), mFileHandler.getLastErrorInfo() );
+            MessageBoxes::showWarningDialog( m_fileHandler.getLastErrorTitle(), m_fileHandler.getLastErrorInfo() );
         }
         else
         {
             closeProject();
 
-            mSampleBufferList << sampleBuffer;
-            mSampleHeader = sampleHeader;
+            m_sampleBufferList << sampleBuffer;
+            m_sampleHeader = sampleHeader;
 
-            const SharedWaveformItem item = mUI->waveGraphicsView->createWaveform( sampleBuffer, sampleHeader );
+            const SharedWaveformItem item = m_UI->waveGraphicsView->createWaveform( sampleBuffer, sampleHeader );
             connectWaveformToMainWindow( item );
 
             setUpSampler();
@@ -641,10 +641,10 @@ void MainWindow::importAudioFileDialog()
                 const QString rate = QString::number( sampleHeader->sampleRate ) + " Hz";
 
                 QString message = fileName + ", " + channels + ", " + bits + ", " + rate + ", " + sampleHeader->format;
-                mUI->statusBar->showMessage( message );
+                m_UI->statusBar->showMessage( message );
             }
 
-            mIsProjectOpen = true;
+            m_isProjectOpen = true;
 
             QApplication::restoreOverrideCursor();
         }
@@ -655,39 +655,39 @@ void MainWindow::importAudioFileDialog()
 
 void MainWindow::exportAsDialog()
 {
-    if ( mExportDialog == NULL || mOptionsDialog == NULL )
+    if ( m_exportDialog == NULL || m_optionsDialog == NULL )
     {
         return;
     }
 
-    QPoint pos = mExportDialog->pos();
+    QPoint pos = m_exportDialog->pos();
 
     if ( pos.x() < 0 )
         pos.setX( 0 );
     if ( pos.y() < 0 )
         pos.setY( 0 );
 
-    mExportDialog->move( pos );
+    m_exportDialog->move( pos );
 
-    const int result = mExportDialog->exec();
+    const int result = m_exportDialog->exec();
 
     if ( result != QDialog::Accepted )
     {
         return;
     }
 
-    const QString tempDirPath = mOptionsDialog->getTempDirPath();
+    const QString tempDirPath = m_optionsDialog->getTempDirPath();
 
-    const QString outputDirPath = mExportDialog->getOutputDirPath();
+    const QString outputDirPath = m_exportDialog->getOutputDirPath();
     const QDir outputDir( outputDirPath );
 
-    const QString fileName = mExportDialog->getFileName();
+    const QString fileName = m_exportDialog->getFileName();
 
     const QString samplesDirPath = outputDir.absoluteFilePath( fileName );
 
-    const bool isOverwriteEnabled = mExportDialog->isOverwriteEnabled();
+    const bool isOverwriteEnabled = m_exportDialog->isOverwriteEnabled();
 
-    const int exportType = mExportDialog->getExportType();
+    const int exportType = m_exportDialog->getExportType();
 
     const bool isExportTypeAudioFiles = exportType & ExportDialog::EXPORT_AUDIO_FILES;
     const bool isExportTypeH2Drumkit  = exportType & ExportDialog::EXPORT_H2DRUMKIT;
@@ -695,16 +695,16 @@ void MainWindow::exportAsDialog()
     const bool isExportTypeAkaiPgm    = exportType & ExportDialog::EXPORT_AKAI_PGM;
     const bool isExportTypeMidiFile   = exportType & ExportDialog::EXPORT_MIDI_FILE;
 
-    const int sndFileFormat = mExportDialog->getSndFileFormat();
+    const int sndFileFormat = m_exportDialog->getSndFileFormat();
 
-    int outputSampleRate = mExportDialog->getSampleRate();
+    int outputSampleRate = m_exportDialog->getSampleRate();
 
     if ( outputSampleRate == ExportDialog::SAMPLE_RATE_KEEP_SAME )
     {
-        outputSampleRate = mSampleHeader->sampleRate;
+        outputSampleRate = m_sampleHeader->sampleRate;
     }
 
-    int numSamplesToExport = mSampleBufferList.size();
+    int numSamplesToExport = m_sampleBufferList.size();
 
     QStringList fullFileNamesList;
 
@@ -780,7 +780,7 @@ void MainWindow::exportAsDialog()
 
     if ( isExportTypeAkaiPgm )
     {
-        const int modelID = mExportDialog->getAkaiModelID();
+        const int modelID = m_exportDialog->getAkaiModelID();
 
         const int numPads = AkaiFileHandler::getNumPads( modelID );
 

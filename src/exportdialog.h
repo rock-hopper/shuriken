@@ -79,11 +79,11 @@ private:
     void enableMidiFileTypeRadioButtons();
     void disableMidiFileTypeRadioButtons();
 
-    Ui::ExportDialog* mUI;
+    Ui::ExportDialog* m_UI;
 
-    QString mLastOpenedExportDir;
+    QString m_lastOpenedExportDir;
 
-    ScopedPointer<DirectoryValidator> mDirectoryValidator;
+    ScopedPointer<DirectoryValidator> m_directoryValidator;
 
 private slots:
     void on_comboBox_MidiFile_activated( const QString text );
