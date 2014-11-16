@@ -61,6 +61,12 @@ namespace Midi
 }
 
 
+// This gets set in: JuceLibraryCode/modules/juce_audio_devices/native/juce_linux_JackAudio.cpp
+//                   void process (int numFrames)
+//
+// and is read in:   rubberbandaudiosource.cpp
+//                   void getNextAudioBlock( AudioSourceChannelInfo& bufferToFill )
+//
 extern volatile double gCurrentJackBPM;
 
 

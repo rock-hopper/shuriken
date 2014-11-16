@@ -172,6 +172,13 @@ private:
 
 //==============================================================================
 
+// This gets set in:     juce_linux_Midi.cpp
+//                       void JackMidiClient::registerCallback (MidiPortAndCallback* cb)
+//                       void JackMidiClient::unregisterCallback (MidiPortAndCallback* cb)
+//
+// and gets called here: juce_linux_JackAudio.cpp
+//                       void process (int numFrames)
+//
 static JackMidiClient* volatile gJackMidiClient;
 
 
