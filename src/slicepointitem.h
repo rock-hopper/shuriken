@@ -38,7 +38,7 @@ class SlicePointItem : public FrameMarkerItem
 public:
     enum { Type = UserTypes::SLICE_POINT };
 
-    SlicePointItem( const qreal height, QGraphicsItem* parent = NULL );
+    SlicePointItem( qreal height, QGraphicsItem* parent = NULL );
 
     int type() const    { return Type; }
 
@@ -50,7 +50,7 @@ private:
     qreal m_scenePosBeforeMove;
 
 signals:
-    void scenePosChanged( SlicePointItem* const item );
+    void scenePosChanged( SlicePointItem* item );
 
 private:
     JUCE_LEAK_DETECTOR( SlicePointItem );

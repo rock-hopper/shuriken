@@ -40,9 +40,9 @@ public:
     enum TimeSigNumerator { ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, ELEVEN, TWELVE, THIRTEEN, FOURTEEN, FIFTEEN, SIXTEEN };
     enum TimeSigDenominator { WHOLE_NOTE, HALF_NOTE, QUARTER_NOTE, EIGHTH_NOTE, SIXTEENTH_NOTE };
 
-    ConfirmBpmDialog( const qreal bpm,
-                      const TimeSigNumerator numerator,
-                      const TimeSigDenominator denominator,
+    ConfirmBpmDialog( qreal bpm,
+                      TimeSigNumerator numerator,
+                      TimeSigDenominator denominator,
                       QWidget* parent = NULL );
     ~ConfirmBpmDialog();
 

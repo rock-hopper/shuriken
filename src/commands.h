@@ -36,9 +36,9 @@
 class AddSlicePointItemCommand : public QUndoCommand
 {
 public:
-    AddSlicePointItemCommand( const int frameNum,
-                              WaveGraphicsView* const graphicsView,
-                              QPushButton* const sliceButton,
+    AddSlicePointItemCommand( int frameNum,
+                              WaveGraphicsView* graphicsView,
+                              QPushButton* sliceButton,
                               QUndoCommand* parent = NULL );
 
     void undo();
@@ -56,10 +56,10 @@ private:
 class MoveSlicePointItemCommand : public QUndoCommand
 {
 public:
-    MoveSlicePointItemCommand( const SharedSlicePointItem slicePoint,
-                               const int oldFrameNum,
-                               const int newFrameNum,
-                               WaveGraphicsView* const graphicsView,
+    MoveSlicePointItemCommand( SharedSlicePointItem slicePoint,
+                               int oldFrameNum,
+                               int newFrameNum,
+                               WaveGraphicsView* graphicsView,
                                QUndoCommand* parent = NULL );
 
     void undo();
@@ -78,9 +78,9 @@ private:
 class DeleteSlicePointItemCommand : public QUndoCommand
 {
 public:
-    DeleteSlicePointItemCommand( const SharedSlicePointItem slicePoint,
-                                 WaveGraphicsView* const graphicsView,
-                                 QPushButton* const sliceButton,
+    DeleteSlicePointItemCommand( SharedSlicePointItem slicePoint,
+                                 WaveGraphicsView* graphicsView,
+                                 QPushButton* sliceButton,
                                  QUndoCommand* parent = NULL );
 
     void undo();
@@ -97,15 +97,15 @@ private:
 class SliceCommand : public QUndoCommand
 {
 public:
-    SliceCommand( MainWindow* const mainWindow,
-                  WaveGraphicsView* const graphicsView,
-                  QPushButton* const sliceButton,
-                  QPushButton* const findOnsetsButton,
-                  QPushButton* const findBeatsButton,
-                  QAction* const addSlicePointAction,
-                  QAction* const moveItemsAction,
-                  QAction* const selectItemsAction,
-                  QAction* const auditionItemsAction,
+    SliceCommand( MainWindow* mainWindow,
+                  WaveGraphicsView* graphicsView,
+                  QPushButton* sliceButton,
+                  QPushButton* findOnsetsButton,
+                  QPushButton* findBeatsButton,
+                  QAction* addSlicePointAction,
+                  QAction* moveItemsAction,
+                  QAction* selectItemsAction,
+                  QAction* auditionItemsAction,
                   QUndoCommand* parent = NULL );
 
     void undo();
@@ -128,10 +128,10 @@ private:
 class MoveWaveformItemCommand : public QUndoCommand
 {
 public:
-    MoveWaveformItemCommand( const QList<int> oldOrderPositions,
-                             const int numPlacesMoved,
-                             WaveGraphicsView* const graphicsView,
-                             MainWindow* const mainWindow,
+    MoveWaveformItemCommand( QList<int> oldOrderPositions,
+                             int numPlacesMoved,
+                             WaveGraphicsView* graphicsView,
+                             MainWindow* mainWindow,
                              QUndoCommand* parent = NULL );
 
     void undo();
@@ -151,9 +151,9 @@ private:
 class DeleteWaveformItemCommand : public QUndoCommand
 {
 public:
-    DeleteWaveformItemCommand( const QList<int> orderPositions,
-                               WaveGraphicsView* const graphicsView,
-                               MainWindow* const mainWindow,
+    DeleteWaveformItemCommand( QList<int> orderPositions,
+                               WaveGraphicsView* graphicsView,
+                               MainWindow* mainWindow,
                                QUndoCommand* parent = NULL );
 
     void undo();
@@ -172,9 +172,9 @@ private:
 class JoinCommand : public QUndoCommand
 {
 public:
-    JoinCommand( const QList<int> orderPositions,
-                 WaveGraphicsView* const graphicsView,
-                 MainWindow* const mainWindow,
+    JoinCommand( QList<int> orderPositions,
+                 WaveGraphicsView* graphicsView,
+                 MainWindow* mainWindow,
                  QUndoCommand* parent = NULL );
 
     void undo();
@@ -213,13 +213,13 @@ private:
 class ApplyGainCommand : public QUndoCommand
 {
 public:
-    ApplyGainCommand( const float gain,
-                      const int waveformItemOrderPos,
-                      WaveGraphicsView* const graphicsView,
-                      const int sampleRate,
+    ApplyGainCommand( float gain,
+                      int waveformItemOrderPos,
+                      WaveGraphicsView* graphicsView,
+                      int sampleRate,
                       AudioFileHandler& fileHandler,
-                      const QString tempDirPath,
-                      const QString fileBaseName,
+                      QString tempDirPath,
+                      QString fileBaseName,
                       QUndoCommand* parent = NULL );
 
     void undo();
@@ -241,14 +241,14 @@ private:
 class ApplyGainRampCommand : public QUndoCommand
 {
 public:
-    ApplyGainRampCommand( const float startGain,
-                          const float endGain,
-                          const int waveformItemOrderPos,
-                          WaveGraphicsView* const graphicsView,
-                          const int sampleRate,
+    ApplyGainRampCommand( float startGain,
+                          float endGain,
+                          int waveformItemOrderPos,
+                          WaveGraphicsView* graphicsView,
+                          int sampleRate,
                           AudioFileHandler& fileHandler,
-                          const QString tempDirPath,
-                          const QString fileBaseName,
+                          QString tempDirPath,
+                          QString fileBaseName,
                           QUndoCommand* parent = NULL );
 
     void undo();
@@ -271,12 +271,12 @@ private:
 class NormaliseCommand : public QUndoCommand
 {
 public:
-    NormaliseCommand( const int waveformItemOrderPos,
-                      WaveGraphicsView* const graphicsView,
-                      const int sampleRate,
+    NormaliseCommand( int waveformItemOrderPos,
+                      WaveGraphicsView* graphicsView,
+                      int sampleRate,
                       AudioFileHandler& fileHandler,
-                      const QString tempDirPath,
-                      const QString fileBaseName,
+                      QString tempDirPath,
+                      QString fileBaseName,
                       QUndoCommand* parent = NULL );
 
     void undo();
@@ -297,8 +297,8 @@ private:
 class ReverseCommand : public QUndoCommand
 {
 public:
-    ReverseCommand( const int waveformItemOrderPos,
-                    WaveGraphicsView* const graphicsView,
+    ReverseCommand( int waveformItemOrderPos,
+                    WaveGraphicsView* graphicsView,
                     QUndoCommand* parent = NULL );
 
     void undo();
@@ -314,22 +314,22 @@ private:
 class ApplyTimeStretchCommand : public QUndoCommand
 {
 public:
-    ApplyTimeStretchCommand( MainWindow* const mainWindow,
-                             WaveGraphicsView* const graphicsView,
-                             QDoubleSpinBox* const spinBoxOriginalBPM,
-                             QDoubleSpinBox* const spinBoxNewBPM,
-                             QCheckBox* const checkBoxPitchCorrection,
-                             const QString tempDirPath,
-                             const QString fileBaseName,
+    ApplyTimeStretchCommand( MainWindow* mainWindow,
+                             WaveGraphicsView* graphicsView,
+                             QDoubleSpinBox* spinBoxOriginalBPM,
+                             QDoubleSpinBox* spinBoxNewBPM,
+                             QCheckBox* checkBoxPitchCorrection,
+                             QString tempDirPath,
+                             QString fileBaseName,
                              QUndoCommand* parent = NULL );
 
     void undo();
     void redo();
 
 private:
-    int stretch( const SharedSampleBuffer sampleBuffer, const qreal timeRatio, const qreal pitchScale );
-    void updateSlicePoints( const qreal timeRatio );
-    void updateLoopMarkers( const qreal timeRatio );
+    int stretch( SharedSampleBuffer sampleBuffer, qreal timeRatio, qreal pitchScale );
+    void updateSlicePoints( qreal timeRatio );
+    void updateLoopMarkers( qreal timeRatio );
 
     MainWindow* const m_mainWindow;
     WaveGraphicsView* const m_graphicsView;

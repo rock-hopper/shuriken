@@ -35,18 +35,18 @@ class AudioFileHandler
 public:
     AudioFileHandler();
 
-    SharedSampleBuffer getSampleData( const QString filePath );
-    SharedSampleBuffer getSampleData( const QString filePath, const int startFrame, const int numFramesToRead );
-    SharedSampleHeader getSampleHeader( const QString filePath );
+    SharedSampleBuffer getSampleData( QString filePath );
+    SharedSampleBuffer getSampleData( QString filePath, int startFrame, int numFramesToRead );
+    SharedSampleHeader getSampleHeader( QString filePath );
 
     // Returns absolute file path of saved audio file on success, otherwise returns an empty string
-    QString saveAudioFile( const QString dirPath,
-                           const QString fileBaseName,
-                           const SharedSampleBuffer sampleBuffer,
-                           const int currentSampleRateRate,
-                           const int outputSampleRate,
-                           const int sndFileFormat,
-                           const bool isOverwriteEnabled = true );
+    QString saveAudioFile( QString dirPath,
+                           QString fileBaseName,
+                           SharedSampleBuffer sampleBuffer,
+                           int currentSampleRateRate,
+                           int outputSampleRate,
+                           int sndFileFormat,
+                           bool isOverwriteEnabled = true );
 
     QString getLastErrorTitle() const   { return s_errorTitle; }
     QString getLastErrorInfo() const    { return s_errorInfo; }
@@ -56,27 +56,27 @@ public:
     static const int TEMP_FORMAT = SF_ENDIAN_CPU | SF_FORMAT_AU | SF_FORMAT_FLOAT;
 
 private:
-    static void interleaveSamples( const SharedSampleBuffer inputBuffer,
-                                   const int numChans,
-                                   const int inputStartFrame,
-                                   const int numFrames,
+    static void interleaveSamples( SharedSampleBuffer inputBuffer,
+                                   int numChans,
+                                   int inputStartFrame,
+                                   int numFrames,
                                    Array<float>& outputBuffer );
 
     static void deinterleaveSamples( Array<float>& inputBuffer,
-                                     const int numChans,
-                                     const int outputStartFrame,
-                                     const int numFrames,
+                                     int numChans,
+                                     int outputStartFrame,
+                                     int numFrames,
                                      SharedSampleBuffer outputBuffer );
 
     // Takes a buffer of non-interleaved samples, converts sample rate,
     // and outputs a buffer of interleaved samples
-    static bool convertSampleRate( const SharedSampleBuffer inputBuffer,
-                                   const qreal sampleRateRatio,
+    static bool convertSampleRate( SharedSampleBuffer inputBuffer,
+                                   qreal sampleRateRatio,
                                    Array<float>& outputBuffer );
 
-    static bool sndfileSaveAudioFile( SNDFILE* fileID, const SharedSampleBuffer sampleBuffer, const int hopSize );
-    static bool sndfileSaveAudioFile( SNDFILE* fileID, const Array<float> interleavedBuffer, const int hopSize );
-    static void sndfileRecordWriteError( const int numSamplesToWrite, const int numSamplesWritten );
+    static bool sndfileSaveAudioFile( SNDFILE* fileID, SharedSampleBuffer sampleBuffer, int hopSize );
+    static bool sndfileSaveAudioFile( SNDFILE* fileID, Array<float> interleavedBuffer, int hopSize );
+    static void sndfileRecordWriteError( int numSamplesToWrite, int numSamplesWritten );
     static SharedSampleBuffer sndfileLoadFile( const char* filePath, sf_count_t startFrame, sf_count_t numFramesToRead );
 
     static int sndlibInit();

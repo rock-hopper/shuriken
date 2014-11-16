@@ -41,16 +41,16 @@ public:
     static QString getFileNameRegExpMPC1000()       { return QString( "\\w{1,16}" ); }
 
     static bool writePgmFileMPC1000( QStringList sampleNames,
-                                     const QString fileBaseName,
-                                     const QString outputDirPath,
-                                     const QString tempDirPath,
-                                     const bool isOverwriteEnabled = true );
+                                     QString fileBaseName,
+                                     QString outputDirPath,
+                                     QString tempDirPath,
+                                     bool isOverwriteEnabled = true );
 
     static bool writePgmFileMPC500( QStringList sampleNames,
-                                    const QString fileBaseName,
-                                    const QString outputDirPath,
-                                    const QString tempDirPath,
-                                    const bool isOverwriteEnabled = true );
+                                    QString fileBaseName,
+                                    QString outputDirPath,
+                                    QString tempDirPath,
+                                    bool isOverwriteEnabled = true );
 
     static QString getFileExtension()               { return QString( ".pgm" ); }
 

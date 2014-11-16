@@ -30,11 +30,11 @@
 class MessageBoxes
 {
 public:
-    static void showWarningDialog( const QString text, const QString infoText );
+    static void showWarningDialog( QString text, QString infoText );
 
     static int showUnsavedChangesDialog();
 
-    static int showQuestionDialog( const QString text, const QString infoText, const QMessageBox::StandardButtons buttons );
+    static int showQuestionDialog( QString text, QString infoText, QMessageBox::StandardButtons buttons );
 };
 
 #endif // MESSAGEBOXES_H

@@ -29,8 +29,8 @@
 class Zipper
 {
 public:
-    static void compress( const QString sourceDirPath, const QString zipFilePath );
-    static void decompress( const QString zipFilePath, const QString destDirPath );
+    static void compress( QString sourceDirPath, QString zipFilePath );
+    static void decompress( QString zipFilePath, QString destDirPath );
 };
 
 #endif // ZIPPER_H

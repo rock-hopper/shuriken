@@ -86,16 +86,16 @@ private:
     ScopedPointer<DirectoryValidator> m_directoryValidator;
 
 private slots:
-    void on_comboBox_MidiFile_activated( const QString text );
+    void on_comboBox_MidiFile_activated( QString text );
     void on_radioButton_Akai_clicked();
     void on_radioButton_SFZ_clicked();
     void on_radioButton_H2Drumkit_clicked();
     void on_radioButton_AudioFiles_clicked();
-    void on_comboBox_Format_currentIndexChanged( const QString text );
+    void on_comboBox_Format_currentIndexChanged( QString text );
     void on_pushButton_Create_clicked();
     void on_pushButton_Choose_clicked();
 
-    void displayDirValidityText( const bool isValid );
+    void displayDirValidityText( bool isValid );
     void enableOkButtonIfInputValid();
 
 private:

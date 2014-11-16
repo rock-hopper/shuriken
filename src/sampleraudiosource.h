@@ -33,13 +33,13 @@ public:
     SamplerAudioSource();
     ~SamplerAudioSource();
 
-    void setSamples( const QList<SharedSampleBuffer> sampleBufferList, const qreal sampleRate );
+    void setSamples( QList<SharedSampleBuffer> sampleBufferList, qreal sampleRate );
 
-    void playSample( const int sampleNum, const SharedSampleRange sampleRange );
-    void playSamples( const int firstSampleNum, const QList<SharedSampleRange> sampleRangeList );
+    void playSample( int sampleNum, SharedSampleRange sampleRange );
+    void playSamples( int firstSampleNum, QList<SharedSampleRange> sampleRangeList );
     void playAll();
     void stop();
-    void setLooping( const bool isLoopingDesired );
+    void setLooping( bool isLoopingDesired );
 
     MidiMessageCollector* getMidiInputCallback()     { return &m_midiCollector; }
 
@@ -49,7 +49,7 @@ public:
     void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill ) override;
 
 private:
-    bool addNewSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate );
+    bool addNewSample( SharedSampleBuffer sampleBuffer, qreal sampleRate );
     void clearSamples();
 
     QList<SharedSampleBuffer> m_sampleBufferList;

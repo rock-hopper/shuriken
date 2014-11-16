@@ -41,18 +41,18 @@ public:
         uint_t sampleRate;
     };
 
-    static QList<int> findOnsetFrameNums( const SharedSampleBuffer sampleBuffer,
-                                               const DetectionSettings settings );
+    static QList<int> findOnsetFrameNums( SharedSampleBuffer sampleBuffer,
+                                          DetectionSettings settings );
 
-    static QList<int> findBeatFrameNums( const SharedSampleBuffer sampleBuffer,
-                                               const DetectionSettings settings );
+    static QList<int> findBeatFrameNums( SharedSampleBuffer sampleBuffer,
+                                         DetectionSettings settings );
 
-    static qreal calcBPM( const SharedSampleBuffer sampleBuffer, const DetectionSettings settings );
+    static qreal calcBPM( SharedSampleBuffer sampleBuffer, DetectionSettings settings );
 
 private:
     static void fillAubioInputBuffer( fvec_t* inputBuffer,
-                                      const SharedSampleBuffer sampleBuffer,
-                                      const int sampleOffset );
+                                      SharedSampleBuffer sampleBuffer,
+                                      int sampleOffset );
 };
 
 #endif // AUDIOANALYSER_H

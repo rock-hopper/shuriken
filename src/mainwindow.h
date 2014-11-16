@@ -58,9 +58,9 @@ public:
     MainWindow( QWidget* parent = NULL );
     ~MainWindow();
 
-    void connectWaveformToMainWindow( const SharedWaveformItem item );
+    void connectWaveformToMainWindow( SharedWaveformItem item );
 
-    void openProject( const QString filePath );
+    void openProject( QString filePath );
 
 protected:
     void changeEvent( QEvent* event );
@@ -82,16 +82,16 @@ private:
 
     void closeProject();
 
-    void exportAs( const QString tempDirPath,
-                   const QString outputDirPath,
-                   const QString samplesDirPath,
-                   const QString fileName,
-                   const int exportType,
-                   const int sndFileFormat,
-                   const int outputSampleRate,
-                   const int numSamplesToExport );
+    void exportAs( QString tempDirPath,
+                   QString outputDirPath,
+                   QString samplesDirPath,
+                   QString fileName,
+                   int exportType,
+                   int sndFileFormat,
+                   int outputSampleRate,
+                   int numSamplesToExport );
 
-    void saveProject( const QString filePath );
+    void saveProject( QString filePath );
 
     void saveProjectDialog();
     void openProjectDialog();
@@ -128,11 +128,11 @@ private:
     bool m_isProjectOpen;
 
 public slots:
-    void reorderSampleBufferList( QList<int> oldOrderPositions, const int numPlacesMoved );
+    void reorderSampleBufferList( QList<int> oldOrderPositions, int numPlacesMoved );
 
 private slots:
-    void on_comboBox_SnapLoopMarkers_currentIndexChanged( const int index );
-    void on_checkBox_LoopMarkers_clicked( const bool isChecked );
+    void on_comboBox_SnapLoopMarkers_currentIndexChanged( int index );
+    void on_checkBox_LoopMarkers_clicked( bool isChecked );
     void on_pushButton_TimestretchOptions_clicked();
     void on_actionAudition_triggered();
     void on_actionSelect_triggered();
@@ -141,15 +141,15 @@ private slots:
     void on_actionZoom_Original_triggered();
     void on_actionZoom_Out_triggered();
     void on_actionZoom_In_triggered();
-    void on_pushButton_Loop_clicked( const bool isChecked );
+    void on_pushButton_Loop_clicked( bool isChecked );
     void on_pushButton_PlayStop_clicked();
-    void on_checkBox_PitchCorrection_toggled( const bool isChecked );
-    void on_checkBox_TimeStretch_toggled( const bool isChecked );
-    void on_doubleSpinBox_NewBPM_valueChanged( const double newBPM );
-    void on_doubleSpinBox_OriginalBPM_valueChanged( const double originalBPM );
+    void on_checkBox_PitchCorrection_toggled( bool isChecked );
+    void on_checkBox_TimeStretch_toggled( bool isChecked );
+    void on_doubleSpinBox_NewBPM_valueChanged( double newBPM );
+    void on_doubleSpinBox_OriginalBPM_valueChanged( double originalBPM );
     void on_pushButton_CalcBPM_clicked();
     void on_pushButton_FindBeats_clicked();
-    void on_horizontalSlider_Threshold_valueChanged( const int value );
+    void on_horizontalSlider_Threshold_valueChanged( int value );
     void on_pushButton_FindOnsets_clicked();
     void on_pushButton_Slice_clicked();
     void on_actionNormalise_triggered();
@@ -176,13 +176,13 @@ private slots:
     void on_actionOpen_Project_triggered();
 
 
-    void recordWaveformItemMove( QList<int> oldOrderPositions, const int numPlacesMoved );
+    void recordWaveformItemMove( QList<int> oldOrderPositions, int numPlacesMoved );
 
-    void recordSlicePointItemMove( const SharedSlicePointItem slicePointItem,
-                                   const int oldFrameNum,
-                                   const int newFrameNum );
+    void recordSlicePointItemMove( SharedSlicePointItem slicePointItem,
+                                   int oldFrameNum,
+                                   int newFrameNum );
 
-    void playSampleRange( const WaveformItem* waveformItem, const QPointF mouseScenePos );
+    void playSampleRange( const WaveformItem* waveformItem, QPointF mouseScenePos );
 
     void stopPlayback();
 
@@ -191,7 +191,7 @@ private slots:
     void disableZoomIn();
     void disableZoomOut();
 
-    void enableRealtimeControls( const bool isEnabled );
+    void enableRealtimeControls( bool isEnabled );
     void resetSampler();
 
     void enableEditActions();

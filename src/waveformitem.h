@@ -46,27 +46,27 @@ class WaveformItem : public QObject, public QGraphicsRectItem
 public:
     enum { Type = UserTypes::WAVEFORM };
 
-    WaveformItem( const SharedSampleBuffer sampleBuffer,
-                  const int orderPos,
-                  const qreal width, const qreal height,
+    WaveformItem( SharedSampleBuffer sampleBuffer,
+                  int orderPos,
+                  qreal width, qreal height,
                   QGraphicsItem* parent = NULL );
 
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
-    void setRect( const qreal x, const qreal y, const qreal width, const qreal height );
+    void setRect( qreal x, qreal y, qreal width, qreal height );
 
     int type() const                                                { return Type; }
 
     SharedSampleBuffer getSampleBuffer() const                      { return m_sampleBuffer; }
 
     int getOrderPos() const                                         { return m_currentOrderPos; }
-    void setOrderPos( const int orderPos )                          { m_currentOrderPos = orderPos; }
+    void setOrderPos( int orderPos )                                { m_currentOrderPos = orderPos; }
 
 public:
     // For use with qSort(); sorts by order position
-    static bool isLessThanOrderPos( const WaveformItem* const item1, const WaveformItem* const item2 );
+    static bool isLessThanOrderPos( const WaveformItem* item1, const WaveformItem* item2 );
 
     // Get list of currently selected waveform items sorted by order position
-    static QList<WaveformItem*> getSelectedWaveformItems( const QGraphicsScene* const scene );
+    static QList<WaveformItem*> getSelectedWaveformItems( const QGraphicsScene* scene );
 
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
@@ -80,7 +80,7 @@ private:
     void resetSampleBins();
 
     // Both 'startBin' and 'endBin' are inclusive
-    void findMinMaxSamples( const int startBin, const int endBin );
+    void findMinMaxSamples( int startBin, int endBin );
 
     enum DetailLevel { LOW, HIGH, VERY_HIGH };
     DetailLevel m_detailLevel;
@@ -113,17 +113,17 @@ signals:
     // the no. of places which they have moved, allowing other waveform items to be reshuffled.
     // 'orderPositions' is sorted
     // 'oldOrderPositions' is negative if the items have moved left, or positive if the items have moved right
-    void orderPosIsChanging( QList<int> oldOrderPositions, const int numPlacesMoved );
+    void orderPosIsChanging( QList<int> oldOrderPositions, int numPlacesMoved );
 
     // This signal is emitted when the user has finished moving the waveform item(s) and the
     // final order position(s) is/are different from the starting order position(s)
     // 'oldOrderPositions' is sorted
     // 'numPlacesMoved' is negative if the items have moved left, or positive if the items have moved right
-    void orderPosHasChanged( QList<int> oldOrderPositions, const int numPlacesMoved );
+    void orderPosHasChanged( QList<int> oldOrderPositions, int numPlacesMoved );
 
-    void finishedMoving( const int orderPos );
+    void finishedMoving( int orderPos );
 
-    void clicked( const WaveformItem* waveformItem, const QPointF mouseScenePos );
+    void clicked( const WaveformItem* waveformItem, QPointF mouseScenePos );
 
     void maxDetailLevelReached();
 

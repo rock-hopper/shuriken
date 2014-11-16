@@ -37,18 +37,18 @@ class RubberbandAudioSource : public QObject, public AudioSource
 
 public:
     // Caller is responsible for deleting 'source' after RubberbandAudioSource has been deleted
-    RubberbandAudioSource( AudioSource* const source,
-                           const int numChans,
-                           const RubberBandStretcher::Options options,
-                           const bool isJackSyncEnabled = false );
+    RubberbandAudioSource( AudioSource* source,
+                           int numChans,
+                           RubberBandStretcher::Options options,
+                           bool isJackSyncEnabled = false );
     ~RubberbandAudioSource();
 
-    void setTimeRatio( const qreal ratio )                                      { m_timeRatio = ratio; }
-    void setPitchScale( const qreal scale )                                     { m_pitchScale = scale; }
-    void enablePitchCorrection( const bool isEnabled )                          { m_isPitchCorrectionEnabled = isEnabled; }
+    void setTimeRatio( qreal ratio )                                      { m_timeRatio = ratio; }
+    void setPitchScale( qreal scale )                                     { m_pitchScale = scale; }
+    void enablePitchCorrection( bool isEnabled )                          { m_isPitchCorrectionEnabled = isEnabled; }
 
     // Only has an effect when JACK Sync is enabled
-    void setOriginalBPM( const qreal bpm )                                      { m_originalBPM = bpm; }
+    void setOriginalBPM( qreal bpm )                                      { m_originalBPM = bpm; }
 
     void prepareToPlay( int samplesPerBlockExpected, double sampleRate ) override;
     void releaseResources() override;
@@ -92,11 +92,11 @@ private:
     int m_totalNumRetrieved;
 
 public slots:
-    void setTransientsOption( const RubberBandStretcher::Options option )       { m_transientsOption = option; }
-    void setPhaseOption( const RubberBandStretcher::Options option )            { m_phaseOption = option; }
-    void setFormantOption( const RubberBandStretcher::Options option )          { m_formantOption = option; }
-    void setPitchOption( const RubberBandStretcher::Options option )            { m_pitchOption = option; }
-    void enableJackSync( const bool isEnabled )                                 { m_isJackSyncEnabled = isEnabled; }
+    void setTransientsOption( RubberBandStretcher::Options option )       { m_transientsOption = option; }
+    void setPhaseOption( RubberBandStretcher::Options option )            { m_phaseOption = option; }
+    void setFormantOption( RubberBandStretcher::Options option )          { m_formantOption = option; }
+    void setPitchOption( RubberBandStretcher::Options option )            { m_pitchOption = option; }
+    void enableJackSync( bool isEnabled )                                 { m_isJackSyncEnabled = isEnabled; }
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( RubberbandAudioSource );

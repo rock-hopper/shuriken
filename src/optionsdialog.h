@@ -50,12 +50,12 @@ public:
     OptionsDialog( AudioDeviceManager& deviceManager, QWidget* parent = NULL );
     ~OptionsDialog();
 
-    void setCurrentTab( const Tab tab );
+    void setCurrentTab( Tab tab );
 
     bool isRealtimeModeEnabled() const;
 
     RubberBandStretcher::Options getStretcherOptions() const    { return m_stretcherOptions; }
-    void setStretcherOptions( const RubberBandStretcher::Options options );
+    void setStretcherOptions( RubberBandStretcher::Options options );
 
     bool isJackSyncEnabled() const;
     void enableJackSync();
@@ -81,10 +81,10 @@ private:
     void disableAllWidgets();
     void setUpMidiInputTestSynth();
     void tearDownMidiInputTestSynth();
-    void setJackMidiInput( const String deviceName );
+    void setJackMidiInput( String deviceName );
 
-    void enableStretcherOptions( const RubberBandStretcher::Options options );
-    void disableStretcherOptions( const RubberBandStretcher::Options options );
+    void enableStretcherOptions( RubberBandStretcher::Options options );
+    void disableStretcherOptions( RubberBandStretcher::Options options );
 
     void saveConfig();
 
@@ -110,18 +110,18 @@ private:
 
 signals:
     void timeStretchOptionsChanged();
-    void realtimeModeToggled( const bool isEnabled );
-    void stretchOptionChanged( const RubberBandStretcher::Options option );
-    void transientsOptionChanged( const RubberBandStretcher::Options option );
-    void phaseOptionChanged( const RubberBandStretcher::Options option );
+    void realtimeModeToggled( bool isEnabled );
+    void stretchOptionChanged( RubberBandStretcher::Options option );
+    void transientsOptionChanged( RubberBandStretcher::Options option );
+    void phaseOptionChanged( RubberBandStretcher::Options option );
     void windowOptionChanged();
-    void formantOptionChanged( const RubberBandStretcher::Options option );
-    void pitchOptionChanged( const RubberBandStretcher::Options option );
-    void jackSyncToggled( const bool isEnabled );
+    void formantOptionChanged( RubberBandStretcher::Options option );
+    void pitchOptionChanged( RubberBandStretcher::Options option );
+    void jackSyncToggled( bool isEnabled );
 
 private slots:
     void on_pushButton_ChooseTempDir_clicked();
-    void on_checkBox_JackSync_toggled( const bool isChecked );
+    void on_checkBox_JackSync_toggled( bool isChecked );
     void on_radioButton_HighConsistency_clicked();
     void on_radioButton_HighQuality_clicked();
     void on_radioButton_HighSpeed_clicked();
@@ -139,19 +139,19 @@ private slots:
     void on_radioButton_Elastic_clicked();
     void on_radioButton_Offline_clicked();
     void on_radioButton_RealTime_clicked();
-    void on_checkBox_MidiInputTestTone_clicked( const bool isChecked );
+    void on_checkBox_MidiInputTestTone_clicked( bool isChecked );
     void on_listWidget_MidiInput_itemClicked( QListWidgetItem* item );
-    void on_comboBox_BufferSize_activated( const int index );
-    void on_comboBox_SampleRate_activated( const int index );
-    void on_comboBox_OutputChannels_activated( const int index );
+    void on_comboBox_BufferSize_activated( int index );
+    void on_comboBox_SampleRate_activated( int index );
+    void on_comboBox_OutputChannels_activated( int index );
     void on_pushButton_TestTone_clicked();
-    void on_comboBox_AudioDevice_activated( const QString deviceName );
-    void on_comboBox_AudioBackend_activated( const int index );
+    void on_comboBox_AudioDevice_activated( QString deviceName );
+    void on_comboBox_AudioBackend_activated( int index );
 
     void accept();
     void reject();
 
-    void displayDirValidityText( const bool isValid );
+    void displayDirValidityText( bool isValid );
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( OptionsDialog );

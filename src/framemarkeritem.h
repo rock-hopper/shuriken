@@ -38,18 +38,18 @@ public:
 
     enum Handle { HANDLE_TOP_BOTTOM, HANDLE_CENTRE_RIGHT, HANDLE_CENTRE_LEFT };
 
-    FrameMarkerItem( const QBrush brush, const QBrush selectedBrush, const qreal height, const Handle handle, QGraphicsItem* parent = NULL );
+    FrameMarkerItem( QBrush brush, QBrush selectedBrush, qreal height, Handle handle, QGraphicsItem* parent = NULL );
 
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
-    void setHeight( const qreal height );
+    void setHeight( qreal height );
     int getFrameNum() const                     { return m_frameNum; }
-    void setFrameNum( const int frameNum )      { m_frameNum = frameNum; }
+    void setFrameNum( int frameNum )            { m_frameNum = frameNum; }
     int type() const                            { return Type; }
 
 protected:
     // Subclasses that reimplement this method MUST ALWAYS call "return FrameMarkerItem::itemChange"
     // in their reimplementation
-    QVariant itemChange( GraphicsItemChange change, const QVariant &value );
+    QVariant itemChange( GraphicsItemChange change, const QVariant& value );
 
     // Subclasses that reimplement this method MUST call FrameMarkerItem::mousePressEvent
     // at the start of the reimplementation

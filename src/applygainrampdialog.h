@@ -49,10 +49,10 @@ private:
     Ui::ApplyGainRampDialog* m_UI;
 
 private slots:
-    void on_doubleSpinBox_EndGain_valueChanged( const double value );
-    void on_dial_EndGain_valueChanged( const int value );
-    void on_doubleSpinBox_StartGain_valueChanged( const double value );
-    void on_dial_StartGain_valueChanged( const int value );
+    void on_doubleSpinBox_EndGain_valueChanged( double value );
+    void on_dial_EndGain_valueChanged( int value );
+    void on_doubleSpinBox_StartGain_valueChanged( double value );
+    void on_dial_StartGain_valueChanged( int value );
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( ApplyGainRampDialog );

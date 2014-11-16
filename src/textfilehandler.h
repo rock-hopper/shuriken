@@ -64,13 +64,13 @@ public:
         int units;
     };
 
-    static bool createProjectXmlFile( const QString filePath, const ProjectSettings settings );
+    static bool createProjectXmlFile( QString filePath, ProjectSettings settings );
 
-    static bool readProjectXmlFile( const QString filePath, ProjectSettings& settings );
+    static bool readProjectXmlFile( QString filePath, ProjectSettings& settings );
 
-    static bool createH2DrumkitXmlFile( const QString dirPath, const QString kitName, const QStringList audioFileNames );
+    static bool createH2DrumkitXmlFile( QString dirPath, QString kitName, QStringList audioFileNames );
 
-    static bool createSFZFile( const QString sfzFilePath, const QString samplesDirName, const QStringList audioFileNames );
+    static bool createSFZFile( QString sfzFilePath, QString samplesDirName, QStringList audioFileNames );
 };
 
 #endif // TEXTFILEHANDLER_H

@@ -402,8 +402,8 @@ SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
     sharedSlicePoint = SharedSlicePointItem( slicePointItem );
     m_slicePointItemList.append( sharedSlicePoint );
 
-    QObject::connect( slicePointItem, SIGNAL( scenePosChanged(SlicePointItem*const) ),
-                      this, SLOT( updateSlicePointFrameNum(SlicePointItem*const) ) );
+    QObject::connect( slicePointItem, SIGNAL( scenePosChanged(SlicePointItem*) ),
+                      this, SLOT( updateSlicePointFrameNum(SlicePointItem*) ) );
 
     scene()->addItem( slicePointItem );
     scene()->update();
@@ -1070,11 +1070,11 @@ void WaveGraphicsView::createLoopMarkers()
     m_loopMarkerLeft->setZValue( ZValues::LOOP_MARKER );
     m_loopMarkerRight->setZValue( ZValues::LOOP_MARKER );
 
-    QObject::connect( m_loopMarkerLeft, SIGNAL( scenePosChanged(LoopMarkerItem*const) ),
-                      this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*const) ) );
+    QObject::connect( m_loopMarkerLeft, SIGNAL( scenePosChanged(LoopMarkerItem*) ),
+                      this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*) ) );
 
-    QObject::connect( m_loopMarkerRight, SIGNAL( scenePosChanged(LoopMarkerItem*const) ),
-                      this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*const) ) );
+    QObject::connect( m_loopMarkerRight, SIGNAL( scenePosChanged(LoopMarkerItem*) ),
+                      this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*) ) );
 
     scene()->addItem( m_loopMarkerLeft );
     scene()->addItem( m_loopMarkerRight );

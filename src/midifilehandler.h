@@ -32,16 +32,16 @@ class MidiFileHandler
 public:
     enum MidiFileType { MIDI_FILE_TYPE_0 = 0, MIDI_FILE_TYPE_1 = 1 };
 
-    static bool SaveMidiFile( const QString fileBaseName,
-                              const QString outputDirPath,
-                              const QList<SharedSampleBuffer> sampleBufferList,
-                              const int numSampleBuffers,
-                              const qreal sampleRate,
-                              const qreal bpm,
-                              const int timeSigNumerator,
-                              const int timeSigDenominator,
-                              const MidiFileType midiFileType,
-                              const bool isOverwriteEnabled = true );
+    static bool SaveMidiFile( QString fileBaseName,
+                              QString outputDirPath,
+                              QList<SharedSampleBuffer> sampleBufferList,
+                              int numSampleBuffers,
+                              qreal sampleRate,
+                              qreal bpm,
+                              int timeSigNumerator,
+                              int timeSigDenominator,
+                              MidiFileType midiFileType,
+                              bool isOverwriteEnabled = true );
 
     static QString getFileExtension()           { return QString( ".mid" ); }
 

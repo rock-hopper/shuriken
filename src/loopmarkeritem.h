@@ -36,7 +36,7 @@ public:
 
     enum MarkerType { LEFT_MARKER, RIGHT_MARKER };
 
-    LoopMarkerItem( const MarkerType markerType, const qreal height, QGraphicsItem* parent = NULL );
+    LoopMarkerItem( MarkerType markerType, qreal height, QGraphicsItem* parent = NULL );
 
     int type() const                            { return Type; }
     MarkerType getMarkerType() const            { return m_markerType; }
@@ -51,7 +51,7 @@ private:
     qreal m_scenePosBeforeMove;
 
 signals:
-    void scenePosChanged( LoopMarkerItem* const item );
+    void scenePosChanged( LoopMarkerItem* item );
 
 private:
     JUCE_LEAK_DETECTOR( FrameMarkerItem );
