@@ -51,7 +51,8 @@ void AddSlicePointItemCommand::undo()
 
     if ( m_graphicsView->getSlicePointFrameNums().isEmpty() )
     {
-        m_sliceButton->setEnabled( false );
+        if ( m_sliceButton != NULL )
+            m_sliceButton->setEnabled( false );
     }
 }
 
@@ -65,7 +66,10 @@ void AddSlicePointItemCommand::redo()
     }
     m_isFirstRedoCall = false;
 
-    m_sliceButton->setEnabled( true );
+    if ( m_sliceButton != NULL )
+    {
+        m_sliceButton->setEnabled( true );
+    }
 }
 
 
@@ -126,7 +130,11 @@ DeleteSlicePointItemCommand::DeleteSlicePointItemCommand( const SharedSlicePoint
 void DeleteSlicePointItemCommand::undo()
 {
     m_graphicsView->addSlicePoint( m_slicePointItem );
-    m_sliceButton->setEnabled( true );
+
+    if ( m_sliceButton != NULL )
+    {
+        m_sliceButton->setEnabled( true );
+    }
 }
 
 
@@ -137,7 +145,8 @@ void DeleteSlicePointItemCommand::redo()
 
     if ( m_graphicsView->getSlicePointFrameNums().isEmpty() )
     {
-        m_sliceButton->setEnabled( false );
+        if ( m_sliceButton != NULL )
+            m_sliceButton->setEnabled( false );
     }
 }
 
@@ -183,17 +192,15 @@ void SliceCommand::undo()
     m_mainWindow->m_sampleBufferList << singleBuffer;
 
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
-                                                  m_mainWindow->m_sampleHeader->sampleRate );
+                                                    m_mainWindow->m_sampleHeader->sampleRate );
 
     m_graphicsView->clearWaveform();
 
     SharedWaveformItem item = m_graphicsView->createWaveform( m_mainWindow->m_sampleBufferList.first(),
-                                                             m_mainWindow->m_sampleHeader );
+                                                              m_mainWindow->m_sampleHeader );
     m_mainWindow->connectWaveformToMainWindow( item );
 
-    m_graphicsView->showSlicePoints();
-
-    m_sliceButton->setEnabled( true );
+    m_sliceButton->setChecked( false );
     m_findOnsetsButton->setEnabled( true );
     m_findBeatsButton->setEnabled( true );
     m_addSlicePointAction->setEnabled( true );
@@ -214,26 +221,123 @@ void SliceCommand::redo()
     m_mainWindow->stopPlayback();
 
     m_mainWindow->m_sampleBufferList = SampleUtils::splitSampleBuffer( m_mainWindow->m_sampleBufferList.first(),
-                                                                     m_graphicsView->getSlicePointFrameNums() );
+                                                                       m_graphicsView->getSlicePointFrameNums() );
 
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
-                                                  m_mainWindow->m_sampleHeader->sampleRate );
+                                                    m_mainWindow->m_sampleHeader->sampleRate );
 
-    m_graphicsView->hideSlicePoints();
     m_graphicsView->clearWaveform();
 
     const QList<SharedWaveformItem> waveformItemList = m_graphicsView->createWaveforms( m_mainWindow->m_sampleBufferList,
-                                                                                       m_mainWindow->m_sampleHeader );
+                                                                                        m_mainWindow->m_sampleHeader );
     foreach ( SharedWaveformItem item, waveformItemList )
     {
         m_mainWindow->connectWaveformToMainWindow( item );
     }
 
-    m_sliceButton->setEnabled( false );
+    m_sliceButton->setChecked( true );
     m_findOnsetsButton->setEnabled( false );
     m_findBeatsButton->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
     m_selectItemsAction->setEnabled( true );
+    m_moveItemsAction->trigger();
+
+    m_mainWindow->updateSnapLoopMarkersComboBox();
+
+    QApplication::restoreOverrideCursor();
+}
+
+
+
+//==================================================================================================
+
+UnsliceCommand::UnsliceCommand( MainWindow* const mainWindow,
+                                WaveGraphicsView* const graphicsView,
+                                QPushButton* const sliceButton,
+                                QPushButton* const findOnsetsButton,
+                                QPushButton* const findBeatsButton,
+                                QAction* const addSlicePointAction,
+                                QAction* const moveItemsAction,
+                                QAction* const selectItemsAction,
+                                QAction* const auditionItemsAction,
+                                QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    m_mainWindow( mainWindow ),
+    m_graphicsView( graphicsView ),
+    m_sliceButton( sliceButton ),
+    m_findOnsetsButton( findOnsetsButton ),
+    m_findBeatsButton( findBeatsButton ),
+    m_addSlicePointAction( addSlicePointAction ),
+    m_moveItemsAction( moveItemsAction ),
+    m_selectItemsAction( selectItemsAction ),
+    m_auditionItemsAction( auditionItemsAction )
+{
+    setText( "Unslice" );
+}
+
+
+
+void UnsliceCommand::undo()
+{
+    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+    m_mainWindow->stopPlayback();
+
+    m_mainWindow->m_sampleBufferList = SampleUtils::splitSampleBuffer( m_mainWindow->m_sampleBufferList.first(),
+                                                                       m_graphicsView->getSlicePointFrameNums() );
+
+    m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
+                                                    m_mainWindow->m_sampleHeader->sampleRate );
+
+    m_graphicsView->clearWaveform();
+
+    const QList<SharedWaveformItem> waveformItemList = m_graphicsView->createWaveforms( m_mainWindow->m_sampleBufferList,
+                                                                                        m_mainWindow->m_sampleHeader );
+    foreach ( SharedWaveformItem item, waveformItemList )
+    {
+        m_mainWindow->connectWaveformToMainWindow( item );
+    }
+
+    m_sliceButton->setChecked( true );
+    m_findOnsetsButton->setEnabled( false );
+    m_findBeatsButton->setEnabled( false );
+    m_addSlicePointAction->setEnabled( false );
+    m_selectItemsAction->setEnabled( true );
+    m_moveItemsAction->trigger();
+
+    m_mainWindow->updateSnapLoopMarkersComboBox();
+
+    QApplication::restoreOverrideCursor();
+}
+
+
+
+void UnsliceCommand::redo()
+{
+    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+    m_mainWindow->stopPlayback();
+
+    SharedSampleBuffer singleBuffer = SampleUtils::joinSampleBuffers( m_mainWindow->m_sampleBufferList );
+
+    m_mainWindow->m_sampleBufferList.clear();
+    m_mainWindow->m_sampleBufferList << singleBuffer;
+
+    m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
+                                                    m_mainWindow->m_sampleHeader->sampleRate );
+
+    m_graphicsView->clearWaveform();
+
+    SharedWaveformItem item = m_graphicsView->createWaveform( m_mainWindow->m_sampleBufferList.first(),
+                                                              m_mainWindow->m_sampleHeader );
+    m_mainWindow->connectWaveformToMainWindow( item );
+
+    m_sliceButton->setChecked( false );
+    m_findOnsetsButton->setEnabled( true );
+    m_findBeatsButton->setEnabled( true );
+    m_addSlicePointAction->setEnabled( true );
+    m_selectItemsAction->setEnabled( false );
+    m_auditionItemsAction->trigger();
 
     m_mainWindow->updateSnapLoopMarkersComboBox();
 

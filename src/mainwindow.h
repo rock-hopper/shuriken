@@ -50,6 +50,7 @@ class MainWindow : public QMainWindow
 
     friend class DeleteWaveformItemCommand;
     friend class SliceCommand;
+    friend class UnsliceCommand;
     friend class JoinCommand;
     friend class SplitCommand;
     friend class ApplyTimeStretchCommand;
@@ -151,7 +152,7 @@ private slots:
     void on_pushButton_FindBeats_clicked();
     void on_horizontalSlider_Threshold_valueChanged( int value );
     void on_pushButton_FindOnsets_clicked();
-    void on_pushButton_Slice_clicked();
+    void on_pushButton_Slice_clicked( bool isChecked );
     void on_actionNormalise_triggered();
     void on_actionApply_Gain_Ramp_triggered();
     void on_actionApply_Gain_triggered();

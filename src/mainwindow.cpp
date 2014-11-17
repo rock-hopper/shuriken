@@ -32,7 +32,7 @@
 #include "aboutdialog.h"
 #include "messageboxes.h"
 #include <rubberband/RubberBandStretcher.h>
-//#include <QDebug>
+#include <QDebug>
 
 
 using namespace RubberBand;
@@ -513,6 +513,7 @@ void MainWindow::disableUI()
     m_UI->checkBox_PitchCorrection->setEnabled( false );
     m_UI->pushButton_TimestretchOptions->setEnabled( false );
     m_UI->pushButton_Slice->setEnabled( false );
+    m_UI->pushButton_Slice->setChecked( false );
     m_UI->comboBox_DetectMethod->setEnabled( false );
     m_UI->comboBox_WindowSize->setEnabled( false );
     m_UI->comboBox_HopSize->setEnabled( false );
@@ -1328,18 +1329,58 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
 
 
 
-void MainWindow::on_pushButton_Slice_clicked()
+void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
 {
-    QUndoCommand* command = new SliceCommand( this,
-                                              m_UI->waveGraphicsView,
-                                              m_UI->pushButton_Slice,
-                                              m_UI->pushButton_FindOnsets,
-                                              m_UI->pushButton_FindBeats,
-                                              m_UI->actionAdd_Slice_Point,
-                                              m_UI->actionMove,
-                                              m_UI->actionSelect,
-                                              m_UI->actionAudition );
-    m_undoStack.push( command );
+    if ( isChecked ) // Slice
+    {
+        QUndoCommand* parentCommand = new QUndoCommand();
+
+        new SliceCommand( this,
+                          m_UI->waveGraphicsView,
+                          m_UI->pushButton_Slice,
+                          m_UI->pushButton_FindOnsets,
+                          m_UI->pushButton_FindBeats,
+                          m_UI->actionAdd_Slice_Point,
+                          m_UI->actionMove,
+                          m_UI->actionSelect,
+                          m_UI->actionAudition,
+                          parentCommand );
+
+        QList<SharedSlicePointItem> slicePoints = m_UI->waveGraphicsView->getSlicePointList();
+
+        foreach ( SharedSlicePointItem slicePoint, slicePoints )
+        {
+            new DeleteSlicePointItemCommand( slicePoint, m_UI->waveGraphicsView, NULL, parentCommand );
+        }
+
+        m_undoStack.push( parentCommand );
+    }
+    else // Unslice
+    {
+        QUndoCommand* parentCommand = new QUndoCommand();
+
+        int frameNum = 0;
+
+        for ( int i = 0; i < m_sampleBufferList.size() - 1; i++ )
+        {
+            frameNum += m_sampleBufferList.at( i )->getNumFrames();
+
+            new AddSlicePointItemCommand( frameNum, m_UI->waveGraphicsView, NULL, parentCommand );
+        }
+
+        new UnsliceCommand( this,
+                            m_UI->waveGraphicsView,
+                            m_UI->pushButton_Slice,
+                            m_UI->pushButton_FindOnsets,
+                            m_UI->pushButton_FindBeats,
+                            m_UI->actionAdd_Slice_Point,
+                            m_UI->actionMove,
+                            m_UI->actionSelect,
+                            m_UI->actionAudition,
+                            parentCommand );
+
+        m_undoStack.push( parentCommand );
+    }
 }
 
 

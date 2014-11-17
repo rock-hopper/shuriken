@@ -125,6 +125,37 @@ private:
 
 
 
+class UnsliceCommand : public QUndoCommand
+{
+public:
+    UnsliceCommand( MainWindow* mainWindow,
+                    WaveGraphicsView* graphicsView,
+                    QPushButton* sliceButton,
+                    QPushButton* findOnsetsButton,
+                    QPushButton* findBeatsButton,
+                    QAction* addSlicePointAction,
+                    QAction* moveItemsAction,
+                    QAction* selectItemsAction,
+                    QAction* auditionItemsAction,
+                    QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    MainWindow* const m_mainWindow;
+    WaveGraphicsView* const m_graphicsView;
+    QPushButton* const m_sliceButton;
+    QPushButton* const m_findOnsetsButton;
+    QPushButton* const m_findBeatsButton;
+    QAction* const m_addSlicePointAction;
+    QAction* const m_moveItemsAction;
+    QAction* const m_selectItemsAction;
+    QAction* const m_auditionItemsAction;
+};
+
+
+
 class MoveWaveformItemCommand : public QUndoCommand
 {
 public:

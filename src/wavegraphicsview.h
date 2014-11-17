@@ -100,7 +100,7 @@ public:
     // Returns the currently selected slice point item
     SharedSlicePointItem getSelectedSlicePoint();
 
-    // Returns a sorted list containing the frame no. of every slice point item
+    // Returns a sorted and edited list containing the frame no. of every valid slice point item
     QList<int> getSlicePointFrameNums() const;
 
     // Returns a list of all slice point items

@@ -261,6 +261,9 @@
          <iconset resource="../resources.qrc">
           <normaloff>:/resources/images/shuriken_small.png</normaloff>:/resources/images/shuriken_small.png</iconset>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>
