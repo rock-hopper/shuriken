@@ -626,7 +626,6 @@
     <addaction name="actionApply_Gain_Ramp"/>
     <addaction name="actionNormalise"/>
     <addaction name="actionEnvelope"/>
-    <addaction name="actionJoin"/>
     <addaction name="actionReverse"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -861,17 +860,6 @@
    </property>
    <property name="text">
     <string>About</string>
-   </property>
-  </action>
-  <action name="actionJoin">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Join</string>
-   </property>
-   <property name="shortcut">
-    <string>J</string>
    </property>
   </action>
   <action name="actionSelect_All">

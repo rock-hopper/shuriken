@@ -538,7 +538,6 @@ void MainWindow::disableUI()
     m_UI->actionSelect_None->setEnabled( false );
     m_UI->actionAdd_Slice_Point->setEnabled( false );
     m_UI->actionDelete->setEnabled( false );
-    m_UI->actionJoin->setEnabled( false );
     m_UI->actionReverse->setEnabled( false );
     m_UI->actionZoom_Original->setEnabled( false );
     m_UI->actionZoom_Out->setEnabled( false );
@@ -796,7 +795,7 @@ void MainWindow::enableEditActions()
 
     if ( ! slicePoint.isNull() || ! orderPositions.isEmpty() )
     {
-        if ( orderPositions.size() < m_UI->waveGraphicsView->getNumWaveformItems() )
+        if ( orderPositions.size() < m_UI->waveGraphicsView->getNumWaveforms() )
         {
             m_UI->actionDelete->setEnabled( true );
         }
@@ -815,15 +814,6 @@ void MainWindow::enableEditActions()
         m_UI->actionApply_Gain_Ramp->setEnabled( false );
         m_UI->actionNormalise->setEnabled( false );
         m_UI->actionReverse->setEnabled( false );
-    }
-
-    if ( orderPositions.size() > 1 )
-    {
-        m_UI->actionJoin->setEnabled( true );
-    }
-    else
-    {
-        m_UI->actionJoin->setEnabled( false );
     }
 }
 
@@ -1212,16 +1202,6 @@ void MainWindow::on_actionNormalise_triggered()
 void MainWindow::on_actionEnvelope_triggered()
 {
     // TODO
-}
-
-
-
-void MainWindow::on_actionJoin_triggered()
-{
-    const QList<int> orderPositions = m_UI->waveGraphicsView->getSelectedWaveformsOrderPositions();
-
-    QUndoCommand* command = new JoinCommand( orderPositions, m_UI->waveGraphicsView, this );
-    m_undoStack.push( command );
 }
 
 

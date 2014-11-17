@@ -58,14 +58,6 @@ public:
                                                int startOrderPos = 0,
                                                qreal totalWidth = 0.0 );
 
-    // Creates a new waveform item by joining several waveform items together. The new item's order
-    // position and scene position will be the same as the first item in the list. The items'
-    // sample buffers are also joined
-    SharedWaveformItem joinWaveforms( QList<int> orderPositions );
-
-    // Splits a waveform item into several new waveform items. The item's sample buffer is also split
-    QList<SharedWaveformItem> splitWaveform( int orderPos, QList<int> slicePointFrameNums );
-
     void moveWaveforms( QList<int> oldOrderPositions, int numPlacesMoved );
 
     // Insert waveform items into the scene
@@ -78,7 +70,7 @@ public:
 
     SharedWaveformItem getWaveformAt( int orderPos ) const;
 
-    int getNumWaveformItems() const                         { return m_waveformItemList.size(); }
+    int getNumWaveforms() const                             { return m_waveformItemList.size(); }
 
     // Redraw all waveform items
     void redrawWaveforms();

@@ -200,47 +200,6 @@ private:
 
 
 
-class JoinCommand : public QUndoCommand
-{
-public:
-    JoinCommand( QList<int> orderPositions,
-                 WaveGraphicsView* graphicsView,
-                 MainWindow* mainWindow,
-                 QUndoCommand* parent = NULL );
-
-    void undo();
-    void redo();
-
-private:
-    const QList<int> m_orderPositions;
-    WaveGraphicsView* const m_graphicsView;
-    MainWindow* const m_mainWindow;
-    int m_joinedItemOrderPos;
-    QList<int> m_slicePoints;
-};
-
-
-
-//class SplitCommand : public QUndoCommand
-//{
-//public:
-//    SplitCommand( const int orderPos,
-//                  WaveGraphicsView* const graphicsView,
-//                  MainWindow* const mainWindow,
-//                  QUndoCommand* parent = NULL );
-//
-//    void undo();
-//    void redo();
-//
-//private:
-//    const int mJoinedItemOrderPos;
-//    WaveGraphicsView* const mGraphicsView;
-//    MainWindow* const mMainWindow;
-//    QList<int> mOrderPositions;
-//};
-
-
-
 class ApplyGainCommand : public QUndoCommand
 {
 public:
