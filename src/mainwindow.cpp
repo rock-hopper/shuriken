@@ -594,7 +594,6 @@ void MainWindow::closeProject()
 {
     m_sampleHeader.clear();
     m_sampleBufferList.clear();
-    m_loopSampleBufferList.clear();
     tearDownSampler();
 
     m_UI->waveGraphicsView->clearAll();

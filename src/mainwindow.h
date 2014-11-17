@@ -112,7 +112,6 @@ private:
 
     SharedSampleHeader m_sampleHeader;
     QList<SharedSampleBuffer> m_sampleBufferList;
-    QList<SharedSampleBuffer> m_loopSampleBufferList;
 
     ScopedPointer<SamplerAudioSource> m_samplerAudioSource;
     ScopedPointer<RubberbandAudioSource> m_rubberbandAudioSource;
