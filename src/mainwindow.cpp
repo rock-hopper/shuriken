@@ -491,8 +491,9 @@ void MainWindow::enableUI()
     m_UI->actionAdd_Slice_Point->setEnabled( true );
     m_UI->actionZoom_Original->setEnabled( true );
     m_UI->actionZoom_In->setEnabled( true );
-    m_UI->actionMove->setEnabled( true );
+    m_UI->actionSelect_Move->setEnabled( true );
     m_UI->actionAudition->setEnabled( true );
+    m_UI->actionTime_Folding->setEnabled( true );
 
     m_UI->actionAudition->trigger();
 }
@@ -542,9 +543,10 @@ void MainWindow::disableUI()
     m_UI->actionZoom_Original->setEnabled( false );
     m_UI->actionZoom_Out->setEnabled( false );
     m_UI->actionZoom_In->setEnabled( false );
-    m_UI->actionMove->setEnabled( false );
-    m_UI->actionSelect->setEnabled( false );
+    m_UI->actionSelect_Move->setEnabled( false );
+    m_UI->actionMulti_Select->setEnabled( false );
     m_UI->actionAudition->setEnabled( false );
+    m_UI->actionTime_Folding->setEnabled( false );
 }
 
 
@@ -1320,8 +1322,8 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
                           m_UI->pushButton_FindOnsets,
                           m_UI->pushButton_FindBeats,
                           m_UI->actionAdd_Slice_Point,
-                          m_UI->actionMove,
-                          m_UI->actionSelect,
+                          m_UI->actionSelect_Move,
+                          m_UI->actionMulti_Select,
                           m_UI->actionAudition,
                           parentCommand );
 
@@ -1353,8 +1355,8 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
                             m_UI->pushButton_FindOnsets,
                             m_UI->pushButton_FindBeats,
                             m_UI->actionAdd_Slice_Point,
-                            m_UI->actionMove,
-                            m_UI->actionSelect,
+                            m_UI->actionSelect_Move,
+                            m_UI->actionMulti_Select,
                             m_UI->actionAudition,
                             parentCommand );
 
@@ -1629,14 +1631,14 @@ void MainWindow::on_pushButton_Apply_clicked()
 
 
 
-void MainWindow::on_actionMove_triggered()
+void MainWindow::on_actionSelect_Move_triggered()
 {
     m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::MOVE_ITEMS );
 }
 
 
 
-void MainWindow::on_actionSelect_triggered()
+void MainWindow::on_actionMulti_Select_triggered()
 {
     m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::SELECT_ITEMS );
 }
@@ -1646,6 +1648,13 @@ void MainWindow::on_actionSelect_triggered()
 void MainWindow::on_actionAudition_triggered()
 {
     m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::AUDITION_ITEMS );
+}
+
+
+
+void MainWindow::on_actionTime_Folding_triggered()
+{
+    // TODO
 }
 
 

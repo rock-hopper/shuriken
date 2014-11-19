@@ -134,9 +134,10 @@ private slots:
     void on_comboBox_SnapLoopMarkers_currentIndexChanged( int index );
     void on_checkBox_LoopMarkers_clicked( bool isChecked );
     void on_pushButton_TimestretchOptions_clicked();
+    void on_actionTime_Folding_triggered();
     void on_actionAudition_triggered();
-    void on_actionSelect_triggered();
-    void on_actionMove_triggered();
+    void on_actionMulti_Select_triggered();
+    void on_actionSelect_Move_triggered();
     void on_pushButton_Apply_clicked();
     void on_actionZoom_Original_triggered();
     void on_actionZoom_Out_triggered();

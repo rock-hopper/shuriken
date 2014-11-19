@@ -103,8 +103,8 @@ public:
                   QPushButton* findOnsetsButton,
                   QPushButton* findBeatsButton,
                   QAction* addSlicePointAction,
-                  QAction* moveItemsAction,
-                  QAction* selectItemsAction,
+                  QAction* selectMoveItemsAction,
+                  QAction* multiSelectItemsAction,
                   QAction* auditionItemsAction,
                   QUndoCommand* parent = NULL );
 
@@ -118,8 +118,8 @@ private:
     QPushButton* const m_findOnsetsButton;
     QPushButton* const m_findBeatsButton;
     QAction* const m_addSlicePointAction;
-    QAction* const m_moveItemsAction;
-    QAction* const m_selectItemsAction;
+    QAction* const m_selectMoveItemsAction;
+    QAction* const m_multiSelectItemsAction;
     QAction* const m_auditionItemsAction;
 };
 
@@ -134,8 +134,8 @@ public:
                     QPushButton* findOnsetsButton,
                     QPushButton* findBeatsButton,
                     QAction* addSlicePointAction,
-                    QAction* moveItemsAction,
-                    QAction* selectItemsAction,
+                    QAction* selectMoveItemsAction,
+                    QAction* multiSelectItemsAction,
                     QAction* auditionItemsAction,
                     QUndoCommand* parent = NULL );
 
@@ -149,8 +149,8 @@ private:
     QPushButton* const m_findOnsetsButton;
     QPushButton* const m_findBeatsButton;
     QAction* const m_addSlicePointAction;
-    QAction* const m_moveItemsAction;
-    QAction* const m_selectItemsAction;
+    QAction* const m_selectMoveItemsAction;
+    QAction* const m_multiSelectItemsAction;
     QAction* const m_auditionItemsAction;
 };
 

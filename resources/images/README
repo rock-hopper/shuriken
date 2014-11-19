@@ -1,6 +1,7 @@
 The following files are part of Oxygen Icons <http://www.oxygen-icons.org/> and are licensed under the GNU LGPL v3:
 
 application-exit.png
+chronometer.png
 document-close.png
 document-export.png
 document-import.png
@@ -19,10 +20,18 @@ help-contents.png
 kdenlive-select-all.png
 media-playback-start.png
 media-playback-stop.png
+pages-3sides.png
 text-speak.png
-view-refresh.png (this image has been modified)
+view-refresh.png
 zoom-in.png
 zoom-original.png
 zoom-out.png
+
+
+The following files are modified versions of one or more of the above:
+
+view-refresh_blue.png
+timefolding.png
+
 
 For full details of the GNU LGPL v3 please read images/LICENSE
