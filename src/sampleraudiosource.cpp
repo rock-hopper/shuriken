@@ -156,7 +156,7 @@ void SamplerAudioSource::releaseResources()
 
 void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill )
 {
-    // The synth always adds its output to the audio buffer, so we have to clear it first
+    // The sampler always adds its output to the audio buffer, so we have to clear it first
     bufferToFill.clearActiveBufferRegion();
 
 
@@ -192,9 +192,9 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
             // Start of note
             if ( m_frameCounter < bufferToFill.numSamples )
             {
-                const MidiMessage message = MidiMessage::noteOn( 1,                             // MIDI channel
-                                                                 m_seqStartNote + m_noteCounter,  // MIDI note no.
-                                                                 1.0f );                        // Velocity
+                const MidiMessage message = MidiMessage::noteOn( 1,                                 // MIDI channel
+                                                                 m_seqStartNote + m_noteCounter,    // MIDI note no.
+                                                                 1.0f );                            // Velocity
                 const int noteOnFrameNum = m_frameCounter;
 
                 incomingMidi.addEvent( message, noteOnFrameNum );
@@ -252,7 +252,7 @@ bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer, co
         m_sampler.addSound( new ShurikenSamplerSound( sampleBuffer,
                                                      sampleRate,
                                                      noteNum,           // MIDI note this sample should be assigned to
-                                                     m_nextFreeNote ));  // Root/pitch-centre MIDI note
+                                                     m_nextFreeNote )); // Root/pitch-centre MIDI note
 
         m_nextFreeNote++;
         isSampleAssignedToKey = true;

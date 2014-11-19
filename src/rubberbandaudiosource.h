@@ -50,12 +50,13 @@ public:
     // Only has an effect when JACK Sync is enabled
     void setOriginalBPM( qreal bpm )                                      { m_originalBPM = bpm; }
 
+    // For JUCE use only!
     void prepareToPlay( int samplesPerBlockExpected, double sampleRate ) override;
     void releaseResources() override;
     void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill ) override;
 
 private:
-    void readNextBufferChunk();
+    void processNextAudioBlock();
 
     AudioSource* const m_source;
     const int m_numChans;

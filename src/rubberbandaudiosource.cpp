@@ -155,12 +155,12 @@ void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buf
         m_prevPitchOption = m_pitchOption;
     }
 
-//    const int latency = mStretcher->getLatency() + mReserveSize;
+//    const int latency = m_stretcher->getLatency() + m_reserveSize;
 //    std::cerr << "latency = " << latency << std::endl;
 
     while ( m_stretcher->available() < bufferToFill.numSamples )
     {
-        readNextBufferChunk();
+        processNextAudioBlock();
     }
 
     m_stretcher->retrieve( bufferToFill.buffer->getArrayOfWritePointers(), bufferToFill.numSamples );
@@ -171,7 +171,7 @@ void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buf
 //==================================================================================================
 // Private:
 
-void RubberbandAudioSource::readNextBufferChunk()
+void RubberbandAudioSource::processNextAudioBlock()
 {
     const int numRequired = m_stretcher->getSamplesRequired();
 
