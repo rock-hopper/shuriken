@@ -223,23 +223,24 @@ void WaveGraphicsView::insertWaveforms( const QList<SharedWaveformItem> waveform
 
 QList<SharedWaveformItem> WaveGraphicsView::removeWaveforms( const QList<int> waveformOrderPositions )
 {
-    const int firstOrderPos = waveformOrderPositions.first();
+    const int startOrderPos = waveformOrderPositions.first();
 
     QList<SharedWaveformItem> removedWaveforms;
 
     // Remove waveform items from scene
     for ( int i = 0; i < waveformOrderPositions.size(); i++ )
     {
-        SharedWaveformItem item = m_waveformItemList.at( firstOrderPos );
-        m_waveformItemList.removeAt( firstOrderPos );
+        SharedWaveformItem item = m_waveformItemList.at( startOrderPos );
 
+        m_waveformItemList.removeAt( startOrderPos );
         scene()->removeItem( item.data() );
+
         removedWaveforms << item;
     }
     scene()->update();
 
     // If necessary, set new order positions and remove gap between remaining items
-    if ( firstOrderPos < m_waveformItemList.size() )
+    if ( startOrderPos < m_waveformItemList.size() )
     {
         qreal distanceToMove = 0.0;
 
@@ -248,7 +249,7 @@ QList<SharedWaveformItem> WaveGraphicsView::removeWaveforms( const QList<int> wa
             distanceToMove += item->rect().width();
         }
 
-        for ( int i = firstOrderPos; i < m_waveformItemList.size(); i++ )
+        for ( int i = startOrderPos; i < m_waveformItemList.size(); i++ )
         {
             m_waveformItemList.at( i )->setOrderPos( i );
 
