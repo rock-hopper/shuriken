@@ -33,7 +33,7 @@
 WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
     QGraphicsView( parent ),
     m_loopMarkerSnapMode( SNAP_OFF ),
-    m_interactionMode( AUDITION_ITEMS ),
+    m_interactionMode( AUDITION ),
     m_isViewZoomedIn( false )
 {
     // Set up view and scene
@@ -829,7 +829,7 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
 {
     switch ( mode )
     {
-    case MOVE_ITEMS:
+    case SELECT_MOVE:
         foreach ( SharedWaveformItem item, m_waveformItemList )
         {
             item->setFlag( QGraphicsItem::ItemIsMovable, true );
@@ -837,7 +837,7 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
         }
         setDragMode( NoDrag );
         break;
-    case SELECT_ITEMS:
+    case MULTI_SELECT:
         foreach ( SharedWaveformItem item, m_waveformItemList )
         {
             item->setFlag( QGraphicsItem::ItemIsMovable, false );
@@ -845,7 +845,15 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
         }
         setDragMode( RubberBandDrag );
         break;
-    case AUDITION_ITEMS:
+    case AUDITION:
+        foreach ( SharedWaveformItem item, m_waveformItemList )
+        {
+            item->setFlag( QGraphicsItem::ItemIsMovable, false );
+            item->setFlag( QGraphicsItem::ItemIsSelectable, false );
+        }
+        setDragMode( NoDrag );
+        break;
+    case TIME_FOLDING:
         foreach ( SharedWaveformItem item, m_waveformItemList )
         {
             item->setFlag( QGraphicsItem::ItemIsMovable, false );

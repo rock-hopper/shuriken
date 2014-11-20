@@ -621,6 +621,7 @@
     <addaction name="actionDelete"/>
     <addaction name="separator"/>
     <addaction name="actionAdd_Slice_Point"/>
+    <addaction name="actionAdd_Fold"/>
     <addaction name="separator"/>
     <addaction name="actionApply_Gain"/>
     <addaction name="actionApply_Gain_Ramp"/>
@@ -1041,6 +1042,18 @@
    </property>
    <property name="toolTip">
     <string>Time Folding</string>
+   </property>
+  </action>
+  <action name="actionAdd_Fold">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/page-3sides.png</normaloff>:/resources/images/page-3sides.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Fold</string>
+   </property>
+   <property name="shortcut">
+    <string>Ins</string>
    </property>
   </action>
  </widget>

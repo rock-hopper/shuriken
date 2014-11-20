@@ -131,6 +131,7 @@ public slots:
     void reorderSampleBufferList( QList<int> oldOrderPositions, int numPlacesMoved );
 
 private slots:
+    void on_actionAdd_Fold_triggered();
     void on_comboBox_SnapLoopMarkers_currentIndexChanged( int index );
     void on_checkBox_LoopMarkers_clicked( bool isChecked );
     void on_pushButton_TimestretchOptions_clicked();

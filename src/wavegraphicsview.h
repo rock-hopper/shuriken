@@ -133,7 +133,7 @@ public:
     void zoomOut();
     void zoomOriginal();
 
-    enum InteractionMode { MOVE_ITEMS, SELECT_ITEMS, AUDITION_ITEMS };
+    enum InteractionMode { SELECT_MOVE, MULTI_SELECT, AUDITION, TIME_FOLDING };
     void setInteractionMode( InteractionMode mode );
 
 protected:

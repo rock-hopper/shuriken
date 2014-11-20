@@ -351,9 +351,10 @@ void MainWindow::setupUI()
     m_UI->comboBox_Units->addItems( unitsTextList );
 
 
-    // Hide widgets
+    // Hide widgets / menu items
     m_UI->label_JackSync->setVisible( false );
     m_UI->checkBox_TimeStretch->setVisible( false );
+    m_UI->actionAdd_Fold->setVisible( false );
 
 
     // Connect signals to slots
@@ -538,6 +539,8 @@ void MainWindow::disableUI()
     m_UI->actionSelect_All->setEnabled( false );
     m_UI->actionSelect_None->setEnabled( false );
     m_UI->actionAdd_Slice_Point->setEnabled( false );
+    m_UI->actionAdd_Slice_Point->setVisible( true );
+    m_UI->actionAdd_Fold->setVisible( false );
     m_UI->actionDelete->setEnabled( false );
     m_UI->actionReverse->setEnabled( false );
     m_UI->actionZoom_Original->setEnabled( false );
@@ -1633,28 +1636,36 @@ void MainWindow::on_pushButton_Apply_clicked()
 
 void MainWindow::on_actionSelect_Move_triggered()
 {
-    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::MOVE_ITEMS );
+    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::SELECT_MOVE );
+    m_UI->actionAdd_Slice_Point->setVisible( true );
+    m_UI->actionAdd_Fold->setVisible( false );
 }
 
 
 
 void MainWindow::on_actionMulti_Select_triggered()
 {
-    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::SELECT_ITEMS );
+    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::MULTI_SELECT );
+    m_UI->actionAdd_Slice_Point->setVisible( true );
+    m_UI->actionAdd_Fold->setVisible( false );
 }
 
 
 
 void MainWindow::on_actionAudition_triggered()
 {
-    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::AUDITION_ITEMS );
+    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::AUDITION );
+    m_UI->actionAdd_Slice_Point->setVisible( true );
+    m_UI->actionAdd_Fold->setVisible( false );
 }
 
 
 
 void MainWindow::on_actionTime_Folding_triggered()
 {
-    // TODO
+    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::TIME_FOLDING );
+    m_UI->actionAdd_Slice_Point->setVisible( false );
+    m_UI->actionAdd_Fold->setVisible( true );
 }
 
 
@@ -1708,4 +1719,11 @@ void MainWindow::on_comboBox_SnapLoopMarkers_currentIndexChanged( const int inde
     default:
         break;
     }
+}
+
+
+
+void MainWindow::on_actionAdd_Fold_triggered()
+{
+    qDebug() << "Add Fold";
 }
