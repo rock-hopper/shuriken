@@ -166,6 +166,8 @@ void MainWindow::openProject( const QString filePath )
                 m_UI->actionAdd_Slice_Point->setEnabled( false );
                 m_UI->pushButton_FindBeats->setEnabled( false );
                 m_UI->pushButton_FindOnsets->setEnabled( false );
+                m_UI->pushButton_Slice->setEnabled( true );
+                m_UI->pushButton_Slice->setChecked( true );
             }
 
             m_appliedBPM = settings.appliedBpm;
