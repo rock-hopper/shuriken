@@ -26,6 +26,7 @@
 #include <QMainWindow>
 #include <QList>
 #include <QUndoStack>
+#include <QActionGroup>
 #include "JuceHeader.h"
 #include "samplebuffer.h"
 #include "optionsdialog.h"
@@ -101,6 +102,8 @@ private:
 
     Ui::MainWindow* m_UI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
+    QActionGroup* m_interactionGroup;
+
     enum LengthUnits { UNITS_BARS, UNITS_BEATS };
 
     ScopedPointer<OptionsDialog> m_optionsDialog;
@@ -135,7 +138,7 @@ private slots:
     void on_comboBox_SnapLoopMarkers_currentIndexChanged( int index );
     void on_checkBox_LoopMarkers_clicked( bool isChecked );
     void on_pushButton_TimestretchOptions_clicked();
-    void on_actionTime_Folding_triggered();
+    void on_actionTime_Folding_triggered( bool isChecked );
     void on_actionAudition_triggered();
     void on_actionMulti_Select_triggered();
     void on_actionSelect_Move_triggered();

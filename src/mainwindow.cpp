@@ -281,6 +281,13 @@ void MainWindow::setupUI()
     m_UI->setupUi( this );
 
 
+    // Set up interaction mode buttons to work like radio buttons
+    m_interactionGroup = new QActionGroup( this );
+    m_interactionGroup->addAction( m_UI->actionSelect_Move );
+    m_interactionGroup->addAction( m_UI->actionMulti_Select );
+    m_interactionGroup->addAction( m_UI->actionAudition );
+
+
     // Populate "Detection Method" combo box
     QStringList detectMethodTextList, detectMethodDataList;
 
@@ -1636,36 +1643,44 @@ void MainWindow::on_pushButton_Apply_clicked()
 
 void MainWindow::on_actionSelect_Move_triggered()
 {
-    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::SELECT_MOVE );
-    m_UI->actionAdd_Slice_Point->setVisible( true );
-    m_UI->actionAdd_Fold->setVisible( false );
+    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::SELECT_MOVE_ITEMS );
 }
 
 
 
 void MainWindow::on_actionMulti_Select_triggered()
 {
-    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::MULTI_SELECT );
-    m_UI->actionAdd_Slice_Point->setVisible( true );
-    m_UI->actionAdd_Fold->setVisible( false );
+    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::MULTI_SELECT_ITEMS );
 }
 
 
 
 void MainWindow::on_actionAudition_triggered()
 {
-    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::AUDITION );
-    m_UI->actionAdd_Slice_Point->setVisible( true );
-    m_UI->actionAdd_Fold->setVisible( false );
+    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::AUDITION_ITEMS );
 }
 
 
 
-void MainWindow::on_actionTime_Folding_triggered()
+void MainWindow::on_actionTime_Folding_triggered( const bool isChecked )
 {
-    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::TIME_FOLDING );
-    m_UI->actionAdd_Slice_Point->setVisible( false );
-    m_UI->actionAdd_Fold->setVisible( true );
+    if ( isChecked )
+    {
+        m_UI->actionSelect_Move->setEnabled( false );
+        m_UI->actionMulti_Select->setEnabled( false );
+        m_UI->actionAudition->setEnabled( false );
+        m_UI->actionAdd_Slice_Point->setVisible( false );
+        m_UI->actionAdd_Fold->setVisible( true );
+        m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::AUDITION_ITEMS );
+    }
+    else
+    {
+        m_UI->actionSelect_Move->setEnabled( true );
+        m_UI->actionMulti_Select->setEnabled( true );
+        m_UI->actionAudition->setEnabled( true );
+        m_UI->actionAdd_Slice_Point->setVisible( true );
+        m_UI->actionAdd_Fold->setVisible( false );
+    }
 }
 
 
@@ -1728,4 +1743,6 @@ void MainWindow::on_actionAdd_Fold_triggered()
     const QPoint mousePos = m_UI->waveGraphicsView->mapFromGlobal( QCursor::pos() );
     const QPointF mouseScenePos = m_UI->waveGraphicsView->mapToScene( mousePos );
     const int frameNum = m_UI->waveGraphicsView->getFrameNum( mouseScenePos.x() );
+
+    qDebug() << "frameNum " << frameNum;
 }

@@ -662,6 +662,7 @@
    <addaction name="actionSelect_Move"/>
    <addaction name="actionMulti_Select"/>
    <addaction name="actionAudition"/>
+   <addaction name="separator"/>
    <addaction name="actionTime_Folding"/>
    <addaction name="separator"/>
    <addaction name="actionZoom_Original"/>
@@ -953,6 +954,9 @@
    </property>
   </action>
   <action name="actionSelect_Move">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -971,6 +975,9 @@
    </property>
   </action>
   <action name="actionMulti_Select">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -989,6 +996,9 @@
    </property>
   </action>
   <action name="actionAudition">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -1030,6 +1040,9 @@
    </property>
   </action>
   <action name="actionTime_Folding">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="enabled">
     <bool>false</bool>
    </property>
