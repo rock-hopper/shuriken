@@ -42,6 +42,7 @@ namespace UserTypes
     static const int FRAME_MARKER   = QGraphicsItem::UserType + 2;
     static const int SLICE_POINT    = QGraphicsItem::UserType + 3;
     static const int LOOP_MARKER    = QGraphicsItem::UserType + 4;
+    static const int TIME_FOLD      = QGraphicsItem::UserType + 5;
 }
 
 namespace ZValues

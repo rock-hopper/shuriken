@@ -1725,5 +1725,7 @@ void MainWindow::on_comboBox_SnapLoopMarkers_currentIndexChanged( const int inde
 
 void MainWindow::on_actionAdd_Fold_triggered()
 {
-    qDebug() << "Add Fold";
+    const QPoint mousePos = m_UI->waveGraphicsView->mapFromGlobal( QCursor::pos() );
+    const QPointF mouseScenePos = m_UI->waveGraphicsView->mapToScene( mousePos );
+    const int frameNum = m_UI->waveGraphicsView->getFrameNum( mouseScenePos.x() );
 }
