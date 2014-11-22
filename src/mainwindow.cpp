@@ -500,6 +500,7 @@ void MainWindow::enableUI()
     m_UI->actionZoom_Original->setEnabled( true );
     m_UI->actionZoom_In->setEnabled( true );
     m_UI->actionSelect_Move->setEnabled( true );
+    m_UI->actionMulti_Select->setEnabled( true );
     m_UI->actionAudition->setEnabled( true );
     m_UI->actionTime_Folding->setEnabled( true );
 
@@ -1333,7 +1334,6 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
                           m_UI->pushButton_FindBeats,
                           m_UI->actionAdd_Slice_Point,
                           m_UI->actionSelect_Move,
-                          m_UI->actionMulti_Select,
                           m_UI->actionAudition,
                           parentCommand );
 
@@ -1366,7 +1366,6 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
                             m_UI->pushButton_FindBeats,
                             m_UI->actionAdd_Slice_Point,
                             m_UI->actionSelect_Move,
-                            m_UI->actionMulti_Select,
                             m_UI->actionAudition,
                             parentCommand );
 
@@ -1666,12 +1665,12 @@ void MainWindow::on_actionTime_Folding_triggered( const bool isChecked )
 {
     if ( isChecked )
     {
+        m_UI->actionAudition->trigger();
         m_UI->actionSelect_Move->setEnabled( false );
         m_UI->actionMulti_Select->setEnabled( false );
         m_UI->actionAudition->setEnabled( false );
         m_UI->actionAdd_Slice_Point->setVisible( false );
         m_UI->actionAdd_Fold->setVisible( true );
-        m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::AUDITION_ITEMS );
     }
     else
     {

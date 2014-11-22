@@ -104,7 +104,6 @@ public:
                   QPushButton* findBeatsButton,
                   QAction* addSlicePointAction,
                   QAction* selectMoveItemsAction,
-                  QAction* multiSelectItemsAction,
                   QAction* auditionItemsAction,
                   QUndoCommand* parent = NULL );
 
@@ -119,7 +118,6 @@ private:
     QPushButton* const m_findBeatsButton;
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
-    QAction* const m_multiSelectItemsAction;
     QAction* const m_auditionItemsAction;
 };
 
@@ -135,7 +133,6 @@ public:
                     QPushButton* findBeatsButton,
                     QAction* addSlicePointAction,
                     QAction* selectMoveItemsAction,
-                    QAction* multiSelectItemsAction,
                     QAction* auditionItemsAction,
                     QUndoCommand* parent = NULL );
 
@@ -150,7 +147,6 @@ private:
     QPushButton* const m_findBeatsButton;
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
-    QAction* const m_multiSelectItemsAction;
     QAction* const m_auditionItemsAction;
 };
 

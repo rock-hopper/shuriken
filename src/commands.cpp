@@ -161,7 +161,6 @@ SliceCommand::SliceCommand( MainWindow* const mainWindow,
                             QPushButton* const findBeatsButton,
                             QAction* const addSlicePointAction,
                             QAction* const selectMoveItemsAction,
-                            QAction* const multiSelectItemsAction,
                             QAction* const auditionItemsAction,
                             QUndoCommand* parent ) :
     QUndoCommand( parent ),
@@ -172,7 +171,6 @@ SliceCommand::SliceCommand( MainWindow* const mainWindow,
     m_findBeatsButton( findBeatsButton ),
     m_addSlicePointAction( addSlicePointAction ),
     m_selectMoveItemsAction( selectMoveItemsAction ),
-    m_multiSelectItemsAction( multiSelectItemsAction ),
     m_auditionItemsAction( auditionItemsAction )
 {
     setText( "Slice" );
@@ -204,7 +202,6 @@ void SliceCommand::undo()
     m_findOnsetsButton->setEnabled( true );
     m_findBeatsButton->setEnabled( true );
     m_addSlicePointAction->setEnabled( true );
-    m_multiSelectItemsAction->setEnabled( false );
     m_auditionItemsAction->trigger();
 
     m_mainWindow->updateSnapLoopMarkersComboBox();
@@ -239,7 +236,6 @@ void SliceCommand::redo()
     m_findOnsetsButton->setEnabled( false );
     m_findBeatsButton->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
-    m_multiSelectItemsAction->setEnabled( true );
     m_selectMoveItemsAction->trigger();
 
     m_mainWindow->updateSnapLoopMarkersComboBox();
@@ -258,7 +254,6 @@ UnsliceCommand::UnsliceCommand( MainWindow* const mainWindow,
                                 QPushButton* const findBeatsButton,
                                 QAction* const addSlicePointAction,
                                 QAction* const selectMoveItemsAction,
-                                QAction* const multiSelectItemsAction,
                                 QAction* const auditionItemsAction,
                                 QUndoCommand* parent ) :
     QUndoCommand( parent ),
@@ -269,7 +264,6 @@ UnsliceCommand::UnsliceCommand( MainWindow* const mainWindow,
     m_findBeatsButton( findBeatsButton ),
     m_addSlicePointAction( addSlicePointAction ),
     m_selectMoveItemsAction( selectMoveItemsAction ),
-    m_multiSelectItemsAction( multiSelectItemsAction ),
     m_auditionItemsAction( auditionItemsAction )
 {
     setText( "Unslice" );
@@ -302,7 +296,6 @@ void UnsliceCommand::undo()
     m_findOnsetsButton->setEnabled( false );
     m_findBeatsButton->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
-    m_multiSelectItemsAction->setEnabled( true );
     m_selectMoveItemsAction->trigger();
 
     m_mainWindow->updateSnapLoopMarkersComboBox();
@@ -336,7 +329,6 @@ void UnsliceCommand::redo()
     m_findOnsetsButton->setEnabled( true );
     m_findBeatsButton->setEnabled( true );
     m_addSlicePointAction->setEnabled( true );
-    m_multiSelectItemsAction->setEnabled( false );
     m_auditionItemsAction->trigger();
 
     m_mainWindow->updateSnapLoopMarkersComboBox();
