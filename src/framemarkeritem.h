@@ -41,9 +41,15 @@ public:
     FrameMarkerItem( QBrush brush, QBrush selectedBrush, qreal height, Handle handle, QGraphicsItem* parent = NULL );
 
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
+
     void setHeight( qreal height );
+
+    qreal getHandleWidth() const                { return m_handleWidth; }
+    qreal getHandleHeight() const               { return m_handleHeight; }
+
     int getFrameNum() const                     { return m_frameNum; }
     void setFrameNum( int frameNum )            { m_frameNum = frameNum; }
+
     int type() const                            { return Type; }
 
 protected:
@@ -55,9 +61,12 @@ protected:
     // at the start of the reimplementation
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
 
+    const qreal m_handleWidth;
+    const qreal m_handleHeight;
+
 private:
-    const QBrush m_selectedBrush;
     const Handle m_handle;
+    const QBrush m_selectedBrush;
 
     int m_frameNum;
 

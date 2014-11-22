@@ -63,16 +63,16 @@ QVariant LoopMarkerItem::itemChange( GraphicsItemChange change, const QVariant &
 
                 if ( otherLoopMarker->getMarkerType() == LEFT_MARKER )
                 {
-                    if ( newPos.x() <= otherItemPos.x() )
+                    if ( newPos.x() - m_handleWidth <= otherItemPos.x() + m_handleWidth )
                     {
-                        newPos.setX( otherItemPos.x() + 1 );
+                        newPos.setX( otherItemPos.x() + m_handleWidth * 2 );
                     }
                 }
                 else // otherLoopMarker->getMarkerType() == RIGHT_MARKER
                 {
-                    if ( newPos.x() >= otherItemPos.x() )
+                    if ( newPos.x() + m_handleWidth >= otherItemPos.x() - m_handleWidth )
                     {
-                        newPos.setX( otherItemPos.x() - 1 );
+                        newPos.setX( otherItemPos.x() - m_handleWidth * 2 );
                     }
                 }
             }

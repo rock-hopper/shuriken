@@ -33,8 +33,10 @@
 FrameMarkerItem::FrameMarkerItem( const QBrush brush, const QBrush selectedBrush, const qreal height, const Handle handle, QGraphicsItem* parent ) :
     QObject(),
     QGraphicsPolygonItem( parent ),
-    m_selectedBrush( selectedBrush ),
-    m_handle( handle )
+    m_handleWidth( 16.0 ),
+    m_handleHeight( handle == HANDLE_TOP_BOTTOM ? 16.0 : 32.0 ),
+    m_handle( handle ),
+    m_selectedBrush( selectedBrush )
 {
     setBrush( brush );
     setHeight( height );
@@ -70,31 +72,22 @@ void FrameMarkerItem::setHeight( const qreal height )
 
     if ( m_handle == HANDLE_TOP_BOTTOM )
     {
-        const qreal triangleWidth = 16.0;
-        const qreal triangleHeight = 16.0;
-
-        polygon << QPointF( -triangleWidth * 0.5, 0.0 ) << QPointF( triangleWidth * 0.5, 0.0 ) << QPointF( 0.0, triangleHeight )
-                << QPointF( 0.0, height - triangleHeight )
-                << QPointF( -triangleWidth * 0.5, height ) << QPointF( triangleWidth * 0.5, height ) << QPointF( 0.0, height - triangleHeight )
-                << QPointF( 0.0, triangleHeight );
+        polygon << QPointF( -m_handleWidth * 0.5, 0.0 ) << QPointF( m_handleWidth * 0.5, 0.0 ) << QPointF( 0.0, m_handleHeight )
+                << QPointF( 0.0, height - m_handleHeight )
+                << QPointF( -m_handleWidth * 0.5, height ) << QPointF( m_handleWidth * 0.5, height ) << QPointF( 0.0, height - m_handleHeight )
+                << QPointF( 0.0, m_handleHeight );
     }
     else if ( m_handle == HANDLE_CENTRE_RIGHT )
     {
-        const qreal triangleWidth = 16.0;
-        const qreal triangleHeight = 32.0;
-
-        polygon << QPointF( 0.0, 0.0 ) << QPointF( 0.0, (height * 0.5) - (triangleHeight * 0.5) )
-                << QPointF( triangleWidth, height * 0.5 ) << QPointF( 0.0, (height * 0.5) + (triangleHeight * 0.5) )
-                << QPointF( 0.0, (height * 0.5) - (triangleHeight * 0.5) ) << QPointF( 0.0, height );
+        polygon << QPointF( 0.0, 0.0 ) << QPointF( 0.0, (height * 0.5) - (m_handleHeight * 0.5) )
+                << QPointF( m_handleWidth, height * 0.5 ) << QPointF( 0.0, (height * 0.5) + (m_handleHeight * 0.5) )
+                << QPointF( 0.0, (height * 0.5) - (m_handleHeight * 0.5) ) << QPointF( 0.0, height );
     }
     else if ( m_handle == HANDLE_CENTRE_LEFT )
     {
-        const qreal triangleWidth = 16.0;
-        const qreal triangleHeight = 32.0;
-
-        polygon << QPointF( 0.0, 0.0 ) << QPointF( 0.0, (height * 0.5) - (triangleHeight * 0.5) )
-                << QPointF( -triangleWidth, height * 0.5 ) << QPointF( 0.0, (height * 0.5) + (triangleHeight * 0.5) )
-                << QPointF( 0.0, (height * 0.5) - (triangleHeight * 0.5) ) << QPointF( 0.0, height );
+        polygon << QPointF( 0.0, 0.0 ) << QPointF( 0.0, (height * 0.5) - (m_handleHeight * 0.5) )
+                << QPointF( -m_handleWidth, height * 0.5 ) << QPointF( 0.0, (height * 0.5) + (m_handleHeight * 0.5) )
+                << QPointF( 0.0, (height * 0.5) - (m_handleHeight * 0.5) ) << QPointF( 0.0, height );
     }
 
     setPolygon( polygon );
