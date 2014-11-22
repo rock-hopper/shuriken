@@ -191,8 +191,8 @@ private slots:
     void reorderWaveformItems( QList<int> oldOrderPositions, int numPlacesMoved );
 
     void slideWaveformItemIntoPlace( int orderPos );
-    void updateSlicePointFrameNum( SlicePointItem* movedItem );
-    void updateLoopMarkerFrameNum( LoopMarkerItem* movedItem );
+    void updateSlicePointFrameNum( FrameMarkerItem* movedItem );
+    void updateLoopMarkerFrameNum( FrameMarkerItem* movedItem );
     void removePlayhead();
     void relayMaxDetailLevelReached();
 

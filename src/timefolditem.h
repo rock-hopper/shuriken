@@ -29,12 +29,12 @@
 
 class TimeFoldItem : public FrameMarkerItem
 {
-    Q_OBJECT
-
 public:
     enum { Type = UserTypes::TIME_FOLD };
 
     TimeFoldItem( qreal height, QGraphicsItem* parent = NULL );
+
+    int type() const    { return Type; }
 
 private:
     JUCE_LEAK_DETECTOR( TimeFoldItem );

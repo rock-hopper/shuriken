@@ -328,14 +328,14 @@ SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
 
     QTransform matrix;
     const qreal currentScaleFactor = transform().m11(); // m11() returns horizontal scale factor
-    matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // slice point remains correct width if view is scaled
+    matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // slice point handle is set to correct width even if view is scaled
     slicePointItem->setTransform( matrix );
 
     sharedSlicePoint = SharedSlicePointItem( slicePointItem );
     m_slicePointItemList.append( sharedSlicePoint );
 
-    QObject::connect( slicePointItem, SIGNAL( scenePosChanged(SlicePointItem*) ),
-                      this, SLOT( updateSlicePointFrameNum(SlicePointItem*) ) );
+    QObject::connect( slicePointItem, SIGNAL( scenePosChanged(FrameMarkerItem*) ),
+                      this, SLOT( updateSlicePointFrameNum(FrameMarkerItem*) ) );
 
     scene()->addItem( slicePointItem );
     scene()->update();
@@ -999,14 +999,11 @@ void WaveGraphicsView::createLoopMarkers()
     m_loopMarkerLeft->setTransform( matrix );
     m_loopMarkerRight->setTransform( matrix );
 
-    m_loopMarkerLeft->setZValue( ZValues::LOOP_MARKER );
-    m_loopMarkerRight->setZValue( ZValues::LOOP_MARKER );
+    QObject::connect( m_loopMarkerLeft, SIGNAL( scenePosChanged(FrameMarkerItem*) ),
+                      this, SLOT( updateLoopMarkerFrameNum(FrameMarkerItem*) ) );
 
-    QObject::connect( m_loopMarkerLeft, SIGNAL( scenePosChanged(LoopMarkerItem*) ),
-                      this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*) ) );
-
-    QObject::connect( m_loopMarkerRight, SIGNAL( scenePosChanged(LoopMarkerItem*) ),
-                      this, SLOT( updateLoopMarkerFrameNum(LoopMarkerItem*) ) );
+    QObject::connect( m_loopMarkerRight, SIGNAL( scenePosChanged(FrameMarkerItem*) ),
+                      this, SLOT( updateLoopMarkerFrameNum(FrameMarkerItem*) ) );
 
     scene()->addItem( m_loopMarkerLeft );
     scene()->addItem( m_loopMarkerRight );
@@ -1325,13 +1322,13 @@ void WaveGraphicsView::slideWaveformItemIntoPlace( const int orderPos )
 
 
 
-void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem )
+void WaveGraphicsView::updateSlicePointFrameNum( FrameMarkerItem* const movedItem )
 {
     const int oldFrameNum = movedItem->getFrameNum();
 
     if ( m_loopMarkerSnapMode == SNAP_SLICES_TO_MARKERS )
     {
-        snapSlicePointToLoopMarker( movedItem );
+        snapSlicePointToLoopMarker( dynamic_cast<SlicePointItem*>( movedItem ) );
     }
     else
     {
@@ -1355,19 +1352,21 @@ void WaveGraphicsView::updateSlicePointFrameNum( SlicePointItem* const movedItem
 
 
 
-void WaveGraphicsView::updateLoopMarkerFrameNum( LoopMarkerItem* const movedItem )
+void WaveGraphicsView::updateLoopMarkerFrameNum( FrameMarkerItem* const movedItem )
 {
-    setLoopMarkerFrameNum( movedItem );
+    LoopMarkerItem* const item = dynamic_cast<LoopMarkerItem*>( movedItem );
+
+    setLoopMarkerFrameNum( item );
 
     if ( m_loopMarkerSnapMode == SNAP_MARKERS_TO_SLICES )
     {
         if ( m_waveformItemList.size() > 1 )
         {
-            snapLoopMarkerToWaveform( movedItem );
+            snapLoopMarkerToWaveform( item );
         }
         else
         {
-            snapLoopMarkerToSlicePoint( movedItem );
+            snapLoopMarkerToSlicePoint( item );
         }
     }
 

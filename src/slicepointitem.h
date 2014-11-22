@@ -33,24 +33,12 @@ typedef QSharedPointer<SlicePointItem> SharedSlicePointItem;
 
 class SlicePointItem : public FrameMarkerItem
 {
-    Q_OBJECT
-
 public:
     enum { Type = UserTypes::SLICE_POINT };
 
     SlicePointItem( qreal height, QGraphicsItem* parent = NULL );
 
     int type() const    { return Type; }
-
-protected:
-    void mousePressEvent( QGraphicsSceneMouseEvent* event );
-    void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
-
-private:
-    qreal m_scenePosBeforeMove;
-
-signals:
-    void scenePosChanged( SlicePointItem* item );
 
 private:
     JUCE_LEAK_DETECTOR( SlicePointItem );

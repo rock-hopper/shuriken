@@ -33,6 +33,8 @@
 
 class FrameMarkerItem : public QObject, public QGraphicsPolygonItem
 {
+    Q_OBJECT
+
 public:
     enum { Type = UserTypes::FRAME_MARKER };
 
@@ -57,9 +59,8 @@ protected:
     // in their reimplementation
     QVariant itemChange( GraphicsItemChange change, const QVariant& value );
 
-    // Subclasses that reimplement this method MUST call FrameMarkerItem::mousePressEvent
-    // at the start of the reimplementation
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
+    void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
     const qreal m_handleWidth;
     const qreal m_handleHeight;
@@ -69,6 +70,10 @@ private:
     const QBrush m_selectedBrush;
 
     int m_frameNum;
+    qreal m_scenePosBeforeMove;
+
+signals:
+    void scenePosChanged( FrameMarkerItem* item );
 
 private:
     JUCE_LEAK_DETECTOR( FrameMarkerItem );

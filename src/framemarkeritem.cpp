@@ -130,4 +130,18 @@ void FrameMarkerItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
     event->setModifiers( modifiers );
 
     QGraphicsItem::mousePressEvent( event );
+
+    m_scenePosBeforeMove = pos().x();
+}
+
+
+
+void FrameMarkerItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
+{
+    QGraphicsItem::mouseReleaseEvent( event );
+
+    if ( m_scenePosBeforeMove != pos().x() )
+    {
+        emit scenePosChanged( this );
+    }
 }

@@ -29,29 +29,21 @@
 
 class LoopMarkerItem : public FrameMarkerItem
 {
-    Q_OBJECT
-
 public:
     enum { Type = UserTypes::LOOP_MARKER };
 
-    enum MarkerType { LEFT_MARKER, RIGHT_MARKER };
+    enum LoopMarkerType { LEFT_MARKER, RIGHT_MARKER };
 
-    LoopMarkerItem( MarkerType markerType, qreal height, QGraphicsItem* parent = NULL );
+    LoopMarkerItem( LoopMarkerType markerType, qreal height, QGraphicsItem* parent = NULL );
 
     int type() const                            { return Type; }
-    MarkerType getMarkerType() const            { return m_markerType; }
+    LoopMarkerType getLoopMarkerType() const    { return m_loopMarkerType; }
 
 protected:
-    QVariant itemChange( GraphicsItemChange change, const QVariant &value );
-    void mousePressEvent( QGraphicsSceneMouseEvent* event );
-    void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
+    QVariant itemChange( GraphicsItemChange change, const QVariant& value );
 
 private:
-    const MarkerType m_markerType;
-    qreal m_scenePosBeforeMove;
-
-signals:
-    void scenePosChanged( LoopMarkerItem* item );
+    const LoopMarkerType m_loopMarkerType;
 
 private:
     JUCE_LEAK_DETECTOR( FrameMarkerItem );

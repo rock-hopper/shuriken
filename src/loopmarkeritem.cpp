@@ -29,7 +29,7 @@
 //==================================================================================================
 // Public:
 
-LoopMarkerItem::LoopMarkerItem( const MarkerType markerType,
+LoopMarkerItem::LoopMarkerItem( const LoopMarkerType markerType,
                                 const qreal height,
                                 QGraphicsItem* parent ) :
     FrameMarkerItem( QColor( Qt::yellow ),
@@ -37,8 +37,9 @@ LoopMarkerItem::LoopMarkerItem( const MarkerType markerType,
                      height,
                      markerType == LEFT_MARKER ? HANDLE_CENTRE_RIGHT : HANDLE_CENTRE_LEFT,
                      parent ),
-    m_markerType( markerType )
+    m_loopMarkerType( markerType )
 {
+    setZValue( ZValues::LOOP_MARKER );
 }
 
 
@@ -61,7 +62,7 @@ QVariant LoopMarkerItem::itemChange( GraphicsItemChange change, const QVariant &
 
                 const QPointF otherItemPos = otherLoopMarker->scenePos();
 
-                if ( otherLoopMarker->getMarkerType() == LEFT_MARKER )
+                if ( otherLoopMarker->getLoopMarkerType() == LEFT_MARKER )
                 {
                     if ( newPos.x() - m_handleWidth <= otherItemPos.x() + m_handleWidth )
                     {
@@ -82,25 +83,4 @@ QVariant LoopMarkerItem::itemChange( GraphicsItemChange change, const QVariant &
     }
 
     return FrameMarkerItem::itemChange( change, value );
-}
-
-
-
-void LoopMarkerItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
-{
-    FrameMarkerItem::mousePressEvent( event );
-
-    m_scenePosBeforeMove = pos().x();
-}
-
-
-
-void LoopMarkerItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
-{
-    QGraphicsItem::mouseReleaseEvent( event );
-
-    if ( m_scenePosBeforeMove != pos().x() )
-    {
-        emit scenePosChanged( this );
-    }
 }

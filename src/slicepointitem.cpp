@@ -32,27 +32,3 @@ SlicePointItem::SlicePointItem( const qreal height, QGraphicsItem* parent ) :
     FrameMarkerItem( QColor( Qt::red ), QColor(255, 192, 0, 255), height, HANDLE_TOP_BOTTOM, parent )
 {
 }
-
-
-
-//==================================================================================================
-// Protected:
-
-void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
-{
-    FrameMarkerItem::mousePressEvent( event );
-
-    m_scenePosBeforeMove = pos().x();
-}
-
-
-
-void SlicePointItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
-{
-    QGraphicsItem::mouseReleaseEvent( event );
-
-    if ( m_scenePosBeforeMove != pos().x() )
-    {
-        emit scenePosChanged( this );
-    }
-}
