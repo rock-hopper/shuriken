@@ -387,11 +387,19 @@ void MoveWaveformItemCommand::redo()
 DeleteWaveformItemCommand::DeleteWaveformItemCommand( const QList<int> orderPositions,
                                                       WaveGraphicsView* const graphicsView,
                                                       MainWindow* const mainWindow,
+                                                      QPushButton* const sliceButton,
+                                                      QPushButton* const findOnsetsButton,
+                                                      QPushButton* const findBeatsButton,
+                                                      QAction* const addSlicePointAction,
                                                       QUndoCommand* parent ) :
     QUndoCommand( parent ),
     m_orderPositions( orderPositions ),
     m_graphicsView( graphicsView ),
-    m_mainWindow( mainWindow )
+    m_mainWindow( mainWindow ),
+    m_sliceButton( sliceButton ),
+    m_findOnsetsButton( findOnsetsButton ),
+    m_findBeatsButton( findBeatsButton ),
+    m_addSlicePointAction( addSlicePointAction )
 {
     setText( "Delete Waveform Item" );
 }
@@ -412,7 +420,13 @@ void DeleteWaveformItemCommand::undo()
     }
 
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
-                                                  m_mainWindow->m_sampleHeader->sampleRate );
+                                                    m_mainWindow->m_sampleHeader->sampleRate );
+
+    m_sliceButton->setEnabled( true );
+    m_sliceButton->setChecked( true );
+    m_findOnsetsButton->setEnabled( false );
+    m_findBeatsButton->setEnabled( false );
+    m_addSlicePointAction->setEnabled( false );
 }
 
 
@@ -434,7 +448,16 @@ void DeleteWaveformItemCommand::redo()
     }
 
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
-                                                  m_mainWindow->m_sampleHeader->sampleRate );
+                                                    m_mainWindow->m_sampleHeader->sampleRate );
+
+    if ( m_mainWindow->m_sampleBufferList.size() == 1 )
+    {
+        m_sliceButton->setEnabled( false );
+        m_sliceButton->setChecked( false );
+        m_findOnsetsButton->setEnabled( true );
+        m_findBeatsButton->setEnabled( true );
+        m_addSlicePointAction->setEnabled( true );
+    }
 }
 
 

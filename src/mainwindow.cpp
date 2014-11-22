@@ -1063,7 +1063,11 @@ void MainWindow::on_actionDelete_triggered()
 
             QUndoCommand* command = new DeleteWaveformItemCommand( orderPositions,
                                                                    m_UI->waveGraphicsView,
-                                                                   this );
+                                                                   this,
+                                                                   m_UI->pushButton_Slice,
+                                                                   m_UI->pushButton_FindOnsets,
+                                                                   m_UI->pushButton_FindBeats,
+                                                                   m_UI->actionAdd_Slice_Point );
             m_undoStack.push( command );
         }
     }

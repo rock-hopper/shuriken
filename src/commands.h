@@ -181,6 +181,10 @@ public:
     DeleteWaveformItemCommand( QList<int> orderPositions,
                                WaveGraphicsView* graphicsView,
                                MainWindow* mainWindow,
+                               QPushButton* sliceButton,
+                               QPushButton* findOnsetsButton,
+                               QPushButton* findBeatsButton,
+                               QAction* addSlicePointAction,
                                QUndoCommand* parent = NULL );
 
     void undo();
@@ -190,6 +194,10 @@ private:
     const QList<int> m_orderPositions;
     WaveGraphicsView* const m_graphicsView;
     MainWindow* const m_mainWindow;
+    QPushButton* const m_sliceButton;
+    QPushButton* const m_findOnsetsButton;
+    QPushButton* const m_findBeatsButton;
+    QAction* const m_addSlicePointAction;
     QList<SharedSampleBuffer> m_removedSampleBuffers;
     QList<SharedWaveformItem> m_removedWaveforms;
 };
