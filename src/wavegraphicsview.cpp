@@ -424,6 +424,7 @@ SharedSlicePointItem WaveGraphicsView::getSelectedSlicePoint()
                 if ( sharedSlicePointItem == slicePointItem )
                 {
                     selectedSlicePointItem = sharedSlicePointItem;
+                    break;
                 }
             }
         }
@@ -904,14 +905,11 @@ void WaveGraphicsView::resizeWaveformItems( const qreal scaleFactorX )
 
 void WaveGraphicsView::resizeSlicePointItems( const qreal scaleFactorX )
 {
-    if ( ! m_slicePointItemList.isEmpty() )
+    foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
     {
-        foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
-        {
-            slicePointItem->setHeight( scene()->height() - 1 );
-            const qreal newX = slicePointItem->scenePos().x() * scaleFactorX;
-            slicePointItem->setPos( newX, 0.0 );
-        }
+        slicePointItem->setHeight( scene()->height() - 1 );
+        const qreal newX = slicePointItem->scenePos().x() * scaleFactorX;
+        slicePointItem->setPos( newX, 0.0 );
     }
 }
 
@@ -961,12 +959,9 @@ void WaveGraphicsView::scaleItems( const qreal scaleFactorX )
         QTransform matrix;
         matrix.scale( 1.0 / scaleFactorX, 1.0 ); // Items remain same width when view is scaled
 
-        if ( ! m_slicePointItemList.isEmpty() )
+        foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
         {
-            foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
-            {
-                slicePointItem->setTransform( matrix );
-            }
+            slicePointItem->setTransform( matrix );
         }
 
         if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
