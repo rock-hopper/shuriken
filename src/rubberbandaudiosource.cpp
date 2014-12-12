@@ -102,9 +102,9 @@ void RubberbandAudioSource::releaseResources()
 void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill )
 {
     // JACK Sync
-    if ( m_isJackSyncEnabled && g_currentJackBPM > 0.0 && m_originalBPM > 0.0 )
+    if ( m_isJackSyncEnabled && Jack::g_currentBPM > 0.0 && m_originalBPM > 0.0 )
     {
-        m_timeRatio = m_originalBPM / g_currentJackBPM;
+        m_timeRatio = m_originalBPM / Jack::g_currentBPM;
     }
 
     // Time ratio

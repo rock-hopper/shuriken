@@ -243,7 +243,7 @@ public:
 
         m_isDeviceOpen = false;
 
-        g_currentJackBPM = 0.0;
+        Jack::g_currentBPM = 0.0;
     }
 
 
@@ -353,7 +353,7 @@ private:
     void process (int numFrames)
     {
         jack_transport_query (m_jackClient, m_positionInfo);
-        g_currentJackBPM = m_positionInfo->beats_per_minute;
+        Jack::g_currentBPM = m_positionInfo->beats_per_minute;
 
         if (m_midiPortIn != nullptr && g_jackMidiClient != nullptr)
         {

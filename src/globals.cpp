@@ -20,4 +20,7 @@
 
 */
 
-volatile double g_currentJackBPM = 0.0;
+namespace Jack
+{
+    volatile double g_currentBPM = 0.0;
+}
