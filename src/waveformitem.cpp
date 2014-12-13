@@ -298,7 +298,7 @@ QVariant WaveformItem::itemChange( GraphicsItemChange change, const QVariant &va
         {
             newPos.setX( sceneRect.width() - minDistanceFromSceneRightEdge - rect().width() );
         }
-        newPos.setY( 0.0 );
+        newPos.setY( Ruler::HEIGHT );
 
         return newPos;
     }
@@ -406,7 +406,7 @@ void WaveformItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
                                                      selectedItems.last()->rect().width() - 1;
 
         // Get item under right edge of the rightmost selected item
-        QGraphicsItem* const otherItem = scene()->items( QPointF(rightmostSelectedItemRightEdge, 0.0) ).last();
+        QGraphicsItem* const otherItem = scene()->items( QPointF(rightmostSelectedItemRightEdge, Ruler::HEIGHT) ).last();
 
         // If the other item is a WaveformItem...
         if ( otherItem != this && otherItem->type() == WaveformItem::Type )

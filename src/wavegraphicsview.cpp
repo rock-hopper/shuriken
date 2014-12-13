@@ -85,7 +85,7 @@ SharedWaveformItem WaveGraphicsView::createWaveform( const SharedSampleBuffer sa
     }
 
     SharedWaveformItem waveformItem( new WaveformItem( sampleBuffer, orderPos, width, scene()->height() ) );
-    waveformItem->setPos( scenePosX, 0.0 );
+    waveformItem->setPos( scenePosX, Ruler::HEIGHT );
 
     m_waveformItemList.insert( orderPos, waveformItem );
 
@@ -129,7 +129,7 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const QList<SharedS
                                                            orderPos,
                                                            sliceWidth,
                                                            scene()->height() ) );
-        waveformItem->setPos( scenePosX, 0.0 );
+        waveformItem->setPos( scenePosX, Ruler::HEIGHT );
 
         m_waveformItemList.insert( orderPos, waveformItem );
         newWaveformItems << waveformItem;
@@ -191,7 +191,7 @@ void WaveGraphicsView::insertWaveforms( const QList<SharedWaveformItem> waveform
         const qreal itemWidth = item->getSampleBuffer()->getNumFrames() * ( scene()->width() / numFrames );
 
         item->setRect( 0.0, 0.0, itemWidth, scene()->height() );
-        item->setPos( scenePosX, 0.0 );
+        item->setPos( scenePosX, Ruler::HEIGHT );
 
         scenePosX += itemWidth;
     }
@@ -214,8 +214,8 @@ void WaveGraphicsView::insertWaveforms( const QList<SharedWaveformItem> waveform
         m_loopMarkerLeft->setFrameNum( startFrame );
         m_loopMarkerRight->setFrameNum( endFrame );
 
-        m_loopMarkerLeft->setPos( 0.0, 0.0 );
-        m_loopMarkerRight->setPos( getScenePosX( endFrame ), 0.0 );
+        m_loopMarkerLeft->setPos( 0.0, Ruler::HEIGHT );
+        m_loopMarkerRight->setPos( getScenePosX( endFrame ), Ruler::HEIGHT );
     }
 }
 
@@ -254,7 +254,7 @@ QList<SharedWaveformItem> WaveGraphicsView::removeWaveforms( const QList<int> wa
             m_waveformItemList.at( i )->setOrderPos( i );
 
             const qreal oldScenePosX = m_waveformItemList.at( i )->scenePos().x();
-            m_waveformItemList.at( i )->setPos( oldScenePosX - distanceToMove, 0.0 );
+            m_waveformItemList.at( i )->setPos( oldScenePosX - distanceToMove, Ruler::HEIGHT );
         }
     }
 
@@ -277,8 +277,8 @@ QList<SharedWaveformItem> WaveGraphicsView::removeWaveforms( const QList<int> wa
         m_loopMarkerLeft->setFrameNum( startFrame );
         m_loopMarkerRight->setFrameNum( endFrame );
 
-        m_loopMarkerLeft->setPos( 0.0, 0.0 );
-        m_loopMarkerRight->setPos( getScenePosX( endFrame ), 0.0 );
+        m_loopMarkerLeft->setPos( 0.0, Ruler::HEIGHT );
+        m_loopMarkerRight->setPos( getScenePosX( endFrame ), Ruler::HEIGHT );
     }
 
     return removedWaveforms;
@@ -322,8 +322,8 @@ SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
 
     SharedSlicePointItem sharedSlicePoint;
 
-    SlicePointItem* slicePointItem = new SlicePointItem( scene()->height() - 1 );
-    slicePointItem->setPos( scenePosX, 0.0 );
+    SlicePointItem* slicePointItem = new SlicePointItem( scene()->height() - Ruler::HEIGHT - 1 );
+    slicePointItem->setPos( scenePosX, Ruler::HEIGHT );
     slicePointItem->setFrameNum( frameNum );
 
     QTransform matrix;
@@ -355,8 +355,8 @@ void WaveGraphicsView::addSlicePoint( const SharedSlicePointItem slicePoint )
     matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // slice point remains same width when view is scaled
     slicePoint.data()->setTransform( matrix );
 
-    slicePoint.data()->setHeight( scene()->height() - 1 );
-    slicePoint.data()->setPos( scenePosX, 0.0 );
+    slicePoint.data()->setHeight( scene()->height() - Ruler::HEIGHT - 1 );
+    slicePoint.data()->setPos( scenePosX, Ruler::HEIGHT );
 
     m_slicePointItemList.append( slicePoint );
 
@@ -381,7 +381,7 @@ void WaveGraphicsView::moveSlicePoint( const SharedSlicePointItem slicePointItem
     const qreal newScenePosX = getScenePosX( newFrameNum );
 
     slicePointItem->setFrameNum( newFrameNum );
-    slicePointItem->setPos( newScenePosX, 0.0 );
+    slicePointItem->setPos( newScenePosX, Ruler::HEIGHT );
 }
 
 
@@ -609,8 +609,8 @@ void WaveGraphicsView::startPlayhead( const bool isLoopingDesired, const qreal s
             stopPlayhead();
         }
 
-        m_animation->setPosAt( 0.0, QPointF( startPosX, 0.0 ) );
-        m_animation->setPosAt( 1.0, QPointF( endPosX,   0.0 ) );
+        m_animation->setPosAt( 0.0, QPointF( startPosX, Ruler::HEIGHT ) );
+        m_animation->setPosAt( 1.0, QPointF( endPosX,   Ruler::HEIGHT ) );
 
         m_playhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
         m_playhead->setVisible( true );
@@ -644,8 +644,8 @@ void WaveGraphicsView::startPlayhead( const qreal startPosX, const qreal endPosX
             stopPlayhead();
         }
 
-        m_animation->setPosAt( 0.0, QPointF( startPosX, 0.0 ) );
-        m_animation->setPosAt( 1.0, QPointF( endPosX,   0.0 ) );
+        m_animation->setPosAt( 0.0, QPointF( startPosX, Ruler::HEIGHT ) );
+        m_animation->setPosAt( 1.0, QPointF( endPosX,   Ruler::HEIGHT ) );
 
         m_playhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
         m_playhead->setVisible( true );
@@ -896,7 +896,7 @@ void WaveGraphicsView::resizeWaveformItems( const qreal scaleFactorX )
             waveformItem->setRect( 0.0, 0.0, newWidth, scene()->height() );
 
             const qreal newX = waveformItem->scenePos().x() * scaleFactorX;
-            waveformItem->setPos( newX, 0.0 );
+            waveformItem->setPos( newX, Ruler::HEIGHT );
         }
     }
 }
@@ -907,9 +907,9 @@ void WaveGraphicsView::resizeSlicePointItems( const qreal scaleFactorX )
 {
     foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
     {
-        slicePointItem->setHeight( scene()->height() - 1 );
+        slicePointItem->setHeight( scene()->height() - Ruler::HEIGHT - 1 );
         const qreal newX = slicePointItem->scenePos().x() * scaleFactorX;
-        slicePointItem->setPos( newX, 0.0 );
+        slicePointItem->setPos( newX, Ruler::HEIGHT );
     }
 }
 
@@ -922,10 +922,10 @@ void WaveGraphicsView::resizePlayhead()
         m_timer->stop();
 
         m_animation->clear();
-        m_animation->setPosAt( 0.0, QPointF( 0.0, 0.0 ) );
-        m_animation->setPosAt( 1.0, QPointF( scene()->width() - 1, 0.0 ) );
+        m_animation->setPosAt( 0.0, QPointF( 0.0, Ruler::HEIGHT ) );
+        m_animation->setPosAt( 1.0, QPointF( scene()->width() - 1, Ruler::HEIGHT ) );
 
-        m_playhead->setLine( 0.0, 0.0, 0.0, scene()->height() - 1 );
+        m_playhead->setLine( 0.0, 0.0, 0.0, scene()->height() - Ruler::HEIGHT - 1 );
 
         m_timer->resume();
     }
@@ -937,15 +937,15 @@ void WaveGraphicsView::resizeLoopMarkers( const qreal scaleFactorX )
 {
     if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
     {
-        m_loopMarkerLeft->setHeight( scene()->height() - 1 );
-        m_loopMarkerRight->setHeight( scene()->height() - 1 );
+        m_loopMarkerLeft->setHeight( scene()->height() - Ruler::HEIGHT - 1 );
+        m_loopMarkerRight->setHeight( scene()->height() - Ruler::HEIGHT - 1 );
         {
             const qreal newX = m_loopMarkerLeft->scenePos().x() * scaleFactorX;
-            m_loopMarkerLeft->setPos( newX, 0.0 );
+            m_loopMarkerLeft->setPos( newX, Ruler::HEIGHT );
         }
         {
             const qreal newX = m_loopMarkerRight->scenePos().x() * scaleFactorX;
-            m_loopMarkerRight->setPos( newX, 0.0 );
+            m_loopMarkerRight->setPos( newX, Ruler::HEIGHT );
         }
     }
 }
@@ -976,8 +976,9 @@ void WaveGraphicsView::scaleItems( const qreal scaleFactorX )
 
 void WaveGraphicsView::createLoopMarkers()
 {
-    m_loopMarkerLeft = new LoopMarkerItem( LoopMarkerItem::LEFT_MARKER, scene()->height() - 1 );
-    m_loopMarkerRight = new LoopMarkerItem( LoopMarkerItem::RIGHT_MARKER, scene()->height() - 1 );
+    m_loopMarkerLeft = new LoopMarkerItem( LoopMarkerItem::LEFT_MARKER, scene()->height() - Ruler::HEIGHT - 1 );
+
+    m_loopMarkerRight = new LoopMarkerItem( LoopMarkerItem::RIGHT_MARKER, scene()->height() - Ruler::HEIGHT - 1 );
 
     const int startFrame = 0;
     const int endFrame = getTotalNumFrames( m_waveformItemList ) - 1;
@@ -985,8 +986,8 @@ void WaveGraphicsView::createLoopMarkers()
     m_loopMarkerLeft->setFrameNum( startFrame );
     m_loopMarkerRight->setFrameNum( endFrame );
 
-    m_loopMarkerLeft->setPos( 0.0, 0.0 );
-    m_loopMarkerRight->setPos( getScenePosX( endFrame ), 0.0 );
+    m_loopMarkerLeft->setPos( 0.0, Ruler::HEIGHT );
+    m_loopMarkerRight->setPos( getScenePosX( endFrame ), Ruler::HEIGHT );
 
     QTransform matrix;
     const qreal currentScaleFactor = transform().m11(); // m11() returns horizontal scale factor
@@ -1125,7 +1126,7 @@ void WaveGraphicsView::snapLoopMarkerToSlicePoint( LoopMarkerItem* const loopMar
         }
 
         loopMarker->setFrameNum( newFrameNum );
-        loopMarker->setPos( getScenePosX( newFrameNum ), 0.0 );
+        loopMarker->setPos( getScenePosX( newFrameNum ), Ruler::HEIGHT );
     }
 }
 
@@ -1164,7 +1165,7 @@ void WaveGraphicsView::snapLoopMarkerToWaveform( LoopMarkerItem* const loopMarke
         }
 
         loopMarker->setFrameNum( newFrameNum );
-        loopMarker->setPos( getScenePosX( newFrameNum ), 0.0 );
+        loopMarker->setPos( getScenePosX( newFrameNum ), Ruler::HEIGHT );
     }
 }
 
@@ -1190,7 +1191,7 @@ void WaveGraphicsView::snapSlicePointToLoopMarker( SlicePointItem* const slicePo
             frameNum = m_loopMarkerRight->getFrameNum();
         }
 
-        slicePoint->setPos( scenePosX, 0.0 );
+        slicePoint->setPos( scenePosX, Ruler::HEIGHT );
         slicePoint->setFrameNum( frameNum );
     }
 }
@@ -1258,7 +1259,7 @@ void WaveGraphicsView::reorderWaveformItems( QList<int> oldOrderPositions, const
         {
             const qreal currentScenePosX = m_waveformItemList.at( orderPos )->scenePos().x();
 
-            m_waveformItemList.at( orderPos )->setPos( currentScenePosX + distanceToMove, 0.0 );
+            m_waveformItemList.at( orderPos )->setPos( currentScenePosX + distanceToMove, Ruler::HEIGHT );
             m_waveformItemList.at( orderPos )->setOrderPos( orderPos + numSelectedItems );
         }
 
@@ -1283,7 +1284,7 @@ void WaveGraphicsView::reorderWaveformItems( QList<int> oldOrderPositions, const
         {
             const qreal currentScenePosX = m_waveformItemList.at( orderPos )->scenePos().x();
 
-            m_waveformItemList.at( orderPos )->setPos( currentScenePosX - distanceToMove, 0.0 );
+            m_waveformItemList.at( orderPos )->setPos( currentScenePosX - distanceToMove, Ruler::HEIGHT );
             m_waveformItemList.at( orderPos )->setOrderPos( orderPos - numSelectedItems );
         }
 
@@ -1310,7 +1311,7 @@ void WaveGraphicsView::slideWaveformItemIntoPlace( const int orderPos )
         newScenePosX += m_waveformItemList.at( i )->rect().width();
     }
 
-    m_waveformItemList.at( orderPos )->setPos( newScenePosX, 0.0 );
+    m_waveformItemList.at( orderPos )->setPos( newScenePosX, Ruler::HEIGHT );
 
     updateLoopMarkerFrameNums();
 }

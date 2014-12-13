@@ -54,6 +54,11 @@ namespace ZValues
     static const int PLAYHEAD           = 5;
 }
 
+namespace Ruler
+{
+    static const qreal HEIGHT = 20.0;
+}
+
 
 namespace Midi
 {
