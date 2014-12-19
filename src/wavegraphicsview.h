@@ -136,6 +136,8 @@ public:
     enum InteractionMode { SELECT_MOVE_ITEMS, MULTI_SELECT_ITEMS, AUDITION_ITEMS };
     void setInteractionMode( InteractionMode mode );
 
+    void setBpmRulerMarks( qreal bpm, int timeSigNumerator );
+
 protected:
     void resizeEvent( QResizeEvent* event );
 
@@ -144,6 +146,7 @@ private:
     void resizeSlicePointItems( qreal scaleFactorX );
     void resizePlayhead();
     void resizeLoopMarkers( qreal scaleFactorX );
+    void resizeRuler( qreal scaleFactorX );
 
     void scaleItems( qreal scaleFactorX );
 
@@ -158,8 +161,15 @@ private:
 
     void connectWaveformToGraphicsView( SharedWaveformItem item );
 
+    void createRuler();
+
     QList<SharedWaveformItem> m_waveformItemList;
     QList<SharedSlicePointItem> m_slicePointItemList;
+
+    typedef QSharedPointer<QGraphicsItem> SharedGraphicsItem;
+    QList<SharedGraphicsItem> m_rulerMarksList;
+    ScopedPointer<QGraphicsRectItem> m_rulerBackground;
+
     SharedSampleHeader m_sampleHeader;
 
     ScopedPointer<QGraphicsLineItem> m_playhead;

@@ -22,9 +22,9 @@
 
 #include "wavegraphicsview.h"
 #include <QGLWidget>
-//#include <QDebug>
+#include <QDebug>
 #include "audioanalyser.h"
-
+#include "globals.h"
 
 
 //==================================================================================================
@@ -45,6 +45,8 @@ WaveGraphicsView::WaveGraphicsView( QWidget* parent ) :
     setCacheMode( CacheBackground );
 
     setScene( new QGraphicsScene( 0.0, 0.0, 1024.0, 768.0 ) );
+
+    createRuler();
 
     // Set up playhead
     m_playhead = new QGraphicsLineItem( 0.0, 0.0, 0.0, scene()->height() - 1 );
@@ -726,8 +728,11 @@ void WaveGraphicsView::clearAll()
 
     m_waveformItemList.clear();
     m_slicePointItemList.clear();
+    m_rulerMarksList.clear();
     m_loopMarkerLeft = NULL;
     m_loopMarkerRight = NULL;
+
+    createRuler();
 }
 
 
@@ -863,6 +868,48 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
 
 
 
+void WaveGraphicsView::setBpmRulerMarks( const qreal bpm, const int timeSigNumerator )
+{
+    if ( bpm > 0.0 && timeSigNumerator > 0 )
+    {
+        foreach ( SharedGraphicsItem item, m_rulerMarksList )
+        {
+            scene()->removeItem( item.data() );
+        }
+
+        m_rulerMarksList.clear();
+
+        const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
+        const qreal framesPerBeat = ( m_sampleHeader->sampleRate * 60 ) / bpm;
+
+        int beat = 0;
+        int bar = 1;
+
+        for ( int frameNum = 0; frameNum < totalNumFrames; frameNum += framesPerBeat, beat++ )
+        {
+            if ( beat % timeSigNumerator == 0 )
+            {
+                QGraphicsSimpleTextItem* textItem = scene()->addSimpleText( QString::number( bar ) );
+                textItem->setPos( getScenePosX( frameNum ), 1.0 );
+                textItem->setBrush( Qt::white );
+                textItem->setZValue( 1 );
+                m_rulerMarksList.append( SharedGraphicsItem( textItem ) );
+                bar++;
+            }
+            else
+            {
+                QGraphicsLineItem* lineItem = scene()->addLine( 0.0, 0.0, 0.0, Ruler::HEIGHT - 5.0 );
+                lineItem->setPos( getScenePosX( frameNum ), 2.0 );
+                lineItem->setPen( QPen( Qt::white ) );
+                lineItem->setZValue( 1 );
+                m_rulerMarksList.append( SharedGraphicsItem( lineItem ) );
+            }
+        }
+    }
+}
+
+
+
 //==================================================================================================
 // Protected:
 
@@ -870,13 +917,16 @@ void WaveGraphicsView::resizeEvent ( QResizeEvent* event )
 {
     scene()->setSceneRect( 0.0, 0.0, event->size().width(), event->size().height() );
 
-    const qreal scaleFactorX = scene()->width() / event->oldSize().width();
-//    const qreal scaleFactorY = scene()->height() / event->oldSize().height();
+    if ( event->oldSize().width() > 0 )
+    {
+        const qreal scaleFactorX = scene()->width() / event->oldSize().width();
 
-    resizeWaveformItems( scaleFactorX );
-    resizeSlicePointItems( scaleFactorX );
-    resizePlayhead();
-    resizeLoopMarkers( scaleFactorX );
+        resizeWaveformItems( scaleFactorX );
+        resizeSlicePointItems( scaleFactorX );
+        resizePlayhead();
+        resizeLoopMarkers( scaleFactorX );
+        resizeRuler( scaleFactorX );
+    }
 
     QGraphicsView::resizeEvent( event );
 }
@@ -952,6 +1002,19 @@ void WaveGraphicsView::resizeLoopMarkers( const qreal scaleFactorX )
 
 
 
+void WaveGraphicsView::resizeRuler( const qreal scaleFactorX )
+{
+    m_rulerBackground->setRect( 0.0, 0.0, scene()->width(), Ruler::HEIGHT );
+
+    foreach ( SharedGraphicsItem item, m_rulerMarksList )
+    {
+        const qreal newX = item->scenePos().x() * scaleFactorX;
+        item->setPos( newX, 1.0 );
+    }
+}
+
+
+
 void WaveGraphicsView::scaleItems( const qreal scaleFactorX )
 {
     if ( scaleFactorX > 0.0 )
@@ -962,6 +1025,11 @@ void WaveGraphicsView::scaleItems( const qreal scaleFactorX )
         foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
         {
             slicePointItem->setTransform( matrix );
+        }
+
+        foreach ( SharedGraphicsItem item, m_rulerMarksList )
+        {
+            item->setTransform( matrix );
         }
 
         if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
@@ -1208,6 +1276,19 @@ void WaveGraphicsView::connectWaveformToGraphicsView( const SharedWaveformItem i
 
     QObject::connect( item.data(), SIGNAL( maxDetailLevelReached() ),
                       this, SLOT( relayMaxDetailLevelReached() ) );
+}
+
+
+
+void WaveGraphicsView::createRuler()
+{
+    m_rulerBackground = scene()->addRect( 0.0, 0.0, scene()->width(), Ruler::HEIGHT, QPen(), QBrush( Qt::black ) );
+
+    QGraphicsSimpleTextItem* textItem = scene()->addSimpleText( "0 BPM" );
+    textItem->setPos( 1.0, 1.0 );
+    textItem->setBrush( Qt::white );
+    textItem->setZValue( 1 );
+    m_rulerMarksList.append( SharedGraphicsItem( textItem ) );
 }
 
 

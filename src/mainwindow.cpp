@@ -1317,6 +1317,8 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
     m_UI->doubleSpinBox_OriginalBPM->setValue( bpm );
     m_UI->doubleSpinBox_NewBPM->setValue( bpm );
 
+    m_UI->waveGraphicsView->setBpmRulerMarks( bpm, numerator );
+
     if ( m_rubberbandAudioSource != NULL && bpm > 0.0 )
     {
         m_rubberbandAudioSource->setOriginalBPM( bpm );
@@ -1472,6 +1474,10 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
             m_UI->waveGraphicsView->updatePlayheadSpeed( timeRatio );
         }
     }
+
+    const int timeSigNumerator = m_UI->comboBox_TimeSigNumerator->currentText().toInt();
+
+    m_UI->waveGraphicsView->setBpmRulerMarks( originalBPM, timeSigNumerator );
 }
 
 
@@ -1748,4 +1754,14 @@ void MainWindow::on_actionAdd_Fold_triggered()
     const int frameNum = m_UI->waveGraphicsView->getFrameNum( mouseScenePos.x() );
 
     qDebug() << "frameNum " << frameNum;
+}
+
+
+
+void MainWindow::on_comboBox_TimeSigNumerator_activated( const QString text )
+{
+    const qreal bpm = m_UI->doubleSpinBox_OriginalBPM->value();
+    const int timeSigNumerator = text.toInt();
+
+    m_UI->waveGraphicsView->setBpmRulerMarks( bpm, timeSigNumerator );
 }

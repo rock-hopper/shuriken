@@ -56,7 +56,7 @@ namespace ZValues
 
 namespace Ruler
 {
-    static const qreal HEIGHT = 20.0;
+    static const qreal HEIGHT = 18.0;
 }
 
 
