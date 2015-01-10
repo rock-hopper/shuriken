@@ -86,9 +86,6 @@ public:
 
     void moveSlicePoint( SharedSlicePointItem slicePointItem, int newFrameNum );
 
-    void hideSlicePoints();
-    void showSlicePoints();
-
     // Returns the currently selected slice point item
     SharedSlicePointItem getSelectedSlicePoint();
 
@@ -162,6 +159,9 @@ private:
     void connectWaveformToGraphicsView( SharedWaveformItem item );
 
     void createRuler();
+
+    void hideSlicePoints();
+    void showSlicePoints();
 
     QList<SharedWaveformItem> m_waveformItemList;
     QList<SharedSlicePointItem> m_slicePointItemList;

@@ -162,6 +162,7 @@ SliceCommand::SliceCommand( MainWindow* const mainWindow,
                             QAction* const addSlicePointAction,
                             QAction* const selectMoveItemsAction,
                             QAction* const auditionItemsAction,
+                            QAction* const quantiseAction,
                             QUndoCommand* parent ) :
     QUndoCommand( parent ),
     m_mainWindow( mainWindow ),
@@ -171,7 +172,8 @@ SliceCommand::SliceCommand( MainWindow* const mainWindow,
     m_findBeatsButton( findBeatsButton ),
     m_addSlicePointAction( addSlicePointAction ),
     m_selectMoveItemsAction( selectMoveItemsAction ),
-    m_auditionItemsAction( auditionItemsAction )
+    m_auditionItemsAction( auditionItemsAction ),
+    m_quantiseAction( quantiseAction )
 {
     setText( "Slice" );
 }
@@ -202,6 +204,7 @@ void SliceCommand::undo()
     m_findOnsetsButton->setEnabled( true );
     m_findBeatsButton->setEnabled( true );
     m_addSlicePointAction->setEnabled( true );
+    m_quantiseAction->setEnabled( false );
     m_auditionItemsAction->trigger();
 
     m_mainWindow->updateSnapLoopMarkersComboBox();
@@ -236,6 +239,7 @@ void SliceCommand::redo()
     m_findOnsetsButton->setEnabled( false );
     m_findBeatsButton->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
+    m_quantiseAction->setEnabled( true );
     m_selectMoveItemsAction->trigger();
 
     m_mainWindow->updateSnapLoopMarkersComboBox();
@@ -255,6 +259,7 @@ UnsliceCommand::UnsliceCommand( MainWindow* const mainWindow,
                                 QAction* const addSlicePointAction,
                                 QAction* const selectMoveItemsAction,
                                 QAction* const auditionItemsAction,
+                                QAction* const quantiseAction,
                                 QUndoCommand* parent ) :
     QUndoCommand( parent ),
     m_mainWindow( mainWindow ),
@@ -264,7 +269,8 @@ UnsliceCommand::UnsliceCommand( MainWindow* const mainWindow,
     m_findBeatsButton( findBeatsButton ),
     m_addSlicePointAction( addSlicePointAction ),
     m_selectMoveItemsAction( selectMoveItemsAction ),
-    m_auditionItemsAction( auditionItemsAction )
+    m_auditionItemsAction( auditionItemsAction ),
+    m_quantiseAction( quantiseAction )
 {
     setText( "Unslice" );
 }
@@ -296,6 +302,7 @@ void UnsliceCommand::undo()
     m_findOnsetsButton->setEnabled( false );
     m_findBeatsButton->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
+    m_quantiseAction->setEnabled( true );
     m_selectMoveItemsAction->trigger();
 
     m_mainWindow->updateSnapLoopMarkersComboBox();
@@ -329,11 +336,124 @@ void UnsliceCommand::redo()
     m_findOnsetsButton->setEnabled( true );
     m_findBeatsButton->setEnabled( true );
     m_addSlicePointAction->setEnabled( true );
+    m_quantiseAction->setEnabled( false );
     m_auditionItemsAction->trigger();
 
     m_mainWindow->updateSnapLoopMarkersComboBox();
 
     QApplication::restoreOverrideCursor();
+}
+
+
+
+//==================================================================================================
+
+EnableQuantisationCommand::EnableQuantisationCommand( WaveGraphicsView* const graphicsView,
+                                                      QPushButton* const sliceButton,
+                                                      QAction* const addSlicePointAction,
+                                                      QAction* const selectMoveItemsAction,
+                                                      QAction* const multiSelectItemsAction,
+                                                      QAction* const auditionItemsAction,
+                                                      QAction* const quantiseAction,
+                                                      const QList<SharedSampleBuffer> sampleBufferList,
+                                                      QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    m_graphicsView( graphicsView ),
+    m_sliceButton( sliceButton ),
+    m_addSlicePointAction( addSlicePointAction ),
+    m_selectMoveItemsAction( selectMoveItemsAction ),
+    m_multiSelectItemsAction( multiSelectItemsAction ),
+    m_auditionItemsAction( auditionItemsAction ),
+    m_quantiseAction( quantiseAction ),
+    m_sampleBufferList( sampleBufferList )
+{
+    setText( "Enable Quantisation" );
+}
+
+
+
+void EnableQuantisationCommand::undo()
+{
+    m_selectMoveItemsAction->setEnabled( true );
+    m_multiSelectItemsAction->setEnabled( true );
+    m_auditionItemsAction->setEnabled( true );
+    m_addSlicePointAction->setEnabled( true );
+
+    if ( m_graphicsView->getSlicePointList().size() > 0 || m_sampleBufferList.size() > 1 )
+    {
+        m_sliceButton->setEnabled( true );
+    }
+
+    m_quantiseAction->setChecked( false );
+}
+
+
+
+void EnableQuantisationCommand::redo()
+{
+    m_auditionItemsAction->trigger();
+    m_selectMoveItemsAction->setEnabled( false );
+    m_multiSelectItemsAction->setEnabled( false );
+    m_auditionItemsAction->setEnabled( false );
+    m_addSlicePointAction->setEnabled( false );
+    m_sliceButton->setEnabled( false );
+    m_quantiseAction->setChecked( true );
+}
+
+
+
+//==================================================================================================
+
+DisableQuantisationCommand::DisableQuantisationCommand( WaveGraphicsView* const graphicsView,
+                                                       QPushButton* const sliceButton,
+                                                       QAction* const addSlicePointAction,
+                                                       QAction* const selectMoveItemsAction,
+                                                       QAction* const multiSelectItemsAction,
+                                                       QAction* const auditionItemsAction,
+                                                       QAction* const quantiseAction,
+                                                       const QList<SharedSampleBuffer> sampleBufferList,
+                                                       QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    m_graphicsView( graphicsView ),
+    m_sliceButton( sliceButton ),
+    m_addSlicePointAction( addSlicePointAction ),
+    m_selectMoveItemsAction( selectMoveItemsAction ),
+    m_multiSelectItemsAction( multiSelectItemsAction ),
+    m_auditionItemsAction( auditionItemsAction ),
+    m_quantiseAction( quantiseAction ),
+    m_sampleBufferList( sampleBufferList )
+{
+    setText( "Disable Quantisation" );
+}
+
+
+
+void DisableQuantisationCommand::undo()
+{
+    m_auditionItemsAction->trigger();
+    m_selectMoveItemsAction->setEnabled( false );
+    m_multiSelectItemsAction->setEnabled( false );
+    m_auditionItemsAction->setEnabled( false );
+    m_addSlicePointAction->setEnabled( false );
+    m_sliceButton->setEnabled( false );
+    m_quantiseAction->setChecked( true );
+}
+
+
+
+void DisableQuantisationCommand::redo()
+{
+    m_selectMoveItemsAction->setEnabled( true );
+    m_multiSelectItemsAction->setEnabled( true );
+    m_auditionItemsAction->setEnabled( true );
+    m_addSlicePointAction->setEnabled( true );
+
+    if ( m_graphicsView->getSlicePointList().size() > 0 || m_sampleBufferList.size() > 1 )
+    {
+        m_sliceButton->setEnabled( true );
+    }
+
+    m_quantiseAction->setChecked( false );
 }
 
 

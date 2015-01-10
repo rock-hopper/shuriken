@@ -621,7 +621,6 @@
     <addaction name="actionDelete"/>
     <addaction name="separator"/>
     <addaction name="actionAdd_Slice_Point"/>
-    <addaction name="actionAdd_Fold"/>
     <addaction name="separator"/>
     <addaction name="actionApply_Gain"/>
     <addaction name="actionApply_Gain_Ramp"/>
@@ -663,7 +662,7 @@
    <addaction name="actionMulti_Select"/>
    <addaction name="actionAudition"/>
    <addaction name="separator"/>
-   <addaction name="actionTime_Folding"/>
+   <addaction name="actionQuantise"/>
    <addaction name="separator"/>
    <addaction name="actionZoom_Original"/>
    <addaction name="actionZoom_Out"/>
@@ -1039,34 +1038,16 @@
     <string>Shift+G</string>
    </property>
   </action>
-  <action name="actionTime_Folding">
+  <action name="actionQuantise">
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../resources.qrc">
-     <normaloff>:/resources/images/timefolding.png</normaloff>:/resources/images/timefolding.png</iconset>
-   </property>
-   <property name="text">
-    <string>Time Folding</string>
-   </property>
-   <property name="toolTip">
-    <string>Time Folding</string>
-   </property>
-  </action>
-  <action name="actionAdd_Fold">
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/resources/images/page-3sides.png</normaloff>:/resources/images/page-3sides.png</iconset>
    </property>
    <property name="text">
-    <string>Add Fold</string>
-   </property>
-   <property name="shortcut">
-    <string>Ins</string>
+    <string>Quantise</string>
    </property>
   </action>
  </widget>

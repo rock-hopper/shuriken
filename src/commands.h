@@ -105,6 +105,7 @@ public:
                   QAction* addSlicePointAction,
                   QAction* selectMoveItemsAction,
                   QAction* auditionItemsAction,
+                  QAction* quantiseAction,
                   QUndoCommand* parent = NULL );
 
     void undo();
@@ -119,6 +120,7 @@ private:
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
     QAction* const m_auditionItemsAction;
+    QAction* const m_quantiseAction;
 };
 
 
@@ -134,6 +136,7 @@ public:
                     QAction* addSlicePointAction,
                     QAction* selectMoveItemsAction,
                     QAction* auditionItemsAction,
+                    QAction* quantiseAction,
                     QUndoCommand* parent = NULL );
 
     void undo();
@@ -148,6 +151,65 @@ private:
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
     QAction* const m_auditionItemsAction;
+    QAction* const m_quantiseAction;
+};
+
+
+
+class EnableQuantisationCommand : public QUndoCommand
+{
+public:
+    EnableQuantisationCommand( WaveGraphicsView* graphicsView,
+                               QPushButton* sliceButton,
+                               QAction* addSlicePointAction,
+                               QAction* selectMoveItemsAction,
+                               QAction* multiSelectItemsAction,
+                               QAction* auditionItemsAction,
+                               QAction* quantiseAction,
+                               const QList<SharedSampleBuffer> sampleBufferList,
+                               QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    WaveGraphicsView* const m_graphicsView;
+    QPushButton* const m_sliceButton;
+    QAction* const m_addSlicePointAction;
+    QAction* const m_selectMoveItemsAction;
+    QAction* const m_multiSelectItemsAction;
+    QAction* const m_auditionItemsAction;
+    QAction* const m_quantiseAction;
+    const QList<SharedSampleBuffer> m_sampleBufferList;
+};
+
+
+
+class DisableQuantisationCommand : public QUndoCommand
+{
+public:
+    DisableQuantisationCommand( WaveGraphicsView* graphicsView,
+                                QPushButton* sliceButton,
+                                QAction* addSlicePointAction,
+                                QAction* selectMoveItemsAction,
+                                QAction* multiSelectItemsAction,
+                                QAction* auditionItemsAction,
+                                QAction* quantiseAction,
+                                const QList<SharedSampleBuffer> sampleBufferList,
+                                QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    WaveGraphicsView* const m_graphicsView;
+    QPushButton* const m_sliceButton;
+    QAction* const m_addSlicePointAction;
+    QAction* const m_selectMoveItemsAction;
+    QAction* const m_multiSelectItemsAction;
+    QAction* const m_auditionItemsAction;
+    QAction* const m_quantiseAction;
+    const QList<SharedSampleBuffer> m_sampleBufferList;
 };
 
 

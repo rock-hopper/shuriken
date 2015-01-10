@@ -28,7 +28,6 @@
         <file>resources/images/zoom-in.png</file>
         <file>resources/images/zoom-original.png</file>
         <file>resources/images/zoom-out.png</file>
-        <file>resources/images/timefolding.png</file>
         <file>resources/images/view-refresh_blue.png</file>
         <file>resources/images/page-3sides.png</file>
     </qresource>

@@ -361,7 +361,6 @@ void MainWindow::setupUI()
     // Hide widgets / menu items
     m_UI->label_JackSync->setVisible( false );
     m_UI->checkBox_TimeStretch->setVisible( false );
-    m_UI->actionAdd_Fold->setVisible( false );
 
 
     // Connect signals to slots
@@ -502,7 +501,6 @@ void MainWindow::enableUI()
     m_UI->actionSelect_Move->setEnabled( true );
     m_UI->actionMulti_Select->setEnabled( true );
     m_UI->actionAudition->setEnabled( true );
-    m_UI->actionTime_Folding->setEnabled( true );
 
     m_UI->actionAudition->trigger();
 }
@@ -548,7 +546,6 @@ void MainWindow::disableUI()
     m_UI->actionSelect_None->setEnabled( false );
     m_UI->actionAdd_Slice_Point->setEnabled( false );
     m_UI->actionAdd_Slice_Point->setVisible( true );
-    m_UI->actionAdd_Fold->setVisible( false );
     m_UI->actionDelete->setEnabled( false );
     m_UI->actionReverse->setEnabled( false );
     m_UI->actionZoom_Original->setEnabled( false );
@@ -557,7 +554,7 @@ void MainWindow::disableUI()
     m_UI->actionSelect_Move->setEnabled( false );
     m_UI->actionMulti_Select->setEnabled( false );
     m_UI->actionAudition->setEnabled( false );
-    m_UI->actionTime_Folding->setEnabled( false );
+    m_UI->actionQuantise->setEnabled( false );
 }
 
 
@@ -1341,6 +1338,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
                           m_UI->actionAdd_Slice_Point,
                           m_UI->actionSelect_Move,
                           m_UI->actionAudition,
+                          m_UI->actionQuantise,
                           parentCommand );
 
         QList<SharedSlicePointItem> slicePoints = m_UI->waveGraphicsView->getSlicePointList();
@@ -1373,6 +1371,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
                             m_UI->actionAdd_Slice_Point,
                             m_UI->actionSelect_Move,
                             m_UI->actionAudition,
+                            m_UI->actionQuantise,
                             parentCommand );
 
         m_undoStack.push( parentCommand );
@@ -1671,24 +1670,55 @@ void MainWindow::on_actionAudition_triggered()
 
 
 
-void MainWindow::on_actionTime_Folding_triggered( const bool isChecked )
+void MainWindow::on_actionQuantise_triggered( const bool isChecked )
 {
-    if ( isChecked )
+    if ( isChecked ) // Enable quantisation
     {
-        m_UI->actionAudition->trigger();
-        m_UI->actionSelect_Move->setEnabled( false );
-        m_UI->actionMulti_Select->setEnabled( false );
-        m_UI->actionAudition->setEnabled( false );
-        m_UI->actionAdd_Slice_Point->setVisible( false );
-        m_UI->actionAdd_Fold->setVisible( true );
+        QUndoCommand* parentCommand = new QUndoCommand();
+
+        new EnableQuantisationCommand( m_UI->waveGraphicsView,
+                                       m_UI->pushButton_Slice,
+                                       m_UI->actionAdd_Slice_Point,
+                                       m_UI->actionSelect_Move,
+                                       m_UI->actionMulti_Select,
+                                       m_UI->actionAudition,
+                                       m_UI->actionQuantise,
+                                       m_sampleBufferList,
+                                       parentCommand );
+
+        int frameNum = 0;
+
+        for ( int i = 0; i < m_sampleBufferList.size() - 1; i++ )
+        {
+            frameNum += m_sampleBufferList.at( i )->getNumFrames();
+
+            new AddSlicePointItemCommand( frameNum, m_UI->waveGraphicsView, NULL, parentCommand );
+        }
+
+        m_undoStack.push( parentCommand );
     }
-    else
+    else // Disable quantisation
     {
-        m_UI->actionSelect_Move->setEnabled( true );
-        m_UI->actionMulti_Select->setEnabled( true );
-        m_UI->actionAudition->setEnabled( true );
-        m_UI->actionAdd_Slice_Point->setVisible( true );
-        m_UI->actionAdd_Fold->setVisible( false );
+        QUndoCommand* parentCommand = new QUndoCommand();
+
+        QList<SharedSlicePointItem> slicePoints = m_UI->waveGraphicsView->getSlicePointList();
+
+        foreach ( SharedSlicePointItem slicePoint, slicePoints )
+        {
+            new DeleteSlicePointItemCommand( slicePoint, m_UI->waveGraphicsView, NULL, parentCommand );
+        }
+
+        new DisableQuantisationCommand( m_UI->waveGraphicsView,
+                                        m_UI->pushButton_Slice,
+                                        m_UI->actionAdd_Slice_Point,
+                                        m_UI->actionSelect_Move,
+                                        m_UI->actionMulti_Select,
+                                        m_UI->actionAudition,
+                                        m_UI->actionQuantise,
+                                        m_sampleBufferList,
+                                        parentCommand );
+
+        m_undoStack.push( parentCommand );
     }
 }
 
@@ -1743,17 +1773,6 @@ void MainWindow::on_comboBox_SnapLoopMarkers_currentIndexChanged( const int inde
     default:
         break;
     }
-}
-
-
-
-void MainWindow::on_actionAdd_Fold_triggered()
-{
-    const QPoint mousePos = m_UI->waveGraphicsView->mapFromGlobal( QCursor::pos() );
-    const QPointF mouseScenePos = m_UI->waveGraphicsView->mapToScene( mousePos );
-    const int frameNum = m_UI->waveGraphicsView->getFrameNum( mouseScenePos.x() );
-
-    qDebug() << "frameNum " << frameNum;
 }
 
 

@@ -1,7 +1,6 @@
 The following files are part of Oxygen Icons <http://www.oxygen-icons.org/> and are licensed under the GNU LGPL v3:
 
 application-exit.png
-chronometer.png
 document-close.png
 document-export.png
 document-import.png
@@ -28,10 +27,11 @@ zoom-original.png
 zoom-out.png
 
 
-The following files are modified versions of one or more of the above:
+
+The following file(s) are modified versions of one or more of the above:
 
 view-refresh_blue.png
-timefolding.png
+
 
 
 For full details of the GNU LGPL v3 please read images/LICENSE

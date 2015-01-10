@@ -322,25 +322,23 @@ SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
 {
     const qreal scenePosX = getScenePosX( frameNum );
 
-    SharedSlicePointItem sharedSlicePoint;
-
-    SlicePointItem* slicePointItem = new SlicePointItem( scene()->height() - Ruler::HEIGHT - 1 );
-    slicePointItem->setPos( scenePosX, Ruler::HEIGHT );
-    slicePointItem->setFrameNum( frameNum );
+    SlicePointItem* item = new SlicePointItem( scene()->height() - Ruler::HEIGHT - 1 );
+    item->setPos( scenePosX, Ruler::HEIGHT );
+    item->setFrameNum( frameNum );
 
     QTransform matrix;
     const qreal currentScaleFactor = transform().m11(); // m11() returns horizontal scale factor
     matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // slice point handle is set to correct width even if view is scaled
-    slicePointItem->setTransform( matrix );
+    item->setTransform( matrix );
 
-    sharedSlicePoint = SharedSlicePointItem( slicePointItem );
-    m_slicePointItemList.append( sharedSlicePoint );
-
-    QObject::connect( slicePointItem, SIGNAL( scenePosChanged(FrameMarkerItem*) ),
+    QObject::connect( item, SIGNAL( scenePosChanged(FrameMarkerItem*) ),
                       this, SLOT( updateSlicePointFrameNum(FrameMarkerItem*) ) );
 
-    scene()->addItem( slicePointItem );
+    scene()->addItem( item );
     scene()->update();
+
+    SharedSlicePointItem sharedSlicePoint = SharedSlicePointItem( item );
+    m_slicePointItemList.append( sharedSlicePoint );
 
     return sharedSlicePoint;
 }

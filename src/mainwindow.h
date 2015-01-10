@@ -135,11 +135,10 @@ public slots:
 
 private slots:
     void on_comboBox_TimeSigNumerator_activated( QString text );
-    void on_actionAdd_Fold_triggered();
     void on_comboBox_SnapLoopMarkers_currentIndexChanged( int index );
     void on_checkBox_LoopMarkers_clicked( bool isChecked );
     void on_pushButton_TimestretchOptions_clicked();
-    void on_actionTime_Folding_triggered( bool isChecked );
+    void on_actionQuantise_triggered( bool isChecked );
     void on_actionAudition_triggered();
     void on_actionMulti_Select_triggered();
     void on_actionSelect_Move_triggered();

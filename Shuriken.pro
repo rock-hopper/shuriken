@@ -174,8 +174,7 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/mainwindowfilehandling.cpp \
     src/loopmarkeritem.cpp \
     src/confirmbpmdialog.cpp \
-    src/samplebuffer.cpp \
-    src/timefolditem.cpp
+    src/samplebuffer.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -390,8 +389,7 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/akaifilehandler.h \
     src/midifilehandler.h \
     src/loopmarkeritem.h \
-    src/confirmbpmdialog.h \
-    src/timefolditem.h
+    src/confirmbpmdialog.h
 FORMS += src/mainwindow.ui \
     src/optionsdialog.ui \
     src/helpform.ui \
