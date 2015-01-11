@@ -43,15 +43,17 @@ public:
 
     int type() const    { return Type; }
 
+    bool canBeMovedPastOtherSlicePoints() const         { return m_canBeMovedPastOtherSlicePoints; }
+    void setMovePastOtherSlicePoints( bool canBeMoved ) { m_canBeMovedPastOtherSlicePoints = canBeMoved; }
+
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant& value );
 
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
 
 private:
-    const bool m_canBeMovedPastOtherSlicePoints;
-    const qreal m_minDistFromOtherItems;
-
+    bool m_canBeMovedPastOtherSlicePoints;
+    qreal m_minDistFromOtherItems;
     qreal m_minScenePosX;
     qreal m_maxScenePosX;
 

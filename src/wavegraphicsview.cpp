@@ -956,8 +956,13 @@ void WaveGraphicsView::resizeSlicePointItems( const qreal scaleFactorX )
     foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
     {
         slicePointItem->setHeight( scene()->height() - Ruler::HEIGHT - 1 );
+
+        const bool canBeMoved = slicePointItem->canBeMovedPastOtherSlicePoints();
         const qreal newX = slicePointItem->scenePos().x() * scaleFactorX;
+
+        slicePointItem->setMovePastOtherSlicePoints( true );
         slicePointItem->setPos( newX, Ruler::HEIGHT );
+        slicePointItem->setMovePastOtherSlicePoints( canBeMoved );
     }
 }
 
