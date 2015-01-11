@@ -318,11 +318,11 @@ void WaveGraphicsView::redrawWaveforms()
 
 
 
-SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum )
+SharedSlicePointItem WaveGraphicsView::createSlicePoint( const int frameNum, const bool canBeMovedPastOtherSlicePoints )
 {
     const qreal scenePosX = getScenePosX( frameNum );
 
-    SlicePointItem* item = new SlicePointItem( scene()->height() - Ruler::HEIGHT - 1 );
+    SlicePointItem* item = new SlicePointItem( scene()->height() - Ruler::HEIGHT - 1, canBeMovedPastOtherSlicePoints );
     item->setPos( scenePosX, Ruler::HEIGHT );
     item->setFrameNum( frameNum );
 

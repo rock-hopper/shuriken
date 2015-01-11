@@ -76,7 +76,7 @@ public:
     void redrawWaveforms();
 
     // Create a new slice point item and add it to the scene
-    SharedSlicePointItem createSlicePoint( int frameNum );
+    SharedSlicePointItem createSlicePoint( int frameNum, bool canBeMovedPastOtherSlicePoints );
 
     // Add a slice point item to the scene
     void addSlicePoint( SharedSlicePointItem slicePoint );

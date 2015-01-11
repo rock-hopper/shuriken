@@ -22,13 +22,85 @@
 
 #include "slicepointitem.h"
 #include <QBrush>
+#include <QGraphicsScene>
 //#include <QDebug>
 
 
 //==================================================================================================
 // Public:
 
-SlicePointItem::SlicePointItem( const qreal height, QGraphicsItem* parent ) :
-    FrameMarkerItem( QColor( Qt::red ), QColor(255, 192, 0, 255), height, HANDLE_TOP_BOTTOM, parent )
+SlicePointItem::SlicePointItem( const qreal height,
+                                const bool canBeMovedPastOtherSlicePoints,
+                                const qreal minDistFromOtherSlicePoints,
+                                QGraphicsItem* parent ) :
+    FrameMarkerItem( QColor( Qt::red ),
+                     QColor(255, 192, 0, 255),
+                     height,
+                     HANDLE_TOP_BOTTOM,
+                     parent ),
+    m_canBeMovedPastOtherSlicePoints( canBeMovedPastOtherSlicePoints ),
+    m_minDistFromOtherItems( minDistFromOtherSlicePoints )
 {
+}
+
+
+
+//==================================================================================================
+// Protected:
+
+QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& value )
+{
+    if ( ! m_canBeMovedPastOtherSlicePoints )
+    {
+        if ( change == ItemPositionChange && scene() != NULL )
+        {
+            QPointF newPos = value.toPointF();
+
+            if ( newPos.x() < m_minScenePosX )
+            {
+                newPos.setX( m_minScenePosX );
+            }
+            else if ( newPos.x() > m_maxScenePosX )
+            {
+                newPos.setX( m_maxScenePosX );
+            }
+
+            return FrameMarkerItem::itemChange( change, newPos );
+        }
+    }
+
+    return FrameMarkerItem::itemChange( change, value );
+}
+
+
+
+void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
+{
+    FrameMarkerItem::mousePressEvent( event );
+
+    qreal minX = scene()->sceneRect().left();
+    qreal maxX = scene()->sceneRect().right() - 1;
+
+    foreach ( QGraphicsItem* item, scene()->items() )
+    {
+        if ( item != this && item->type() == SlicePointItem::Type )
+        {
+            SlicePointItem* const otherSlicePoint = qgraphicsitem_cast<SlicePointItem*>( item );
+
+            const qreal otherItemPosX = otherSlicePoint->scenePos().x();
+
+            if ( otherItemPosX > minX && otherItemPosX < pos().x() )
+            {
+                minX = otherItemPosX;
+            }
+
+            if ( otherItemPosX < maxX && otherItemPosX > pos().x() )
+            {
+                maxX = otherItemPosX;
+            }
+        }
+    }
+
+    m_minScenePosX = minX + m_minDistFromOtherItems;
+    m_maxScenePosX = maxX - m_minDistFromOtherItems;
 }

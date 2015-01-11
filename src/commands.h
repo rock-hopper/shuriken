@@ -37,6 +37,7 @@ class AddSlicePointItemCommand : public QUndoCommand
 {
 public:
     AddSlicePointItemCommand( int frameNum,
+                              bool canBeMovedPastOtherSlicePoints,
                               WaveGraphicsView* graphicsView,
                               QPushButton* sliceButton,
                               QUndoCommand* parent = NULL );

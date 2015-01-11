@@ -49,11 +49,11 @@ LoopMarkerItem::LoopMarkerItem( const LoopMarkerType markerType,
 
 QVariant LoopMarkerItem::itemChange( GraphicsItemChange change, const QVariant &value )
 {
+    // Prevent loop markers from going past each other
     if ( change == ItemPositionChange && scene() != NULL )
     {
         QPointF newPos = value.toPointF();
 
-        // Prevent loop markers from going past each other
         foreach ( QGraphicsItem* item, scene()->items() )
         {
             if ( item != this && item->type() == LoopMarkerItem::Type )

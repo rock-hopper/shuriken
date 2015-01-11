@@ -59,7 +59,12 @@ protected:
     // in their reimplementation
     QVariant itemChange( GraphicsItemChange change, const QVariant& value );
 
+    // Subclasses that reimplement this method MUST ALWAYS call "FrameMarkerItem::mousePressEvent"
+    // at the start of the reimplementationed method
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
+
+    // Subclasses that reimplement this method MUST ALWAYS call "FrameMarkerItem::mouseReleaseEvent"
+    // at the start of the reimplementated method
     void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
     const qreal m_handleWidth;
@@ -70,7 +75,7 @@ private:
     const QBrush m_selectedBrush;
 
     int m_frameNum;
-    qreal m_scenePosBeforeMove;
+    qreal m_scenePosX_beforeMove;
 
 signals:
     void scenePosChanged( FrameMarkerItem* item );

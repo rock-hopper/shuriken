@@ -98,24 +98,33 @@ void FrameMarkerItem::setHeight( const qreal height )
 //==================================================================================================
 // Protected:
 
-QVariant FrameMarkerItem::itemChange( GraphicsItemChange change, const QVariant &value )
+QVariant FrameMarkerItem::itemChange( GraphicsItemChange change, const QVariant& value )
 {
-    // Keep FrameMarkerItem within bounds of scene rect
+    // Keep item within bounds of scene rect
     if ( change == ItemPositionChange && scene() != NULL )
     {
         QPointF newPos = value.toPointF();
         const QRectF sceneRect = scene()->sceneRect();
 
-        if ( ! sceneRect.contains( newPos ) )
+        if ( newPos.x() < sceneRect.left() || newPos.x() > sceneRect.right() - 1 )
         {
             newPos.setX
             (
-                    qMin( sceneRect.right() - 1, qMax( newPos.x(), sceneRect.left() ) )
+                qMin( sceneRect.right() - 1, qMax( newPos.x(), sceneRect.left() ) )
             );
         }
         newPos.setY( Ruler::HEIGHT );
 
         return newPos;
+    }
+
+    // If this item is selected then bring it in front of other frame markers
+    if ( change == ItemSelectedHasChanged )
+    {
+        if ( isSelected() )
+            setZValue( ZValues::SELECTED_FRAME_MARKER );
+        else
+            setZValue( ZValues::FRAME_MARKER );
     }
 
     return QGraphicsItem::itemChange( change, value );
@@ -131,7 +140,7 @@ void FrameMarkerItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 
     QGraphicsItem::mousePressEvent( event );
 
-    m_scenePosBeforeMove = pos().x();
+    m_scenePosX_beforeMove = pos().x();
 }
 
 
@@ -140,7 +149,7 @@ void FrameMarkerItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseReleaseEvent( event );
 
-    if ( m_scenePosBeforeMove != pos().x() )
+    if ( m_scenePosX_beforeMove != pos().x() )
     {
         emit scenePosChanged( this );
     }

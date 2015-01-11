@@ -36,11 +36,25 @@ class SlicePointItem : public FrameMarkerItem
 public:
     enum { Type = UserTypes::SLICE_POINT };
 
-    SlicePointItem( qreal height, QGraphicsItem* parent = NULL );
+    SlicePointItem( qreal height,
+                    bool canBeMovedPastOtherSlicePoints,
+                    qreal minDistFromOtherSlicePoints = 1.0,
+                    QGraphicsItem* parent = NULL );
 
     int type() const    { return Type; }
 
+protected:
+    QVariant itemChange( GraphicsItemChange change, const QVariant& value );
+
+    void mousePressEvent( QGraphicsSceneMouseEvent* event );
+
 private:
+    const bool m_canBeMovedPastOtherSlicePoints;
+    const qreal m_minDistFromOtherItems;
+
+    qreal m_minScenePosX;
+    qreal m_maxScenePosX;
+
     JUCE_LEAK_DETECTOR( SlicePointItem );
 };
 

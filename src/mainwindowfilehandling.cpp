@@ -146,7 +146,7 @@ void MainWindow::openProject( const QString filePath )
 
                     foreach ( int frameNum, settings.slicePointFrameNums )
                     {
-                        new AddSlicePointItemCommand( frameNum, m_UI->waveGraphicsView, m_UI->pushButton_Slice, parentCommand );
+                        new AddSlicePointItemCommand( frameNum, true, m_UI->waveGraphicsView, m_UI->pushButton_Slice, parentCommand );
                     }
                     m_undoStack.push( parentCommand );
                 }

@@ -1078,7 +1078,7 @@ void MainWindow::on_actionAdd_Slice_Point_triggered()
     const QPointF mouseScenePos = m_UI->waveGraphicsView->mapToScene( mousePos );
     const int frameNum = m_UI->waveGraphicsView->getFrameNum( mouseScenePos.x() );
 
-    QUndoCommand* command = new AddSlicePointItemCommand( frameNum, m_UI->waveGraphicsView, m_UI->pushButton_Slice );
+    QUndoCommand* command = new AddSlicePointItemCommand( frameNum, true, m_UI->waveGraphicsView, m_UI->pushButton_Slice );
     m_undoStack.push( command );
 }
 
@@ -1360,7 +1360,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
         {
             frameNum += m_sampleBufferList.at( i )->getNumFrames();
 
-            new AddSlicePointItemCommand( frameNum, m_UI->waveGraphicsView, NULL, parentCommand );
+            new AddSlicePointItemCommand( frameNum, true, m_UI->waveGraphicsView, NULL, parentCommand );
         }
 
         new UnsliceCommand( this,
@@ -1412,7 +1412,7 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
 
         foreach ( int frameNum, slicePointFrameNumList )
         {
-            new AddSlicePointItemCommand( frameNum, m_UI->waveGraphicsView, m_UI->pushButton_Slice, parentCommand );
+            new AddSlicePointItemCommand( frameNum, true, m_UI->waveGraphicsView, m_UI->pushButton_Slice, parentCommand );
         }
     }
 
@@ -1445,7 +1445,7 @@ void MainWindow::on_pushButton_FindBeats_clicked()
 
     foreach ( int frameNum, slicePointFrameNumList )
     {
-        new AddSlicePointItemCommand( frameNum, m_UI->waveGraphicsView, m_UI->pushButton_Slice, parentCommand );
+        new AddSlicePointItemCommand( frameNum, true, m_UI->waveGraphicsView, m_UI->pushButton_Slice, parentCommand );
     }
 
     m_undoStack.push( parentCommand );
@@ -1692,7 +1692,7 @@ void MainWindow::on_actionQuantise_triggered( const bool isChecked )
         {
             frameNum += m_sampleBufferList.at( i )->getNumFrames();
 
-            new AddSlicePointItemCommand( frameNum, m_UI->waveGraphicsView, NULL, parentCommand );
+            new AddSlicePointItemCommand( frameNum, false, m_UI->waveGraphicsView, NULL, parentCommand );
         }
 
         m_undoStack.push( parentCommand );

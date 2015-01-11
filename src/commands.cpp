@@ -31,6 +31,7 @@ using namespace RubberBand;
 
 
 AddSlicePointItemCommand::AddSlicePointItemCommand( const int frameNum,
+                                                    const bool canBeMovedPastOtherSlicePoints,
                                                     WaveGraphicsView* const graphicsView,
                                                     QPushButton* const sliceButton,
                                                     QUndoCommand* parent ) :
@@ -39,7 +40,7 @@ AddSlicePointItemCommand::AddSlicePointItemCommand( const int frameNum,
     m_sliceButton( sliceButton )
 {
     setText( "Add Slice Point" );
-    m_slicePointItem = m_graphicsView->createSlicePoint( frameNum );
+    m_slicePointItem = m_graphicsView->createSlicePoint( frameNum, canBeMovedPastOtherSlicePoints );
     m_isFirstRedoCall = true;
 }
 
