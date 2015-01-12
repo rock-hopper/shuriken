@@ -384,7 +384,6 @@ public:
     void redo();
 
 private:
-    int stretch( SharedSampleBuffer sampleBuffer, qreal timeRatio, qreal pitchScale );
     void updateSlicePoints( qreal timeRatio );
     void updateLoopMarkers( qreal timeRatio );
 

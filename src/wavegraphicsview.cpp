@@ -1427,7 +1427,7 @@ void WaveGraphicsView::updateSlicePointFrameNum( FrameMarkerItem* const movedIte
         }
     }
 
-    emit slicePointOrderChanged( sharedSlicePoint, oldFrameNum, sharedSlicePoint->getFrameNum() );
+    emit slicePointPosChanged( sharedSlicePoint, oldFrameNum, sharedSlicePoint->getFrameNum() );
 }
 
 

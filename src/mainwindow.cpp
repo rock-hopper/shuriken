@@ -364,7 +364,7 @@ void MainWindow::setupUI()
 
 
     // Connect signals to slots
-    QObject::connect( m_UI->waveGraphicsView, SIGNAL( slicePointOrderChanged(SharedSlicePointItem,int,int) ),
+    QObject::connect( m_UI->waveGraphicsView, SIGNAL( slicePointPosChanged(SharedSlicePointItem,int,int) ),
                       this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int) ) );
 
     QObject::connect( m_UI->waveGraphicsView, SIGNAL( loopMarkerPosChanged() ),

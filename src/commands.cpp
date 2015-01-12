@@ -26,6 +26,7 @@
 #include <QDir>
 #include <QDebug>
 #include "messageboxes.h"
+#include "offlinetimestretcher.h"
 
 using namespace RubberBand;
 
@@ -924,11 +925,11 @@ void ApplyTimeStretchCommand::redo()
     for ( int i = 0; i < m_mainWindow->m_sampleBufferList.size(); i++ )
     {
         const QString path = m_mainWindow->m_fileHandler.saveAudioFile( m_tempDirPath,
-                                                                      m_fileBaseName + "_" + QString::number( i ),
-                                                                      m_mainWindow->m_sampleBufferList.at( i ),
-                                                                      m_mainWindow->m_sampleHeader->sampleRate,
-                                                                      m_mainWindow->m_sampleHeader->sampleRate,
-                                                                      AudioFileHandler::TEMP_FORMAT );
+                                                                        m_fileBaseName + "_" + QString::number( i ),
+                                                                        m_mainWindow->m_sampleBufferList.at( i ),
+                                                                        m_mainWindow->m_sampleHeader->sampleRate,
+                                                                        m_mainWindow->m_sampleHeader->sampleRate,
+                                                                        AudioFileHandler::TEMP_FORMAT );
         if ( ! path.isEmpty() )
         {
             m_tempFilePaths << path;
@@ -945,15 +946,16 @@ void ApplyTimeStretchCommand::redo()
         const qreal timeRatio = m_originalBPM / m_newBPM;
         const qreal pitchScale = m_isPitchCorrectionEnabled ? 1.0 : m_newBPM / m_originalBPM;
 
-        int newTotalNumFrames = 0;
+        const int sampleRate = m_mainWindow->m_sampleHeader->sampleRate;
+        const int numChans = m_mainWindow->m_sampleHeader->numChans;
 
         foreach ( SharedSampleBuffer sampleBuffer, m_mainWindow->m_sampleBufferList )
         {
-            newTotalNumFrames += stretch( sampleBuffer, timeRatio, pitchScale );
+            OfflineTimeStretcher::stretch( sampleBuffer, timeRatio, pitchScale, sampleRate, numChans, m_options );
         }
 
         m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
-                                                      m_mainWindow->m_sampleHeader->sampleRate );
+                                                        m_mainWindow->m_sampleHeader->sampleRate );
 
         updateLoopMarkers( timeRatio );
         updateSlicePoints( timeRatio );
@@ -972,143 +974,8 @@ void ApplyTimeStretchCommand::redo()
         QApplication::restoreOverrideCursor();
 
         MessageBoxes::showWarningDialog( m_mainWindow->m_fileHandler.getLastErrorTitle(),
-                                       m_mainWindow->m_fileHandler.getLastErrorInfo() );
+                                         m_mainWindow->m_fileHandler.getLastErrorInfo() );
     }
-}
-
-
-
-int ApplyTimeStretchCommand::stretch( const SharedSampleBuffer sampleBuffer, const qreal timeRatio, const qreal pitchScale )
-{
-    const int sampleRate = m_mainWindow->m_sampleHeader->sampleRate;
-    const int numChans = m_mainWindow->m_sampleHeader->numChans;
-
-    RubberBandStretcher stretcher( sampleRate, numChans, m_options, timeRatio, pitchScale );
-
-    // Copy sample buffer to a temporary buffer
-    SharedSampleBuffer tempBuffer( new SampleBuffer( *sampleBuffer.data() ) );
-
-    const int origNumFrames = tempBuffer->getNumFrames();
-    const int newBufferSize = roundToInt( origNumFrames * timeRatio );
-    const float** inFloatBuffer = new const float*[ numChans ];
-    float** outFloatBuffer = new float*[ numChans ];
-    int inFrameNum = 0;
-    int totalNumFramesRetrieved = 0;
-//            std::map<size_t, size_t> mapping;
-//
-//            if ( ! mMainWindow->mSampleBufferList.isEmpty() )
-//            {
-//                foreach ( SharedSampleBuffer sampleBuffer, mMainWindow->mSampleBufferList )
-//                {
-//                    const int startFrame = sampleBuffer->getStartFrame()
-//                    mapping[ startFrame ] = roundToInt( startFrame * timeRatio );
-//                }
-//            }
-
-    stretcher.setExpectedInputDuration( origNumFrames );
-
-    sampleBuffer->setSize( numChans, newBufferSize );
-
-    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-    {
-        inFloatBuffer[ chanNum ] = tempBuffer->getReadPointer( chanNum );
-        outFloatBuffer[ chanNum ] = sampleBuffer->getWritePointer( chanNum );
-    }
-
-    stretcher.study( inFloatBuffer, origNumFrames, true );
-
-//            if ( ! mapping.empty() )
-//            {
-//                stretcher.setKeyFrameMap( mapping );
-//            }
-
-    while ( inFrameNum < origNumFrames )
-    {
-        const int numRequired = stretcher.getSamplesRequired();
-
-        const int numFramesToProcess = inFrameNum + numRequired <= origNumFrames ?
-                                       numRequired : origNumFrames - inFrameNum;
-        const bool isFinal = (inFrameNum + numRequired >= origNumFrames);
-
-        stretcher.process( inFloatBuffer, numFramesToProcess, isFinal );
-
-        const int numAvailable = stretcher.available();
-
-        if ( numAvailable > 0 )
-        {
-            // Ensure enough space to store output
-            if ( sampleBuffer->getNumFrames() < totalNumFramesRetrieved + numAvailable )
-            {
-                sampleBuffer->setSize( numChans,                                  // No. of channels
-                                       totalNumFramesRetrieved + numAvailable,    // New no. of frames
-                                       true );                                    // Keep existing content
-
-                for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-                {
-                    outFloatBuffer[ chanNum ] = sampleBuffer->getWritePointer( chanNum );
-                    outFloatBuffer[ chanNum ] += totalNumFramesRetrieved;
-                }
-            }
-
-            const int numRetrieved = stretcher.retrieve( outFloatBuffer, numAvailable );
-
-            for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-            {
-                outFloatBuffer[ chanNum ] += numRetrieved;
-            }
-            totalNumFramesRetrieved += numRetrieved;
-        }
-
-        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-        {
-            inFloatBuffer[ chanNum ] += numFramesToProcess;
-        }
-        inFrameNum += numFramesToProcess;
-    }
-
-    int numAvailable;
-
-    while ( (numAvailable = stretcher.available()) >= 0 )
-    {
-        if ( numAvailable > 0 )
-        {
-            // Ensure enough space to store output
-            if ( sampleBuffer->getNumFrames() < totalNumFramesRetrieved + numAvailable )
-            {
-                sampleBuffer->setSize( numChans,                                  // No. of channels
-                                       totalNumFramesRetrieved + numAvailable,    // New no. of frames
-                                       true );                                    // Keep existing content
-
-                for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-                {
-                    outFloatBuffer[ chanNum ] = sampleBuffer->getWritePointer( chanNum );
-                    outFloatBuffer[ chanNum ] += totalNumFramesRetrieved;
-                }
-            }
-
-            const int numRetrieved = stretcher.retrieve( outFloatBuffer, numAvailable );
-
-            for ( int chanNum = 0; chanNum < numChans; chanNum++ )
-            {
-                outFloatBuffer[ chanNum ] += numRetrieved;
-            }
-            totalNumFramesRetrieved += numRetrieved;
-        }
-        else
-        {
-            usleep( 10000 );
-        }
-    }
-
-    if ( sampleBuffer->getNumFrames() != totalNumFramesRetrieved )
-    {
-        sampleBuffer->setSize( numChans, totalNumFramesRetrieved, true );
-    }
-
-    delete[] inFloatBuffer;
-    delete[] outFloatBuffer;
-
-    return totalNumFramesRetrieved;
 }
 
 
