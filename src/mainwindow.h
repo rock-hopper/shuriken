@@ -182,9 +182,11 @@ private slots:
 
     void recordWaveformItemMove( QList<int> oldOrderPositions, int numPlacesMoved );
 
-    void recordSlicePointItemMove( SharedSlicePointItem slicePointItem,
-                                   int oldFrameNum,
-                                   int newFrameNum );
+    void recordSlicePointItemMove( SharedSlicePointItem slicePoint,
+                                   int orderPos,
+                                   int numFramesFromPrevSlicePoint,
+                                   int numFramesToNextSlicePoint,
+                                   int oldFrameNum );
 
     void playSampleRange( const WaveformItem* waveformItem, QPointF mouseScenePos );
 

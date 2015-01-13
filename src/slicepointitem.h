@@ -46,6 +46,10 @@ public:
     bool canBeMovedPastOtherSlicePoints() const         { return m_canBeMovedPastOtherSlicePoints; }
     void setMovePastOtherSlicePoints( bool canBeMoved ) { m_canBeMovedPastOtherSlicePoints = canBeMoved; }
 
+public:
+    // For use with qSort(); sorts by frame number
+    static bool isLessThanFrameNum( const SharedSlicePointItem item1, const SharedSlicePointItem item2 );
+
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant& value );
 

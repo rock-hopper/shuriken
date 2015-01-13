@@ -1416,18 +1416,38 @@ void WaveGraphicsView::updateSlicePointFrameNum( FrameMarkerItem* const movedIte
         movedItem->setFrameNum( newFrameNum );
     }
 
+    qSort( m_slicePointItemList.begin(), m_slicePointItemList.end(), SlicePointItem::isLessThanFrameNum );
+
     SharedSlicePointItem sharedSlicePoint;
 
-    foreach ( SharedSlicePointItem item, m_slicePointItemList )
+    int numFramesFromPrevSlicePoint = movedItem->getFrameNum();
+    int numFramesToNextSlicePoint = getTotalNumFrames( m_waveformItemList ) - movedItem->getFrameNum();
+    int orderPos = 0;
+
+    for ( int i = 0; i < m_slicePointItemList.size(); i++ )
     {
+        SharedSlicePointItem item = m_slicePointItemList.at( i );
+
         if ( item == movedItem )
         {
             sharedSlicePoint = item;
+
+            if ( i > 0 )
+            {
+                numFramesFromPrevSlicePoint = movedItem->getFrameNum() - m_slicePointItemList.at( i - 1 )->getFrameNum();
+            }
+
+            if ( i < m_slicePointItemList.size() - 1 )
+            {
+                numFramesToNextSlicePoint = m_slicePointItemList.at( i + 1 )->getFrameNum() - movedItem->getFrameNum();
+            }
+
+            orderPos = i;
             break;
         }
     }
 
-    emit slicePointPosChanged( sharedSlicePoint, oldFrameNum, sharedSlicePoint->getFrameNum() );
+    emit slicePointPosChanged( sharedSlicePoint, orderPos, numFramesFromPrevSlicePoint, numFramesToNextSlicePoint, oldFrameNum );
 }
 
 

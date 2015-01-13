@@ -59,7 +59,6 @@ class MoveSlicePointItemCommand : public QUndoCommand
 public:
     MoveSlicePointItemCommand( SharedSlicePointItem slicePoint,
                                int oldFrameNum,
-                               int newFrameNum,
                                WaveGraphicsView* graphicsView,
                                QUndoCommand* parent = NULL );
 

@@ -46,6 +46,16 @@ SlicePointItem::SlicePointItem( const qreal height,
 
 
 //==================================================================================================
+// Public Static:
+
+bool SlicePointItem::isLessThanFrameNum( const SharedSlicePointItem item1, const SharedSlicePointItem item2 )
+{
+    return item1->getFrameNum() < item2->getFrameNum();
+}
+
+
+
+//==================================================================================================
 // Protected:
 
 QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& value )

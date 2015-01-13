@@ -21,14 +21,11 @@
 */
 
 #include "commands.h"
-#include <rubberband/RubberBandStretcher.h>
 #include <QApplication>
 #include <QDir>
 #include <QDebug>
 #include "messageboxes.h"
 #include "offlinetimestretcher.h"
-
-using namespace RubberBand;
 
 
 AddSlicePointItemCommand::AddSlicePointItemCommand( const int frameNum,
@@ -80,13 +77,12 @@ void AddSlicePointItemCommand::redo()
 
 MoveSlicePointItemCommand::MoveSlicePointItemCommand( const SharedSlicePointItem slicePoint,
                                                       const int oldFrameNum,
-                                                      const int newFrameNum,
                                                       WaveGraphicsView* const graphicsView,
                                                       QUndoCommand* parent ) :
     QUndoCommand( parent ),
     m_slicePointItem( slicePoint ),
     m_oldFrameNum( oldFrameNum ),
-    m_newFrameNum( newFrameNum ),
+    m_newFrameNum( slicePoint->getFrameNum() ),
     m_graphicsView( graphicsView )
 {
     setText( "Move Slice Point" );
@@ -895,7 +891,7 @@ void ApplyTimeStretchCommand::undo()
     }
 
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
-                                                  m_mainWindow->m_sampleHeader->sampleRate );
+                                                    m_mainWindow->m_sampleHeader->sampleRate );
 
     const qreal timeRatio = 1.0 / ( m_originalBPM / m_newBPM );
 

@@ -364,8 +364,8 @@ void MainWindow::setupUI()
 
 
     // Connect signals to slots
-    QObject::connect( m_UI->waveGraphicsView, SIGNAL( slicePointPosChanged(SharedSlicePointItem,int,int) ),
-                      this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int) ) );
+    QObject::connect( m_UI->waveGraphicsView, SIGNAL( slicePointPosChanged(SharedSlicePointItem,int,int,int,int) ),
+                      this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int,int,int) ) );
 
     QObject::connect( m_UI->waveGraphicsView, SIGNAL( loopMarkerPosChanged() ),
                       this, SLOT( stopPlayback() ) );
@@ -664,12 +664,25 @@ void MainWindow::recordWaveformItemMove( QList<int> oldOrderPositions, const int
 
 
 
-void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePointItem,
-                                           const int oldFrameNum,
-                                           const int newFrameNum )
+void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint,
+                                           const int orderPos,
+                                           const int numFramesFromPrevSlicePoint,
+                                           const int numFramesToNextSlicePoint,
+                                           const int oldFrameNum )
 {
-    QUndoCommand* command = new MoveSlicePointItemCommand( slicePointItem, oldFrameNum, newFrameNum, m_UI->waveGraphicsView );
-    m_undoStack.push( command );
+    if ( m_UI->actionQuantise->isChecked() )
+    {
+        QUndoCommand* parentCommand = new QUndoCommand();
+
+        new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_UI->waveGraphicsView, parentCommand );
+
+        m_undoStack.push( parentCommand );
+    }
+    else
+    {
+        QUndoCommand* command = new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_UI->waveGraphicsView );
+        m_undoStack.push( command );
+    }
 }
 
 

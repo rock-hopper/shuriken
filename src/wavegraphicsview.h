@@ -189,7 +189,11 @@ private:
     static int getTotalNumFrames( QList<SharedWaveformItem> waveformItemList );
 
 signals:
-    void slicePointPosChanged( SharedSlicePointItem slicePoint, int oldFrameNum, int newFrameNum );
+    void slicePointPosChanged( SharedSlicePointItem slicePoint,
+                               int orderPos,
+                               int numFramesFromPrevSlicePoint,
+                               int numFramesToNextSlicePoint,
+                               int oldFrameNum );
     void loopMarkerPosChanged();
     void minDetailLevelReached();
     void maxDetailLevelReached();
