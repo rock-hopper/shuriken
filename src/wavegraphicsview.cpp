@@ -310,6 +310,21 @@ SharedWaveformItem WaveGraphicsView::getWaveformAt( const int orderPos ) const
 
 
 
+void WaveGraphicsView::resizeWaveform( const int orderPos, const qreal scaleFactorX )
+{
+    if ( ! m_waveformItemList.isEmpty() )
+    {
+        SharedWaveformItem waveformItem = m_waveformItemList.at( orderPos );
+
+        const qreal newWidth = waveformItem->rect().width() * scaleFactorX;
+        waveformItem->setRect( 0.0, 0.0, newWidth, scene()->height() );
+
+        slideWaveformItemIntoPlace( orderPos );
+    }
+}
+
+
+
 void WaveGraphicsView::redrawWaveforms()
 {
     resizeWaveformItems( 1.0 );

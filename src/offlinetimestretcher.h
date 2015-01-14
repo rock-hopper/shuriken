@@ -33,11 +33,11 @@ class OfflineTimeStretcher
 {
 public:
     static int stretch( SharedSampleBuffer sampleBuffer,
-                        qreal timeRatio,
-                        qreal pitchScale,
                         int sampleRate,
                         int numChans,
-                        RubberBandStretcher::Options options );
+                        RubberBandStretcher::Options options,
+                        qreal timeRatio,
+                        qreal pitchScale );
 };
 
 

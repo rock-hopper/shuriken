@@ -72,6 +72,8 @@ public:
 
     int getNumWaveforms() const                             { return m_waveformItemList.size(); }
 
+    void resizeWaveform( int orderPos, qreal scaleFactorX );
+
     // Redraw all waveform items
     void redrawWaveforms();
 

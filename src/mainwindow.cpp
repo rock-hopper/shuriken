@@ -672,11 +672,39 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
 {
     if ( m_UI->actionQuantise->isChecked() )
     {
-        QUndoCommand* parentCommand = new QUndoCommand();
+        const QString tempDirPath = m_optionsDialog->getTempDirPath();
 
-        new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_UI->waveGraphicsView, parentCommand );
+        if ( ! tempDirPath.isEmpty() )
+        {
+            const QString fileBaseName = QString::number( m_undoStack.index() );
 
-        m_undoStack.push( parentCommand );
+            QUndoCommand* parentCommand = new QUndoCommand();
+
+            new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_UI->waveGraphicsView, parentCommand );
+
+            QList<qreal> timeRatioList;
+
+            const qreal firstSampleNumFrames = m_sampleBufferList.at( orderPos )->getNumFrames();
+            const qreal secondSampleNumFrames = m_sampleBufferList.at( orderPos + 1 )->getNumFrames();
+
+            timeRatioList << numFramesFromPrevSlicePoint / firstSampleNumFrames;
+            timeRatioList << numFramesToNextSlicePoint / secondSampleNumFrames;
+
+            new SelectiveTimeStretchCommand( this,
+                                             m_UI->waveGraphicsView,
+                                             orderPos,
+                                             timeRatioList,
+                                             tempDirPath,
+                                             fileBaseName,
+                                             parentCommand );
+
+            m_undoStack.push( parentCommand );
+        }
+        else
+        {
+            MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
+                                             tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+        }
     }
     else
     {
@@ -1643,13 +1671,13 @@ void MainWindow::on_pushButton_Apply_clicked()
         {
             const QString fileBaseName = QString::number( m_undoStack.index() );
 
-            QUndoCommand* command = new ApplyTimeStretchCommand( this,
-                                                                 m_UI->waveGraphicsView,
-                                                                 m_UI->doubleSpinBox_OriginalBPM,
-                                                                 m_UI->doubleSpinBox_NewBPM,
-                                                                 m_UI->checkBox_PitchCorrection,
-                                                                 tempDirPath,
-                                                                 fileBaseName );
+            QUndoCommand* command = new GlobalTimeStretchCommand( this,
+                                                                  m_UI->waveGraphicsView,
+                                                                  m_UI->doubleSpinBox_OriginalBPM,
+                                                                  m_UI->doubleSpinBox_NewBPM,
+                                                                  m_UI->checkBox_PitchCorrection,
+                                                                  tempDirPath,
+                                                                  fileBaseName );
             m_undoStack.push( command );
         }
         else

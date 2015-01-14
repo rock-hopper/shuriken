@@ -367,17 +367,17 @@ private:
 
 
 
-class ApplyTimeStretchCommand : public QUndoCommand
+class GlobalTimeStretchCommand : public QUndoCommand
 {
 public:
-    ApplyTimeStretchCommand( MainWindow* mainWindow,
-                             WaveGraphicsView* graphicsView,
-                             QDoubleSpinBox* spinBoxOriginalBPM,
-                             QDoubleSpinBox* spinBoxNewBPM,
-                             QCheckBox* checkBoxPitchCorrection,
-                             QString tempDirPath,
-                             QString fileBaseName,
-                             QUndoCommand* parent = NULL );
+    GlobalTimeStretchCommand( MainWindow* mainWindow,
+                              WaveGraphicsView* graphicsView,
+                              QDoubleSpinBox* spinBoxOriginalBPM,
+                              QDoubleSpinBox* spinBoxNewBPM,
+                              QCheckBox* checkBoxPitchCorrection,
+                              QString tempDirPath,
+                              QString fileBaseName,
+                              QUndoCommand* parent = NULL );
 
     void undo();
     void redo();
@@ -396,6 +396,33 @@ private:
     const qreal m_prevAppliedBPM;
     const bool m_isPitchCorrectionEnabled;
     const RubberBandStretcher::Options m_options;
+    const QString m_tempDirPath;
+    const QString m_fileBaseName;
+    QStringList m_tempFilePaths;
+};
+
+
+
+class SelectiveTimeStretchCommand : public QUndoCommand
+{
+public:
+    SelectiveTimeStretchCommand( MainWindow* mainWindow,
+                                 WaveGraphicsView* graphicsView,
+                                 int firstSampleOrderPos,
+                                 QList<qreal> timeRatioList,
+                                 QString tempDirPath,
+                                 QString fileBaseName,
+                                 QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    MainWindow* const m_mainWindow;
+    WaveGraphicsView* const m_graphicsView;
+    const RubberBandStretcher::Options m_options;
+    const int m_firstSampleOrderPos;
+    const QList<qreal> m_timeRatioList;
     const QString m_tempDirPath;
     const QString m_fileBaseName;
     QStringList m_tempFilePaths;

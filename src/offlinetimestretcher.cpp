@@ -28,11 +28,11 @@
 // Public Static:
 
 int OfflineTimeStretcher::stretch( const SharedSampleBuffer sampleBuffer,
-                                   const qreal timeRatio,
-                                   const qreal pitchScale,
                                    const int sampleRate,
                                    const int numChans,
-                                   RubberBandStretcher::Options options )
+                                   RubberBandStretcher::Options options,
+                                   const qreal timeRatio,
+                                   const qreal pitchScale )
 {
     RubberBandStretcher stretcher( sampleRate, numChans, options, timeRatio, pitchScale );
 
