@@ -60,7 +60,7 @@ public:
 
     void moveWaveforms( QList<int> oldOrderPositions, int numPlacesMoved );
 
-    // Insert waveform items at the order positions at which they are set
+    // Insert waveform items at the order positions at which they have been set to
     void insertWaveforms( QList<SharedWaveformItem> waveformItems );
 
     // Remove waveform items from the scene

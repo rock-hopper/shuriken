@@ -39,7 +39,7 @@ public:
     AddSlicePointItemCommand( int frameNum,
                               bool canBeMovedPastOtherSlicePoints,
                               WaveGraphicsView* graphicsView,
-                              QPushButton* sliceButton,
+                              QPushButton* sliceButton = NULL,
                               QUndoCommand* parent = NULL );
 
     void undo();
@@ -80,7 +80,7 @@ class DeleteSlicePointItemCommand : public QUndoCommand
 public:
     DeleteSlicePointItemCommand( SharedSlicePointItem slicePoint,
                                  WaveGraphicsView* graphicsView,
-                                 QPushButton* sliceButton,
+                                 QPushButton* sliceButton = NULL,
                                  QUndoCommand* parent = NULL );
 
     void undo();

@@ -250,9 +250,9 @@ bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer, co
         noteNum.setBit( m_nextFreeNote );
 
         m_sampler.addSound( new ShurikenSamplerSound( sampleBuffer,
-                                                     sampleRate,
-                                                     noteNum,           // MIDI note this sample should be assigned to
-                                                     m_nextFreeNote )); // Root/pitch-centre MIDI note
+                                                      sampleRate,
+                                                      noteNum,           // MIDI note this sample should be assigned to
+                                                      m_nextFreeNote )); // Root/pitch-centre MIDI note
 
         m_nextFreeNote++;
         isSampleAssignedToKey = true;
