@@ -28,7 +28,7 @@
 //==================================================================================================
 // Public:
 
-RubberbandAudioSource::RubberbandAudioSource( AudioSource* const source,
+RubberbandAudioSource::RubberbandAudioSource( SamplerAudioSource* const source,
                                               const int numChans,
                                               const RubberBandStretcher::Options options,
                                               const bool isJackSyncEnabled ) :
@@ -39,8 +39,9 @@ RubberbandAudioSource::RubberbandAudioSource( AudioSource* const source,
     m_options( RubberBandStretcher::OptionProcessRealTime | options ),
     m_stretcher( NULL ),
     m_inputBuffer( numChans, 8192 ),
-    m_timeRatio( 1.0 ),
-    m_prevTimeRatio( 1.0 ),
+    m_globalTimeRatio( 1.0 ),
+    m_prevGlobalTimeRatio( 1.0 ),
+    m_noteTimeRatio( 1.0 ),
     m_pitchScale( 1.0 ),
     m_prevPitchScale( 1.0 ),
     m_isPitchCorrectionEnabled( true ),
@@ -55,6 +56,8 @@ RubberbandAudioSource::RubberbandAudioSource( AudioSource* const source,
     m_originalBPM( 0.0 ),
     m_isJackSyncEnabled( isJackSyncEnabled )
 {
+    m_samplePositions.resize( 20 );
+    m_noteTimeRatios.resize( 20 );
 }
 
 
@@ -73,7 +76,8 @@ void RubberbandAudioSource::prepareToPlay( int samplesPerBlockExpected, double s
         m_stretcher = new RubberBandStretcher( sampleRate, m_numChans, m_options );
         m_stretcher->reset();
 
-        m_prevTimeRatio = 1.0;
+        m_noteTimeRatio = 1.0;
+        m_prevGlobalTimeRatio = 1.0;
         m_prevPitchScale = 1.0;
         m_prevTransientsOption = 0;
         m_prevPhaseOption = 0;
@@ -104,14 +108,14 @@ void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buf
     // JACK Sync
     if ( m_isJackSyncEnabled && Jack::g_currentBPM > 0.0 && m_originalBPM > 0.0 )
     {
-        m_timeRatio = m_originalBPM / Jack::g_currentBPM;
+        m_globalTimeRatio = m_originalBPM / Jack::g_currentBPM;
     }
 
     // Time ratio
-    if ( m_timeRatio != m_prevTimeRatio)
+    if ( m_globalTimeRatio != m_prevGlobalTimeRatio)
     {
-        m_stretcher->setTimeRatio( m_timeRatio );
-        m_prevTimeRatio = m_timeRatio;
+        m_stretcher->setTimeRatio( m_globalTimeRatio * m_noteTimeRatio );
+        m_prevGlobalTimeRatio = m_globalTimeRatio;
     }
 
     // Pitch scale
@@ -121,7 +125,7 @@ void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buf
     }
     else
     {
-        if ( m_timeRatio > 0.0 ) m_pitchScale = 1 / m_timeRatio;
+        if ( m_globalTimeRatio > 0.0 ) m_pitchScale = 1 / m_globalTimeRatio;
     }
 
     if ( m_pitchScale != m_prevPitchScale)
@@ -184,9 +188,69 @@ void RubberbandAudioSource::processNextAudioBlock()
 
         m_source->getNextAudioBlock( info );
 
-        m_stretcher->process( m_inputBuffer.getArrayOfReadPointers(), info.numSamples, false );
+        const MidiBuffer* midiBuffer = m_source->getMidiBuffer();
+
+        if ( midiBuffer->isEmpty() )
+        {
+            m_stretcher->process( m_inputBuffer.getArrayOfReadPointers(), info.numSamples, false );
+        }
+        else
+        {
+            int numEvents = 0;
+
+            {
+                int samplePos;
+                MidiMessage midiMessage;
+
+                int i = 0;
+                MidiBuffer::Iterator iterator( *midiBuffer );
+
+                while ( iterator.getNextEvent( midiMessage, samplePos ) )
+                {
+                    if ( midiMessage.isNoteOn() )
+                    {
+                        const qreal noteTimeRatio = m_noteTimeRatioTable.value( midiMessage.getNoteNumber(), 1.0 );
+
+                        m_samplePositions.setUnchecked( i, samplePos );
+                        m_noteTimeRatios.setUnchecked( i, noteTimeRatio );
+
+                        i++;
+                    }
+                }
+
+                numEvents = i;
+            }
+
+            // Process tail-end of previous note
+            if ( m_samplePositions.getFirst() > 0 )
+            {
+                m_stretcher->process( m_inputBuffer.getArrayOfReadPointers(), m_samplePositions.getFirst(), false );
+            }
+
+            // Set note-specific time ratio and start processing any new note
+            for ( int i = 0; i < numEvents; i++ )
+            {
+                m_noteTimeRatio = m_noteTimeRatios.getUnchecked( i );
+                m_stretcher->setTimeRatio( m_globalTimeRatio * m_noteTimeRatio );
+
+                const int samplePos = m_samplePositions.getUnchecked( i );
+
+                const int numSamples = i + 1 < numEvents ?
+                                       m_samplePositions.getUnchecked( i + 1 ) - samplePos :
+                                       info.numSamples - samplePos;
+
+                const float** sampleData = m_inputBuffer.getArrayOfReadPointers();
+
+                for ( int chanNum = 0; chanNum < m_inputBuffer.getNumChannels(); chanNum++ )
+                {
+                    sampleData[ chanNum ] += samplePos;
+                }
+
+                m_stretcher->process( sampleData, numSamples, false );
+            }
+        }
     }
-    else
+    else // numRequired == 0
     {
         m_stretcher->process( m_inputBuffer.getArrayOfReadPointers(), 0, false );
     }

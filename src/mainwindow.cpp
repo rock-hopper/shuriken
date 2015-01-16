@@ -676,27 +676,36 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
 
         if ( ! tempDirPath.isEmpty() )
         {
-            const QString fileBaseName = QString::number( m_undoStack.index() );
+//            const QString fileBaseName = QString::number( m_undoStack.index() );
 
             QUndoCommand* parentCommand = new QUndoCommand();
 
             new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_UI->waveGraphicsView, parentCommand );
 
-            QList<qreal> timeRatioList;
+//            QList<qreal> timeRatioList;
 
-            const qreal firstSampleNumFrames = m_sampleBufferList.at( orderPos )->getNumFrames();
-            const qreal secondSampleNumFrames = m_sampleBufferList.at( orderPos + 1 )->getNumFrames();
+            if ( m_samplerAudioSource != NULL && m_rubberbandAudioSource != NULL )
+            {
+                const int midiNoteA = m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos;
+                const int midiNoteB = m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos + 1;
 
-            timeRatioList << numFramesFromPrevSlicePoint / firstSampleNumFrames;
-            timeRatioList << numFramesToNextSlicePoint / secondSampleNumFrames;
+                const qreal numFramesA = m_sampleBufferList.at( orderPos )->getNumFrames();
+                const qreal numFramesB = m_sampleBufferList.at( orderPos + 1 )->getNumFrames();
 
-            new SelectiveTimeStretchCommand( this,
-                                             m_UI->waveGraphicsView,
-                                             orderPos,
-                                             timeRatioList,
-                                             tempDirPath,
-                                             fileBaseName,
-                                             parentCommand );
+                m_rubberbandAudioSource->setNoteTimeRatio( midiNoteA, numFramesFromPrevSlicePoint / numFramesA );
+                m_rubberbandAudioSource->setNoteTimeRatio( midiNoteB, numFramesToNextSlicePoint / numFramesB );
+            }
+
+//            timeRatioList << numFramesFromPrevSlicePoint / firstSampleNumFrames;
+//            timeRatioList << numFramesToNextSlicePoint / secondSampleNumFrames;
+//
+//            new SelectiveTimeStretchCommand( this,
+//                                             m_UI->waveGraphicsView,
+//                                             orderPos,
+//                                             timeRatioList,
+//                                             tempDirPath,
+//                                             fileBaseName,
+//                                             parentCommand );
 
             m_undoStack.push( parentCommand );
         }
@@ -1509,7 +1518,7 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
         {
             const qreal timeRatio = originalBPM / newBPM;
 
-            m_rubberbandAudioSource->setTimeRatio( timeRatio );
+            m_rubberbandAudioSource->setGlobalTimeRatio( timeRatio );
 
             m_UI->waveGraphicsView->updatePlayheadSpeed( timeRatio );
         }
@@ -1533,7 +1542,7 @@ void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
         {
             const qreal timeRatio = originalBPM / newBPM;
 
-            m_rubberbandAudioSource->setTimeRatio( timeRatio );
+            m_rubberbandAudioSource->setGlobalTimeRatio( timeRatio );
 
             m_UI->waveGraphicsView->updatePlayheadSpeed( timeRatio );
         }
@@ -1560,7 +1569,7 @@ void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
             isPitchCorrectionEnabled = m_UI->checkBox_PitchCorrection->isChecked();
         }
 
-        m_rubberbandAudioSource->setTimeRatio( timeRatio );
+        m_rubberbandAudioSource->setGlobalTimeRatio( timeRatio );
         m_rubberbandAudioSource->enablePitchCorrection( isPitchCorrectionEnabled );
     }
 }

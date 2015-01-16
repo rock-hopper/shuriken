@@ -41,7 +41,12 @@ public:
     void stop();
     void setLooping( bool isLoopingDesired );
 
-    MidiMessageCollector* getMidiInputCallback()     { return &m_midiCollector; }
+    int getLowestAssignedMidiNote() const           { return m_lowestAssignedNote; }
+
+    MidiMessageCollector* getMidiInputCallback()    { return &m_midiCollector; }
+
+    // Get the MIDI buffer that is filled each time 'getNextAudioBlock()' is called
+    const MidiBuffer* getMidiBuffer() const         { return &m_incomingMidi; }
 
     // For JUCE use only!
     void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;
@@ -62,7 +67,7 @@ private:
     Synthesiser m_sampler;
 
     int m_nextFreeNote;
-    volatile int m_firstNote;
+    volatile int m_lowestAssignedNote;
 
     volatile bool m_isPlaySeqEnabled;
     volatile bool m_isLoopingEnabled;
@@ -70,6 +75,8 @@ private:
     volatile int m_noteCounter;
     volatile int m_noteCounterEnd;
     volatile int m_frameCounter;
+
+    MidiBuffer m_incomingMidi;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( SamplerAudioSource );

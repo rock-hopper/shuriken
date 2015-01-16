@@ -34,7 +34,7 @@ SamplerAudioSource::SamplerAudioSource() :
     m_fileSampleRate( 0.0 ),
     m_playbackSampleRate( 0.0 ),
     m_nextFreeNote( Midi::MIDDLE_C ),
-    m_firstNote( Midi::MIDDLE_C ),
+    m_lowestAssignedNote( Midi::MIDDLE_C ),
     m_isPlaySeqEnabled( false ),
     m_isLoopingEnabled( false ),
     m_noteCounter( 0 ),
@@ -63,7 +63,7 @@ void SamplerAudioSource::setSamples( const QList<SharedSampleBuffer> sampleBuffe
         m_nextFreeNote = qMax( Midi::MAX_POLYPHONY - sampleBufferList.size(), 0 );
     }
 
-    m_firstNote = m_nextFreeNote;
+    m_lowestAssignedNote = m_nextFreeNote;
 
     int i = 0;
     while (  i < sampleBufferList.size() && i < Midi::MAX_POLYPHONY )
@@ -78,7 +78,7 @@ void SamplerAudioSource::setSamples( const QList<SharedSampleBuffer> sampleBuffe
 void SamplerAudioSource::playSample( const int sampleNum, const SharedSampleRange sampleRange )
 {
     const int midiChannel = 1;
-    const int midiNoteNum = m_firstNote + sampleNum;
+    const int midiNoteNum = m_lowestAssignedNote + sampleNum;
     const float velocity = 1.0;
 
     SynthesiserSound* sound = m_sampler.getSound( sampleNum );
@@ -98,7 +98,7 @@ void SamplerAudioSource::playSample( const int sampleNum, const SharedSampleRang
 void SamplerAudioSource::playSamples( const int firstSampleNum, const QList<SharedSampleRange> sampleRangeList )
 {
     m_tempSampleRangeList = sampleRangeList;
-    m_seqStartNote = m_firstNote + firstSampleNum;
+    m_seqStartNote = m_lowestAssignedNote + firstSampleNum;
     m_noteCounter = -1;
     m_noteCounterEnd = sampleRangeList.size();
     m_frameCounter = 0;
@@ -109,7 +109,7 @@ void SamplerAudioSource::playSamples( const int firstSampleNum, const QList<Shar
 
 void SamplerAudioSource::playAll()
 {
-    m_seqStartNote = m_firstNote;
+    m_seqStartNote = m_lowestAssignedNote;
     m_noteCounter = -1;
     m_noteCounterEnd = m_sampleBufferList.size();
     m_frameCounter = 0;
@@ -161,8 +161,8 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
 
 
     // Fill a MIDI buffer with incoming messages from the MIDI input
-    MidiBuffer incomingMidi;
-    m_midiCollector.removeNextBlockOfMessages( incomingMidi, bufferToFill.numSamples );
+    m_incomingMidi.clear();
+    m_midiCollector.removeNextBlockOfMessages( m_incomingMidi, bufferToFill.numSamples );
 
 
     // If requested, play all samples in sequence by adding appropriate MIDI messages to the buffer
@@ -197,13 +197,13 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
                                                                  1.0f );                            // Velocity
                 const int noteOnFrameNum = m_frameCounter;
 
-                incomingMidi.addEvent( message, noteOnFrameNum );
+                m_incomingMidi.addEvent( message, noteOnFrameNum );
 
                 int numFrames = 0;
 
                 if ( ! m_tempSampleRangeList.isEmpty() )
                 {
-                    SynthesiserSound* sound = m_sampler.getSound( m_seqStartNote - m_firstNote + m_noteCounter );
+                    SynthesiserSound* sound = m_sampler.getSound( m_seqStartNote - m_lowestAssignedNote + m_noteCounter );
 
                     ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
 
@@ -229,7 +229,7 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
 
 
     // Tell the sampler to process the MIDI events and generate its output
-    m_sampler.renderNextBlock( *bufferToFill.buffer, incomingMidi, 0, bufferToFill.numSamples );
+    m_sampler.renderNextBlock( *bufferToFill.buffer, m_incomingMidi, 0, bufferToFill.numSamples );
 }
 
 
@@ -270,5 +270,5 @@ void SamplerAudioSource::clearSamples()
     m_sampler.clearSounds();
     m_sampleBufferList.clear();
     m_nextFreeNote = Midi::MIDDLE_C;
-    m_firstNote = Midi::MIDDLE_C;
+    m_lowestAssignedNote = Midi::MIDDLE_C;
 }

@@ -24,8 +24,9 @@
 #define RUBBERBANDAUDIOSOURCE_H
 
 #include <QObject>
-#include "samplebuffer.h"
 #include "JuceHeader.h"
+#include "samplebuffer.h"
+#include "sampleraudiosource.h"
 #include <rubberband/RubberBandStretcher.h>
 
 using namespace RubberBand;
@@ -37,18 +38,21 @@ class RubberbandAudioSource : public QObject, public AudioSource
 
 public:
     // Caller is responsible for deleting 'source' after RubberbandAudioSource has been deleted
-    RubberbandAudioSource( AudioSource* source,
+    RubberbandAudioSource( SamplerAudioSource* source,
                            int numChans,
                            RubberBandStretcher::Options options,
                            bool isJackSyncEnabled = false );
+
     ~RubberbandAudioSource();
 
-    void setTimeRatio( qreal ratio )                                      { m_timeRatio = ratio; }
-    void setPitchScale( qreal scale )                                     { m_pitchScale = scale; }
-    void enablePitchCorrection( bool isEnabled )                          { m_isPitchCorrectionEnabled = isEnabled; }
+    void setGlobalTimeRatio( qreal ratio )                          { m_globalTimeRatio = ratio; }
+    void setPitchScale( qreal scale )                               { m_pitchScale = scale; }
+    void enablePitchCorrection( bool isEnabled )                    { m_isPitchCorrectionEnabled = isEnabled; }
+
+    void setNoteTimeRatio( int midiNote, qreal ratio )              { m_noteTimeRatioTable.insert( midiNote, ratio ); }
 
     // Only has an effect when JACK Sync is enabled
-    void setOriginalBPM( qreal bpm )                                      { m_originalBPM = bpm; }
+    void setOriginalBPM( qreal bpm )                                { m_originalBPM = bpm; }
 
     // For JUCE use only!
     void prepareToPlay( int samplesPerBlockExpected, double sampleRate ) override;
@@ -58,7 +62,7 @@ public:
 private:
     void processNextAudioBlock();
 
-    AudioSource* const m_source;
+    SamplerAudioSource* const m_source;
     const int m_numChans;
     const RubberBandStretcher::Options m_options;
 
@@ -66,8 +70,9 @@ private:
 
     SampleBuffer m_inputBuffer;
 
-    volatile qreal m_timeRatio;
-    qreal m_prevTimeRatio;
+    volatile qreal m_globalTimeRatio;
+    qreal m_prevGlobalTimeRatio;
+    qreal m_noteTimeRatio;
 
     volatile qreal m_pitchScale;
     qreal m_prevPitchScale;
@@ -90,7 +95,10 @@ private:
 
     volatile bool m_isJackSyncEnabled;
 
-    int m_totalNumRetrieved;
+    QHash<int, qreal> m_noteTimeRatioTable;
+
+    Array<int> m_samplePositions;
+    Array<qreal> m_noteTimeRatios;
 
 public slots:
     void setTransientsOption( RubberBandStretcher::Options option )       { m_transientsOption = option; }
