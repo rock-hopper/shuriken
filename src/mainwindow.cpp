@@ -49,8 +49,8 @@ MainWindow::MainWindow( QWidget* parent ) :
     m_appliedBPM( 0.0 ),
     m_isProjectOpen( false )
 {
-    setupUI();
     initialiseAudio();
+    setupUI();
 }
 
 
@@ -180,29 +180,6 @@ void MainWindow::initialiseAudio()
         m_deviceManager.setCurrentAudioDeviceType( "ALSA", true );
     }
 
-    m_optionsDialog = new OptionsDialog( m_deviceManager );
-
-    if ( m_optionsDialog != NULL )
-    {
-        // Centre form in desktop
-        m_optionsDialog->setGeometry
-        (
-            QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, m_optionsDialog->size(), QApplication::desktop()->availableGeometry() )
-        );
-
-        QObject::connect( m_optionsDialog, SIGNAL( realtimeModeToggled(bool) ),
-                          this, SLOT( enableRealtimeControls(bool) ) );
-
-        QObject::connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
-                          m_UI->doubleSpinBox_NewBPM, SLOT( setHidden(bool) ) );
-
-        QObject::connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
-                          m_UI->label_JackSync, SLOT( setVisible(bool) ) );
-
-        QObject::connect( m_optionsDialog, SIGNAL( timeStretchOptionsChanged() ),
-                          this, SLOT( enableSaveAction() ) );
-    }
-
     // Check if any errors occurred while the audio file handler was being initialised
     if ( ! m_fileHandler.getLastErrorTitle().isEmpty() )
     {
@@ -223,7 +200,7 @@ void MainWindow::setUpSampler()
 
     on_pushButton_Loop_clicked( m_UI->pushButton_Loop->isChecked() );
 
-    if ( m_optionsDialog->isRealtimeModeEnabled() ) // Realtime timestretch mode
+    if ( m_optionsDialog->isRealtimeModeEnabled() ) // Real-time time stretch mode
     {
         const int numChans = m_sampleHeader->numChans;
         const RubberBandStretcher::Options options = m_optionsDialog->getStretcherOptions();
@@ -249,7 +226,7 @@ void MainWindow::setUpSampler()
 
         on_checkBox_TimeStretch_toggled( m_UI->checkBox_TimeStretch->isChecked() );
     }
-    else // Offline timestretch mode
+    else // Offline time stretch mode
     {
         m_audioSourcePlayer.setSource( m_samplerAudioSource );
     }
@@ -452,6 +429,33 @@ void MainWindow::setupUI()
             QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, m_exportDialog->size(), QApplication::desktop()->availableGeometry() )
         );
     }
+
+
+    // Create options dialog
+    m_optionsDialog = new OptionsDialog( m_deviceManager );
+
+    if ( m_optionsDialog != NULL )
+    {
+        // Centre form in desktop
+        m_optionsDialog->setGeometry
+        (
+            QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, m_optionsDialog->size(), QApplication::desktop()->availableGeometry() )
+        );
+
+        QObject::connect( m_optionsDialog, SIGNAL( realtimeModeToggled(bool) ),
+                          this, SLOT( enableRealtimeControls(bool) ) );
+
+        QObject::connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
+                          m_UI->doubleSpinBox_NewBPM, SLOT( setHidden(bool) ) );
+
+        QObject::connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
+                          m_UI->label_JackSync, SLOT( setVisible(bool) ) );
+
+        QObject::connect( m_optionsDialog, SIGNAL( timeStretchOptionsChanged() ),
+                          this, SLOT( enableSaveAction() ) );
+
+        m_optionsDialog->disableTab( OptionsDialog::TIME_STRETCH_TAB );
+    }
 }
 
 
@@ -503,6 +507,8 @@ void MainWindow::enableUI()
     m_UI->actionAudition->setEnabled( true );
 
     m_UI->actionAudition->trigger();
+
+    m_optionsDialog->enableTab( OptionsDialog::TIME_STRETCH_TAB );
 }
 
 
@@ -555,6 +561,8 @@ void MainWindow::disableUI()
     m_UI->actionMulti_Select->setEnabled( false );
     m_UI->actionAudition->setEnabled( false );
     m_UI->actionQuantise->setEnabled( false );
+
+    m_optionsDialog->disableTab( OptionsDialog::TIME_STRETCH_TAB );
 }
 
 
@@ -1297,7 +1305,7 @@ void MainWindow::on_actionOptions_triggered()
         pos.setY( 0 );
 
     m_optionsDialog->move( pos );
-    m_optionsDialog->setCurrentTab( OptionsDialog::AUDIO_SETUP );
+    m_optionsDialog->setCurrentTab( OptionsDialog::AUDIO_SETUP_TAB );
     m_optionsDialog->show();
 }
 
@@ -1783,7 +1791,7 @@ void MainWindow::on_pushButton_TimestretchOptions_clicked()
         pos.setY( 0 );
 
     m_optionsDialog->move( pos );
-    m_optionsDialog->setCurrentTab( OptionsDialog::TIMESTRETCH );
+    m_optionsDialog->setCurrentTab( OptionsDialog::TIME_STRETCH_TAB );
     m_optionsDialog->show();
 }
 

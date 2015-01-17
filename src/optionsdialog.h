@@ -45,12 +45,14 @@ class OptionsDialog : public QDialog
     Q_OBJECT
 
 public:
-    enum Tab { AUDIO_SETUP = 0, TIMESTRETCH = 1 };
+    enum Tab { AUDIO_SETUP_TAB = 0, TIME_STRETCH_TAB = 1, PATHS_TAB = 2 };
     
     OptionsDialog( AudioDeviceManager& deviceManager, QWidget* parent = NULL );
     ~OptionsDialog();
 
     void setCurrentTab( Tab tab );
+    void enableTab( Tab tab );
+    void disableTab( Tab tab );
 
     bool isRealtimeModeEnabled() const;
 

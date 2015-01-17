@@ -83,6 +83,20 @@ void OptionsDialog::setCurrentTab( const Tab tab )
 
 
 
+void OptionsDialog::enableTab( const Tab tab )
+{
+    m_UI->tabWidget->setTabEnabled( tab, true );
+}
+
+
+
+void OptionsDialog::disableTab( const Tab tab )
+{
+    m_UI->tabWidget->setTabEnabled( tab, false );
+}
+
+
+
 bool OptionsDialog::isRealtimeModeEnabled() const
 {
     return m_UI->radioButton_RealTime->isChecked();
