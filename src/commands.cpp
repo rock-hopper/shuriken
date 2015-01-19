@@ -237,7 +237,12 @@ void SliceCommand::redo()
     m_findOnsetsButton->setEnabled( false );
     m_findBeatsButton->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
-    m_quantiseAction->setEnabled( true );
+
+    if ( m_mainWindow->m_rubberbandAudioSource != NULL )
+    {
+        m_quantiseAction->setEnabled( true );
+    }
+
     m_selectMoveItemsAction->trigger();
 
     m_mainWindow->updateSnapLoopMarkersComboBox();

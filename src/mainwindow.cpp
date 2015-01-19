@@ -823,6 +823,11 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
         m_UI->checkBox_TimeStretch->setVisible( true );
         m_UI->pushButton_Apply->setVisible( false );
 
+        if ( m_sampleBufferList.size() > 1 )
+        {
+            m_UI->actionQuantise->setEnabled( true );
+        }
+
         QObject::connect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
                           this, SLOT( resetSampler() ) );
     }
@@ -830,6 +835,8 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
     {
         m_UI->checkBox_TimeStretch->setVisible( false );
         m_UI->pushButton_Apply->setVisible( true );
+
+        m_UI->actionQuantise->setEnabled( false );
 
         QObject::disconnect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
                              this, SLOT( resetSampler() ) );

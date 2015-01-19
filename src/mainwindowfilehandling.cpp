@@ -168,6 +168,11 @@ void MainWindow::openProject( const QString filePath )
                 m_UI->pushButton_FindOnsets->setEnabled( false );
                 m_UI->pushButton_Slice->setEnabled( true );
                 m_UI->pushButton_Slice->setChecked( true );
+
+                if ( m_rubberbandAudioSource != NULL )
+                {
+                    m_UI->actionQuantise->setEnabled( true );
+                }
             }
 
             m_appliedBPM = settings.appliedBpm;
