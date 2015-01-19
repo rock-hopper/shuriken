@@ -77,20 +77,12 @@ void SamplerAudioSource::setSamples( const QList<SharedSampleBuffer> sampleBuffe
 
 void SamplerAudioSource::playSample( const int sampleNum, const SharedSampleRange sampleRange )
 {
-    const int midiChannel = 1;
-    const int midiNoteNum = m_lowestAssignedNote + sampleNum;
-    const float velocity = 1.0;
-
-    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
-
-    ShurikenSamplerSound* const samplerSound = dynamic_cast<ShurikenSamplerSound*>( sound );
-
-    if ( samplerSound != NULL )
-    {
-        stop();
-        samplerSound->setTempSampleRange( sampleRange );
-        m_sampler.noteOn( midiChannel, midiNoteNum, velocity );
-    }
+    m_tempSampleRangeList << sampleRange;
+    m_seqStartNote = m_lowestAssignedNote + sampleNum;
+    m_noteCounter = -1;
+    m_noteCounterEnd = 1;
+    m_frameCounter = 0;
+    m_isPlaySeqEnabled = true;
 }
 
 
