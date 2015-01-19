@@ -58,6 +58,7 @@ RubberbandAudioSource::RubberbandAudioSource( SamplerAudioSource* const source,
 {
     m_samplePositions.resize( 20 );
     m_noteTimeRatios.resize( 20 );
+    m_sampleData.resize( numChans );
 }
 
 
@@ -103,7 +104,7 @@ void RubberbandAudioSource::releaseResources()
 
 
 
-void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill )
+void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info )
 {
     // JACK Sync
     if ( m_isJackSyncEnabled && Jack::g_currentBPM > 0.0 && m_originalBPM > 0.0 )
@@ -162,12 +163,12 @@ void RubberbandAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buf
 //    const int latency = m_stretcher->getLatency() + m_reserveSize;
 //    std::cerr << "latency = " << latency << std::endl;
 
-    while ( m_stretcher->available() < bufferToFill.numSamples )
+    while ( m_stretcher->available() < info.numSamples )
     {
         processNextAudioBlock();
     }
 
-    m_stretcher->retrieve( bufferToFill.buffer->getArrayOfWritePointers(), bufferToFill.numSamples );
+    m_stretcher->retrieve( info.buffer->getArrayOfWritePointers(), info.numSamples );
 }
 
 
@@ -186,11 +187,11 @@ void RubberbandAudioSource::processNextAudioBlock()
         info.startSample = 0;
         info.numSamples = qMin( m_inputBuffer.getNumFrames(), numRequired );
 
-        m_source->getNextAudioBlock( info );
+        MidiBuffer midiBuffer;
 
-        const MidiBuffer* midiBuffer = m_source->getMidiBuffer();
+        m_source->getNextAudioBlock( info, midiBuffer );
 
-        if ( midiBuffer->isEmpty() )
+        if ( midiBuffer.isEmpty() )
         {
             m_stretcher->process( m_inputBuffer.getArrayOfReadPointers(), info.numSamples, false );
         }
@@ -203,7 +204,7 @@ void RubberbandAudioSource::processNextAudioBlock()
                 MidiMessage midiMessage;
 
                 int i = 0;
-                MidiBuffer::Iterator iterator( *midiBuffer );
+                MidiBuffer::Iterator iterator( midiBuffer );
 
                 while ( iterator.getNextEvent( midiMessage, samplePos ) )
                 {
@@ -239,14 +240,12 @@ void RubberbandAudioSource::processNextAudioBlock()
                                        m_samplePositions.getUnchecked( i + 1 ) - samplePos :
                                        info.numSamples - samplePos;
 
-                const float** sampleData = m_inputBuffer.getArrayOfReadPointers();
-
-                for ( int chanNum = 0; chanNum < m_inputBuffer.getNumChannels(); chanNum++ )
+                for ( int chanNum = 0; chanNum < m_numChans; chanNum++ )
                 {
-                    sampleData[ chanNum ] += samplePos;
+                    m_sampleData.setUnchecked( chanNum, m_inputBuffer.getReadPointer( chanNum, samplePos ) );
                 }
 
-                m_stretcher->process( sampleData, numSamples, false );
+                m_stretcher->process( m_sampleData.getRawDataPointer(), numSamples, false );
             }
         }
     }

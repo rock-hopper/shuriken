@@ -45,13 +45,11 @@ public:
 
     MidiMessageCollector* getMidiInputCallback()    { return &m_midiCollector; }
 
-    // Get the MIDI buffer that is filled each time 'getNextAudioBlock()' is called
-    const MidiBuffer* getMidiBuffer() const         { return &m_incomingMidi; }
-
     // For JUCE use only!
     void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;
     void releaseResources() override;
-    void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill ) override;
+    void getNextAudioBlock( const AudioSourceChannelInfo& info ) override;
+    void getNextAudioBlock( const AudioSourceChannelInfo& info, MidiBuffer& midiBuffer );
 
 private:
     bool addNewSample( SharedSampleBuffer sampleBuffer, qreal sampleRate );
@@ -75,8 +73,6 @@ private:
     volatile int m_noteCounter;
     volatile int m_noteCounterEnd;
     volatile int m_frameCounter;
-
-    MidiBuffer m_incomingMidi;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( SamplerAudioSource );

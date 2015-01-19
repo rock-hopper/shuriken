@@ -154,22 +154,29 @@ void SamplerAudioSource::releaseResources()
 
 
 
-void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill )
+void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info )
+{
+    MidiBuffer midiBuffer;
+    getNextAudioBlock( info, midiBuffer );
+}
+
+
+
+void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info, MidiBuffer& midiBuffer )
 {
     // The sampler always adds its output to the audio buffer, so we have to clear it first
-    bufferToFill.clearActiveBufferRegion();
+    info.clearActiveBufferRegion();
 
 
-    // Fill a MIDI buffer with incoming messages from the MIDI input
-    m_incomingMidi.clear();
-    m_midiCollector.removeNextBlockOfMessages( m_incomingMidi, bufferToFill.numSamples );
+    // Fill the MIDI buffer with incoming messages from the MIDI input
+    m_midiCollector.removeNextBlockOfMessages( midiBuffer, info.numSamples );
 
 
     // If requested, play all samples in sequence by adding appropriate MIDI messages to the buffer
     if ( m_isPlaySeqEnabled )
     {
         // End of note
-        if ( m_frameCounter + 1 < bufferToFill.numSamples )
+        if ( m_frameCounter + 1 < info.numSamples )
         {
             m_noteCounter++;
 
@@ -190,14 +197,14 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
         if ( m_isPlaySeqEnabled )
         {
             // Start of note
-            if ( m_frameCounter < bufferToFill.numSamples )
+            if ( m_frameCounter < info.numSamples )
             {
                 const MidiMessage message = MidiMessage::noteOn( 1,                                 // MIDI channel
                                                                  m_seqStartNote + m_noteCounter,    // MIDI note no.
                                                                  1.0f );                            // Velocity
                 const int noteOnFrameNum = m_frameCounter;
 
-                m_incomingMidi.addEvent( message, noteOnFrameNum );
+                midiBuffer.addEvent( message, noteOnFrameNum );
 
                 int numFrames = 0;
 
@@ -218,18 +225,18 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& buffer
                     numFrames = m_sampleBufferList.at( m_noteCounter )->getNumFrames();
                 }
                 m_frameCounter = roundToInt( numFrames * (m_playbackSampleRate / m_fileSampleRate) );
-                m_frameCounter -= bufferToFill.numSamples - noteOnFrameNum;
+                m_frameCounter -= info.numSamples - noteOnFrameNum;
             }
             else // Middle of note
             {
-                m_frameCounter -= bufferToFill.numSamples;
+                m_frameCounter -= info.numSamples;
             }
         }
     }
 
 
     // Tell the sampler to process the MIDI events and generate its output
-    m_sampler.renderNextBlock( *bufferToFill.buffer, m_incomingMidi, 0, bufferToFill.numSamples );
+    m_sampler.renderNextBlock( *info.buffer, midiBuffer, 0, info.numSamples );
 }
 
 

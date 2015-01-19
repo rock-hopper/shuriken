@@ -57,7 +57,7 @@ public:
     // For JUCE use only!
     void prepareToPlay( int samplesPerBlockExpected, double sampleRate ) override;
     void releaseResources() override;
-    void getNextAudioBlock( const AudioSourceChannelInfo& bufferToFill ) override;
+    void getNextAudioBlock( const AudioSourceChannelInfo& info ) override;
 
 private:
     void processNextAudioBlock();
@@ -99,6 +99,8 @@ private:
 
     Array<int> m_samplePositions;
     Array<qreal> m_noteTimeRatios;
+
+    Array<const float*> m_sampleData;
 
 public slots:
     void setTransientsOption( RubberBandStretcher::Options option )       { m_transientsOption = option; }
