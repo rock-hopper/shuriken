@@ -111,7 +111,7 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const QList<SharedS
 {
     m_sampleHeader = sampleHeader;
 
-    const int numFrames = SampleUtils::getTotalNumFrames( sampleBufferList );
+    const int totalNumFrames = SampleUtils::getTotalNumFrames( sampleBufferList );
 
     if ( totalWidth <= 0.0 )
     {
@@ -125,7 +125,7 @@ QList<SharedWaveformItem> WaveGraphicsView::createWaveforms( const QList<SharedS
 
     foreach ( SharedSampleBuffer sampleBuffer, sampleBufferList )
     {
-        const qreal sliceWidth = sampleBuffer->getNumFrames() * ( totalWidth / numFrames );
+        const qreal sliceWidth = sampleBuffer->getNumFrames() * ( totalWidth / totalNumFrames );
 
         SharedWaveformItem waveformItem( new WaveformItem( sampleBuffer,
                                                            orderPos,
@@ -185,12 +185,12 @@ void WaveGraphicsView::insertWaveforms( const QList<SharedWaveformItem> waveform
     }
 
     // Resize and reposition all waveform items
-    const int numFrames = getTotalNumFrames( m_waveformItemList );
+    const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
     qreal scenePosX = 0.0;
 
     foreach ( SharedWaveformItem item, m_waveformItemList )
     {
-        const qreal itemWidth = item->getSampleBuffer()->getNumFrames() * ( scene()->width() / numFrames );
+        const qreal itemWidth = item->getSampleBuffer()->getNumFrames() * ( scene()->width() / totalNumFrames );
 
         item->setRect( 0.0, 0.0, itemWidth, scene()->height() );
         item->setPos( scenePosX, Ruler::HEIGHT );
@@ -303,24 +303,47 @@ QList<int> WaveGraphicsView::getSelectedWaveformsOrderPositions() const
 
 
 
-SharedWaveformItem WaveGraphicsView::getWaveformAt( const int orderPos ) const
+void WaveGraphicsView::resizeWaveforms( const QList<int> orderPositions, const QList<qreal> scaleFactorX )
 {
-    return m_waveformItemList.at( orderPos );
+    if ( ! m_waveformItemList.isEmpty() )
+    {
+        const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
+
+        for ( int i = 0; i < orderPositions.size(); i++ )
+        {
+            SharedWaveformItem item = m_waveformItemList.at( orderPositions.at( i ) );
+
+            const qreal origWidth = item->getSampleBuffer()->getNumFrames() * ( scene()->width() / totalNumFrames );
+            const qreal newWidth = origWidth * scaleFactorX.at( i );
+
+            item->setRect( 0.0, 0.0, newWidth, scene()->height() );
+
+            slideWaveformItemIntoPlace( orderPositions.at( i ) );
+        }
+    }
 }
 
 
 
-void WaveGraphicsView::resizeWaveform( const int orderPos, const qreal scaleFactorX )
+QList<qreal> WaveGraphicsView::getWaveformScaleFactors( const QList<int> orderPositions ) const
 {
+    QList<qreal> scaleFactorList;
+
     if ( ! m_waveformItemList.isEmpty() )
     {
-        SharedWaveformItem waveformItem = m_waveformItemList.at( orderPos );
+        const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
 
-        const qreal newWidth = waveformItem->rect().width() * scaleFactorX;
-        waveformItem->setRect( 0.0, 0.0, newWidth, scene()->height() );
+        foreach ( int orderPos, orderPositions )
+        {
+            SharedWaveformItem item = m_waveformItemList.at( orderPos );
 
-        slideWaveformItemIntoPlace( orderPos );
+            const qreal origWidth = item->getSampleBuffer()->getNumFrames() * ( scene()->width() / totalNumFrames );
+
+            scaleFactorList << item->rect().width() / origWidth;
+        }
     }
+
+    return scaleFactorList;
 }
 
 

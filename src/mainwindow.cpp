@@ -684,38 +684,33 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
 
         if ( ! tempDirPath.isEmpty() )
         {
-//            const QString fileBaseName = QString::number( m_undoStack.index() );
-
-            QUndoCommand* parentCommand = new QUndoCommand();
-
-            new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_UI->waveGraphicsView, parentCommand );
-
-//            QList<qreal> timeRatioList;
-
             if ( m_samplerAudioSource != NULL && m_rubberbandAudioSource != NULL )
             {
-                const int midiNoteA = m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos;
-                const int midiNoteB = m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos + 1;
+                QUndoCommand* parentCommand = new QUndoCommand();
 
-                const qreal numFramesA = m_sampleBufferList.at( orderPos )->getNumFrames();
-                const qreal numFramesB = m_sampleBufferList.at( orderPos + 1 )->getNumFrames();
+                new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_UI->waveGraphicsView, parentCommand );
 
-                m_rubberbandAudioSource->setNoteTimeRatio( midiNoteA, numFramesFromPrevSlicePoint / numFramesA );
-                m_rubberbandAudioSource->setNoteTimeRatio( midiNoteB, numFramesToNextSlicePoint / numFramesB );
+                QList<int> orderPositions;
+                QList<qreal> timeRatios;
+                QList<int> midiNotes;
+
+                orderPositions << orderPos << orderPos + 1;
+
+                timeRatios << (qreal) numFramesFromPrevSlicePoint / m_sampleBufferList.at( orderPos )->getNumFrames();
+                timeRatios << (qreal) numFramesToNextSlicePoint / m_sampleBufferList.at( orderPos + 1 )->getNumFrames();
+
+                midiNotes << m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos;
+                midiNotes << m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos + 1;
+
+                new RealTimeStretchCommand( m_UI->waveGraphicsView,
+                                            orderPositions,
+                                            timeRatios,
+                                            midiNotes,
+                                            m_rubberbandAudioSource,
+                                            parentCommand );
+
+                m_undoStack.push( parentCommand );
             }
-
-//            timeRatioList << numFramesFromPrevSlicePoint / firstSampleNumFrames;
-//            timeRatioList << numFramesToNextSlicePoint / secondSampleNumFrames;
-//
-//            new SelectiveTimeStretchCommand( this,
-//                                             m_UI->waveGraphicsView,
-//                                             orderPos,
-//                                             timeRatioList,
-//                                             tempDirPath,
-//                                             fileBaseName,
-//                                             parentCommand );
-
-            m_undoStack.push( parentCommand );
         }
         else
         {

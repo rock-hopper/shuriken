@@ -68,11 +68,14 @@ public:
 
     QList<int> getSelectedWaveformsOrderPositions() const;
 
-    SharedWaveformItem getWaveformAt( int orderPos ) const;
+    SharedWaveformItem getWaveformAt( int orderPos ) const  { return m_waveformItemList.at( orderPos ); }
 
     int getNumWaveforms() const                             { return m_waveformItemList.size(); }
 
-    void resizeWaveform( int orderPos, qreal scaleFactorX );
+    // Resize waveform items by a ratio of their original size (not necessarily their current size)
+    void resizeWaveforms( QList<int> orderPositions, QList<qreal> scaleFactorX );
+
+    QList<qreal> getWaveformScaleFactors( QList<int> orderPositions ) const;
 
     // Redraw all waveform items
     void redrawWaveforms();

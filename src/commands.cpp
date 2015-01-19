@@ -1059,10 +1059,10 @@ void SelectiveTimeStretchCommand::undo()
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                     m_mainWindow->m_sampleHeader->sampleRate );
 
-    for ( int i = 0; i < m_timeRatioList.size(); i++ )
-    {
-        m_graphicsView->resizeWaveform( m_firstSampleOrderPos + i, 1 / m_timeRatioList.at( i ) );
-    }
+//    for ( int i = 0; i < m_timeRatioList.size(); i++ )
+//    {
+//        m_graphicsView->resizeWaveform( m_firstSampleOrderPos + i, 1 / m_timeRatioList.at( i ) );
+//    }
 
     QApplication::restoreOverrideCursor();
 }
@@ -1116,10 +1116,10 @@ void SelectiveTimeStretchCommand::redo()
         m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                         m_mainWindow->m_sampleHeader->sampleRate );
 
-        for ( int i = 0; i < m_timeRatioList.size(); i++ )
-        {
-            m_graphicsView->resizeWaveform( m_firstSampleOrderPos + i, m_timeRatioList.at( i ) );
-        }
+//        for ( int i = 0; i < m_timeRatioList.size(); i++ )
+//        {
+//            m_graphicsView->resizeWaveform( m_firstSampleOrderPos + i, m_timeRatioList.at( i ) );
+//        }
 
         QApplication::restoreOverrideCursor();
     }
@@ -1130,4 +1130,47 @@ void SelectiveTimeStretchCommand::redo()
         MessageBoxes::showWarningDialog( m_mainWindow->m_fileHandler.getLastErrorTitle(),
                                          m_mainWindow->m_fileHandler.getLastErrorInfo() );
     }
+}
+
+
+
+//==================================================================================================
+
+RealTimeStretchCommand::RealTimeStretchCommand( WaveGraphicsView* const graphicsView,
+                                                const QList<int> orderPositions,
+                                                const QList<qreal> timeRatios,
+                                                const QList<int> midiNotes,
+                                                RubberbandAudioSource* const source,
+                                                QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    m_graphicsView( graphicsView ),
+    m_orderPositions( orderPositions ),
+    m_origTimeRatios( graphicsView->getWaveformScaleFactors( orderPositions ) ),
+    m_timeRatios( timeRatios ),
+    m_midiNotes( midiNotes ),
+    m_rubberbandAudioSource( source )
+{
+    setText( "Real-time Time Stretch" );
+}
+
+
+
+void RealTimeStretchCommand::undo()
+{
+    for ( int i = 0; i < m_midiNotes.size(); i++ )
+    {
+        m_rubberbandAudioSource->setNoteTimeRatio( m_midiNotes.at( i ), m_origTimeRatios.at( i ) );
+    }
+    m_graphicsView->resizeWaveforms( m_orderPositions, m_origTimeRatios );
+}
+
+
+
+void RealTimeStretchCommand::redo()
+{
+    for ( int i = 0; i < m_midiNotes.size(); i++ )
+    {
+        m_rubberbandAudioSource->setNoteTimeRatio( m_midiNotes.at( i ), m_timeRatios.at( i ) );
+    }
+    m_graphicsView->resizeWaveforms( m_orderPositions, m_timeRatios );
 }
