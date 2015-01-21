@@ -55,7 +55,7 @@ class MainWindow : public QMainWindow
     friend class JoinCommand;
     friend class SplitCommand;
     friend class GlobalTimeStretchCommand;
-    friend class SelectiveTimeStretchCommand;
+    friend class RenderTimeStretchCommand;
 
 public:
     MainWindow( QWidget* parent = NULL );
@@ -100,6 +100,9 @@ private:
     void openProjectDialog();
     void importAudioFileDialog();
     void exportAsDialog();
+
+    bool isSelectiveTimeStretchInUse() const;
+    void renderTimeStretch();
 
     Ui::MainWindow* m_UI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 

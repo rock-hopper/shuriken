@@ -867,7 +867,7 @@ GlobalTimeStretchCommand::GlobalTimeStretchCommand( MainWindow* const mainWindow
     m_tempDirPath( tempDirPath ),
     m_fileBaseName( fileBaseName )
 {
-    setText( "Global Timestretch" );
+    setText( "Global Time Stretch" );
 }
 
 
@@ -878,12 +878,13 @@ void GlobalTimeStretchCommand::undo()
 
     m_mainWindow->stopPlayback();
 
+    const int numChans = m_mainWindow->m_sampleHeader->numChans;
+
     for ( int i = 0; i < m_tempFilePaths.size(); i++ )
     {
         const QString filePath = m_tempFilePaths.at( i );
         const SharedSampleBuffer origSampleBuffer = m_mainWindow->m_fileHandler.getSampleData( filePath );
 
-        const int numChans = origSampleBuffer->getNumChannels();
         const int origBufferSize = origSampleBuffer->getNumFrames();
 
         const SharedSampleBuffer sampleBuffer = m_mainWindow->m_sampleBufferList.at( i );
@@ -1017,64 +1018,70 @@ void GlobalTimeStretchCommand::updateLoopMarkers( const qreal timeRatio )
 
 //==================================================================================================
 
-SelectiveTimeStretchCommand::SelectiveTimeStretchCommand( MainWindow* const mainWindow,
-                                        WaveGraphicsView* const graphicsView,
-                                        const int firstSampleOrderPos,
-                                        QList<qreal> timeRatioList,
-                                        const QString tempDirPath,
-                                        const QString fileBaseName,
-                                        QUndoCommand* parent ) :
+RenderTimeStretchCommand::RenderTimeStretchCommand( MainWindow* const mainWindow,
+                                                    WaveGraphicsView* const graphicsView,
+                                                    const QString tempDirPath,
+                                                    const QString fileBaseName,
+                                                    QUndoCommand* parent ) :
     QUndoCommand( parent ),
     m_mainWindow( mainWindow ),
     m_graphicsView( graphicsView ),
     m_options( m_mainWindow->m_optionsDialog->getStretcherOptions() & ~RubberBandStretcher::OptionProcessRealTime ),
-    m_firstSampleOrderPos( firstSampleOrderPos ),
-    m_timeRatioList( timeRatioList ),
     m_tempDirPath( tempDirPath ),
     m_fileBaseName( fileBaseName )
 {
-    setText( "Selective Timestretch" );
+    setText( "Render Time Stretch" );
 }
 
 
 
-void SelectiveTimeStretchCommand::undo()
+void RenderTimeStretchCommand::undo()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     m_mainWindow->stopPlayback();
+
+    if ( m_mainWindow->m_rubberbandAudioSource == NULL )
+    {
+        m_mainWindow->m_optionsDialog->enableRealtimeMode();
+    }
+
+    const int lowestAssignedMidiNote = m_mainWindow->m_samplerAudioSource->getLowestAssignedMidiNote();
+    const int numChans = m_mainWindow->m_sampleHeader->numChans;
+
+    QList<int> orderPosList;
 
     for ( int i = 0; i < m_tempFilePaths.size(); i++ )
     {
         const QString filePath = m_tempFilePaths.at( i );
         const SharedSampleBuffer origSampleBuffer = m_mainWindow->m_fileHandler.getSampleData( filePath );
 
-        const int numChans = origSampleBuffer->getNumChannels();
         const int origBufferSize = origSampleBuffer->getNumFrames();
 
-        const SharedSampleBuffer sampleBuffer = m_mainWindow->m_sampleBufferList.at( m_firstSampleOrderPos + i );
+        const SharedSampleBuffer sampleBuffer = m_mainWindow->m_sampleBufferList.at( i );
         sampleBuffer->setSize( numChans, origBufferSize );
 
         for ( int chanNum = 0; chanNum < numChans; chanNum++ )
         {
             sampleBuffer->copyFrom( chanNum, 0, *origSampleBuffer.data(), chanNum, 0, origBufferSize );
         }
+
+        m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( lowestAssignedMidiNote + i, m_timeRatioList.at( i ) );
+
+        orderPosList << i;
     }
 
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                     m_mainWindow->m_sampleHeader->sampleRate );
 
-//    for ( int i = 0; i < m_timeRatioList.size(); i++ )
-//    {
-//        m_graphicsView->resizeWaveform( m_firstSampleOrderPos + i, 1 / m_timeRatioList.at( i ) );
-//    }
+    m_graphicsView->resizeWaveforms( orderPosList, m_timeRatioList );
 
     QApplication::restoreOverrideCursor();
 }
 
 
 
-void SelectiveTimeStretchCommand::redo()
+void RenderTimeStretchCommand::redo()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
@@ -1082,11 +1089,11 @@ void SelectiveTimeStretchCommand::redo()
 
     m_tempFilePaths.clear();
 
-    for ( int i = 0; i < m_timeRatioList.size(); i++ )
+    for ( int i = 0; i < m_mainWindow->m_sampleBufferList.size(); i++ )
     {
         const QString path = m_mainWindow->m_fileHandler.saveAudioFile( m_tempDirPath,
                                                                         m_fileBaseName + "_" + QString::number( i ),
-                                                                        m_mainWindow->m_sampleBufferList.at( m_firstSampleOrderPos + i ),
+                                                                        m_mainWindow->m_sampleBufferList.at( i ),
                                                                         m_mainWindow->m_sampleHeader->sampleRate,
                                                                         m_mainWindow->m_sampleHeader->sampleRate,
                                                                         AudioFileHandler::TEMP_FORMAT );
@@ -1103,28 +1110,32 @@ void SelectiveTimeStretchCommand::redo()
 
     if ( ! m_tempFilePaths.isEmpty() )
     {
+        m_timeRatioList.clear();
+
+        const int lowestAssignedMidiNote = m_mainWindow->m_samplerAudioSource->getLowestAssignedMidiNote();
 
         const int sampleRate = m_mainWindow->m_sampleHeader->sampleRate;
         const int numChans = m_mainWindow->m_sampleHeader->numChans;
 
         const qreal pitchScale = 1.0;
 
-        for ( int i = 0; i < m_timeRatioList.size(); i++ )
+        for ( int i = 0; i < m_mainWindow->m_sampleBufferList.size(); i++ )
         {
-            const qreal timeRatio = m_timeRatioList.at( i );
+            const int midiNote = lowestAssignedMidiNote + i;
+            const qreal timeRatio = m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( midiNote );
 
-            SharedSampleBuffer sampleBuffer = m_mainWindow->m_sampleBufferList.at( m_firstSampleOrderPos + i );
+            SharedSampleBuffer sampleBuffer = m_mainWindow->m_sampleBufferList.at( i );
 
             OfflineTimeStretcher::stretch( sampleBuffer, sampleRate, numChans, m_options, timeRatio, pitchScale );
+
+            m_timeRatioList << timeRatio;
+            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( midiNote, 1.0 );
         }
 
         m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                         m_mainWindow->m_sampleHeader->sampleRate );
 
-//        for ( int i = 0; i < m_timeRatioList.size(); i++ )
-//        {
-//            m_graphicsView->resizeWaveform( m_firstSampleOrderPos + i, m_timeRatioList.at( i ) );
-//        }
+        m_graphicsView->redrawWaveforms();
 
         QApplication::restoreOverrideCursor();
     }
@@ -1141,12 +1152,12 @@ void SelectiveTimeStretchCommand::redo()
 
 //==================================================================================================
 
-RealTimeStretchCommand::RealTimeStretchCommand( WaveGraphicsView* const graphicsView,
-                                                const QList<int> orderPositions,
-                                                const QList<qreal> timeRatios,
-                                                const QList<int> midiNotes,
-                                                RubberbandAudioSource* const source,
-                                                QUndoCommand* parent ) :
+SelectiveTimeStretchCommand::SelectiveTimeStretchCommand( WaveGraphicsView* const graphicsView,
+                                                          const QList<int> orderPositions,
+                                                          const QList<qreal> timeRatios,
+                                                          const QList<int> midiNotes,
+                                                          RubberbandAudioSource* const source,
+                                                          QUndoCommand* parent ) :
     QUndoCommand( parent ),
     m_graphicsView( graphicsView ),
     m_orderPositions( orderPositions ),
@@ -1155,12 +1166,12 @@ RealTimeStretchCommand::RealTimeStretchCommand( WaveGraphicsView* const graphics
     m_midiNotes( midiNotes ),
     m_rubberbandAudioSource( source )
 {
-    setText( "Real-time Time Stretch" );
+    setText( "Selective Time Stretch" );
 }
 
 
 
-void RealTimeStretchCommand::undo()
+void SelectiveTimeStretchCommand::undo()
 {
     for ( int i = 0; i < m_midiNotes.size(); i++ )
     {
@@ -1171,7 +1182,7 @@ void RealTimeStretchCommand::undo()
 
 
 
-void RealTimeStretchCommand::redo()
+void SelectiveTimeStretchCommand::redo()
 {
     for ( int i = 0; i < m_midiNotes.size(); i++ )
     {

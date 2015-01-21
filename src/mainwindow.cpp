@@ -629,6 +629,59 @@ void MainWindow::closeProject()
 
 
 
+bool MainWindow::isSelectiveTimeStretchInUse() const
+{
+    bool isSelectiveTimeStretchInUse = false;
+
+    if ( m_samplerAudioSource != NULL && m_rubberbandAudioSource != NULL )
+    {
+        const int lowestAssignedMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
+
+        for ( int i = 0; i < m_sampleBufferList.size(); i++ )
+        {
+            const int midiNote = lowestAssignedMidiNote + i;
+            const qreal timeRatio = m_rubberbandAudioSource->getNoteTimeRatio( midiNote );
+
+            if ( timeRatio != 1.0 )
+            {
+                isSelectiveTimeStretchInUse = true;
+                break;
+            }
+        }
+    }
+
+    return isSelectiveTimeStretchInUse;
+}
+
+
+
+void MainWindow::renderTimeStretch()
+{
+    const QString tempDirPath = m_optionsDialog->getTempDirPath();
+
+    if ( ! tempDirPath.isEmpty() )
+    {
+        if ( m_samplerAudioSource != NULL && m_rubberbandAudioSource != NULL )
+        {
+            const QString fileBaseName = QString::number( m_undoStack.index() );
+
+            QUndoCommand* command = new RenderTimeStretchCommand( this,
+                                                                  m_UI->waveGraphicsView,
+                                                                  tempDirPath,
+                                                                  fileBaseName );
+
+            m_undoStack.push( command );
+        }
+    }
+    else
+    {
+        MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
+                                         tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+    }
+}
+
+
+
 //==================================================================================================
 // Public Slots:
 
@@ -680,42 +733,32 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
 {
     if ( m_UI->actionQuantise->isChecked() )
     {
-        const QString tempDirPath = m_optionsDialog->getTempDirPath();
-
-        if ( ! tempDirPath.isEmpty() )
+        if ( m_samplerAudioSource != NULL && m_rubberbandAudioSource != NULL )
         {
-            if ( m_samplerAudioSource != NULL && m_rubberbandAudioSource != NULL )
-            {
-                QUndoCommand* parentCommand = new QUndoCommand();
+            QUndoCommand* parentCommand = new QUndoCommand();
 
-                new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_UI->waveGraphicsView, parentCommand );
+            new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_UI->waveGraphicsView, parentCommand );
 
-                QList<int> orderPositions;
-                QList<qreal> timeRatios;
-                QList<int> midiNotes;
+            QList<int> orderPositions;
+            QList<qreal> timeRatios;
+            QList<int> midiNotes;
 
-                orderPositions << orderPos << orderPos + 1;
+            orderPositions << orderPos << orderPos + 1;
 
-                timeRatios << (qreal) numFramesFromPrevSlicePoint / m_sampleBufferList.at( orderPos )->getNumFrames();
-                timeRatios << (qreal) numFramesToNextSlicePoint / m_sampleBufferList.at( orderPos + 1 )->getNumFrames();
+            timeRatios << (qreal) numFramesFromPrevSlicePoint / m_sampleBufferList.at( orderPos )->getNumFrames();
+            timeRatios << (qreal) numFramesToNextSlicePoint / m_sampleBufferList.at( orderPos + 1 )->getNumFrames();
 
-                midiNotes << m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos;
-                midiNotes << m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos + 1;
+            midiNotes << m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos;
+            midiNotes << m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos + 1;
 
-                new RealTimeStretchCommand( m_UI->waveGraphicsView,
-                                            orderPositions,
-                                            timeRatios,
-                                            midiNotes,
-                                            m_rubberbandAudioSource,
-                                            parentCommand );
+            new SelectiveTimeStretchCommand( m_UI->waveGraphicsView,
+                                             orderPositions,
+                                             timeRatios,
+                                             midiNotes,
+                                             m_rubberbandAudioSource,
+                                             parentCommand );
 
-                m_undoStack.push( parentCommand );
-            }
-        }
-        else
-        {
-            MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
-                                             tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+            m_undoStack.push( parentCommand );
         }
     }
     else
@@ -840,6 +883,11 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
 
         QObject::disconnect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
                              this, SLOT( resetSampler() ) );
+
+        if ( isSelectiveTimeStretchInUse() )
+        {
+            renderTimeStretch();
+        }
     }
 
     resetSampler();
@@ -1412,6 +1460,11 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
     }
     else // Unslice
     {
+        if ( isSelectiveTimeStretchInUse() )
+        {
+            renderTimeStretch();
+        }
+
         QUndoCommand* parentCommand = new QUndoCommand();
 
         int frameNum = 0;

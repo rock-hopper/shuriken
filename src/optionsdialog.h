@@ -54,10 +54,11 @@ public:
     void enableTab( Tab tab );
     void disableTab( Tab tab );
 
-    bool isRealtimeModeEnabled() const;
-
     RubberBandStretcher::Options getStretcherOptions() const    { return m_stretcherOptions; }
     void setStretcherOptions( RubberBandStretcher::Options options );
+
+    bool isRealtimeModeEnabled() const;
+    void enableRealtimeMode();
 
     bool isJackSyncEnabled() const;
     void enableJackSync();

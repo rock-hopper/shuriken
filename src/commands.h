@@ -403,16 +403,14 @@ private:
 
 
 
-class SelectiveTimeStretchCommand : public QUndoCommand
+class RenderTimeStretchCommand : public QUndoCommand
 {
 public:
-    SelectiveTimeStretchCommand( MainWindow* mainWindow,
-                                 WaveGraphicsView* graphicsView,
-                                 int firstSampleOrderPos,
-                                 QList<qreal> timeRatioList,
-                                 QString tempDirPath,
-                                 QString fileBaseName,
-                                 QUndoCommand* parent = NULL );
+    RenderTimeStretchCommand( MainWindow* mainWindow,
+                              WaveGraphicsView* graphicsView,
+                              QString tempDirPath,
+                              QString fileBaseName,
+                              QUndoCommand* parent = NULL );
 
     void undo();
     void redo();
@@ -421,24 +419,23 @@ private:
     MainWindow* const m_mainWindow;
     WaveGraphicsView* const m_graphicsView;
     const RubberBandStretcher::Options m_options;
-    const int m_firstSampleOrderPos;
-    const QList<qreal> m_timeRatioList;
     const QString m_tempDirPath;
     const QString m_fileBaseName;
     QStringList m_tempFilePaths;
+    QList<qreal> m_timeRatioList;
 };
 
 
 
-class RealTimeStretchCommand : public QUndoCommand
+class SelectiveTimeStretchCommand : public QUndoCommand
 {
 public:
-    RealTimeStretchCommand( WaveGraphicsView* graphicsView,
-                            QList<int> orderPositions,
-                            QList<qreal> timeRatios,
-                            QList<int> midiNotes,
-                            RubberbandAudioSource* source,
-                            QUndoCommand* parent = NULL );
+    SelectiveTimeStretchCommand( WaveGraphicsView* graphicsView,
+                                 QList<int> orderPositions,
+                                 QList<qreal> timeRatios,
+                                 QList<int> midiNotes,
+                                 RubberbandAudioSource* source,
+                                 QUndoCommand* parent = NULL );
 
     void undo();
     void redo();

@@ -49,6 +49,7 @@ public:
     void setPitchScale( qreal scale )                               { m_pitchScale = scale; }
     void enablePitchCorrection( bool isEnabled )                    { m_isPitchCorrectionEnabled = isEnabled; }
 
+    qreal getNoteTimeRatio( int midiNote ) const                    { return m_noteTimeRatioTable.value( midiNote, 1.0 ); }
     void setNoteTimeRatio( int midiNote, qreal ratio )              { m_noteTimeRatioTable.insert( midiNote, ratio ); }
 
     // Only has an effect when JACK Sync is enabled
@@ -100,7 +101,7 @@ private:
     Array<int> m_samplePositions;
     Array<qreal> m_noteTimeRatios;
 
-    Array<const float*> m_sampleData;
+    Array<const float*> m_inputBufferPtrs;
 
 public slots:
     void setTransientsOption( RubberBandStretcher::Options option )       { m_transientsOption = option; }

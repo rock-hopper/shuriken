@@ -58,7 +58,7 @@ RubberbandAudioSource::RubberbandAudioSource( SamplerAudioSource* const source,
 {
     m_samplePositions.resize( 20 );
     m_noteTimeRatios.resize( 20 );
-    m_sampleData.resize( numChans );
+    m_inputBufferPtrs.resize( numChans );
 }
 
 
@@ -242,10 +242,10 @@ void RubberbandAudioSource::processNextAudioBlock()
 
                 for ( int chanNum = 0; chanNum < m_numChans; chanNum++ )
                 {
-                    m_sampleData.setUnchecked( chanNum, m_inputBuffer.getReadPointer( chanNum, samplePos ) );
+                    m_inputBufferPtrs.setUnchecked( chanNum, m_inputBuffer.getReadPointer( chanNum, samplePos ) );
                 }
 
-                m_stretcher->process( m_sampleData.getRawDataPointer(), numSamples, false );
+                m_stretcher->process( m_inputBufferPtrs.getRawDataPointer(), numSamples, false );
             }
         }
     }

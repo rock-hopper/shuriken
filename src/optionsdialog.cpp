@@ -97,13 +97,6 @@ void OptionsDialog::disableTab( const Tab tab )
 
 
 
-bool OptionsDialog::isRealtimeModeEnabled() const
-{
-    return m_UI->radioButton_RealTime->isChecked();
-}
-
-
-
 void OptionsDialog::setStretcherOptions( const RubberBandStretcher::Options options )
 {
     if ( options & RubberBandStretcher::OptionProcessRealTime )
@@ -186,6 +179,20 @@ void OptionsDialog::setStretcherOptions( const RubberBandStretcher::Options opti
     {
         m_UI->radioButton_HighSpeed->click();
     }
+}
+
+
+
+bool OptionsDialog::isRealtimeModeEnabled() const
+{
+    return m_UI->radioButton_RealTime->isChecked();
+}
+
+
+
+void OptionsDialog::enableRealtimeMode()
+{
+    m_UI->radioButton_RealTime->click();
 }
 
 
