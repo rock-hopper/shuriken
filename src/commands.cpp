@@ -351,15 +351,15 @@ void UnsliceCommand::redo()
 
 //==================================================================================================
 
-EnableQuantisationCommand::EnableQuantisationCommand( WaveGraphicsView* const graphicsView,
-                                                      QPushButton* const sliceButton,
-                                                      QAction* const addSlicePointAction,
-                                                      QAction* const selectMoveItemsAction,
-                                                      QAction* const multiSelectItemsAction,
-                                                      QAction* const auditionItemsAction,
-                                                      QAction* const selectiveTimeStretchAction,
-                                                      const QList<SharedSampleBuffer> sampleBufferList,
-                                                      QUndoCommand* parent ) :
+EnableSelectiveTSCommand::EnableSelectiveTSCommand( WaveGraphicsView* const graphicsView,
+                                                    QPushButton* const sliceButton,
+                                                    QAction* const addSlicePointAction,
+                                                    QAction* const selectMoveItemsAction,
+                                                    QAction* const multiSelectItemsAction,
+                                                    QAction* const auditionItemsAction,
+                                                    QAction* const selectiveTimeStretchAction,
+                                                    const QList<SharedSampleBuffer> sampleBufferList,
+                                                    QUndoCommand* parent ) :
     QUndoCommand( parent ),
     m_graphicsView( graphicsView ),
     m_sliceButton( sliceButton ),
@@ -370,12 +370,12 @@ EnableQuantisationCommand::EnableQuantisationCommand( WaveGraphicsView* const gr
     m_selectiveTimeStretchAction( selectiveTimeStretchAction ),
     m_sampleBufferList( sampleBufferList )
 {
-    setText( "Enable Quantisation" );
+    setText( "Enable Selective Time Stretching" );
 }
 
 
 
-void EnableQuantisationCommand::undo()
+void EnableSelectiveTSCommand::undo()
 {
     m_selectMoveItemsAction->setEnabled( true );
     m_multiSelectItemsAction->setEnabled( true );
@@ -392,7 +392,7 @@ void EnableQuantisationCommand::undo()
 
 
 
-void EnableQuantisationCommand::redo()
+void EnableSelectiveTSCommand::redo()
 {
     m_auditionItemsAction->trigger();
     m_selectMoveItemsAction->setEnabled( false );
@@ -407,15 +407,15 @@ void EnableQuantisationCommand::redo()
 
 //==================================================================================================
 
-DisableQuantisationCommand::DisableQuantisationCommand( WaveGraphicsView* const graphicsView,
-                                                       QPushButton* const sliceButton,
-                                                       QAction* const addSlicePointAction,
-                                                       QAction* const selectMoveItemsAction,
-                                                       QAction* const multiSelectItemsAction,
-                                                       QAction* const auditionItemsAction,
-                                                       QAction* const selectiveTimeStretchAction,
-                                                       const QList<SharedSampleBuffer> sampleBufferList,
-                                                       QUndoCommand* parent ) :
+DisableSelectiveTSCommand::DisableSelectiveTSCommand( WaveGraphicsView* const graphicsView,
+                                                     QPushButton* const sliceButton,
+                                                     QAction* const addSlicePointAction,
+                                                     QAction* const selectMoveItemsAction,
+                                                     QAction* const multiSelectItemsAction,
+                                                     QAction* const auditionItemsAction,
+                                                     QAction* const selectiveTimeStretchAction,
+                                                     const QList<SharedSampleBuffer> sampleBufferList,
+                                                     QUndoCommand* parent ) :
     QUndoCommand( parent ),
     m_graphicsView( graphicsView ),
     m_sliceButton( sliceButton ),
@@ -426,12 +426,12 @@ DisableQuantisationCommand::DisableQuantisationCommand( WaveGraphicsView* const 
     m_selectiveTimeStretchAction( selectiveTimeStretchAction ),
     m_sampleBufferList( sampleBufferList )
 {
-    setText( "Disable Quantisation" );
+    setText( "Disable Selective Time Stretching" );
 }
 
 
 
-void DisableQuantisationCommand::undo()
+void DisableSelectiveTSCommand::undo()
 {
     m_auditionItemsAction->trigger();
     m_selectMoveItemsAction->setEnabled( false );
@@ -444,7 +444,7 @@ void DisableQuantisationCommand::undo()
 
 
 
-void DisableQuantisationCommand::redo()
+void DisableSelectiveTSCommand::redo()
 {
     m_selectMoveItemsAction->setEnabled( true );
     m_multiSelectItemsAction->setEnabled( true );

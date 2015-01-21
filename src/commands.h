@@ -156,18 +156,18 @@ private:
 
 
 
-class EnableQuantisationCommand : public QUndoCommand
+class EnableSelectiveTSCommand : public QUndoCommand
 {
 public:
-    EnableQuantisationCommand( WaveGraphicsView* graphicsView,
-                               QPushButton* sliceButton,
-                               QAction* addSlicePointAction,
-                               QAction* selectMoveItemsAction,
-                               QAction* multiSelectItemsAction,
-                               QAction* auditionItemsAction,
-                               QAction* selectiveTimeStretchAction,
-                               const QList<SharedSampleBuffer> sampleBufferList,
-                               QUndoCommand* parent = NULL );
+    EnableSelectiveTSCommand( WaveGraphicsView* graphicsView,
+                              QPushButton* sliceButton,
+                              QAction* addSlicePointAction,
+                              QAction* selectMoveItemsAction,
+                              QAction* multiSelectItemsAction,
+                              QAction* auditionItemsAction,
+                              QAction* selectiveTimeStretchAction,
+                              const QList<SharedSampleBuffer> sampleBufferList,
+                              QUndoCommand* parent = NULL );
 
     void undo();
     void redo();
@@ -185,18 +185,18 @@ private:
 
 
 
-class DisableQuantisationCommand : public QUndoCommand
+class DisableSelectiveTSCommand : public QUndoCommand
 {
 public:
-    DisableQuantisationCommand( WaveGraphicsView* graphicsView,
-                                QPushButton* sliceButton,
-                                QAction* addSlicePointAction,
-                                QAction* selectMoveItemsAction,
-                                QAction* multiSelectItemsAction,
-                                QAction* auditionItemsAction,
-                                QAction* selectiveTimeStretchAction,
-                                const QList<SharedSampleBuffer> sampleBufferList,
-                                QUndoCommand* parent = NULL );
+    DisableSelectiveTSCommand( WaveGraphicsView* graphicsView,
+                               QPushButton* sliceButton,
+                               QAction* addSlicePointAction,
+                               QAction* selectMoveItemsAction,
+                               QAction* multiSelectItemsAction,
+                               QAction* auditionItemsAction,
+                               QAction* selectiveTimeStretchAction,
+                               const QList<SharedSampleBuffer> sampleBufferList,
+                               QUndoCommand* parent = NULL );
 
     void undo();
     void redo();

@@ -1785,32 +1785,38 @@ void MainWindow::on_actionAudition_triggered()
 
 void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked )
 {
-    if ( isChecked ) // Enable quantisation
+    if ( isChecked ) // Enable Selective Time Stretching
     {
         QUndoCommand* parentCommand = new QUndoCommand();
 
-        new EnableQuantisationCommand( m_UI->waveGraphicsView,
-                                       m_UI->pushButton_Slice,
-                                       m_UI->actionAdd_Slice_Point,
-                                       m_UI->actionSelect_Move,
-                                       m_UI->actionMulti_Select,
-                                       m_UI->actionAudition,
-                                       m_UI->actionSelective_Time_Stretch,
-                                       m_sampleBufferList,
-                                       parentCommand );
+        new EnableSelectiveTSCommand( m_UI->waveGraphicsView,
+                                      m_UI->pushButton_Slice,
+                                      m_UI->actionAdd_Slice_Point,
+                                      m_UI->actionSelect_Move,
+                                      m_UI->actionMulti_Select,
+                                      m_UI->actionAudition,
+                                      m_UI->actionSelective_Time_Stretch,
+                                      m_sampleBufferList,
+                                      parentCommand );
+
+        const int lowestAssignedMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
 
         int frameNum = 0;
 
         for ( int i = 0; i < m_sampleBufferList.size() - 1; i++ )
         {
-            frameNum += m_sampleBufferList.at( i )->getNumFrames();
+            const qreal timeRatio = m_rubberbandAudioSource->getNoteTimeRatio( lowestAssignedMidiNote + i );
+
+            const int numFrames = roundToInt( m_sampleBufferList.at( i )->getNumFrames() * timeRatio );
+
+            frameNum += numFrames;
 
             new AddSlicePointItemCommand( frameNum, false, m_UI->waveGraphicsView, NULL, parentCommand );
         }
 
         m_undoStack.push( parentCommand );
     }
-    else // Disable quantisation
+    else // Disable Selective Time Stretching
     {
         QUndoCommand* parentCommand = new QUndoCommand();
 
@@ -1821,15 +1827,15 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
             new DeleteSlicePointItemCommand( slicePoint, m_UI->waveGraphicsView, NULL, parentCommand );
         }
 
-        new DisableQuantisationCommand( m_UI->waveGraphicsView,
-                                        m_UI->pushButton_Slice,
-                                        m_UI->actionAdd_Slice_Point,
-                                        m_UI->actionSelect_Move,
-                                        m_UI->actionMulti_Select,
-                                        m_UI->actionAudition,
-                                        m_UI->actionSelective_Time_Stretch,
-                                        m_sampleBufferList,
-                                        parentCommand );
+        new DisableSelectiveTSCommand( m_UI->waveGraphicsView,
+                                       m_UI->pushButton_Slice,
+                                       m_UI->actionAdd_Slice_Point,
+                                       m_UI->actionSelect_Move,
+                                       m_UI->actionMulti_Select,
+                                       m_UI->actionAudition,
+                                       m_UI->actionSelective_Time_Stretch,
+                                       m_sampleBufferList,
+                                       parentCommand );
 
         m_undoStack.push( parentCommand );
     }
