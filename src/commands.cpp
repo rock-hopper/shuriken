@@ -351,7 +351,8 @@ void UnsliceCommand::redo()
 
 //==================================================================================================
 
-EnableSelectiveTSCommand::EnableSelectiveTSCommand( WaveGraphicsView* const graphicsView,
+EnableSelectiveTSCommand::EnableSelectiveTSCommand( OptionsDialog* const optionsDialog,
+                                                    WaveGraphicsView* const graphicsView,
                                                     QPushButton* const sliceButton,
                                                     QAction* const addSlicePointAction,
                                                     QAction* const selectMoveItemsAction,
@@ -361,6 +362,7 @@ EnableSelectiveTSCommand::EnableSelectiveTSCommand( WaveGraphicsView* const grap
                                                     const QList<SharedSampleBuffer> sampleBufferList,
                                                     QUndoCommand* parent ) :
     QUndoCommand( parent ),
+    m_optionsDialog( optionsDialog ),
     m_graphicsView( graphicsView ),
     m_sliceButton( sliceButton ),
     m_addSlicePointAction( addSlicePointAction ),
@@ -388,12 +390,14 @@ void EnableSelectiveTSCommand::undo()
     }
 
     m_selectiveTimeStretchAction->setChecked( false );
+    m_optionsDialog->enableOfflineRealtimeButtons();
 }
 
 
 
 void EnableSelectiveTSCommand::redo()
 {
+    m_optionsDialog->disableOfflineRealtimeButtons();
     m_auditionItemsAction->trigger();
     m_selectMoveItemsAction->setEnabled( false );
     m_multiSelectItemsAction->setEnabled( false );
@@ -407,16 +411,18 @@ void EnableSelectiveTSCommand::redo()
 
 //==================================================================================================
 
-DisableSelectiveTSCommand::DisableSelectiveTSCommand( WaveGraphicsView* const graphicsView,
-                                                     QPushButton* const sliceButton,
-                                                     QAction* const addSlicePointAction,
-                                                     QAction* const selectMoveItemsAction,
-                                                     QAction* const multiSelectItemsAction,
-                                                     QAction* const auditionItemsAction,
-                                                     QAction* const selectiveTimeStretchAction,
-                                                     const QList<SharedSampleBuffer> sampleBufferList,
-                                                     QUndoCommand* parent ) :
+DisableSelectiveTSCommand::DisableSelectiveTSCommand( OptionsDialog* const optionsDialog,
+                                                      WaveGraphicsView* const graphicsView,
+                                                      QPushButton* const sliceButton,
+                                                      QAction* const addSlicePointAction,
+                                                      QAction* const selectMoveItemsAction,
+                                                      QAction* const multiSelectItemsAction,
+                                                      QAction* const auditionItemsAction,
+                                                      QAction* const selectiveTimeStretchAction,
+                                                      const QList<SharedSampleBuffer> sampleBufferList,
+                                                      QUndoCommand* parent ) :
     QUndoCommand( parent ),
+    m_optionsDialog( optionsDialog ),
     m_graphicsView( graphicsView ),
     m_sliceButton( sliceButton ),
     m_addSlicePointAction( addSlicePointAction ),
@@ -433,6 +439,7 @@ DisableSelectiveTSCommand::DisableSelectiveTSCommand( WaveGraphicsView* const gr
 
 void DisableSelectiveTSCommand::undo()
 {
+    m_optionsDialog->disableOfflineRealtimeButtons();
     m_auditionItemsAction->trigger();
     m_selectMoveItemsAction->setEnabled( false );
     m_multiSelectItemsAction->setEnabled( false );
@@ -457,6 +464,7 @@ void DisableSelectiveTSCommand::redo()
     }
 
     m_selectiveTimeStretchAction->setChecked( false );
+    m_optionsDialog->enableOfflineRealtimeButtons();
 }
 
 

@@ -31,6 +31,7 @@
 #include "wavegraphicsview.h"
 #include "slicepointitem.h"
 #include "mainwindow.h"
+#include "optionsdialog.h"
 
 
 class AddSlicePointItemCommand : public QUndoCommand
@@ -159,7 +160,8 @@ private:
 class EnableSelectiveTSCommand : public QUndoCommand
 {
 public:
-    EnableSelectiveTSCommand( WaveGraphicsView* graphicsView,
+    EnableSelectiveTSCommand( OptionsDialog* optionsDialog,
+                              WaveGraphicsView* graphicsView,
                               QPushButton* sliceButton,
                               QAction* addSlicePointAction,
                               QAction* selectMoveItemsAction,
@@ -173,6 +175,7 @@ public:
     void redo();
 
 private:
+    OptionsDialog* const m_optionsDialog;
     WaveGraphicsView* const m_graphicsView;
     QPushButton* const m_sliceButton;
     QAction* const m_addSlicePointAction;
@@ -188,7 +191,8 @@ private:
 class DisableSelectiveTSCommand : public QUndoCommand
 {
 public:
-    DisableSelectiveTSCommand( WaveGraphicsView* graphicsView,
+    DisableSelectiveTSCommand( OptionsDialog* optionsDialog,
+                               WaveGraphicsView* graphicsView,
                                QPushButton* sliceButton,
                                QAction* addSlicePointAction,
                                QAction* selectMoveItemsAction,
@@ -202,6 +206,7 @@ public:
     void redo();
 
 private:
+    OptionsDialog* const m_optionsDialog;
     WaveGraphicsView* const m_graphicsView;
     QPushButton* const m_sliceButton;
     QAction* const m_addSlicePointAction;

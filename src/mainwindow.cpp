@@ -1789,7 +1789,8 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
     {
         QUndoCommand* parentCommand = new QUndoCommand();
 
-        new EnableSelectiveTSCommand( m_UI->waveGraphicsView,
+        new EnableSelectiveTSCommand( m_optionsDialog,
+                                      m_UI->waveGraphicsView,
                                       m_UI->pushButton_Slice,
                                       m_UI->actionAdd_Slice_Point,
                                       m_UI->actionSelect_Move,
@@ -1827,7 +1828,8 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
             new DeleteSlicePointItemCommand( slicePoint, m_UI->waveGraphicsView, NULL, parentCommand );
         }
 
-        new DisableSelectiveTSCommand( m_UI->waveGraphicsView,
+        new DisableSelectiveTSCommand( m_optionsDialog,
+                                       m_UI->waveGraphicsView,
                                        m_UI->pushButton_Slice,
                                        m_UI->actionAdd_Slice_Point,
                                        m_UI->actionSelect_Move,

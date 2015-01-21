@@ -97,6 +97,22 @@ void OptionsDialog::disableTab( const Tab tab )
 
 
 
+void OptionsDialog::enableOfflineRealtimeButtons()
+{
+    m_UI->radioButton_Offline->setEnabled( true );
+    m_UI->radioButton_RealTime->setEnabled( true );
+}
+
+
+
+void OptionsDialog::disableOfflineRealtimeButtons()
+{
+    m_UI->radioButton_Offline->setEnabled( false );
+    m_UI->radioButton_RealTime->setEnabled( false );
+}
+
+
+
 void OptionsDialog::setStretcherOptions( const RubberBandStretcher::Options options )
 {
     if ( options & RubberBandStretcher::OptionProcessRealTime )

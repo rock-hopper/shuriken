@@ -54,6 +54,9 @@ public:
     void enableTab( Tab tab );
     void disableTab( Tab tab );
 
+    void enableOfflineRealtimeButtons();
+    void disableOfflineRealtimeButtons();
+
     RubberBandStretcher::Options getStretcherOptions() const    { return m_stretcherOptions; }
     void setStretcherOptions( RubberBandStretcher::Options options );
 
