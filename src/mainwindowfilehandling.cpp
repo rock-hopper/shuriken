@@ -171,7 +171,7 @@ void MainWindow::openProject( const QString filePath )
 
                 if ( m_rubberbandAudioSource != NULL )
                 {
-                    m_UI->actionQuantise->setEnabled( true );
+                    m_UI->actionSelective_Time_Stretch->setEnabled( true );
                 }
             }
 

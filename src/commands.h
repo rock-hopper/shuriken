@@ -105,7 +105,7 @@ public:
                   QAction* addSlicePointAction,
                   QAction* selectMoveItemsAction,
                   QAction* auditionItemsAction,
-                  QAction* quantiseAction,
+                  QAction* selectiveTimeStretchAction,
                   QUndoCommand* parent = NULL );
 
     void undo();
@@ -120,7 +120,7 @@ private:
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
     QAction* const m_auditionItemsAction;
-    QAction* const m_quantiseAction;
+    QAction* const m_selectiveTimeStretchAction;
 };
 
 
@@ -136,7 +136,7 @@ public:
                     QAction* addSlicePointAction,
                     QAction* selectMoveItemsAction,
                     QAction* auditionItemsAction,
-                    QAction* quantiseAction,
+                    QAction* selectiveTimeStretchAction,
                     QUndoCommand* parent = NULL );
 
     void undo();
@@ -151,7 +151,7 @@ private:
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
     QAction* const m_auditionItemsAction;
-    QAction* const m_quantiseAction;
+    QAction* const m_selectiveTimeStretchAction;
 };
 
 
@@ -165,7 +165,7 @@ public:
                                QAction* selectMoveItemsAction,
                                QAction* multiSelectItemsAction,
                                QAction* auditionItemsAction,
-                               QAction* quantiseAction,
+                               QAction* selectiveTimeStretchAction,
                                const QList<SharedSampleBuffer> sampleBufferList,
                                QUndoCommand* parent = NULL );
 
@@ -179,7 +179,7 @@ private:
     QAction* const m_selectMoveItemsAction;
     QAction* const m_multiSelectItemsAction;
     QAction* const m_auditionItemsAction;
-    QAction* const m_quantiseAction;
+    QAction* const m_selectiveTimeStretchAction;
     const QList<SharedSampleBuffer> m_sampleBufferList;
 };
 
@@ -194,7 +194,7 @@ public:
                                 QAction* selectMoveItemsAction,
                                 QAction* multiSelectItemsAction,
                                 QAction* auditionItemsAction,
-                                QAction* quantiseAction,
+                                QAction* selectiveTimeStretchAction,
                                 const QList<SharedSampleBuffer> sampleBufferList,
                                 QUndoCommand* parent = NULL );
 
@@ -208,7 +208,7 @@ private:
     QAction* const m_selectMoveItemsAction;
     QAction* const m_multiSelectItemsAction;
     QAction* const m_auditionItemsAction;
-    QAction* const m_quantiseAction;
+    QAction* const m_selectiveTimeStretchAction;
     const QList<SharedSampleBuffer> m_sampleBufferList;
 };
 

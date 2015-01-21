@@ -662,7 +662,7 @@
    <addaction name="actionMulti_Select"/>
    <addaction name="actionAudition"/>
    <addaction name="separator"/>
-   <addaction name="actionQuantise"/>
+   <addaction name="actionSelective_Time_Stretch"/>
    <addaction name="separator"/>
    <addaction name="actionZoom_Original"/>
    <addaction name="actionZoom_Out"/>
@@ -1038,16 +1038,19 @@
     <string>Shift+G</string>
    </property>
   </action>
-  <action name="actionQuantise">
+  <action name="actionSelective_Time_Stretch">
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/resources/images/page-3sides.png</normaloff>:/resources/images/page-3sides.png</iconset>
+     <normaloff>:/resources/images/mixer-surround.png</normaloff>:/resources/images/mixer-surround.png</iconset>
    </property>
    <property name="text">
-    <string>Quantise</string>
+    <string>Selective Time Stretch</string>
    </property>
   </action>
  </widget>

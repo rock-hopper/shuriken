@@ -560,7 +560,7 @@ void MainWindow::disableUI()
     m_UI->actionSelect_Move->setEnabled( false );
     m_UI->actionMulti_Select->setEnabled( false );
     m_UI->actionAudition->setEnabled( false );
-    m_UI->actionQuantise->setEnabled( false );
+    m_UI->actionSelective_Time_Stretch->setEnabled( false );
 
     m_optionsDialog->disableTab( OptionsDialog::TIME_STRETCH_TAB );
 }
@@ -731,7 +731,7 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
                                            const int numFramesToNextSlicePoint,
                                            const int oldFrameNum )
 {
-    if ( m_UI->actionQuantise->isChecked() )
+    if ( m_UI->actionSelective_Time_Stretch->isChecked() )
     {
         if ( m_samplerAudioSource != NULL && m_rubberbandAudioSource != NULL )
         {
@@ -868,7 +868,7 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
 
         if ( m_sampleBufferList.size() > 1 )
         {
-            m_UI->actionQuantise->setEnabled( true );
+            m_UI->actionSelective_Time_Stretch->setEnabled( true );
         }
 
         QObject::connect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
@@ -879,7 +879,7 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
         m_UI->checkBox_TimeStretch->setVisible( false );
         m_UI->pushButton_Apply->setVisible( true );
 
-        m_UI->actionQuantise->setEnabled( false );
+        m_UI->actionSelective_Time_Stretch->setEnabled( false );
 
         QObject::disconnect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
                              this, SLOT( resetSampler() ) );
@@ -1446,7 +1446,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
                           m_UI->actionAdd_Slice_Point,
                           m_UI->actionSelect_Move,
                           m_UI->actionAudition,
-                          m_UI->actionQuantise,
+                          m_UI->actionSelective_Time_Stretch,
                           parentCommand );
 
         QList<SharedSlicePointItem> slicePoints = m_UI->waveGraphicsView->getSlicePointList();
@@ -1484,7 +1484,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
                             m_UI->actionAdd_Slice_Point,
                             m_UI->actionSelect_Move,
                             m_UI->actionAudition,
-                            m_UI->actionQuantise,
+                            m_UI->actionSelective_Time_Stretch,
                             parentCommand );
 
         m_undoStack.push( parentCommand );
@@ -1783,7 +1783,7 @@ void MainWindow::on_actionAudition_triggered()
 
 
 
-void MainWindow::on_actionQuantise_triggered( const bool isChecked )
+void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked )
 {
     if ( isChecked ) // Enable quantisation
     {
@@ -1795,7 +1795,7 @@ void MainWindow::on_actionQuantise_triggered( const bool isChecked )
                                        m_UI->actionSelect_Move,
                                        m_UI->actionMulti_Select,
                                        m_UI->actionAudition,
-                                       m_UI->actionQuantise,
+                                       m_UI->actionSelective_Time_Stretch,
                                        m_sampleBufferList,
                                        parentCommand );
 
@@ -1827,7 +1827,7 @@ void MainWindow::on_actionQuantise_triggered( const bool isChecked )
                                         m_UI->actionSelect_Move,
                                         m_UI->actionMulti_Select,
                                         m_UI->actionAudition,
-                                        m_UI->actionQuantise,
+                                        m_UI->actionSelective_Time_Stretch,
                                         m_sampleBufferList,
                                         parentCommand );
 
