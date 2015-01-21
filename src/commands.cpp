@@ -1152,19 +1152,19 @@ void RenderTimeStretchCommand::redo()
 
 //==================================================================================================
 
-SelectiveTimeStretchCommand::SelectiveTimeStretchCommand( WaveGraphicsView* const graphicsView,
+SelectiveTimeStretchCommand::SelectiveTimeStretchCommand( MainWindow* const mainWindow,
+                                                          WaveGraphicsView* const graphicsView,
                                                           const QList<int> orderPositions,
                                                           const QList<qreal> timeRatios,
                                                           const QList<int> midiNotes,
-                                                          RubberbandAudioSource* const source,
                                                           QUndoCommand* parent ) :
     QUndoCommand( parent ),
+    m_mainWindow( mainWindow ),
     m_graphicsView( graphicsView ),
     m_orderPositions( orderPositions ),
     m_origTimeRatios( graphicsView->getWaveformScaleFactors( orderPositions ) ),
     m_timeRatios( timeRatios ),
-    m_midiNotes( midiNotes ),
-    m_rubberbandAudioSource( source )
+    m_midiNotes( midiNotes )
 {
     setText( "Selective Time Stretch" );
 }
@@ -1175,7 +1175,7 @@ void SelectiveTimeStretchCommand::undo()
 {
     for ( int i = 0; i < m_midiNotes.size(); i++ )
     {
-        m_rubberbandAudioSource->setNoteTimeRatio( m_midiNotes.at( i ), m_origTimeRatios.at( i ) );
+        m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( m_midiNotes.at( i ), m_origTimeRatios.at( i ) );
     }
     m_graphicsView->resizeWaveforms( m_orderPositions, m_origTimeRatios );
 }
@@ -1186,7 +1186,7 @@ void SelectiveTimeStretchCommand::redo()
 {
     for ( int i = 0; i < m_midiNotes.size(); i++ )
     {
-        m_rubberbandAudioSource->setNoteTimeRatio( m_midiNotes.at( i ), m_timeRatios.at( i ) );
+        m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( m_midiNotes.at( i ), m_timeRatios.at( i ) );
     }
     m_graphicsView->resizeWaveforms( m_orderPositions, m_timeRatios );
 }

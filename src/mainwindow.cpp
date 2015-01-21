@@ -751,11 +751,11 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
             midiNotes << m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos;
             midiNotes << m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos + 1;
 
-            new SelectiveTimeStretchCommand( m_UI->waveGraphicsView,
+            new SelectiveTimeStretchCommand( this,
+                                             m_UI->waveGraphicsView,
                                              orderPositions,
                                              timeRatios,
                                              midiNotes,
-                                             m_rubberbandAudioSource,
                                              parentCommand );
 
             m_undoStack.push( parentCommand );

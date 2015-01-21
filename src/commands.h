@@ -430,23 +430,23 @@ private:
 class SelectiveTimeStretchCommand : public QUndoCommand
 {
 public:
-    SelectiveTimeStretchCommand( WaveGraphicsView* graphicsView,
+    SelectiveTimeStretchCommand( MainWindow* mainWindow,
+                                 WaveGraphicsView* graphicsView,
                                  QList<int> orderPositions,
                                  QList<qreal> timeRatios,
                                  QList<int> midiNotes,
-                                 RubberbandAudioSource* source,
                                  QUndoCommand* parent = NULL );
 
     void undo();
     void redo();
 
 private:
+    MainWindow* const m_mainWindow;
     WaveGraphicsView* const m_graphicsView;
     const QList<int> m_orderPositions;
     const QList<qreal> m_origTimeRatios;
     const QList<qreal> m_timeRatios;
     const QList<int> m_midiNotes;
-    RubberbandAudioSource* const m_rubberbandAudioSource;
 };
 
 

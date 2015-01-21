@@ -56,6 +56,7 @@ class MainWindow : public QMainWindow
     friend class SplitCommand;
     friend class GlobalTimeStretchCommand;
     friend class RenderTimeStretchCommand;
+    friend class SelectiveTimeStretchCommand;
 
 public:
     MainWindow( QWidget* parent = NULL );
