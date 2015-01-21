@@ -700,9 +700,7 @@ void MainWindow::reorderSampleBufferList( QList<int> oldOrderPositions, const in
     }
     else // If waveform items have been dragged to the right...
     {
-        const int lastIndex = numSelectedItems - 1;
-
-        for ( int i = lastIndex; i >= 0; i-- )
+        for ( int i = numSelectedItems - 1; i >= 0; i-- )
         {
             const int orderPos = oldOrderPositions.at( i );
             m_sampleBufferList.move( orderPos, orderPos + numPlacesMoved );
@@ -710,6 +708,22 @@ void MainWindow::reorderSampleBufferList( QList<int> oldOrderPositions, const in
     }
 
     m_samplerAudioSource->setSamples( m_sampleBufferList, m_sampleHeader->sampleRate );
+
+    if ( m_rubberbandAudioSource != NULL )
+    {
+        const int lowestAssignedMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
+
+        for ( int i = 0; i < numSelectedItems; i++ )
+        {
+            const int orderPos = oldOrderPositions.at( i );
+
+            const qreal noteTimeRatioA = m_rubberbandAudioSource->getNoteTimeRatio( lowestAssignedMidiNote + orderPos );
+            const qreal noteTimeRatioB = m_rubberbandAudioSource->getNoteTimeRatio( lowestAssignedMidiNote + orderPos + numPlacesMoved );
+
+            m_rubberbandAudioSource->setNoteTimeRatio( lowestAssignedMidiNote + orderPos + numPlacesMoved, noteTimeRatioA );
+            m_rubberbandAudioSource->setNoteTimeRatio( lowestAssignedMidiNote + orderPos, noteTimeRatioB );
+        }
+    }
 }
 
 
