@@ -69,6 +69,9 @@ public:
     // Remove waveform items from the scene
     QList<SharedWaveformItem> removeWaveforms( QList<int> waveformOrderPositions );
 
+    // Get list of currently selected waveform items sorted by order position
+    QList<WaveformItem*> getSelectedWaveforms() const;
+
     QList<int> getSelectedWaveformsOrderPositions() const;
 
     SharedWaveformItem getWaveformAt( int orderPos ) const  { return m_waveformItemList.at( orderPos ); }

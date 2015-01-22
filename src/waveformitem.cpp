@@ -21,6 +21,7 @@
 */
 
 #include "waveformitem.h"
+#include "wavegraphicsscene.h"
 #include <QDebug>
 
 
@@ -234,27 +235,6 @@ bool WaveformItem::isLessThanOrderPos( const WaveformItem* const item1, const Wa
 
 
 
-QList<WaveformItem*> WaveformItem::getSelectedWaveformItems( const QGraphicsScene* const scene )
-{
-    QList<WaveformItem*> selectedItems;
-
-    if ( scene != NULL )
-    {
-        foreach ( QGraphicsItem* item, scene->selectedItems() )
-        {
-            if ( item->type() == WaveformItem::Type )
-            {
-                selectedItems << qgraphicsitem_cast<WaveformItem*>( item );
-            }
-        }
-        qSort( selectedItems.begin(), selectedItems.end(), WaveformItem::isLessThanOrderPos );
-    }
-
-    return selectedItems;
-}
-
-
-
 //==================================================================================================
 // Protected:
 
@@ -270,7 +250,8 @@ QVariant WaveformItem::itemChange( GraphicsItemChange change, const QVariant &va
         // minimum distance it must be from the left and right edges of the scene
         if ( isSelected() )
         {
-            QList<WaveformItem*> selectedItems = getSelectedWaveformItems( scene() );
+            WaveGraphicsScene* scene = static_cast<WaveGraphicsScene*>( this->scene() );
+            QList<WaveformItem*> selectedItems = scene->getSelectedWaveforms();
 
             foreach( WaveformItem* item, selectedItems )
             {
@@ -359,7 +340,8 @@ void WaveformItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseMoveEvent( event );
 
-    QList<WaveformItem*> selectedItems = getSelectedWaveformItems( scene() );
+    WaveGraphicsScene* scene = static_cast<WaveGraphicsScene*>( this->scene() );
+    QList<WaveformItem*> selectedItems = scene->getSelectedWaveforms();
 
     // If this item is being dragged to the left...
     if ( event->screenPos().x() < event->lastScreenPos().x() )
@@ -369,7 +351,7 @@ void WaveformItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
         const int leftmostSelectedItemOrderPos = selectedItems.first()->getOrderPos();
 
         // Get item under left edge of the leftmost selected item
-        QGraphicsItem* const otherItem = scene()->items( leftmostSelectedItemScenePos ).last();
+        QGraphicsItem* const otherItem = scene->items( leftmostSelectedItemScenePos ).last();
 
         // If the other item is a WaveformItem...
         if ( otherItem != this && otherItem->type() == WaveformItem::Type )
@@ -406,7 +388,7 @@ void WaveformItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
                                                      selectedItems.last()->rect().width() - 1;
 
         // Get item under right edge of the rightmost selected item
-        QGraphicsItem* const otherItem = scene()->items( QPointF(rightmostSelectedItemRightEdge, Ruler::HEIGHT) ).last();
+        QGraphicsItem* const otherItem = scene->items( QPointF(rightmostSelectedItemRightEdge, Ruler::HEIGHT) ).last();
 
         // If the other item is a WaveformItem...
         if ( otherItem != this && otherItem->type() == WaveformItem::Type )
@@ -441,7 +423,8 @@ void WaveformItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseReleaseEvent( event );
 
-    QList<WaveformItem*> selectedItems = getSelectedWaveformItems( scene() );
+    WaveGraphicsScene* scene = static_cast<WaveGraphicsScene*>( this->scene() );
+    QList<WaveformItem*> selectedItems = scene->getSelectedWaveforms();
 
     if ( m_orderPosBeforeMove != m_currentOrderPos )
     {

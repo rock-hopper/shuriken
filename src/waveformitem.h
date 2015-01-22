@@ -65,9 +65,6 @@ public:
     // For use with qSort(); sorts by order position
     static bool isLessThanOrderPos( const WaveformItem* item1, const WaveformItem* item2 );
 
-    // Get list of currently selected waveform items sorted by order position
-    static QList<WaveformItem*> getSelectedWaveformItems( const QGraphicsScene* scene );
-
 protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant &value );
     void mousePressEvent( QGraphicsSceneMouseEvent* event );

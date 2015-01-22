@@ -287,9 +287,27 @@ QList<SharedWaveformItem> WaveGraphicsScene::removeWaveforms( const QList<int> w
 
 
 
+QList<WaveformItem*> WaveGraphicsScene::getSelectedWaveforms() const
+{
+    QList<WaveformItem*> selectedItems;
+
+    foreach ( QGraphicsItem* item, this->selectedItems() )
+    {
+        if ( item->type() == WaveformItem::Type )
+        {
+            selectedItems << qgraphicsitem_cast<WaveformItem*>( item );
+        }
+    }
+    qSort( selectedItems.begin(), selectedItems.end(), WaveformItem::isLessThanOrderPos );
+
+    return selectedItems;
+}
+
+
+
 QList<int> WaveGraphicsScene::getSelectedWaveformsOrderPositions() const
 {
-    const QList<WaveformItem*> selectedItems = WaveformItem::getSelectedWaveformItems( this );
+    const QList<WaveformItem*> selectedItems = getSelectedWaveforms();
     QList<int> orderPositions;
 
     foreach ( WaveformItem* item, selectedItems )
