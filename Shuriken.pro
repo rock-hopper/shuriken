@@ -175,7 +175,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/loopmarkeritem.cpp \
     src/confirmbpmdialog.cpp \
     src/samplebuffer.cpp \
-    src/offlinetimestretcher.cpp
+    src/offlinetimestretcher.cpp \
+    src/wavegraphicsscene.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -391,7 +392,8 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/midifilehandler.h \
     src/loopmarkeritem.h \
     src/confirmbpmdialog.h \
-    src/offlinetimestretcher.h
+    src/offlinetimestretcher.h \
+    src/wavegraphicsscene.h
 FORMS += src/mainwindow.ui \
     src/optionsdialog.ui \
     src/helpform.ui \

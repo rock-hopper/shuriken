@@ -1,7 +1,7 @@
 /*
   This file is part of Shuriken Beat Slicer.
 
-  Copyright (C) 2014 Andrew M Taylor <a.m.taylor303@gmail.com>
+  Copyright (C) 2015 Andrew M Taylor <a.m.taylor303@gmail.com>
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -20,12 +20,10 @@
 
 */
 
-#ifndef WAVEGRAPHICSVIEW_H
-#define WAVEGRAPHICSVIEW_H
+#ifndef WAVEGRAPHICSSCENE_H
+#define WAVEGRAPHICSSCENE_H
 
-#include <QGraphicsView>
 #include <QGraphicsScene>
-#include <QResizeEvent>
 #include <QTimeLine>
 #include <QGraphicsItemAnimation>
 #include "JuceHeader.h"
@@ -35,12 +33,12 @@
 #include "samplebuffer.h"
 
 
-class WaveGraphicsView : public QGraphicsView
+class WaveGraphicsScene : public QGraphicsScene
 {
     Q_OBJECT
 
 public:
-    WaveGraphicsView( QWidget* parent = NULL );
+    WaveGraphicsScene( qreal x, qreal y, qreal width, qreal height, QObject* parent = NULL );
 
     // Creates a new waveform item and adds it to the scene. If 'width' is not specified by the caller
     // then the waveform's width will be the same as the scene width
@@ -76,9 +74,6 @@ public:
     void resizeWaveforms( QList<int> orderPositions, QList<qreal> scaleFactorX );
 
     QList<qreal> getWaveformScaleFactors( QList<int> orderPositions ) const;
-
-    // Redraw all waveform items
-    void redrawWaveforms();
 
     // Create a new slice point item and add it to the scene
     SharedSlicePointItem createSlicePoint( int frameNum, bool canBeMovedPastOtherSlicePoints );
@@ -131,29 +126,10 @@ public:
     qreal getScenePosX( int frameNum ) const;
     int getFrameNum( qreal scenePosX ) const;
 
-    void zoomIn();
-    void zoomOut();
-    void zoomOriginal();
-
-    enum InteractionMode { SELECT_MOVE_ITEMS, MULTI_SELECT_ITEMS, AUDITION_ITEMS };
-
-    InteractionMode getInteractionMode() const              { return m_interactionMode; }
-    void setInteractionMode( InteractionMode mode );
-
     void setBpmRulerMarks( qreal bpm, int timeSigNumerator );
-
-protected:
-    void resizeEvent( QResizeEvent* event );
 
 private:
     void resizeWaveformItems( qreal scaleFactorX );
-    void resizeSlicePointItems( qreal scaleFactorX );
-    void resizePlayhead();
-    void resizeLoopMarkers( qreal scaleFactorX );
-    void resizeRuler( qreal scaleFactorX );
-
-    void scaleItems( qreal scaleFactorX );
-
     void createLoopMarkers();
     void setLoopMarkerFrameNum( LoopMarkerItem* loopMarker );
     int getRelativeLoopMarkerFrameNum( const LoopMarkerItem* loopMarker ) const;
@@ -163,12 +139,9 @@ private:
     void snapLoopMarkerToWaveform( LoopMarkerItem* loopMarker );
     void snapSlicePointToLoopMarker( SlicePointItem* slicePoint );
 
-    void connectWaveformToGraphicsView( SharedWaveformItem item );
+    void connectWaveform( SharedWaveformItem item );
 
     void createRuler();
-
-    void hideSlicePoints();
-    void showSlicePoints();
 
     QList<SharedWaveformItem> m_waveformItemList;
     QList<SharedSlicePointItem> m_slicePointItemList;
@@ -188,10 +161,6 @@ private:
 
     LoopMarkerSnapMode m_loopMarkerSnapMode;
 
-    InteractionMode m_interactionMode;
-
-    bool m_isViewZoomedIn;
-
 private:
     static int getTotalNumFrames( QList<SharedWaveformItem> waveformItemList );
 
@@ -202,8 +171,6 @@ signals:
                                int numFramesToNextSlicePoint,
                                int oldFrameNum );
     void loopMarkerPosChanged();
-    void minDetailLevelReached();
-    void maxDetailLevelReached();
     void playheadFinishedScrolling();
 
 private slots:
@@ -215,11 +182,10 @@ private slots:
     void updateSlicePointFrameNum( FrameMarkerItem* movedItem );
     void updateLoopMarkerFrameNum( FrameMarkerItem* movedItem );
     void removePlayhead();
-    void relayMaxDetailLevelReached();
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( WaveGraphicsView );
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( WaveGraphicsScene );
 };
 
 
-#endif // WAVEGRAPHICSVIEW_H
+#endif // WAVEGRAPHICSSCENE_H
