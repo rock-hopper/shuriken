@@ -31,6 +31,9 @@
 #include "slicepointitem.h"
 #include "loopmarkeritem.h"
 #include "samplebuffer.h"
+#include "wavegraphicsview.h"
+
+class WaveGraphicsView;
 
 
 class WaveGraphicsScene : public QGraphicsScene
@@ -39,6 +42,8 @@ class WaveGraphicsScene : public QGraphicsScene
 
 public:
     WaveGraphicsScene( qreal x, qreal y, qreal width, qreal height, QObject* parent = NULL );
+
+    WaveGraphicsView* getView() const;
 
     // Creates a new waveform item and adds it to the scene. If 'width' is not specified by the caller
     // then the waveform's width will be the same as the scene width
@@ -70,6 +75,8 @@ public:
 
     int getNumWaveforms() const                             { return m_waveformItemList.size(); }
 
+    const QList<SharedWaveformItem> getWaveformList() const { return m_waveformItemList; }
+
     // Resize waveform items by a ratio of their original size (not necessarily their current size)
     void resizeWaveforms( QList<int> orderPositions, QList<qreal> scaleFactorX );
 
@@ -93,16 +100,16 @@ public:
     QList<int> getSlicePointFrameNums() const;
 
     // Returns a list of all slice point items
-    QList<SharedSlicePointItem> getSlicePointList() const   { return m_slicePointItemList; }
+    const QList<SharedSlicePointItem> getSlicePointList() const { return m_slicePointItemList; }
 
     void showLoopMarkers();
     void hideLoopMarkers();
 
-    LoopMarkerItem* getLeftLoopMarker() const               { return m_loopMarkerLeft; }
-    LoopMarkerItem* getRightLoopMarker() const              { return m_loopMarkerRight; }
+    LoopMarkerItem* getLeftLoopMarker() const                   { return m_loopMarkerLeft; }
+    LoopMarkerItem* getRightLoopMarker() const                  { return m_loopMarkerRight; }
 
     enum LoopMarkerSnapMode { SNAP_OFF, SNAP_MARKERS_TO_SLICES, SNAP_SLICES_TO_MARKERS };
-    void setLoopMarkerSnapMode( LoopMarkerSnapMode mode )   { m_loopMarkerSnapMode = mode; }
+    void setLoopMarkerSnapMode( LoopMarkerSnapMode mode )       { m_loopMarkerSnapMode = mode; }
 
     void getSampleRangesBetweenLoopMarkers( int& firstOrderPos, QList<SharedSampleRange>& sampleRanges ) const;
     int getNumFramesBetweenLoopMarkers() const;
@@ -128,8 +135,15 @@ public:
 
     void setBpmRulerMarks( qreal bpm, int timeSigNumerator );
 
-private:
     void resizeWaveformItems( qreal scaleFactorX );
+    void resizeSlicePointItems( qreal scaleFactorX );
+    void resizePlayhead();
+    void resizeLoopMarkers( qreal scaleFactorX );
+    void resizeRuler( qreal scaleFactorX );
+
+    void scaleItems( qreal scaleFactorX );
+
+private:
     void createLoopMarkers();
     void setLoopMarkerFrameNum( LoopMarkerItem* loopMarker );
     int getRelativeLoopMarkerFrameNum( const LoopMarkerItem* loopMarker ) const;

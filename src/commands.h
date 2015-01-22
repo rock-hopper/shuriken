@@ -28,6 +28,7 @@
 #include <QAction>
 #include <QDoubleSpinBox>
 #include <QCheckBox>
+#include "wavegraphicsscene.h"
 #include "wavegraphicsview.h"
 #include "slicepointitem.h"
 #include "mainwindow.h"
@@ -39,7 +40,7 @@ class AddSlicePointItemCommand : public QUndoCommand
 public:
     AddSlicePointItemCommand( int frameNum,
                               bool canBeMovedPastOtherSlicePoints,
-                              WaveGraphicsView* graphicsView,
+                              WaveGraphicsScene* graphicsScene,
                               QPushButton* sliceButton = NULL,
                               QUndoCommand* parent = NULL );
 
@@ -47,7 +48,7 @@ public:
     void redo();
 
 private:
-    WaveGraphicsView* const m_graphicsView;
+    WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
     SharedSlicePointItem m_slicePointItem;
     bool m_isFirstRedoCall;
@@ -60,7 +61,7 @@ class MoveSlicePointItemCommand : public QUndoCommand
 public:
     MoveSlicePointItemCommand( SharedSlicePointItem slicePoint,
                                int oldFrameNum,
-                               WaveGraphicsView* graphicsView,
+                               WaveGraphicsScene* graphicsScene,
                                QUndoCommand* parent = NULL );
 
     void undo();
@@ -70,7 +71,7 @@ private:
     const SharedSlicePointItem m_slicePointItem;
     const int m_oldFrameNum;
     const int m_newFrameNum;
-    WaveGraphicsView* const m_graphicsView;
+    WaveGraphicsScene* const m_graphicsScene;
     bool m_isFirstRedoCall;
 };
 
@@ -80,7 +81,7 @@ class DeleteSlicePointItemCommand : public QUndoCommand
 {
 public:
     DeleteSlicePointItemCommand( SharedSlicePointItem slicePoint,
-                                 WaveGraphicsView* graphicsView,
+                                 WaveGraphicsScene* graphicsScene,
                                  QPushButton* sliceButton = NULL,
                                  QUndoCommand* parent = NULL );
 
@@ -89,7 +90,7 @@ public:
 
 private:
     const SharedSlicePointItem m_slicePointItem;
-    WaveGraphicsView* const m_graphicsView;
+    WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
 };
 
@@ -99,7 +100,7 @@ class SliceCommand : public QUndoCommand
 {
 public:
     SliceCommand( MainWindow* mainWindow,
-                  WaveGraphicsView* graphicsView,
+                  WaveGraphicsScene* graphicsScene,
                   QPushButton* sliceButton,
                   QPushButton* findOnsetsButton,
                   QPushButton* findBeatsButton,
@@ -114,7 +115,7 @@ public:
 
 private:
     MainWindow* const m_mainWindow;
-    WaveGraphicsView* const m_graphicsView;
+    WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
     QPushButton* const m_findOnsetsButton;
     QPushButton* const m_findBeatsButton;
@@ -130,7 +131,7 @@ class UnsliceCommand : public QUndoCommand
 {
 public:
     UnsliceCommand( MainWindow* mainWindow,
-                    WaveGraphicsView* graphicsView,
+                    WaveGraphicsScene* graphicsScene,
                     QPushButton* sliceButton,
                     QPushButton* findOnsetsButton,
                     QPushButton* findBeatsButton,
@@ -145,7 +146,7 @@ public:
 
 private:
     MainWindow* const m_mainWindow;
-    WaveGraphicsView* const m_graphicsView;
+    WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
     QPushButton* const m_findOnsetsButton;
     QPushButton* const m_findBeatsButton;
@@ -161,7 +162,7 @@ class EnableSelectiveTSCommand : public QUndoCommand
 {
 public:
     EnableSelectiveTSCommand( OptionsDialog* optionsDialog,
-                              WaveGraphicsView* graphicsView,
+                              WaveGraphicsScene* graphicsScene,
                               QPushButton* sliceButton,
                               QAction* addSlicePointAction,
                               QAction* selectMoveItemsAction,
@@ -176,7 +177,7 @@ public:
 
 private:
     OptionsDialog* const m_optionsDialog;
-    WaveGraphicsView* const m_graphicsView;
+    WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
@@ -192,7 +193,7 @@ class DisableSelectiveTSCommand : public QUndoCommand
 {
 public:
     DisableSelectiveTSCommand( OptionsDialog* optionsDialog,
-                               WaveGraphicsView* graphicsView,
+                               WaveGraphicsScene* graphicsScene,
                                QPushButton* sliceButton,
                                QAction* addSlicePointAction,
                                QAction* selectMoveItemsAction,
@@ -207,7 +208,7 @@ public:
 
 private:
     OptionsDialog* const m_optionsDialog;
-    WaveGraphicsView* const m_graphicsView;
+    WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
@@ -224,7 +225,7 @@ class MoveWaveformItemCommand : public QUndoCommand
 public:
     MoveWaveformItemCommand( QList<int> oldOrderPositions,
                              int numPlacesMoved,
-                             WaveGraphicsView* graphicsView,
+                             WaveGraphicsScene* graphicsScene,
                              MainWindow* mainWindow,
                              QUndoCommand* parent = NULL );
 
@@ -234,7 +235,7 @@ public:
 private:
     const QList<int> m_oldOrderPositions;
     const int m_numPlacesMoved;
-    WaveGraphicsView* const m_graphicsView;
+    WaveGraphicsScene* const m_graphicsScene;
     MainWindow* const m_mainWindow;
     QList<int> m_newOrderPositions;
     bool m_isFirstRedoCall;
@@ -246,7 +247,7 @@ class DeleteWaveformItemCommand : public QUndoCommand
 {
 public:
     DeleteWaveformItemCommand( QList<int> orderPositions,
-                               WaveGraphicsView* graphicsView,
+                               WaveGraphicsScene* graphicsScene,
                                MainWindow* mainWindow,
                                QPushButton* sliceButton,
                                QPushButton* findOnsetsButton,
@@ -259,7 +260,7 @@ public:
 
 private:
     const QList<int> m_orderPositions;
-    WaveGraphicsView* const m_graphicsView;
+    WaveGraphicsScene* const m_graphicsScene;
     MainWindow* const m_mainWindow;
     QPushButton* const m_sliceButton;
     QPushButton* const m_findOnsetsButton;
@@ -276,6 +277,7 @@ class ApplyGainCommand : public QUndoCommand
 public:
     ApplyGainCommand( float gain,
                       int waveformItemOrderPos,
+                      WaveGraphicsScene* graphicsScene,
                       WaveGraphicsView* graphicsView,
                       int sampleRate,
                       AudioFileHandler& fileHandler,
@@ -289,6 +291,7 @@ public:
 private:
     const float m_gain;
     const int m_orderPos;
+    WaveGraphicsScene* const m_graphicsScene;
     WaveGraphicsView* const m_graphicsView;
     const int m_sampleRate;
     AudioFileHandler& m_fileHandler;
@@ -305,6 +308,7 @@ public:
     ApplyGainRampCommand( float startGain,
                           float endGain,
                           int waveformItemOrderPos,
+                          WaveGraphicsScene* graphicsScene,
                           WaveGraphicsView* graphicsView,
                           int sampleRate,
                           AudioFileHandler& fileHandler,
@@ -319,6 +323,7 @@ private:
     const float m_startGain;
     const float m_endGain;
     const int m_orderPos;
+    WaveGraphicsScene* const m_graphicsScene;
     WaveGraphicsView* const m_graphicsView;
     const int m_sampleRate;
     AudioFileHandler& m_fileHandler;
@@ -333,6 +338,7 @@ class NormaliseCommand : public QUndoCommand
 {
 public:
     NormaliseCommand( int waveformItemOrderPos,
+                      WaveGraphicsScene* graphicsScene,
                       WaveGraphicsView* graphicsView,
                       int sampleRate,
                       AudioFileHandler& fileHandler,
@@ -345,6 +351,7 @@ public:
 
 private:
     const int m_orderPos;
+    WaveGraphicsScene* const m_graphicsScene;
     WaveGraphicsView* const m_graphicsView;
     const int m_sampleRate;
     AudioFileHandler& m_fileHandler;
@@ -359,6 +366,7 @@ class ReverseCommand : public QUndoCommand
 {
 public:
     ReverseCommand( int waveformItemOrderPos,
+                    WaveGraphicsScene* graphicsScene,
                     WaveGraphicsView* graphicsView,
                     QUndoCommand* parent = NULL );
 
@@ -367,6 +375,7 @@ public:
 
 private:
     const int mOrderPos;
+    WaveGraphicsScene* const m_graphicsScene;
     WaveGraphicsView* const m_graphicsView;
 };
 
@@ -376,6 +385,7 @@ class GlobalTimeStretchCommand : public QUndoCommand
 {
 public:
     GlobalTimeStretchCommand( MainWindow* mainWindow,
+                              WaveGraphicsScene* graphicsScene,
                               WaveGraphicsView* graphicsView,
                               QDoubleSpinBox* spinBoxOriginalBPM,
                               QDoubleSpinBox* spinBoxNewBPM,
@@ -392,6 +402,7 @@ private:
     void updateLoopMarkers( qreal timeRatio );
 
     MainWindow* const m_mainWindow;
+    WaveGraphicsScene* const m_graphicsScene;
     WaveGraphicsView* const m_graphicsView;
     QDoubleSpinBox* const m_spinBoxOriginalBPM;
     QDoubleSpinBox* const m_spinBoxNewBPM;
@@ -412,6 +423,7 @@ class RenderTimeStretchCommand : public QUndoCommand
 {
 public:
     RenderTimeStretchCommand( MainWindow* mainWindow,
+                              WaveGraphicsScene* graphicsScene,
                               WaveGraphicsView* graphicsView,
                               QString tempDirPath,
                               QString fileBaseName,
@@ -422,6 +434,7 @@ public:
 
 private:
     MainWindow* const m_mainWindow;
+    WaveGraphicsScene* const m_graphicsScene;
     WaveGraphicsView* const m_graphicsView;
     const RubberBandStretcher::Options m_options;
     const QString m_tempDirPath;
@@ -436,7 +449,7 @@ class SelectiveTimeStretchCommand : public QUndoCommand
 {
 public:
     SelectiveTimeStretchCommand( MainWindow* mainWindow,
-                                 WaveGraphicsView* graphicsView,
+                                 WaveGraphicsScene* graphicsScene,
                                  QList<int> orderPositions,
                                  QList<qreal> timeRatios,
                                  QList<int> midiNotes,
@@ -447,7 +460,7 @@ public:
 
 private:
     MainWindow* const m_mainWindow;
-    WaveGraphicsView* const m_graphicsView;
+    WaveGraphicsScene* const m_graphicsScene;
     const QList<int> m_orderPositions;
     const QList<qreal> m_origTimeRatios;
     const QList<qreal> m_timeRatios;

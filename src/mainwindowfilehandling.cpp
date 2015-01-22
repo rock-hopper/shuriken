@@ -132,7 +132,7 @@ void MainWindow::openProject( const QString filePath )
             // Only one sample buffer - waveform has not been sliced
             if ( m_sampleBufferList.size() == 1 )
             {
-                const SharedWaveformItem item = m_UI->waveGraphicsView->createWaveform( m_sampleBufferList.first(),
+                const SharedWaveformItem item = m_scene->createWaveform( m_sampleBufferList.first(),
                                                                                        m_sampleHeader );
                 connectWaveformToMainWindow( item );
 
@@ -146,14 +146,14 @@ void MainWindow::openProject( const QString filePath )
 
                     foreach ( int frameNum, settings.slicePointFrameNums )
                     {
-                        new AddSlicePointItemCommand( frameNum, true, m_UI->waveGraphicsView, m_UI->pushButton_Slice, parentCommand );
+                        new AddSlicePointItemCommand( frameNum, true, m_scene, m_UI->pushButton_Slice, parentCommand );
                     }
                     m_undoStack.push( parentCommand );
                 }
             }
             else // Multiple sample buffers - waveform has been sliced
             {
-                const QList<SharedWaveformItem> waveformItemList = m_UI->waveGraphicsView->createWaveforms( m_sampleBufferList, m_sampleHeader );
+                const QList<SharedWaveformItem> waveformItemList = m_scene->createWaveforms( m_sampleBufferList, m_sampleHeader );
 
                 foreach ( SharedWaveformItem item, waveformItemList )
                 {
@@ -484,7 +484,7 @@ void MainWindow::saveProject( const QString filePath )
 
         settings.audioFileNames = audioFileNames;
 
-        settings.slicePointFrameNums = m_UI->waveGraphicsView->getSlicePointFrameNums();
+        settings.slicePointFrameNums = m_scene->getSlicePointFrameNums();
 
         TextFileHandler::createProjectXmlFile( xmlFilePath, settings );
 
@@ -630,7 +630,7 @@ void MainWindow::importAudioFileDialog()
             m_sampleBufferList << sampleBuffer;
             m_sampleHeader = sampleHeader;
 
-            const SharedWaveformItem item = m_UI->waveGraphicsView->createWaveform( sampleBuffer, sampleHeader );
+            const SharedWaveformItem item = m_scene->createWaveform( sampleBuffer, sampleHeader );
             connectWaveformToMainWindow( item );
 
             setUpSampler();

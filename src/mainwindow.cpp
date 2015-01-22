@@ -256,6 +256,7 @@ void MainWindow::setupUI()
 {
     // Initialise user interface
     m_UI->setupUi( this );
+    m_scene = m_UI->waveGraphicsView->getScene();
 
 
     // Set up interaction mode buttons to work like radio buttons
@@ -341,10 +342,10 @@ void MainWindow::setupUI()
 
 
     // Connect signals to slots
-    QObject::connect( m_UI->waveGraphicsView, SIGNAL( slicePointPosChanged(SharedSlicePointItem,int,int,int,int) ),
+    QObject::connect( m_scene, SIGNAL( slicePointPosChanged(SharedSlicePointItem,int,int,int,int) ),
                       this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int,int,int) ) );
 
-    QObject::connect( m_UI->waveGraphicsView, SIGNAL( loopMarkerPosChanged() ),
+    QObject::connect( m_scene, SIGNAL( loopMarkerPosChanged() ),
                       this, SLOT( stopPlayback() ) );
 
     QObject::connect( m_UI->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
@@ -353,10 +354,10 @@ void MainWindow::setupUI()
     QObject::connect( m_UI->waveGraphicsView, SIGNAL( maxDetailLevelReached() ),
                       this, SLOT( disableZoomIn() ) );
 
-    QObject::connect( m_UI->waveGraphicsView, SIGNAL( playheadFinishedScrolling() ),
+    QObject::connect( m_scene, SIGNAL( playheadFinishedScrolling() ),
                       this, SLOT( resetPlayStopButtonIcon() ) );
 
-    QObject::connect( m_UI->waveGraphicsView->scene(), SIGNAL( selectionChanged() ),
+    QObject::connect( m_scene, SIGNAL( selectionChanged() ),
                       this, SLOT( enableEditActions() ) );
 
     QObject::connect( &m_undoStack, SIGNAL( canUndoChanged(bool) ),
@@ -614,7 +615,7 @@ void MainWindow::closeProject()
     m_sampleBufferList.clear();
     tearDownSampler();
 
-    m_UI->waveGraphicsView->clearAll();
+    m_scene->clearAll();
     on_actionZoom_Original_triggered();
     disableUI();
     m_UI->statusBar->clearMessage();
@@ -666,6 +667,7 @@ void MainWindow::renderTimeStretch()
             const QString fileBaseName = QString::number( m_undoStack.index() );
 
             QUndoCommand* command = new RenderTimeStretchCommand( this,
+                                                                  m_scene,
                                                                   m_UI->waveGraphicsView,
                                                                   tempDirPath,
                                                                   fileBaseName );
@@ -733,7 +735,7 @@ void MainWindow::reorderSampleBufferList( QList<int> oldOrderPositions, const in
 
 void MainWindow::recordWaveformItemMove( QList<int> oldOrderPositions, const int numPlacesMoved )
 {
-    QUndoCommand* command = new MoveWaveformItemCommand( oldOrderPositions, numPlacesMoved, m_UI->waveGraphicsView, this );
+    QUndoCommand* command = new MoveWaveformItemCommand( oldOrderPositions, numPlacesMoved, m_scene, this );
     m_undoStack.push( command );
 }
 
@@ -751,7 +753,7 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
         {
             QUndoCommand* parentCommand = new QUndoCommand();
 
-            new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_UI->waveGraphicsView, parentCommand );
+            new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_scene, parentCommand );
 
             QList<int> orderPositions;
             QList<qreal> timeRatios;
@@ -766,7 +768,7 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
             midiNotes << m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos + 1;
 
             new SelectiveTimeStretchCommand( this,
-                                             m_UI->waveGraphicsView,
+                                             m_scene,
                                              orderPositions,
                                              timeRatios,
                                              midiNotes,
@@ -777,7 +779,7 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
     }
     else
     {
-        QUndoCommand* command = new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_UI->waveGraphicsView );
+        QUndoCommand* command = new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_scene );
         m_undoStack.push( command );
     }
 }
@@ -793,12 +795,12 @@ void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPoint
     qreal startPosX = waveformItem->scenePos().x();
     qreal endPosX = startPosX + waveformItem->rect().width();
 
-    const QList<int> slicePointFrameNums = m_UI->waveGraphicsView->getSlicePointFrameNums();
+    const QList<int> slicePointFrameNums = m_scene->getSlicePointFrameNums();
 
     // If slice points are present and the waveform has not yet been sliced...
     if ( slicePointFrameNums.size() > 0 && m_sampleBufferList.size() == 1 )
     {
-        const int mousePosFrameNum = m_UI->waveGraphicsView->getFrameNum( mouseScenePos.x() );
+        const int mousePosFrameNum = m_scene->getFrameNum( mouseScenePos.x() );
         int endFrame = sampleRange->numFrames;
 
         foreach ( int frameNum, slicePointFrameNums )
@@ -816,8 +818,8 @@ void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPoint
 
         sampleRange->numFrames = endFrame - sampleRange->startFrame;
 
-        startPosX = m_UI->waveGraphicsView->getScenePosX( sampleRange->startFrame );
-        endPosX = m_UI->waveGraphicsView->getScenePosX( endFrame );
+        startPosX = m_scene->getScenePosX( sampleRange->startFrame );
+        endPosX = m_scene->getScenePosX( endFrame );
     }
 
     // Play sample range and start playhead scrolling
@@ -830,11 +832,11 @@ void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPoint
          m_UI->doubleSpinBox_NewBPM->value() > 0.0 )
     {
         qreal stretchRatio = m_UI->doubleSpinBox_OriginalBPM->value() / m_UI->doubleSpinBox_NewBPM->value();
-        m_UI->waveGraphicsView->startPlayhead( startPosX, endPosX, sampleRange->numFrames, stretchRatio );
+        m_scene->startPlayhead( startPosX, endPosX, sampleRange->numFrames, stretchRatio );
     }
     else
     {
-        m_UI->waveGraphicsView->startPlayhead( startPosX, endPosX, sampleRange->numFrames );
+        m_scene->startPlayhead( startPosX, endPosX, sampleRange->numFrames );
     }
 }
 
@@ -846,7 +848,7 @@ void MainWindow::stopPlayback()
     {
         m_samplerAudioSource->stop();
     }
-    m_UI->waveGraphicsView->stopPlayhead();
+    m_scene->stopPlayhead();
     m_UI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
 }
 
@@ -919,14 +921,14 @@ void MainWindow::resetSampler()
 
 void MainWindow::enableEditActions()
 {
-    const SharedSlicePointItem slicePoint = m_UI->waveGraphicsView->getSelectedSlicePoint();
-    const QList<int> orderPositions = m_UI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+    const SharedSlicePointItem slicePoint = m_scene->getSelectedSlicePoint();
+    const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
 
     m_UI->actionDelete->setEnabled( false );
 
     if ( ! slicePoint.isNull() || ! orderPositions.isEmpty() )
     {
-        if ( orderPositions.size() < m_UI->waveGraphicsView->getNumWaveforms() )
+        if ( orderPositions.size() < m_scene->getNumWaveforms() )
         {
             m_UI->actionDelete->setEnabled( true );
         }
@@ -1144,44 +1146,44 @@ void MainWindow::on_actionRedo_triggered()
 
 void MainWindow::on_actionSelect_All_triggered()
 {
-    m_UI->waveGraphicsView->selectAll();
+    m_scene->selectAll();
 }
 
 
 
 void MainWindow::on_actionSelect_None_triggered()
 {
-    m_UI->waveGraphicsView->selectNone();
+    m_scene->selectNone();
 }
 
 
 
 void MainWindow::on_actionDelete_triggered()
 {    
-    const SharedSlicePointItem selectedSlicePoint = m_UI->waveGraphicsView->getSelectedSlicePoint();
+    const SharedSlicePointItem selectedSlicePoint = m_scene->getSelectedSlicePoint();
 
     if ( ! selectedSlicePoint.isNull() )
     {
         selectedSlicePoint->setSelected( false );
 
         QUndoCommand* command = new DeleteSlicePointItemCommand( selectedSlicePoint,
-                                                                 m_UI->waveGraphicsView,
+                                                                 m_scene,
                                                                  m_UI->pushButton_Slice );
         m_undoStack.push( command );
     }
     else
     {
-        const QList<int> orderPositions = m_UI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+        const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
 
         if ( ! orderPositions.isEmpty() )
         {
             foreach ( int orderPos, orderPositions )
             {
-                m_UI->waveGraphicsView->getWaveformAt( orderPos )->setSelected( false );
+                m_scene->getWaveformAt( orderPos )->setSelected( false );
             }
 
             QUndoCommand* command = new DeleteWaveformItemCommand( orderPositions,
-                                                                   m_UI->waveGraphicsView,
+                                                                   m_scene,
                                                                    this,
                                                                    m_UI->pushButton_Slice,
                                                                    m_UI->pushButton_FindOnsets,
@@ -1198,9 +1200,9 @@ void MainWindow::on_actionAdd_Slice_Point_triggered()
 {
     const QPoint mousePos = m_UI->waveGraphicsView->mapFromGlobal( QCursor::pos() );
     const QPointF mouseScenePos = m_UI->waveGraphicsView->mapToScene( mousePos );
-    const int frameNum = m_UI->waveGraphicsView->getFrameNum( mouseScenePos.x() );
+    const int frameNum = m_scene->getFrameNum( mouseScenePos.x() );
 
-    QUndoCommand* command = new AddSlicePointItemCommand( frameNum, true, m_UI->waveGraphicsView, m_UI->pushButton_Slice );
+    QUndoCommand* command = new AddSlicePointItemCommand( frameNum, true, m_scene, m_UI->pushButton_Slice );
     m_undoStack.push( command );
 }
 
@@ -1218,7 +1220,7 @@ void MainWindow::on_actionApply_Gain_triggered()
 
         if ( result == QDialog::Accepted )
         {
-            const QList<int> orderPositions = m_UI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+            const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
 
             QUndoCommand* parentCommand = new QUndoCommand();
 
@@ -1231,6 +1233,7 @@ void MainWindow::on_actionApply_Gain_triggered()
 
                 new ApplyGainCommand( dialog.getGainValue(),
                                       orderPos,
+                                      m_scene,
                                       m_UI->waveGraphicsView,
                                       m_sampleHeader->sampleRate,
                                       m_fileHandler,
@@ -1263,7 +1266,7 @@ void MainWindow::on_actionApply_Gain_Ramp_triggered()
 
         if ( result == QDialog::Accepted )
         {
-            const QList<int> orderPositions = m_UI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+            const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
 
             QUndoCommand* parentCommand = new QUndoCommand();
 
@@ -1277,6 +1280,7 @@ void MainWindow::on_actionApply_Gain_Ramp_triggered()
                 new ApplyGainRampCommand( dialog.getStartGainValue(),
                                           dialog.getEndGainValue(),
                                           orderPos,
+                                          m_scene,
                                           m_UI->waveGraphicsView,
                                           m_sampleHeader->sampleRate,
                                           m_fileHandler,
@@ -1303,7 +1307,7 @@ void MainWindow::on_actionNormalise_triggered()
 
     if ( ! tempDirPath.isEmpty() )
     {
-        const QList<int> orderPositions = m_UI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+        const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
 
         QUndoCommand* parentCommand = new QUndoCommand();
 
@@ -1315,6 +1319,7 @@ void MainWindow::on_actionNormalise_triggered()
             QString fileBaseName = stackIndex + "_" + QString::number( i++ );
 
             new NormaliseCommand( orderPos,
+                                  m_scene,
                                   m_UI->waveGraphicsView,
                                   m_sampleHeader->sampleRate,
                                   m_fileHandler,
@@ -1343,13 +1348,13 @@ void MainWindow::on_actionEnvelope_triggered()
 
 void MainWindow::on_actionReverse_triggered()
 {
-    const QList<int> orderPositions = m_UI->waveGraphicsView->getSelectedWaveformsOrderPositions();
+    const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
 
     QUndoCommand* parentCommand = new QUndoCommand();
 
     foreach ( int orderPos, orderPositions )
     {
-        new ReverseCommand( orderPos, m_UI->waveGraphicsView, parentCommand );
+        new ReverseCommand( orderPos, m_scene, m_UI->waveGraphicsView, parentCommand );
     }
 
     m_undoStack.push( parentCommand );
@@ -1410,7 +1415,7 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
 
     if ( m_UI->checkBox_LoopMarkers->isChecked() )
     {
-        numFrames = m_UI->waveGraphicsView->getNumFramesBetweenLoopMarkers();
+        numFrames = m_scene->getNumFramesBetweenLoopMarkers();
     }
     else
     {
@@ -1436,7 +1441,7 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
     m_UI->doubleSpinBox_OriginalBPM->setValue( bpm );
     m_UI->doubleSpinBox_NewBPM->setValue( bpm );
 
-    m_UI->waveGraphicsView->setBpmRulerMarks( bpm, numerator );
+    m_scene->setBpmRulerMarks( bpm, numerator );
 
     if ( m_rubberbandAudioSource != NULL && bpm > 0.0 )
     {
@@ -1453,7 +1458,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
         QUndoCommand* parentCommand = new QUndoCommand();
 
         new SliceCommand( this,
-                          m_UI->waveGraphicsView,
+                          m_scene,
                           m_UI->pushButton_Slice,
                           m_UI->pushButton_FindOnsets,
                           m_UI->pushButton_FindBeats,
@@ -1463,11 +1468,11 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
                           m_UI->actionSelective_Time_Stretch,
                           parentCommand );
 
-        QList<SharedSlicePointItem> slicePoints = m_UI->waveGraphicsView->getSlicePointList();
+        QList<SharedSlicePointItem> slicePoints = m_scene->getSlicePointList();
 
         foreach ( SharedSlicePointItem slicePoint, slicePoints )
         {
-            new DeleteSlicePointItemCommand( slicePoint, m_UI->waveGraphicsView, NULL, parentCommand );
+            new DeleteSlicePointItemCommand( slicePoint, m_scene, NULL, parentCommand );
         }
 
         m_undoStack.push( parentCommand );
@@ -1487,11 +1492,11 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
         {
             frameNum += m_sampleBufferList.at( i )->getNumFrames();
 
-            new AddSlicePointItemCommand( frameNum, true, m_UI->waveGraphicsView, NULL, parentCommand );
+            new AddSlicePointItemCommand( frameNum, true, m_scene, NULL, parentCommand );
         }
 
         new UnsliceCommand( this,
-                            m_UI->waveGraphicsView,
+                            m_scene,
                             m_UI->pushButton_Slice,
                             m_UI->pushButton_FindOnsets,
                             m_UI->pushButton_FindBeats,
@@ -1522,11 +1527,11 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
 
     // Remove current slice points if present
     {
-        const QList<SharedSlicePointItem> slicePointItemList = m_UI->waveGraphicsView->getSlicePointList();
+        const QList<SharedSlicePointItem> slicePointItemList = m_scene->getSlicePointList();
 
         foreach ( SharedSlicePointItem item, slicePointItemList )
         {
-            new DeleteSlicePointItemCommand( item, m_UI->waveGraphicsView, m_UI->pushButton_Slice, parentCommand );
+            new DeleteSlicePointItemCommand( item, m_scene, m_UI->pushButton_Slice, parentCommand );
         }
     }
 
@@ -1539,7 +1544,7 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
 
         foreach ( int frameNum, slicePointFrameNumList )
         {
-            new AddSlicePointItemCommand( frameNum, true, m_UI->waveGraphicsView, m_UI->pushButton_Slice, parentCommand );
+            new AddSlicePointItemCommand( frameNum, true, m_scene, m_UI->pushButton_Slice, parentCommand );
         }
     }
 
@@ -1561,18 +1566,18 @@ void MainWindow::on_pushButton_FindBeats_clicked()
     const QList<int> slicePointFrameNumList = AudioAnalyser::findBeatFrameNums( m_sampleBufferList.first(), settings );
 
     // Get list of slice point items to be removed
-    const QList<SharedSlicePointItem> slicePointItemList = m_UI->waveGraphicsView->getSlicePointList();
+    const QList<SharedSlicePointItem> slicePointItemList = m_scene->getSlicePointList();
 
     QUndoCommand* parentCommand = new QUndoCommand();
 
     foreach ( SharedSlicePointItem item, slicePointItemList )
     {
-        new DeleteSlicePointItemCommand( item, m_UI->waveGraphicsView, m_UI->pushButton_Slice, parentCommand );
+        new DeleteSlicePointItemCommand( item, m_scene, m_UI->pushButton_Slice, parentCommand );
     }
 
     foreach ( int frameNum, slicePointFrameNumList )
     {
-        new AddSlicePointItemCommand( frameNum, true, m_UI->waveGraphicsView, m_UI->pushButton_Slice, parentCommand );
+        new AddSlicePointItemCommand( frameNum, true, m_scene, m_UI->pushButton_Slice, parentCommand );
     }
 
     m_undoStack.push( parentCommand );
@@ -1597,13 +1602,13 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
 
             m_rubberbandAudioSource->setGlobalTimeRatio( timeRatio );
 
-            m_UI->waveGraphicsView->updatePlayheadSpeed( timeRatio );
+            m_scene->updatePlayheadSpeed( timeRatio );
         }
     }
 
     const int timeSigNumerator = m_UI->comboBox_TimeSigNumerator->currentText().toInt();
 
-    m_UI->waveGraphicsView->setBpmRulerMarks( originalBPM, timeSigNumerator );
+    m_scene->setBpmRulerMarks( originalBPM, timeSigNumerator );
 }
 
 
@@ -1621,7 +1626,7 @@ void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
 
             m_rubberbandAudioSource->setGlobalTimeRatio( timeRatio );
 
-            m_UI->waveGraphicsView->updatePlayheadSpeed( timeRatio );
+            m_scene->updatePlayheadSpeed( timeRatio );
         }
     }
 }
@@ -1667,10 +1672,10 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
 
 void MainWindow::on_pushButton_PlayStop_clicked()
 {
-    if ( m_UI->waveGraphicsView->isPlayheadScrolling() )
+    if ( m_scene->isPlayheadScrolling() )
     {
         m_samplerAudioSource->stop();
-        m_UI->waveGraphicsView->stopPlayhead();
+        m_scene->stopPlayhead();
         m_UI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
     }
     else
@@ -1680,7 +1685,7 @@ void MainWindow::on_pushButton_PlayStop_clicked()
             int firstOrderPos;
             QList<SharedSampleRange> sampleRanges;
 
-            m_UI->waveGraphicsView->getSampleRangesBetweenLoopMarkers( firstOrderPos, sampleRanges );
+            m_scene->getSampleRangesBetweenLoopMarkers( firstOrderPos, sampleRanges );
 
             m_samplerAudioSource->playSamples( firstOrderPos, sampleRanges );
         }
@@ -1697,11 +1702,11 @@ void MainWindow::on_pushButton_PlayStop_clicked()
              m_UI->doubleSpinBox_NewBPM->value() > 0.0 )
         {
             qreal stretchRatio = m_UI->doubleSpinBox_OriginalBPM->value() / m_UI->doubleSpinBox_NewBPM->value();
-            m_UI->waveGraphicsView->startPlayhead( m_UI->pushButton_Loop->isChecked(), stretchRatio );
+            m_scene->startPlayhead( m_UI->pushButton_Loop->isChecked(), stretchRatio );
         }
         else
         {
-            m_UI->waveGraphicsView->startPlayhead( m_UI->pushButton_Loop->isChecked() );
+            m_scene->startPlayhead( m_UI->pushButton_Loop->isChecked() );
         }
     }
 }
@@ -1714,7 +1719,7 @@ void MainWindow::on_pushButton_Loop_clicked( const bool isChecked )
     {
         m_samplerAudioSource->setLooping( isChecked );
     }
-    m_UI->waveGraphicsView->setPlayheadLooping( isChecked );
+    m_scene->setPlayheadLooping( isChecked );
 }
 
 
@@ -1758,6 +1763,7 @@ void MainWindow::on_pushButton_Apply_clicked()
             const QString fileBaseName = QString::number( m_undoStack.index() );
 
             QUndoCommand* command = new GlobalTimeStretchCommand( this,
+                                                                  m_scene,
                                                                   m_UI->waveGraphicsView,
                                                                   m_UI->doubleSpinBox_OriginalBPM,
                                                                   m_UI->doubleSpinBox_NewBPM,
@@ -1804,7 +1810,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
         QUndoCommand* parentCommand = new QUndoCommand();
 
         new EnableSelectiveTSCommand( m_optionsDialog,
-                                      m_UI->waveGraphicsView,
+                                      m_scene,
                                       m_UI->pushButton_Slice,
                                       m_UI->actionAdd_Slice_Point,
                                       m_UI->actionSelect_Move,
@@ -1826,7 +1832,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
 
             frameNum += numFrames;
 
-            new AddSlicePointItemCommand( frameNum, false, m_UI->waveGraphicsView, NULL, parentCommand );
+            new AddSlicePointItemCommand( frameNum, false, m_scene, NULL, parentCommand );
         }
 
         m_undoStack.push( parentCommand );
@@ -1835,15 +1841,15 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
     {
         QUndoCommand* parentCommand = new QUndoCommand();
 
-        QList<SharedSlicePointItem> slicePoints = m_UI->waveGraphicsView->getSlicePointList();
+        QList<SharedSlicePointItem> slicePoints = m_scene->getSlicePointList();
 
         foreach ( SharedSlicePointItem slicePoint, slicePoints )
         {
-            new DeleteSlicePointItemCommand( slicePoint, m_UI->waveGraphicsView, NULL, parentCommand );
+            new DeleteSlicePointItemCommand( slicePoint, m_scene, NULL, parentCommand );
         }
 
         new DisableSelectiveTSCommand( m_optionsDialog,
-                                       m_UI->waveGraphicsView,
+                                       m_scene,
                                        m_UI->pushButton_Slice,
                                        m_UI->actionAdd_Slice_Point,
                                        m_UI->actionSelect_Move,
@@ -1880,12 +1886,12 @@ void MainWindow::on_checkBox_LoopMarkers_clicked( const bool isChecked )
 
     if ( isChecked )
     {
-        m_UI->waveGraphicsView->showLoopMarkers();
+        m_scene->showLoopMarkers();
         m_UI->comboBox_SnapLoopMarkers->setEnabled( true );
     }
     else
     {
-        m_UI->waveGraphicsView->hideLoopMarkers();
+        m_scene->hideLoopMarkers();
         m_UI->comboBox_SnapLoopMarkers->setEnabled( false );
     }
 }
@@ -1896,14 +1902,14 @@ void MainWindow::on_comboBox_SnapLoopMarkers_currentIndexChanged( const int inde
 {
     switch ( index )
     {
-    case WaveGraphicsView::SNAP_OFF :
-        m_UI->waveGraphicsView->setLoopMarkerSnapMode( WaveGraphicsView::SNAP_OFF );
+    case WaveGraphicsScene::SNAP_OFF :
+        m_scene->setLoopMarkerSnapMode( WaveGraphicsScene::SNAP_OFF );
         break;
-    case WaveGraphicsView::SNAP_MARKERS_TO_SLICES :
-        m_UI->waveGraphicsView->setLoopMarkerSnapMode( WaveGraphicsView::SNAP_MARKERS_TO_SLICES );
+    case WaveGraphicsScene::SNAP_MARKERS_TO_SLICES :
+        m_scene->setLoopMarkerSnapMode( WaveGraphicsScene::SNAP_MARKERS_TO_SLICES );
         break;
-    case WaveGraphicsView::SNAP_SLICES_TO_MARKERS :
-        m_UI->waveGraphicsView->setLoopMarkerSnapMode( WaveGraphicsView::SNAP_SLICES_TO_MARKERS );
+    case WaveGraphicsScene::SNAP_SLICES_TO_MARKERS :
+        m_scene->setLoopMarkerSnapMode( WaveGraphicsScene::SNAP_SLICES_TO_MARKERS );
         break;
     default:
         break;
@@ -1917,5 +1923,5 @@ void MainWindow::on_comboBox_TimeSigNumerator_activated( const QString text )
     const qreal bpm = m_UI->doubleSpinBox_OriginalBPM->value();
     const int timeSigNumerator = text.toInt();
 
-    m_UI->waveGraphicsView->setBpmRulerMarks( bpm, timeSigNumerator );
+    m_scene->setBpmRulerMarks( bpm, timeSigNumerator );
 }

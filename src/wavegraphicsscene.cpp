@@ -23,14 +23,14 @@
 #include "wavegraphicsscene.h"
 #include "audioanalyser.h"
 #include "globals.h"
-#include "wavegraphicsview.h"
 
 
 //==================================================================================================
 // Public:
 
 WaveGraphicsScene::WaveGraphicsScene( const qreal x, const qreal y, const qreal width, const qreal height, QObject* parent ) :
-    QGraphicsScene( x, y, width, height, parent )
+    QGraphicsScene( x, y, width, height, parent ),
+    m_loopMarkerSnapMode( SNAP_OFF )
 {
     createRuler();
 
@@ -57,11 +57,18 @@ WaveGraphicsScene::WaveGraphicsScene( const qreal x, const qreal y, const qreal 
 
 
 
+WaveGraphicsView* WaveGraphicsScene::getView() const
+{
+    return static_cast<WaveGraphicsView*>( views().first() );
+}
+
+
+
 SharedWaveformItem WaveGraphicsScene::createWaveform( const SharedSampleBuffer sampleBuffer,
-                                                     const SharedSampleHeader sampleHeader,
-                                                     const qreal scenePosX,
-                                                     const int orderPos,
-                                                     qreal width )
+                                                      const SharedSampleHeader sampleHeader,
+                                                      const qreal scenePosX,
+                                                      const int orderPos,
+                                                      qreal width )
 {
     Q_ASSERT( sampleBuffer->getNumFrames() > 0 );
 
@@ -82,7 +89,7 @@ SharedWaveformItem WaveGraphicsScene::createWaveform( const SharedSampleBuffer s
     addItem( waveformItem.data() );
     update();
 
-    WaveGraphicsView* view = static_cast<WaveGraphicsView*>( views().first() );
+    WaveGraphicsView* view = getView();
 
     view->setInteractionMode( view->getInteractionMode() );
 
@@ -92,10 +99,10 @@ SharedWaveformItem WaveGraphicsScene::createWaveform( const SharedSampleBuffer s
 
 
 QList<SharedWaveformItem> WaveGraphicsScene::createWaveforms( const QList<SharedSampleBuffer> sampleBufferList,
-                                                             const SharedSampleHeader sampleHeader,
-                                                             const qreal startScenePosX,
-                                                             const int startOrderPos,
-                                                             qreal totalWidth )
+                                                              const SharedSampleHeader sampleHeader,
+                                                              const qreal startScenePosX,
+                                                              const int startOrderPos,
+                                                              qreal totalWidth )
 {
     m_sampleHeader = sampleHeader;
 
@@ -133,7 +140,7 @@ QList<SharedWaveformItem> WaveGraphicsScene::createWaveforms( const QList<Shared
         orderPos++;
     }
 
-    WaveGraphicsView* view = static_cast<WaveGraphicsView*>( views().first() );
+    WaveGraphicsView* view = getView();
 
     view->setInteractionMode( view->getInteractionMode() );
 
@@ -195,7 +202,7 @@ void WaveGraphicsScene::insertWaveforms( const QList<SharedWaveformItem> wavefor
     }
     update();
 
-    WaveGraphicsView* view = static_cast<WaveGraphicsView*>( views().first() );
+    WaveGraphicsView* view = getView();
 
     view->setInteractionMode( view->getInteractionMode() );
 
@@ -829,25 +836,116 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
 
 
 
-//==================================================================================================
-// Private:
-
 void WaveGraphicsScene::resizeWaveformItems( const qreal scaleFactorX )
 {
-    if ( ! m_waveformItemList.isEmpty() )
+    foreach ( SharedWaveformItem waveformItem, m_waveformItemList )
     {
-        foreach ( SharedWaveformItem waveformItem, m_waveformItemList )
-        {
-            const qreal newWidth = waveformItem->rect().width() * scaleFactorX;
-            waveformItem->setRect( 0.0, 0.0, newWidth, height() );
+        const qreal newWidth = waveformItem->rect().width() * scaleFactorX;
+        waveformItem->setRect( 0.0, 0.0, newWidth, height() );
 
-            const qreal newX = waveformItem->scenePos().x() * scaleFactorX;
-            waveformItem->setPos( newX, Ruler::HEIGHT );
+        const qreal newX = waveformItem->scenePos().x() * scaleFactorX;
+        waveformItem->setPos( newX, Ruler::HEIGHT );
+    }
+}
+
+
+
+void WaveGraphicsScene::resizeSlicePointItems( const qreal scaleFactorX )
+{
+    foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
+    {
+        slicePointItem->setHeight( height() - Ruler::HEIGHT - 1 );
+
+        const bool canBeMoved = slicePointItem->canBeMovedPastOtherSlicePoints();
+        const qreal newX = slicePointItem->scenePos().x() * scaleFactorX;
+
+        slicePointItem->setMovePastOtherSlicePoints( true );
+        slicePointItem->setPos( newX, Ruler::HEIGHT );
+        slicePointItem->setMovePastOtherSlicePoints( canBeMoved );
+    }
+}
+
+
+
+void WaveGraphicsScene::resizePlayhead()
+{
+    if ( m_timer->state() == QTimeLine::Running )
+    {
+        m_timer->stop();
+
+        m_animation->clear();
+        m_animation->setPosAt( 0.0, QPointF( 0.0, Ruler::HEIGHT ) );
+        m_animation->setPosAt( 1.0, QPointF( width() - 1, Ruler::HEIGHT ) );
+
+        m_playhead->setLine( 0.0, 0.0, 0.0, height() - Ruler::HEIGHT - 1 );
+
+        m_timer->resume();
+    }
+}
+
+
+
+void WaveGraphicsScene::resizeLoopMarkers( const qreal scaleFactorX )
+{
+    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
+    {
+        m_loopMarkerLeft->setHeight( height() - Ruler::HEIGHT - 1 );
+        m_loopMarkerRight->setHeight( height() - Ruler::HEIGHT - 1 );
+        {
+            const qreal newX = m_loopMarkerLeft->scenePos().x() * scaleFactorX;
+            m_loopMarkerLeft->setPos( newX, Ruler::HEIGHT );
+        }
+        {
+            const qreal newX = m_loopMarkerRight->scenePos().x() * scaleFactorX;
+            m_loopMarkerRight->setPos( newX, Ruler::HEIGHT );
         }
     }
 }
 
 
+
+void WaveGraphicsScene::resizeRuler( const qreal scaleFactorX )
+{
+    m_rulerBackground->setRect( 0.0, 0.0, width(), Ruler::HEIGHT );
+
+    foreach ( SharedGraphicsItem item, m_rulerMarksList )
+    {
+        const qreal newX = item->scenePos().x() * scaleFactorX;
+        item->setPos( newX, 1.0 );
+    }
+}
+
+
+
+void WaveGraphicsScene::scaleItems( const qreal scaleFactorX )
+{
+    if ( scaleFactorX > 0.0 )
+    {
+        QTransform matrix;
+        matrix.scale( 1.0 / scaleFactorX, 1.0 ); // Items remain same width when view is scaled
+
+        foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
+        {
+            slicePointItem->setTransform( matrix );
+        }
+
+        foreach ( SharedGraphicsItem item, m_rulerMarksList )
+        {
+            item->setTransform( matrix );
+        }
+
+        if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
+        {
+            m_loopMarkerLeft->setTransform( matrix );
+            m_loopMarkerRight->setTransform( matrix );
+        }
+    }
+}
+
+
+
+//==================================================================================================
+// Private:
 
 void WaveGraphicsScene::createLoopMarkers()
 {
@@ -1081,10 +1179,8 @@ void WaveGraphicsScene::connectWaveform( const SharedWaveformItem item )
     QObject::connect( item.data(), SIGNAL( finishedMoving(int) ),
                       this, SLOT( slideWaveformItemIntoPlace(int) ) );
 
-    WaveGraphicsView* view = static_cast<WaveGraphicsView*>( views().first() );
-
     QObject::connect( item.data(), SIGNAL( maxDetailLevelReached() ),
-                      view, SLOT( relayMaxDetailLevelReached() ) );
+                      getView(), SLOT( relayMaxDetailLevelReached() ) );
 }
 
 

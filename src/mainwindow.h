@@ -38,6 +38,7 @@
 #include "waveformitem.h"
 #include "helpform.h"
 #include "exportdialog.h"
+#include "wavegraphicsscene.h"
 
 
 namespace Ui
@@ -106,7 +107,7 @@ private:
     void renderTimeStretch();
 
     Ui::MainWindow* m_UI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
-
+    WaveGraphicsScene* m_scene;
     QActionGroup* m_interactionGroup;
 
     enum LengthUnits { UNITS_BARS, UNITS_BEATS };
