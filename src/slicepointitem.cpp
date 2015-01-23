@@ -22,7 +22,7 @@
 
 #include "slicepointitem.h"
 #include <QBrush>
-#include <QGraphicsScene>
+#include "wavegraphicsscene.h"
 //#include <QDebug>
 
 
@@ -66,6 +66,20 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
         {
             QPointF newPos = value.toPointF();
 
+            WaveGraphicsScene* scene = static_cast<WaveGraphicsScene*>( this->scene() );
+
+            // Snap slice point to BPM Ruler marks
+            foreach ( SharedGraphicsItem item, scene->getBpmRulerMarks() )
+            {
+                const qreal itemPosX = item->scenePos().x();
+
+                if ( qAbs( newPos.x() - itemPosX ) < 8.0 )
+                {
+                    newPos.setX( itemPosX );
+                }
+            }
+
+            // Prevent slice point from being moved past other slice points
             if ( newPos.x() < m_minScenePosX )
             {
                 newPos.setX( m_minScenePosX );

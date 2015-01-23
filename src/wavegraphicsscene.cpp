@@ -743,6 +743,48 @@ void WaveGraphicsScene::updatePlayheadSpeed( const qreal stretchRatio )
 
 
 
+void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNumerator )
+{
+    if ( bpm > 0.0 && timeSigNumerator > 0 )
+    {
+        foreach ( SharedGraphicsItem item, m_rulerMarksList )
+        {
+            removeItem( item.data() );
+        }
+
+        m_rulerMarksList.clear();
+
+        const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
+        const qreal framesPerBeat = ( m_sampleHeader->sampleRate * 60 ) / bpm;
+
+        int beat = 0;
+        int bar = 1;
+
+        for ( int frameNum = 0; frameNum < totalNumFrames; frameNum += framesPerBeat, beat++ )
+        {
+            if ( beat % timeSigNumerator == 0 )
+            {
+                QGraphicsSimpleTextItem* textItem = addSimpleText( QString::number( bar ) );
+                textItem->setPos( getScenePosX( frameNum ), 1.0 );
+                textItem->setBrush( Qt::white );
+                textItem->setZValue( 1 );
+                m_rulerMarksList.append( SharedGraphicsItem( textItem ) );
+                bar++;
+            }
+            else
+            {
+                QGraphicsLineItem* lineItem = addLine( 0.0, 0.0, 0.0, Ruler::HEIGHT - 5.0 );
+                lineItem->setPos( getScenePosX( frameNum ), 2.0 );
+                lineItem->setPen( QPen( Qt::white ) );
+                lineItem->setZValue( 1 );
+                m_rulerMarksList.append( SharedGraphicsItem( lineItem ) );
+            }
+        }
+    }
+}
+
+
+
 void WaveGraphicsScene::clearAll()
 {
     foreach ( QGraphicsItem* item, items() )
@@ -808,48 +850,6 @@ int WaveGraphicsScene::getFrameNum( qreal scenePosX ) const
         frameNum = numFrames - 1;
 
     return frameNum;
-}
-
-
-
-void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNumerator )
-{
-    if ( bpm > 0.0 && timeSigNumerator > 0 )
-    {
-        foreach ( SharedGraphicsItem item, m_rulerMarksList )
-        {
-            removeItem( item.data() );
-        }
-
-        m_rulerMarksList.clear();
-
-        const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
-        const qreal framesPerBeat = ( m_sampleHeader->sampleRate * 60 ) / bpm;
-
-        int beat = 0;
-        int bar = 1;
-
-        for ( int frameNum = 0; frameNum < totalNumFrames; frameNum += framesPerBeat, beat++ )
-        {
-            if ( beat % timeSigNumerator == 0 )
-            {
-                QGraphicsSimpleTextItem* textItem = addSimpleText( QString::number( bar ) );
-                textItem->setPos( getScenePosX( frameNum ), 1.0 );
-                textItem->setBrush( Qt::white );
-                textItem->setZValue( 1 );
-                m_rulerMarksList.append( SharedGraphicsItem( textItem ) );
-                bar++;
-            }
-            else
-            {
-                QGraphicsLineItem* lineItem = addLine( 0.0, 0.0, 0.0, Ruler::HEIGHT - 5.0 );
-                lineItem->setPos( getScenePosX( frameNum ), 2.0 );
-                lineItem->setPen( QPen( Qt::white ) );
-                lineItem->setZValue( 1 );
-                m_rulerMarksList.append( SharedGraphicsItem( lineItem ) );
-            }
-        }
-    }
 }
 
 

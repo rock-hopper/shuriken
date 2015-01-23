@@ -35,6 +35,8 @@
 
 class WaveGraphicsView;
 
+typedef QSharedPointer<QGraphicsItem> SharedGraphicsItem;
+
 
 class WaveGraphicsScene : public QGraphicsScene
 {
@@ -78,7 +80,7 @@ public:
 
     int getNumWaveforms() const                             { return m_waveformItemList.size(); }
 
-    const QList<SharedWaveformItem> getWaveformList() const { return m_waveformItemList; }
+    QList<SharedWaveformItem> getWaveformList() const       { return m_waveformItemList; }
 
     // Resize waveform items by a ratio of their original size (not necessarily their current size)
     void resizeWaveforms( QList<int> orderPositions, QList<qreal> scaleFactorX );
@@ -103,16 +105,16 @@ public:
     QList<int> getSlicePointFrameNums() const;
 
     // Returns a list of all slice point items
-    const QList<SharedSlicePointItem> getSlicePointList() const { return m_slicePointItemList; }
+    QList<SharedSlicePointItem> getSlicePointList() const   { return m_slicePointItemList; }
 
     void showLoopMarkers();
     void hideLoopMarkers();
 
-    LoopMarkerItem* getLeftLoopMarker() const                   { return m_loopMarkerLeft; }
-    LoopMarkerItem* getRightLoopMarker() const                  { return m_loopMarkerRight; }
+    LoopMarkerItem* getLeftLoopMarker() const               { return m_loopMarkerLeft; }
+    LoopMarkerItem* getRightLoopMarker() const              { return m_loopMarkerRight; }
 
     enum LoopMarkerSnapMode { SNAP_OFF, SNAP_MARKERS_TO_SLICES, SNAP_SLICES_TO_MARKERS };
-    void setLoopMarkerSnapMode( LoopMarkerSnapMode mode )       { m_loopMarkerSnapMode = mode; }
+    void setLoopMarkerSnapMode( LoopMarkerSnapMode mode )   { m_loopMarkerSnapMode = mode; }
 
     void getSampleRangesBetweenLoopMarkers( int& firstOrderPos, QList<SharedSampleRange>& sampleRanges ) const;
     int getNumFramesBetweenLoopMarkers() const;
@@ -130,13 +132,14 @@ public:
     void setPlayheadLooping( bool isLoopingDesired );
     void updatePlayheadSpeed( qreal stretchRatio );
 
+    QList<SharedGraphicsItem> getBpmRulerMarks() const          { return m_rulerMarksList; }
+    void setBpmRulerMarks( qreal bpm, int timeSigNumerator );
+
     void clearAll();
     void clearWaveform();
 
     qreal getScenePosX( int frameNum ) const;
     int getFrameNum( qreal scenePosX ) const;
-
-    void setBpmRulerMarks( qreal bpm, int timeSigNumerator );
 
     void resizeWaveformItems( qreal scaleFactorX );
     void resizeSlicePointItems( qreal scaleFactorX );
@@ -163,7 +166,6 @@ private:
     QList<SharedWaveformItem> m_waveformItemList;
     QList<SharedSlicePointItem> m_slicePointItemList;
 
-    typedef QSharedPointer<QGraphicsItem> SharedGraphicsItem;
     QList<SharedGraphicsItem> m_rulerMarksList;
     ScopedPointer<QGraphicsRectItem> m_rulerBackground;
 
