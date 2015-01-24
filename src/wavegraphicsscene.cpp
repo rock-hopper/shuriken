@@ -743,7 +743,7 @@ void WaveGraphicsScene::updatePlayheadSpeed( const qreal stretchRatio )
 
 
 
-void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNumerator )
+void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNumerator, const int divisionsPerBeat )
 {
     if ( bpm > 0.0 && timeSigNumerator > 0 )
     {
@@ -755,14 +755,16 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
         m_rulerMarksList.clear();
 
         const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
-        const qreal framesPerBeat = ( m_sampleHeader->sampleRate * 60 ) / bpm;
+        const qreal framesPerDivision = ( ( m_sampleHeader->sampleRate * 60 ) / bpm ) / divisionsPerBeat;
 
-        int beat = 0;
+        int frameNum = 0;
         int bar = 1;
+        int beat = 0;
+        int div = 0;
 
-        for ( int frameNum = 0; frameNum < totalNumFrames; frameNum += framesPerBeat, beat++ )
+        while ( frameNum < totalNumFrames )
         {
-            if ( beat % timeSigNumerator == 0 )
+            if ( div % (divisionsPerBeat * timeSigNumerator) == 0 ) // Bar
             {
                 QGraphicsSimpleTextItem* textItem = addSimpleText( QString::number( bar ) );
                 textItem->setPos( getScenePosX( frameNum ), 1.0 );
@@ -770,15 +772,28 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
                 textItem->setZValue( 1 );
                 m_rulerMarksList.append( SharedGraphicsItem( textItem ) );
                 bar++;
+                beat++;
             }
-            else
+            else if ( div % divisionsPerBeat == 0 ) // Beat
             {
                 QGraphicsLineItem* lineItem = addLine( 0.0, 0.0, 0.0, Ruler::HEIGHT - 5.0 );
                 lineItem->setPos( getScenePosX( frameNum ), 2.0 );
                 lineItem->setPen( QPen( Qt::white ) );
                 lineItem->setZValue( 1 );
                 m_rulerMarksList.append( SharedGraphicsItem( lineItem ) );
+                beat++;
             }
+            else // Division
+            {
+                QGraphicsLineItem* lineItem = addLine( 0.0, 0.0, 0.0, Ruler::HEIGHT - 13.0 );
+                lineItem->setPos( getScenePosX( frameNum ), 6.0 );
+                lineItem->setPen( QPen( Qt::white ) );
+                lineItem->setZValue( 1 );
+                m_rulerMarksList.append( SharedGraphicsItem( lineItem ) );
+            }
+
+            frameNum += framesPerDivision;
+            div++;
         }
     }
 }

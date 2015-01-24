@@ -132,8 +132,8 @@ public:
     void setPlayheadLooping( bool isLoopingDesired );
     void updatePlayheadSpeed( qreal stretchRatio );
 
-    QList<SharedGraphicsItem> getBpmRulerMarks() const          { return m_rulerMarksList; }
-    void setBpmRulerMarks( qreal bpm, int timeSigNumerator );
+    QList<SharedGraphicsItem> getBpmRulerMarks() const      { return m_rulerMarksList; }
+    void setBpmRulerMarks( qreal bpm, int timeSigNumerator, int divisionsPerBeat = 4 );
 
     void clearAll();
     void clearWaveform();
