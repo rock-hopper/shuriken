@@ -77,6 +77,10 @@ void SamplerAudioSource::setSamples( const QList<SharedSampleBuffer> sampleBuffe
 
 void SamplerAudioSource::playSample( const int sampleNum, const SharedSampleRange sampleRange )
 {
+    if ( m_isPlaySeqEnabled )
+    {
+        stop();
+    }
     m_tempSampleRangeList << sampleRange;
     m_seqStartNote = m_lowestAssignedNote + sampleNum;
     m_noteCounter = 0;
@@ -89,6 +93,10 @@ void SamplerAudioSource::playSample( const int sampleNum, const SharedSampleRang
 
 void SamplerAudioSource::playSamples( const int firstSampleNum, const QList<SharedSampleRange> sampleRangeList )
 {
+    if ( m_isPlaySeqEnabled )
+    {
+        stop();
+    }
     m_tempSampleRangeList = sampleRangeList;
     m_seqStartNote = m_lowestAssignedNote + firstSampleNum;
     m_noteCounter = 0;
@@ -101,6 +109,10 @@ void SamplerAudioSource::playSamples( const int firstSampleNum, const QList<Shar
 
 void SamplerAudioSource::playAll()
 {
+    if ( m_isPlaySeqEnabled )
+    {
+        stop();
+    }
     m_seqStartNote = m_lowestAssignedNote;
     m_noteCounter = 0;
     m_noteCounterEnd = m_sampleBufferList.size();
