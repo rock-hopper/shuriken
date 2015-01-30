@@ -187,11 +187,9 @@ void RubberbandAudioSource::processNextAudioBlock()
         info.startSample = 0;
         info.numSamples = qMin( m_inputBuffer.getNumFrames(), numRequired );
 
-        MidiBuffer midiBuffer;
+        m_source->getNextAudioBlock( info, m_midiBuffer );
 
-        m_source->getNextAudioBlock( info, midiBuffer );
-
-        if ( midiBuffer.isEmpty() )
+        if ( m_midiBuffer.isEmpty() )
         {
             m_stretcher->process( m_inputBuffer.getArrayOfReadPointers(), info.numSamples, false );
         }
@@ -204,7 +202,7 @@ void RubberbandAudioSource::processNextAudioBlock()
                 MidiMessage midiMessage;
 
                 int i = 0;
-                MidiBuffer::Iterator iterator( midiBuffer );
+                MidiBuffer::Iterator iterator( m_midiBuffer );
 
                 while ( iterator.getNextEvent( midiMessage, samplePos ) )
                 {

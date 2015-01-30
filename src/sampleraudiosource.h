@@ -61,7 +61,9 @@ private:
     volatile qreal m_fileSampleRate;
     volatile qreal m_playbackSampleRate;
 
+    MidiBuffer m_midiBuffer;
     MidiMessageCollector m_midiCollector;
+
     Synthesiser m_sampler;
 
     int m_nextFreeNote;

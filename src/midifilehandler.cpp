@@ -59,7 +59,7 @@ bool MidiFileHandler::SaveMidiFile( const QString fileBaseName,
     MidiFile midiFile;
     MidiMessageSequence midiSeq;
 
-    const int microsecsPerQuartNote = roundToInt( qreal(timeSigDenominator * MICROSECS_PER_MINUTE) / (4 * bpm) );
+    const int microsecsPerQuartNote = roundToIntAccurate( qreal(timeSigDenominator * MICROSECS_PER_MINUTE) / (4 * bpm) );
     const int chanNum = 1;
 
     midiFile.setTicksPerQuarterNote( TICKS_PER_QUART_NOTE );
@@ -96,10 +96,10 @@ bool MidiFileHandler::SaveMidiFile( const QString fileBaseName,
         const qreal noteLength = ( sampleBufferList.at( i )->getNumFrames() / sampleRate ) / secondsPerTick;
 
         midiSeq.addEvent( MidiMessage::noteOn( chanNum, startNote + i, velocity ),
-                          roundToInt( noteStart ) );
+                          roundToIntAccurate( noteStart ) );
 
         midiSeq.addEvent( MidiMessage::noteOff( chanNum, startNote + i ),
-                          roundToInt( noteStart + noteLength ) );
+                          roundToIntAccurate( noteStart + noteLength ) );
 
         midiSeq.updateMatchedPairs();
 

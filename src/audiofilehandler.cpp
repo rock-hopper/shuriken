@@ -297,7 +297,7 @@ bool AudioFileHandler::convertSampleRate( const SharedSampleBuffer inputBuffer,
     const int inputNumFrames = inputBuffer->getNumFrames();
     const int numChans = inputBuffer->getNumChannels();
 
-    const long outputNumFrames = roundToInt( inputNumFrames * sampleRateRatio );
+    const long outputNumFrames = roundToIntAccurate( inputNumFrames * sampleRateRatio );
 
     if ( outputBuffer.size() != outputNumFrames * numChans )
     {

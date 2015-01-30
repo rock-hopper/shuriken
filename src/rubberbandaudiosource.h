@@ -71,6 +71,8 @@ private:
 
     SampleBuffer m_inputBuffer;
 
+    MidiBuffer m_midiBuffer;
+
     volatile qreal m_globalTimeRatio;
     qreal m_prevGlobalTimeRatio;
     qreal m_noteTimeRatio;

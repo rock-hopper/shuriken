@@ -474,7 +474,7 @@ QList<int> WaveGraphicsScene::getSlicePointFrameNums() const
     qSort( slicePointFrameNums );
 
     const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
-    const int minFramesBetweenSlicePoints = roundToInt( m_sampleHeader->sampleRate * AudioAnalyser::MIN_INTER_ONSET_SECS );
+    const int minFramesBetweenSlicePoints = roundToIntAccurate( m_sampleHeader->sampleRate * AudioAnalyser::MIN_INTER_ONSET_SECS );
 
     QList<int> amendedFrameNumList;
     int prevFrameNum = 0;
@@ -528,7 +528,7 @@ void WaveGraphicsScene::getSampleRangesBetweenLoopMarkers( int& firstOrderPos, Q
         const int leftWaveformOrderPos = getWaveformUnderLoopMarker( m_loopMarkerLeft )->getOrderPos();
         const int rightWaveformOrderPos = getWaveformUnderLoopMarker( m_loopMarkerRight )->getOrderPos();
 
-        const int minNumFrames = roundToInt( m_sampleHeader->sampleRate * AudioAnalyser::MIN_INTER_ONSET_SECS );
+        const int minNumFrames = roundToIntAccurate( m_sampleHeader->sampleRate * AudioAnalyser::MIN_INTER_ONSET_SECS );
 
         bool isFirstOrderPos = true;
 
@@ -629,7 +629,7 @@ void WaveGraphicsScene::startPlayhead( const bool isLoopingDesired, const qreal 
             endPosX   = m_loopMarkerRight->scenePos().x();
         }
 
-        const int millis = roundToInt( (numFrames / sampleRate) * 1000 * stretchRatio );
+        const int millis = roundToIntAccurate( (numFrames / sampleRate) * 1000 * stretchRatio );
 
         if ( isPlayheadScrolling() )
         {
@@ -664,7 +664,7 @@ void WaveGraphicsScene::startPlayhead( const qreal startPosX, const qreal endPos
 
     if ( sampleRate > 0.0 )
     {
-        const int millis = roundToInt( (numFrames / sampleRate) * 1000 * stretchRatio );
+        const int millis = roundToIntAccurate( (numFrames / sampleRate) * 1000 * stretchRatio );
 
         if ( isPlayheadScrolling() )
         {
@@ -856,7 +856,7 @@ int WaveGraphicsScene::getFrameNum( qreal scenePosX ) const
 {
     const int numFrames = getTotalNumFrames( m_waveformItemList );
 
-    int frameNum = roundToInt( scenePosX / ( width() / numFrames ) );
+    int frameNum = roundToIntAccurate( scenePosX / ( width() / numFrames ) );
 
     if ( frameNum < 0 )
         frameNum = 0;

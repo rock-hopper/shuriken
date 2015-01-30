@@ -40,7 +40,7 @@ int OfflineTimeStretcher::stretch( const SharedSampleBuffer sampleBuffer,
     SharedSampleBuffer tempBuffer( new SampleBuffer( *sampleBuffer.data() ) );
 
     const int origNumFrames = tempBuffer->getNumFrames();
-    const int newBufferSize = roundToInt( origNumFrames * timeRatio );
+    const int newBufferSize = roundToIntAccurate( origNumFrames * timeRatio );
 
     const float** inFloatBuffer = new const float*[ numChans ];
     float** outFloatBuffer = new float*[ numChans ];

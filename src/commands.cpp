@@ -1006,7 +1006,7 @@ void GlobalTimeStretchCommand::updateSlicePoints( const qreal timeRatio )
 
     foreach ( SharedSlicePointItem slicePoint, slicePointList )
     {
-        const int newFrameNum = roundToInt( slicePoint->getFrameNum() * timeRatio );
+        const int newFrameNum = roundToIntAccurate( slicePoint->getFrameNum() * timeRatio );
         slicePoint->setFrameNum( newFrameNum );
     }
 }
@@ -1019,7 +1019,7 @@ void GlobalTimeStretchCommand::updateLoopMarkers( const qreal timeRatio )
 
     if ( loopMarkerLeft != NULL )
     {
-        const int newFrameNum = roundToInt( loopMarkerLeft->getFrameNum() * timeRatio );
+        const int newFrameNum = roundToIntAccurate( loopMarkerLeft->getFrameNum() * timeRatio );
         loopMarkerLeft->setFrameNum( newFrameNum );
     }
 
@@ -1027,7 +1027,7 @@ void GlobalTimeStretchCommand::updateLoopMarkers( const qreal timeRatio )
 
     if ( loopMarkerRight != NULL )
     {
-        const int newFrameNum = roundToInt( loopMarkerRight->getFrameNum() * timeRatio );
+        const int newFrameNum = roundToIntAccurate( loopMarkerRight->getFrameNum() * timeRatio );
         loopMarkerRight->setFrameNum( newFrameNum );
     }
 }

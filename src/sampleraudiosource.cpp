@@ -148,8 +148,7 @@ void SamplerAudioSource::releaseResources()
 
 void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info )
 {
-    MidiBuffer midiBuffer;
-    getNextAudioBlock( info, midiBuffer );
+    getNextAudioBlock( info, m_midiBuffer );
 }
 
 
@@ -161,6 +160,7 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info, 
 
 
     // Fill the MIDI buffer with incoming messages from the MIDI input
+    midiBuffer.clear();
     m_midiCollector.removeNextBlockOfMessages( midiBuffer, info.numSamples );
 
 
@@ -216,7 +216,7 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info, 
                 {
                     numFrames = m_sampleBufferList.at( m_noteCounter )->getNumFrames();
                 }
-                m_frameCounter = roundToInt( numFrames * (m_playbackSampleRate / m_fileSampleRate) );
+                m_frameCounter = static_cast<int>( numFrames * (m_playbackSampleRate / m_fileSampleRate) );
                 m_frameCounter -= info.numSamples - noteOnFrameNum;
             }
             else // Middle of note

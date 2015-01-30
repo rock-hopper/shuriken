@@ -1833,7 +1833,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
         {
             const qreal timeRatio = m_rubberbandAudioSource->getNoteTimeRatio( lowestAssignedMidiNote + i );
 
-            const int numFrames = roundToInt( m_sampleBufferList.at( i )->getNumFrames() * timeRatio );
+            const int numFrames = roundToIntAccurate( m_sampleBufferList.at( i )->getNumFrames() * timeRatio );
 
             frameNum += numFrames;
 
