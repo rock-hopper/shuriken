@@ -561,6 +561,11 @@ void MainWindow::disableUI()
     m_UI->actionSelect_Move->setEnabled( false );
     m_UI->actionMulti_Select->setEnabled( false );
     m_UI->actionAudition->setEnabled( false );
+
+    if ( m_UI->actionSelective_Time_Stretch->isChecked() )
+    {
+        m_UI->actionSelective_Time_Stretch->trigger();
+    }
     m_UI->actionSelective_Time_Stretch->setEnabled( false );
 
     m_optionsDialog->disableTab( OptionsDialog::TIME_STRETCH_TAB );
