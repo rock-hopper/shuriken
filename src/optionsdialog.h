@@ -94,7 +94,7 @@ private:
 
     void saveConfig();
 
-    Ui::OptionsDialog* m_UI;
+    Ui::OptionsDialog* m_ui;
 
     AudioDeviceManager& m_deviceManager;
     AudioDeviceManager::AudioDeviceSetup m_originalConfig;

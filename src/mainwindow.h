@@ -106,7 +106,7 @@ private:
     bool isSelectiveTimeStretchInUse() const;
     void renderTimeStretch();
 
-    Ui::MainWindow* m_UI; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
+    Ui::MainWindow* m_ui; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
     WaveGraphicsScene* m_scene;
     QActionGroup* m_interactionGroup;
 

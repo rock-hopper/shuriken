@@ -43,7 +43,7 @@ using namespace RubberBand;
 
 MainWindow::MainWindow( QWidget* parent ) :
     QMainWindow( parent ),
-    m_UI( new Ui::MainWindow ),
+    m_ui( new Ui::MainWindow ),
     m_lastOpenedImportDir( QDir::homePath() ),
     m_lastOpenedProjDir( QDir::homePath() ),
     m_appliedBPM( 0.0 ),
@@ -69,7 +69,7 @@ MainWindow::~MainWindow()
         }
     }
 
-    delete m_UI;
+    delete m_ui;
 }
 
 
@@ -100,7 +100,7 @@ void MainWindow::changeEvent( QEvent* event )
     switch ( event->type() )
     {
     case QEvent::LanguageChange:
-        m_UI->retranslateUi( this );
+        m_ui->retranslateUi( this );
         break;
     default:
         break;
@@ -198,7 +198,7 @@ void MainWindow::setUpSampler()
         m_samplerAudioSource->setSamples( m_sampleBufferList, m_sampleHeader->sampleRate );
     }
 
-    on_pushButton_Loop_clicked( m_UI->pushButton_Loop->isChecked() );
+    on_pushButton_Loop_clicked( m_ui->pushButton_Loop->isChecked() );
 
     if ( m_optionsDialog->isRealtimeModeEnabled() ) // Real-time time stretch mode
     {
@@ -224,7 +224,7 @@ void MainWindow::setUpSampler()
         QObject::connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
                           m_rubberbandAudioSource, SLOT( enableJackSync(bool) ) );
 
-        on_checkBox_TimeStretch_toggled( m_UI->checkBox_TimeStretch->isChecked() );
+        on_checkBox_TimeStretch_toggled( m_ui->checkBox_TimeStretch->isChecked() );
     }
     else // Offline time stretch mode
     {
@@ -255,15 +255,15 @@ void MainWindow::tearDownSampler()
 void MainWindow::setupUI()
 {
     // Initialise user interface
-    m_UI->setupUi( this );
-    m_scene = m_UI->waveGraphicsView->getScene();
+    m_ui->setupUi( this );
+    m_scene = m_ui->waveGraphicsView->getScene();
 
 
     // Set up interaction mode buttons to work like radio buttons
     m_interactionGroup = new QActionGroup( this );
-    m_interactionGroup->addAction( m_UI->actionSelect_Move );
-    m_interactionGroup->addAction( m_UI->actionMulti_Select );
-    m_interactionGroup->addAction( m_UI->actionAudition );
+    m_interactionGroup->addAction( m_ui->actionSelect_Move );
+    m_interactionGroup->addAction( m_ui->actionMulti_Select );
+    m_interactionGroup->addAction( m_ui->actionAudition );
 
 
     // Populate "Detection Method" combo box
@@ -278,7 +278,7 @@ void MainWindow::setupUI()
 
     for ( int i = 0; i < detectMethodTextList.size(); i++ )
     {
-        m_UI->comboBox_DetectMethod->addItem( detectMethodTextList[ i ], detectMethodDataList[ i ] );
+        m_ui->comboBox_DetectMethod->addItem( detectMethodTextList[ i ], detectMethodDataList[ i ] );
     }
 
 
@@ -291,9 +291,9 @@ void MainWindow::setupUI()
 
     for ( int i = 0; i < windowSizeTextList.size(); i++ )
     {
-        m_UI->comboBox_WindowSize->addItem( windowSizeTextList[ i ], windowSizeDataList[ i ] );
+        m_ui->comboBox_WindowSize->addItem( windowSizeTextList[ i ], windowSizeDataList[ i ] );
     }
-    m_UI->comboBox_WindowSize->setCurrentIndex( 3 ); // "1024"
+    m_ui->comboBox_WindowSize->setCurrentIndex( 3 ); // "1024"
 
 
     // Populate "Hop Size" combo box
@@ -305,9 +305,9 @@ void MainWindow::setupUI()
 
     for ( int i = 0; i < hopSizeTextList.size(); i++ )
     {
-        m_UI->comboBox_HopSize->addItem( hopSizeTextList[ i ], hopSizeDataList[ i ] );
+        m_ui->comboBox_HopSize->addItem( hopSizeTextList[ i ], hopSizeDataList[ i ] );
     }
-    m_UI->comboBox_HopSize->setCurrentIndex( 0 ); // "50%"
+    m_ui->comboBox_HopSize->setCurrentIndex( 0 ); // "50%"
 
 
     // Populate "Snap Loop Markers" combo box
@@ -321,11 +321,11 @@ void MainWindow::setupUI()
     timeSigNumeratorTextList << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12" << "13" << "14" << "15" << "16";
     timeSigDenominatorTextList << "1" << "2" << "4" << "8" << "16";
 
-    m_UI->comboBox_TimeSigNumerator->addItems( timeSigNumeratorTextList );
-    m_UI->comboBox_TimeSigDenominator->addItems( timeSigDenominatorTextList );
+    m_ui->comboBox_TimeSigNumerator->addItems( timeSigNumeratorTextList );
+    m_ui->comboBox_TimeSigDenominator->addItems( timeSigDenominatorTextList );
 
-    m_UI->comboBox_TimeSigNumerator->setCurrentIndex( 3 );   // 4
-    m_UI->comboBox_TimeSigDenominator->setCurrentIndex( 2 ); // 4
+    m_ui->comboBox_TimeSigNumerator->setCurrentIndex( 3 );   // 4
+    m_ui->comboBox_TimeSigDenominator->setCurrentIndex( 2 ); // 4
 
 
     // Populate "Units" combo box
@@ -333,12 +333,12 @@ void MainWindow::setupUI()
 
     unitsTextList << "Bars" << "Beats";
 
-    m_UI->comboBox_Units->addItems( unitsTextList );
+    m_ui->comboBox_Units->addItems( unitsTextList );
 
 
     // Hide widgets / menu items
-    m_UI->label_JackSync->setVisible( false );
-    m_UI->checkBox_TimeStretch->setVisible( false );
+    m_ui->label_JackSync->setVisible( false );
+    m_ui->checkBox_TimeStretch->setVisible( false );
 
 
     // Connect signals to slots
@@ -348,10 +348,10 @@ void MainWindow::setupUI()
     QObject::connect( m_scene, SIGNAL( loopMarkerPosChanged() ),
                       this, SLOT( stopPlayback() ) );
 
-    QObject::connect( m_UI->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
+    QObject::connect( m_ui->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
                       this, SLOT( disableZoomOut() ) );
 
-    QObject::connect( m_UI->waveGraphicsView, SIGNAL( maxDetailLevelReached() ),
+    QObject::connect( m_ui->waveGraphicsView, SIGNAL( maxDetailLevelReached() ),
                       this, SLOT( disableZoomIn() ) );
 
     QObject::connect( m_scene, SIGNAL( playheadFinishedScrolling() ),
@@ -361,19 +361,19 @@ void MainWindow::setupUI()
                       this, SLOT( enableEditActions() ) );
 
     QObject::connect( &m_undoStack, SIGNAL( canUndoChanged(bool) ),
-                      m_UI->actionUndo, SLOT( setEnabled(bool) ) );
+                      m_ui->actionUndo, SLOT( setEnabled(bool) ) );
 
     QObject::connect( &m_undoStack, SIGNAL( canRedoChanged(bool) ),
-                      m_UI->actionRedo, SLOT( setEnabled(bool) ) );
+                      m_ui->actionRedo, SLOT( setEnabled(bool) ) );
 
-    QObject::connect( m_UI->actionUndo, SIGNAL( triggered() ),
+    QObject::connect( m_ui->actionUndo, SIGNAL( triggered() ),
                       &m_undoStack, SLOT( undo() ) );
 
-    QObject::connect( m_UI->actionRedo, SIGNAL( triggered() ),
+    QObject::connect( m_ui->actionRedo, SIGNAL( triggered() ),
                       &m_undoStack, SLOT( redo() ) );
 
     QObject::connect( &m_undoStack, SIGNAL( cleanChanged(bool) ),
-                      m_UI->actionSave_Project, SLOT( setDisabled(bool) ) );
+                      m_ui->actionSave_Project, SLOT( setDisabled(bool) ) );
 
 
     // Create help form
@@ -415,7 +415,7 @@ void MainWindow::setupUI()
             QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, m_helpForm->size(), QApplication::desktop()->availableGeometry() )
         );
 
-        m_UI->actionHelp->setEnabled( true );
+        m_ui->actionHelp->setEnabled( true );
     }
 
 
@@ -447,10 +447,10 @@ void MainWindow::setupUI()
                           this, SLOT( enableRealtimeControls(bool) ) );
 
         QObject::connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
-                          m_UI->doubleSpinBox_NewBPM, SLOT( setHidden(bool) ) );
+                          m_ui->doubleSpinBox_NewBPM, SLOT( setHidden(bool) ) );
 
         QObject::connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
-                          m_UI->label_JackSync, SLOT( setVisible(bool) ) );
+                          m_ui->label_JackSync, SLOT( setVisible(bool) ) );
 
         QObject::connect( m_optionsDialog, SIGNAL( timeStretchOptionsChanged() ),
                           this, SLOT( enableSaveAction() ) );
@@ -463,51 +463,51 @@ void MainWindow::setupUI()
 
 void MainWindow::enableUI()
 {
-    m_UI->pushButton_PlayStop->setEnabled( true );
-    m_UI->pushButton_Loop->setEnabled( true );
-    m_UI->pushButton_TimestretchOptions->setEnabled( true );
+    m_ui->pushButton_PlayStop->setEnabled( true );
+    m_ui->pushButton_Loop->setEnabled( true );
+    m_ui->pushButton_TimestretchOptions->setEnabled( true );
 
     if ( m_optionsDialog->isRealtimeModeEnabled() )
     {
-        m_UI->checkBox_TimeStretch->setVisible( true );
+        m_ui->checkBox_TimeStretch->setVisible( true );
     }
     else
     {
-        m_UI->pushButton_Apply->setEnabled( true );
-        m_UI->checkBox_TimeStretch->setVisible( false );
+        m_ui->pushButton_Apply->setEnabled( true );
+        m_ui->checkBox_TimeStretch->setVisible( false );
     }
 
-    m_UI->doubleSpinBox_OriginalBPM->setEnabled( true );
-    m_UI->doubleSpinBox_NewBPM->setEnabled( true );
-    m_UI->pushButton_CalcBPM->setEnabled( true );
-    m_UI->checkBox_TimeStretch->setEnabled( true );
-    m_UI->checkBox_PitchCorrection->setEnabled( true );
-    m_UI->comboBox_DetectMethod->setEnabled( true );
-    m_UI->comboBox_WindowSize->setEnabled( true );
-    m_UI->comboBox_HopSize->setEnabled( true );
-    m_UI->lcdNumber_Threshold->setEnabled( true );
-    m_UI->horizontalSlider_Threshold->setEnabled( true );
-    m_UI->pushButton_FindOnsets->setEnabled( true );
-    m_UI->pushButton_FindBeats->setEnabled( true );
-    m_UI->checkBox_LoopMarkers->setEnabled( true );
-    m_UI->comboBox_TimeSigNumerator->setEnabled( true );
-    m_UI->comboBox_TimeSigDenominator->setEnabled( true );
-    m_UI->spinBox_Length->setEnabled( true );
-    m_UI->comboBox_Units->setEnabled( true );
+    m_ui->doubleSpinBox_OriginalBPM->setEnabled( true );
+    m_ui->doubleSpinBox_NewBPM->setEnabled( true );
+    m_ui->pushButton_CalcBPM->setEnabled( true );
+    m_ui->checkBox_TimeStretch->setEnabled( true );
+    m_ui->checkBox_PitchCorrection->setEnabled( true );
+    m_ui->comboBox_DetectMethod->setEnabled( true );
+    m_ui->comboBox_WindowSize->setEnabled( true );
+    m_ui->comboBox_HopSize->setEnabled( true );
+    m_ui->lcdNumber_Threshold->setEnabled( true );
+    m_ui->horizontalSlider_Threshold->setEnabled( true );
+    m_ui->pushButton_FindOnsets->setEnabled( true );
+    m_ui->pushButton_FindBeats->setEnabled( true );
+    m_ui->checkBox_LoopMarkers->setEnabled( true );
+    m_ui->comboBox_TimeSigNumerator->setEnabled( true );
+    m_ui->comboBox_TimeSigDenominator->setEnabled( true );
+    m_ui->spinBox_Length->setEnabled( true );
+    m_ui->comboBox_Units->setEnabled( true );
 
-    m_UI->actionSave_As->setEnabled( true );
-    m_UI->actionClose_Project->setEnabled( true );
-    m_UI->actionExport_As->setEnabled( true );
-    m_UI->actionSelect_All->setEnabled( true );
-    m_UI->actionSelect_None->setEnabled( true );
-    m_UI->actionAdd_Slice_Point->setEnabled( true );
-    m_UI->actionZoom_Original->setEnabled( true );
-    m_UI->actionZoom_In->setEnabled( true );
-    m_UI->actionSelect_Move->setEnabled( true );
-    m_UI->actionMulti_Select->setEnabled( true );
-    m_UI->actionAudition->setEnabled( true );
+    m_ui->actionSave_As->setEnabled( true );
+    m_ui->actionClose_Project->setEnabled( true );
+    m_ui->actionExport_As->setEnabled( true );
+    m_ui->actionSelect_All->setEnabled( true );
+    m_ui->actionSelect_None->setEnabled( true );
+    m_ui->actionAdd_Slice_Point->setEnabled( true );
+    m_ui->actionZoom_Original->setEnabled( true );
+    m_ui->actionZoom_In->setEnabled( true );
+    m_ui->actionSelect_Move->setEnabled( true );
+    m_ui->actionMulti_Select->setEnabled( true );
+    m_ui->actionAudition->setEnabled( true );
 
-    m_UI->actionAudition->trigger();
+    m_ui->actionAudition->trigger();
 
     m_optionsDialog->enableTab( OptionsDialog::TIME_STRETCH_TAB );
 }
@@ -516,57 +516,57 @@ void MainWindow::enableUI()
 
 void MainWindow::disableUI()
 {
-    m_UI->pushButton_PlayStop->setEnabled( false );
-    m_UI->pushButton_Loop->setEnabled( false );
-    m_UI->doubleSpinBox_OriginalBPM->setValue( 0.0 );
-    m_UI->doubleSpinBox_OriginalBPM->setEnabled( false );
-    m_UI->doubleSpinBox_NewBPM->setValue( 0.0 );
-    m_UI->doubleSpinBox_NewBPM->setEnabled( false );
-    m_UI->pushButton_CalcBPM->setEnabled( false );
-    m_UI->pushButton_Apply->setEnabled( false );
-    m_UI->checkBox_TimeStretch->setEnabled( false );
-    m_UI->checkBox_PitchCorrection->setEnabled( false );
-    m_UI->pushButton_TimestretchOptions->setEnabled( false );
-    m_UI->pushButton_Slice->setEnabled( false );
-    m_UI->pushButton_Slice->setChecked( false );
-    m_UI->comboBox_DetectMethod->setEnabled( false );
-    m_UI->comboBox_WindowSize->setEnabled( false );
-    m_UI->comboBox_HopSize->setEnabled( false );
-    m_UI->lcdNumber_Threshold->setEnabled( false );
-    m_UI->horizontalSlider_Threshold->setEnabled( false );
-    m_UI->pushButton_FindOnsets->setEnabled( false );
-    m_UI->pushButton_FindBeats->setEnabled( false );
-    m_UI->checkBox_LoopMarkers->setEnabled( false );
-    m_UI->checkBox_LoopMarkers->setChecked( false );
-    m_UI->comboBox_SnapLoopMarkers->setEnabled( false );
-    m_UI->comboBox_TimeSigNumerator->setEnabled( false );
-    m_UI->comboBox_TimeSigDenominator->setEnabled( false );
-    m_UI->spinBox_Length->setEnabled( false );
-    m_UI->spinBox_Length->setValue( 0 );
-    m_UI->comboBox_Units->setEnabled( false );
+    m_ui->pushButton_PlayStop->setEnabled( false );
+    m_ui->pushButton_Loop->setEnabled( false );
+    m_ui->doubleSpinBox_OriginalBPM->setValue( 0.0 );
+    m_ui->doubleSpinBox_OriginalBPM->setEnabled( false );
+    m_ui->doubleSpinBox_NewBPM->setValue( 0.0 );
+    m_ui->doubleSpinBox_NewBPM->setEnabled( false );
+    m_ui->pushButton_CalcBPM->setEnabled( false );
+    m_ui->pushButton_Apply->setEnabled( false );
+    m_ui->checkBox_TimeStretch->setEnabled( false );
+    m_ui->checkBox_PitchCorrection->setEnabled( false );
+    m_ui->pushButton_TimestretchOptions->setEnabled( false );
+    m_ui->pushButton_Slice->setEnabled( false );
+    m_ui->pushButton_Slice->setChecked( false );
+    m_ui->comboBox_DetectMethod->setEnabled( false );
+    m_ui->comboBox_WindowSize->setEnabled( false );
+    m_ui->comboBox_HopSize->setEnabled( false );
+    m_ui->lcdNumber_Threshold->setEnabled( false );
+    m_ui->horizontalSlider_Threshold->setEnabled( false );
+    m_ui->pushButton_FindOnsets->setEnabled( false );
+    m_ui->pushButton_FindBeats->setEnabled( false );
+    m_ui->checkBox_LoopMarkers->setEnabled( false );
+    m_ui->checkBox_LoopMarkers->setChecked( false );
+    m_ui->comboBox_SnapLoopMarkers->setEnabled( false );
+    m_ui->comboBox_TimeSigNumerator->setEnabled( false );
+    m_ui->comboBox_TimeSigDenominator->setEnabled( false );
+    m_ui->spinBox_Length->setEnabled( false );
+    m_ui->spinBox_Length->setValue( 0 );
+    m_ui->comboBox_Units->setEnabled( false );
 
-    m_UI->actionSave_Project->setEnabled( false );
-    m_UI->actionSave_As->setEnabled( false );
-    m_UI->actionClose_Project->setEnabled( false );
-    m_UI->actionExport_As->setEnabled( false );
-    m_UI->actionSelect_All->setEnabled( false );
-    m_UI->actionSelect_None->setEnabled( false );
-    m_UI->actionAdd_Slice_Point->setEnabled( false );
-    m_UI->actionAdd_Slice_Point->setVisible( true );
-    m_UI->actionDelete->setEnabled( false );
-    m_UI->actionReverse->setEnabled( false );
-    m_UI->actionZoom_Original->setEnabled( false );
-    m_UI->actionZoom_Out->setEnabled( false );
-    m_UI->actionZoom_In->setEnabled( false );
-    m_UI->actionSelect_Move->setEnabled( false );
-    m_UI->actionMulti_Select->setEnabled( false );
-    m_UI->actionAudition->setEnabled( false );
+    m_ui->actionSave_Project->setEnabled( false );
+    m_ui->actionSave_As->setEnabled( false );
+    m_ui->actionClose_Project->setEnabled( false );
+    m_ui->actionExport_As->setEnabled( false );
+    m_ui->actionSelect_All->setEnabled( false );
+    m_ui->actionSelect_None->setEnabled( false );
+    m_ui->actionAdd_Slice_Point->setEnabled( false );
+    m_ui->actionAdd_Slice_Point->setVisible( true );
+    m_ui->actionDelete->setEnabled( false );
+    m_ui->actionReverse->setEnabled( false );
+    m_ui->actionZoom_Original->setEnabled( false );
+    m_ui->actionZoom_Out->setEnabled( false );
+    m_ui->actionZoom_In->setEnabled( false );
+    m_ui->actionSelect_Move->setEnabled( false );
+    m_ui->actionMulti_Select->setEnabled( false );
+    m_ui->actionAudition->setEnabled( false );
 
-    if ( m_UI->actionSelective_Time_Stretch->isChecked() )
+    if ( m_ui->actionSelective_Time_Stretch->isChecked() )
     {
-        m_UI->actionSelective_Time_Stretch->trigger();
+        m_ui->actionSelective_Time_Stretch->trigger();
     }
-    m_UI->actionSelective_Time_Stretch->setEnabled( false );
+    m_ui->actionSelective_Time_Stretch->setEnabled( false );
 
     m_optionsDialog->disableTab( OptionsDialog::TIME_STRETCH_TAB );
 }
@@ -586,8 +586,8 @@ void MainWindow::updateSnapLoopMarkersComboBox()
         snapTextList << "Off" << "Markers -> Slice Points" << "Slice Points -> Markers";
     }
 
-    m_UI->comboBox_SnapLoopMarkers->clear();
-    m_UI->comboBox_SnapLoopMarkers->addItems( snapTextList );
+    m_ui->comboBox_SnapLoopMarkers->clear();
+    m_ui->comboBox_SnapLoopMarkers->addItems( snapTextList );
 }
 
 
@@ -597,16 +597,16 @@ void MainWindow::getDetectionSettings( AudioAnalyser::DetectionSettings& setting
     int currentIndex;
 
     // From aubio website: "Typical threshold values are within 0.001 and 0.900." Default is 0.3 in aubio-0.4.0
-    currentIndex = m_UI->comboBox_DetectMethod->currentIndex();
-    settings.detectionMethod = m_UI->comboBox_DetectMethod->itemData( currentIndex ).toString().toLocal8Bit();
+    currentIndex = m_ui->comboBox_DetectMethod->currentIndex();
+    settings.detectionMethod = m_ui->comboBox_DetectMethod->itemData( currentIndex ).toString().toLocal8Bit();
 
-    settings.threshold = qreal( m_UI->horizontalSlider_Threshold->value() ) / 1000.0;
+    settings.threshold = qreal( m_ui->horizontalSlider_Threshold->value() ) / 1000.0;
 
-    currentIndex = m_UI->comboBox_WindowSize->currentIndex();
-    settings.windowSize = (uint_t) m_UI->comboBox_WindowSize->itemData( currentIndex ).toInt();
+    currentIndex = m_ui->comboBox_WindowSize->currentIndex();
+    settings.windowSize = (uint_t) m_ui->comboBox_WindowSize->itemData( currentIndex ).toInt();
 
-    currentIndex = m_UI->comboBox_HopSize->currentIndex();
-    const qreal percentage = m_UI->comboBox_HopSize->itemData( currentIndex ).toReal();
+    currentIndex = m_ui->comboBox_HopSize->currentIndex();
+    const qreal percentage = m_ui->comboBox_HopSize->itemData( currentIndex ).toReal();
     settings.hopSize = (uint_t) ( settings.windowSize * ( percentage / 100.0 ) );
 
     settings.sampleRate = (uint_t) m_sampleHeader->sampleRate;
@@ -623,7 +623,7 @@ void MainWindow::closeProject()
     m_scene->clearAll();
     on_actionZoom_Original_triggered();
     disableUI();
-    m_UI->statusBar->clearMessage();
+    m_ui->statusBar->clearMessage();
 
     m_undoStack.clear();
 
@@ -673,7 +673,7 @@ void MainWindow::renderTimeStretch()
 
             QUndoCommand* command = new RenderTimeStretchCommand( this,
                                                                   m_scene,
-                                                                  m_UI->waveGraphicsView,
+                                                                  m_ui->waveGraphicsView,
                                                                   tempDirPath,
                                                                   fileBaseName );
 
@@ -752,7 +752,7 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
                                            const int numFramesToNextSlicePoint,
                                            const int oldFrameNum )
 {
-    if ( m_UI->actionSelective_Time_Stretch->isChecked() )
+    if ( m_ui->actionSelective_Time_Stretch->isChecked() )
     {
         if ( m_samplerAudioSource != NULL && m_rubberbandAudioSource != NULL )
         {
@@ -829,14 +829,14 @@ void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPoint
 
     // Play sample range and start playhead scrolling
     m_samplerAudioSource->playSample( waveformItem->getOrderPos(), sampleRange );
-    m_UI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
+    m_ui->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
 
     if ( m_optionsDialog != NULL && m_optionsDialog->isRealtimeModeEnabled() &&
-         m_UI->checkBox_TimeStretch->isChecked() &&
-         m_UI->doubleSpinBox_OriginalBPM->value() > 0.0 &&
-         m_UI->doubleSpinBox_NewBPM->value() > 0.0 )
+         m_ui->checkBox_TimeStretch->isChecked() &&
+         m_ui->doubleSpinBox_OriginalBPM->value() > 0.0 &&
+         m_ui->doubleSpinBox_NewBPM->value() > 0.0 )
     {
-        qreal stretchRatio = m_UI->doubleSpinBox_OriginalBPM->value() / m_UI->doubleSpinBox_NewBPM->value();
+        qreal stretchRatio = m_ui->doubleSpinBox_OriginalBPM->value() / m_ui->doubleSpinBox_NewBPM->value();
         m_scene->startPlayhead( startPosX, endPosX, sampleRange->numFrames, stretchRatio );
     }
     else
@@ -854,28 +854,28 @@ void MainWindow::stopPlayback()
         m_samplerAudioSource->stop();
     }
     m_scene->stopPlayhead();
-    m_UI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
+    m_ui->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
 }
 
 
 
 void MainWindow::resetPlayStopButtonIcon()
 {
-    m_UI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
+    m_ui->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
 }
 
 
 
 void MainWindow::disableZoomIn()
 {
-    m_UI->actionZoom_In->setEnabled( false );
+    m_ui->actionZoom_In->setEnabled( false );
 }
 
 
 
 void MainWindow::disableZoomOut()
 {
-    m_UI->actionZoom_Out->setEnabled( false );
+    m_ui->actionZoom_Out->setEnabled( false );
 }
 
 
@@ -884,12 +884,12 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
 {
     if ( isEnabled ) // Realtime mode
     {
-        m_UI->checkBox_TimeStretch->setVisible( true );
-        m_UI->pushButton_Apply->setVisible( false );
+        m_ui->checkBox_TimeStretch->setVisible( true );
+        m_ui->pushButton_Apply->setVisible( false );
 
         if ( m_sampleBufferList.size() > 1 )
         {
-            m_UI->actionSelective_Time_Stretch->setEnabled( true );
+            m_ui->actionSelective_Time_Stretch->setEnabled( true );
         }
 
         QObject::connect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
@@ -897,10 +897,10 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
     }
     else // Offline mode
     {
-        m_UI->checkBox_TimeStretch->setVisible( false );
-        m_UI->pushButton_Apply->setVisible( true );
+        m_ui->checkBox_TimeStretch->setVisible( false );
+        m_ui->pushButton_Apply->setVisible( true );
 
-        m_UI->actionSelective_Time_Stretch->setEnabled( false );
+        m_ui->actionSelective_Time_Stretch->setEnabled( false );
 
         QObject::disconnect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
                              this, SLOT( resetSampler() ) );
@@ -929,29 +929,29 @@ void MainWindow::enableEditActions()
     const SharedSlicePointItem slicePoint = m_scene->getSelectedSlicePoint();
     const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
 
-    m_UI->actionDelete->setEnabled( false );
+    m_ui->actionDelete->setEnabled( false );
 
     if ( ! slicePoint.isNull() || ! orderPositions.isEmpty() )
     {
         if ( orderPositions.size() < m_scene->getNumWaveforms() )
         {
-            m_UI->actionDelete->setEnabled( true );
+            m_ui->actionDelete->setEnabled( true );
         }
     }
 
     if ( ! orderPositions.isEmpty() )
     {
-        m_UI->actionApply_Gain->setEnabled( true );
-        m_UI->actionApply_Gain_Ramp->setEnabled( true );
-        m_UI->actionNormalise->setEnabled( true );
-        m_UI->actionReverse->setEnabled( true );
+        m_ui->actionApply_Gain->setEnabled( true );
+        m_ui->actionApply_Gain_Ramp->setEnabled( true );
+        m_ui->actionNormalise->setEnabled( true );
+        m_ui->actionReverse->setEnabled( true );
     }
     else
     {
-        m_UI->actionApply_Gain->setEnabled( false );
-        m_UI->actionApply_Gain_Ramp->setEnabled( false );
-        m_UI->actionNormalise->setEnabled( false );
-        m_UI->actionReverse->setEnabled( false );
+        m_ui->actionApply_Gain->setEnabled( false );
+        m_ui->actionApply_Gain_Ramp->setEnabled( false );
+        m_ui->actionNormalise->setEnabled( false );
+        m_ui->actionReverse->setEnabled( false );
     }
 }
 
@@ -961,7 +961,7 @@ void MainWindow::enableSaveAction()
 {
     if ( m_isProjectOpen )
     {
-        m_UI->actionSave_Project->setEnabled( true );
+        m_ui->actionSave_Project->setEnabled( true );
     }
 }
 
@@ -1173,7 +1173,7 @@ void MainWindow::on_actionDelete_triggered()
 
         QUndoCommand* command = new DeleteSlicePointItemCommand( selectedSlicePoint,
                                                                  m_scene,
-                                                                 m_UI->pushButton_Slice );
+                                                                 m_ui->pushButton_Slice );
         m_undoStack.push( command );
     }
     else
@@ -1190,10 +1190,10 @@ void MainWindow::on_actionDelete_triggered()
             QUndoCommand* command = new DeleteWaveformItemCommand( orderPositions,
                                                                    m_scene,
                                                                    this,
-                                                                   m_UI->pushButton_Slice,
-                                                                   m_UI->pushButton_FindOnsets,
-                                                                   m_UI->pushButton_FindBeats,
-                                                                   m_UI->actionAdd_Slice_Point );
+                                                                   m_ui->pushButton_Slice,
+                                                                   m_ui->pushButton_FindOnsets,
+                                                                   m_ui->pushButton_FindBeats,
+                                                                   m_ui->actionAdd_Slice_Point );
             m_undoStack.push( command );
         }
     }
@@ -1203,11 +1203,11 @@ void MainWindow::on_actionDelete_triggered()
 
 void MainWindow::on_actionAdd_Slice_Point_triggered()
 {
-    const QPoint mousePos = m_UI->waveGraphicsView->mapFromGlobal( QCursor::pos() );
-    const QPointF mouseScenePos = m_UI->waveGraphicsView->mapToScene( mousePos );
+    const QPoint mousePos = m_ui->waveGraphicsView->mapFromGlobal( QCursor::pos() );
+    const QPointF mouseScenePos = m_ui->waveGraphicsView->mapToScene( mousePos );
     const int frameNum = m_scene->getFrameNum( mouseScenePos.x() );
 
-    QUndoCommand* command = new AddSlicePointItemCommand( frameNum, true, m_scene, m_UI->pushButton_Slice );
+    QUndoCommand* command = new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice );
     m_undoStack.push( command );
 }
 
@@ -1239,7 +1239,7 @@ void MainWindow::on_actionApply_Gain_triggered()
                 new ApplyGainCommand( dialog.getGainValue(),
                                       orderPos,
                                       m_scene,
-                                      m_UI->waveGraphicsView,
+                                      m_ui->waveGraphicsView,
                                       m_sampleHeader->sampleRate,
                                       m_fileHandler,
                                       tempDirPath,
@@ -1286,7 +1286,7 @@ void MainWindow::on_actionApply_Gain_Ramp_triggered()
                                           dialog.getEndGainValue(),
                                           orderPos,
                                           m_scene,
-                                          m_UI->waveGraphicsView,
+                                          m_ui->waveGraphicsView,
                                           m_sampleHeader->sampleRate,
                                           m_fileHandler,
                                           tempDirPath,
@@ -1325,7 +1325,7 @@ void MainWindow::on_actionNormalise_triggered()
 
             new NormaliseCommand( orderPos,
                                   m_scene,
-                                  m_UI->waveGraphicsView,
+                                  m_ui->waveGraphicsView,
                                   m_sampleHeader->sampleRate,
                                   m_fileHandler,
                                   tempDirPath,
@@ -1359,7 +1359,7 @@ void MainWindow::on_actionReverse_triggered()
 
     foreach ( int orderPos, orderPositions )
     {
-        new ReverseCommand( orderPos, m_scene, m_UI->waveGraphicsView, parentCommand );
+        new ReverseCommand( orderPos, m_scene, m_ui->waveGraphicsView, parentCommand );
     }
 
     m_undoStack.push( parentCommand );
@@ -1418,7 +1418,7 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
     qreal bpm = 0.0;
     int numFrames = 0;
 
-    if ( m_UI->checkBox_LoopMarkers->isChecked() )
+    if ( m_ui->checkBox_LoopMarkers->isChecked() )
     {
         numFrames = m_scene->getNumFramesBetweenLoopMarkers();
     }
@@ -1428,23 +1428,23 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
     }
 
     const qreal numSeconds = numFrames / m_sampleHeader->sampleRate;
-    const int numerator = m_UI->comboBox_TimeSigNumerator->currentText().toInt();
+    const int numerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
 
     int numBeats = 0;
 
-    if ( m_UI->comboBox_Units->currentIndex() == UNITS_BARS )
+    if ( m_ui->comboBox_Units->currentIndex() == UNITS_BARS )
     {
-        numBeats = m_UI->spinBox_Length->value() * numerator;
+        numBeats = m_ui->spinBox_Length->value() * numerator;
     }
     else // UNITS_BEATS
     {
-        numBeats = m_UI->spinBox_Length->value();
+        numBeats = m_ui->spinBox_Length->value();
     }
 
     bpm = numBeats / ( numSeconds / 60 );
 
-    m_UI->doubleSpinBox_OriginalBPM->setValue( bpm );
-    m_UI->doubleSpinBox_NewBPM->setValue( bpm );
+    m_ui->doubleSpinBox_OriginalBPM->setValue( bpm );
+    m_ui->doubleSpinBox_NewBPM->setValue( bpm );
 
     m_scene->setBpmRulerMarks( bpm, numerator );
 
@@ -1464,13 +1464,13 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
 
         new SliceCommand( this,
                           m_scene,
-                          m_UI->pushButton_Slice,
-                          m_UI->pushButton_FindOnsets,
-                          m_UI->pushButton_FindBeats,
-                          m_UI->actionAdd_Slice_Point,
-                          m_UI->actionSelect_Move,
-                          m_UI->actionAudition,
-                          m_UI->actionSelective_Time_Stretch,
+                          m_ui->pushButton_Slice,
+                          m_ui->pushButton_FindOnsets,
+                          m_ui->pushButton_FindBeats,
+                          m_ui->actionAdd_Slice_Point,
+                          m_ui->actionSelect_Move,
+                          m_ui->actionAudition,
+                          m_ui->actionSelective_Time_Stretch,
                           parentCommand );
 
         QList<SharedSlicePointItem> slicePoints = m_scene->getSlicePointList();
@@ -1502,13 +1502,13 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
 
         new UnsliceCommand( this,
                             m_scene,
-                            m_UI->pushButton_Slice,
-                            m_UI->pushButton_FindOnsets,
-                            m_UI->pushButton_FindBeats,
-                            m_UI->actionAdd_Slice_Point,
-                            m_UI->actionSelect_Move,
-                            m_UI->actionAudition,
-                            m_UI->actionSelective_Time_Stretch,
+                            m_ui->pushButton_Slice,
+                            m_ui->pushButton_FindOnsets,
+                            m_ui->pushButton_FindBeats,
+                            m_ui->actionAdd_Slice_Point,
+                            m_ui->actionSelect_Move,
+                            m_ui->actionAudition,
+                            m_ui->actionSelective_Time_Stretch,
                             parentCommand );
 
         m_undoStack.push( parentCommand );
@@ -1519,7 +1519,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
 
 void MainWindow::on_horizontalSlider_Threshold_valueChanged( const int value )
 {
-    m_UI->lcdNumber_Threshold->display( qreal( value ) / 1000.0 );
+    m_ui->lcdNumber_Threshold->display( qreal( value ) / 1000.0 );
 }
 
 
@@ -1536,7 +1536,7 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
 
         foreach ( SharedSlicePointItem item, slicePointItemList )
         {
-            new DeleteSlicePointItemCommand( item, m_scene, m_UI->pushButton_Slice, parentCommand );
+            new DeleteSlicePointItemCommand( item, m_scene, m_ui->pushButton_Slice, parentCommand );
         }
     }
 
@@ -1549,7 +1549,7 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
 
         foreach ( int frameNum, slicePointFrameNumList )
         {
-            new AddSlicePointItemCommand( frameNum, true, m_scene, m_UI->pushButton_Slice, parentCommand );
+            new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, parentCommand );
         }
     }
 
@@ -1577,12 +1577,12 @@ void MainWindow::on_pushButton_FindBeats_clicked()
 
     foreach ( SharedSlicePointItem item, slicePointItemList )
     {
-        new DeleteSlicePointItemCommand( item, m_scene, m_UI->pushButton_Slice, parentCommand );
+        new DeleteSlicePointItemCommand( item, m_scene, m_ui->pushButton_Slice, parentCommand );
     }
 
     foreach ( int frameNum, slicePointFrameNumList )
     {
-        new AddSlicePointItemCommand( frameNum, true, m_scene, m_UI->pushButton_Slice, parentCommand );
+        new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, parentCommand );
     }
 
     m_undoStack.push( parentCommand );
@@ -1594,8 +1594,8 @@ void MainWindow::on_pushButton_FindBeats_clicked()
 
 void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double originalBPM )
 {
-    const qreal newBPM = m_UI->doubleSpinBox_NewBPM->value();
-    const bool isTimeStretchEnabled = m_UI->checkBox_TimeStretch->isChecked();
+    const qreal newBPM = m_ui->doubleSpinBox_NewBPM->value();
+    const bool isTimeStretchEnabled = m_ui->checkBox_TimeStretch->isChecked();
 
     if ( isTimeStretchEnabled && m_rubberbandAudioSource != NULL )
     {
@@ -1611,7 +1611,7 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
         }
     }
 
-    const int timeSigNumerator = m_UI->comboBox_TimeSigNumerator->currentText().toInt();
+    const int timeSigNumerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
 
     m_scene->setBpmRulerMarks( originalBPM, timeSigNumerator );
 }
@@ -1620,8 +1620,8 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
 
 void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
 {
-    const qreal originalBPM = m_UI->doubleSpinBox_OriginalBPM->value();
-    const bool isTimeStretchEnabled = m_UI->checkBox_TimeStretch->isChecked();
+    const qreal originalBPM = m_ui->doubleSpinBox_OriginalBPM->value();
+    const bool isTimeStretchEnabled = m_ui->checkBox_TimeStretch->isChecked();
 
     if ( isTimeStretchEnabled && m_rubberbandAudioSource != NULL )
     {
@@ -1640,8 +1640,8 @@ void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
 
 void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
 {
-    const qreal originalBPM = m_UI->doubleSpinBox_OriginalBPM->value();
-    const qreal newBPM = m_UI->doubleSpinBox_NewBPM->value();
+    const qreal originalBPM = m_ui->doubleSpinBox_OriginalBPM->value();
+    const qreal newBPM = m_ui->doubleSpinBox_NewBPM->value();
     const bool isTimeStretchEnabled = isChecked;
 
     if ( m_rubberbandAudioSource != NULL )
@@ -1653,7 +1653,7 @@ void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
         {
             if ( newBPM > 0.0 && originalBPM > 0.0 )
                 timeRatio = originalBPM / newBPM;
-            isPitchCorrectionEnabled = m_UI->checkBox_PitchCorrection->isChecked();
+            isPitchCorrectionEnabled = m_ui->checkBox_PitchCorrection->isChecked();
         }
 
         m_rubberbandAudioSource->setGlobalTimeRatio( timeRatio );
@@ -1665,7 +1665,7 @@ void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
 
 void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
 {
-    const bool isTimeStretchEnabled = m_UI->checkBox_TimeStretch->isChecked();
+    const bool isTimeStretchEnabled = m_ui->checkBox_TimeStretch->isChecked();
 
     if ( isTimeStretchEnabled && m_rubberbandAudioSource != NULL )
     {
@@ -1681,11 +1681,11 @@ void MainWindow::on_pushButton_PlayStop_clicked()
     {
         m_samplerAudioSource->stop();
         m_scene->stopPlayhead();
-        m_UI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
+        m_ui->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
     }
     else
     {
-        if ( m_UI->checkBox_LoopMarkers->isChecked() )
+        if ( m_ui->checkBox_LoopMarkers->isChecked() )
         {
             int firstOrderPos;
             QList<SharedSampleRange> sampleRanges;
@@ -1699,19 +1699,19 @@ void MainWindow::on_pushButton_PlayStop_clicked()
             m_samplerAudioSource->playAll();
         }
         
-        m_UI->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
+        m_ui->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
 
         if ( m_optionsDialog != NULL && m_optionsDialog->isRealtimeModeEnabled() &&
-             m_UI->checkBox_TimeStretch->isChecked() &&
-             m_UI->doubleSpinBox_OriginalBPM->value() > 0.0 &&
-             m_UI->doubleSpinBox_NewBPM->value() > 0.0 )
+             m_ui->checkBox_TimeStretch->isChecked() &&
+             m_ui->doubleSpinBox_OriginalBPM->value() > 0.0 &&
+             m_ui->doubleSpinBox_NewBPM->value() > 0.0 )
         {
-            qreal stretchRatio = m_UI->doubleSpinBox_OriginalBPM->value() / m_UI->doubleSpinBox_NewBPM->value();
-            m_scene->startPlayhead( m_UI->pushButton_Loop->isChecked(), stretchRatio );
+            qreal stretchRatio = m_ui->doubleSpinBox_OriginalBPM->value() / m_ui->doubleSpinBox_NewBPM->value();
+            m_scene->startPlayhead( m_ui->pushButton_Loop->isChecked(), stretchRatio );
         }
         else
         {
-            m_scene->startPlayhead( m_UI->pushButton_Loop->isChecked() );
+            m_scene->startPlayhead( m_ui->pushButton_Loop->isChecked() );
         }
     }
 }
@@ -1731,33 +1731,33 @@ void MainWindow::on_pushButton_Loop_clicked( const bool isChecked )
 
 void MainWindow::on_actionZoom_In_triggered()
 {
-    m_UI->waveGraphicsView->zoomIn();
-    m_UI->actionZoom_Out->setEnabled( true );
+    m_ui->waveGraphicsView->zoomIn();
+    m_ui->actionZoom_Out->setEnabled( true );
 }
 
 
 
 void MainWindow::on_actionZoom_Out_triggered()
 {
-    m_UI->waveGraphicsView->zoomOut();
-    m_UI->actionZoom_In->setEnabled( true );
+    m_ui->waveGraphicsView->zoomOut();
+    m_ui->actionZoom_In->setEnabled( true );
 }
 
 
 
 void MainWindow::on_actionZoom_Original_triggered()
 {
-    m_UI->waveGraphicsView->zoomOriginal();
-    m_UI->actionZoom_In->setEnabled( true );
-    m_UI->actionZoom_Out->setEnabled( false );
+    m_ui->waveGraphicsView->zoomOriginal();
+    m_ui->actionZoom_In->setEnabled( true );
+    m_ui->actionZoom_Out->setEnabled( false );
 }
 
 
 
 void MainWindow::on_pushButton_Apply_clicked()
 {
-    const qreal originalBPM = m_UI->doubleSpinBox_OriginalBPM->value();
-    const qreal newBPM = m_UI->doubleSpinBox_NewBPM->value();
+    const qreal originalBPM = m_ui->doubleSpinBox_OriginalBPM->value();
+    const qreal newBPM = m_ui->doubleSpinBox_NewBPM->value();
 
     if ( newBPM > 0.0 && originalBPM > 0.0 )
     {
@@ -1769,10 +1769,10 @@ void MainWindow::on_pushButton_Apply_clicked()
 
             QUndoCommand* command = new GlobalTimeStretchCommand( this,
                                                                   m_scene,
-                                                                  m_UI->waveGraphicsView,
-                                                                  m_UI->doubleSpinBox_OriginalBPM,
-                                                                  m_UI->doubleSpinBox_NewBPM,
-                                                                  m_UI->checkBox_PitchCorrection,
+                                                                  m_ui->waveGraphicsView,
+                                                                  m_ui->doubleSpinBox_OriginalBPM,
+                                                                  m_ui->doubleSpinBox_NewBPM,
+                                                                  m_ui->checkBox_PitchCorrection,
                                                                   tempDirPath,
                                                                   fileBaseName );
             m_undoStack.push( command );
@@ -1789,21 +1789,21 @@ void MainWindow::on_pushButton_Apply_clicked()
 
 void MainWindow::on_actionSelect_Move_triggered()
 {
-    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::SELECT_MOVE_ITEMS );
+    m_ui->waveGraphicsView->setInteractionMode( WaveGraphicsView::SELECT_MOVE_ITEMS );
 }
 
 
 
 void MainWindow::on_actionMulti_Select_triggered()
 {
-    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::MULTI_SELECT_ITEMS );
+    m_ui->waveGraphicsView->setInteractionMode( WaveGraphicsView::MULTI_SELECT_ITEMS );
 }
 
 
 
 void MainWindow::on_actionAudition_triggered()
 {
-    m_UI->waveGraphicsView->setInteractionMode( WaveGraphicsView::AUDITION_ITEMS );
+    m_ui->waveGraphicsView->setInteractionMode( WaveGraphicsView::AUDITION_ITEMS );
 }
 
 
@@ -1816,12 +1816,12 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
 
         new EnableSelectiveTSCommand( m_optionsDialog,
                                       m_scene,
-                                      m_UI->pushButton_Slice,
-                                      m_UI->actionAdd_Slice_Point,
-                                      m_UI->actionSelect_Move,
-                                      m_UI->actionMulti_Select,
-                                      m_UI->actionAudition,
-                                      m_UI->actionSelective_Time_Stretch,
+                                      m_ui->pushButton_Slice,
+                                      m_ui->actionAdd_Slice_Point,
+                                      m_ui->actionSelect_Move,
+                                      m_ui->actionMulti_Select,
+                                      m_ui->actionAudition,
+                                      m_ui->actionSelective_Time_Stretch,
                                       m_sampleBufferList,
                                       parentCommand );
 
@@ -1855,12 +1855,12 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
 
         new DisableSelectiveTSCommand( m_optionsDialog,
                                        m_scene,
-                                       m_UI->pushButton_Slice,
-                                       m_UI->actionAdd_Slice_Point,
-                                       m_UI->actionSelect_Move,
-                                       m_UI->actionMulti_Select,
-                                       m_UI->actionAudition,
-                                       m_UI->actionSelective_Time_Stretch,
+                                       m_ui->pushButton_Slice,
+                                       m_ui->actionAdd_Slice_Point,
+                                       m_ui->actionSelect_Move,
+                                       m_ui->actionMulti_Select,
+                                       m_ui->actionAudition,
+                                       m_ui->actionSelective_Time_Stretch,
                                        m_sampleBufferList,
                                        parentCommand );
 
@@ -1892,12 +1892,12 @@ void MainWindow::on_checkBox_LoopMarkers_clicked( const bool isChecked )
     if ( isChecked )
     {
         m_scene->showLoopMarkers();
-        m_UI->comboBox_SnapLoopMarkers->setEnabled( true );
+        m_ui->comboBox_SnapLoopMarkers->setEnabled( true );
     }
     else
     {
         m_scene->hideLoopMarkers();
-        m_UI->comboBox_SnapLoopMarkers->setEnabled( false );
+        m_ui->comboBox_SnapLoopMarkers->setEnabled( false );
     }
 }
 
@@ -1925,7 +1925,7 @@ void MainWindow::on_comboBox_SnapLoopMarkers_currentIndexChanged( const int inde
 
 void MainWindow::on_comboBox_TimeSigNumerator_activated( const QString text )
 {
-    const qreal bpm = m_UI->doubleSpinBox_OriginalBPM->value();
+    const qreal bpm = m_ui->doubleSpinBox_OriginalBPM->value();
     const int timeSigNumerator = text.toInt();
 
     m_scene->setBpmRulerMarks( bpm, timeSigNumerator );

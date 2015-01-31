@@ -32,13 +32,13 @@ ConfirmBpmDialog::ConfirmBpmDialog( const qreal bpm,
                                     const TimeSigDenominator denominator,
                                     QWidget* parent  ) :
     QDialog( parent ),
-    m_UI( new Ui::ConfirmBpmDialog )
+    m_ui( new Ui::ConfirmBpmDialog )
 {
-    m_UI->setupUi( this );
+    m_ui->setupUi( this );
 
     if ( bpm > 0.0 )
     {
-        m_UI->doubleSpinBox_BPM->setValue( bpm );
+        m_ui->doubleSpinBox_BPM->setValue( bpm );
     }
 
     // Populate "Time Signature" combo boxes
@@ -48,39 +48,39 @@ ConfirmBpmDialog::ConfirmBpmDialog( const qreal bpm,
     timeSigNumeratorTextList << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12" << "13" << "14" << "15" << "16";
     timeSigDenominatorTextList << "1" << "2" << "4" << "8" << "16";
 
-    m_UI->comboBox_TimeSigNumerator->addItems( timeSigNumeratorTextList );
-    m_UI->comboBox_TimeSigDenominator->addItems( timeSigDenominatorTextList );
+    m_ui->comboBox_TimeSigNumerator->addItems( timeSigNumeratorTextList );
+    m_ui->comboBox_TimeSigDenominator->addItems( timeSigDenominatorTextList );
 
-    m_UI->comboBox_TimeSigNumerator->setCurrentIndex( numerator );   // 4
-    m_UI->comboBox_TimeSigDenominator->setCurrentIndex( denominator ); // 4
+    m_ui->comboBox_TimeSigNumerator->setCurrentIndex( numerator );   // 4
+    m_ui->comboBox_TimeSigDenominator->setCurrentIndex( denominator ); // 4
 }
 
 
 
 ConfirmBpmDialog::~ConfirmBpmDialog()
 {
-    delete m_UI;
+    delete m_ui;
 }
 
 
 
 qreal ConfirmBpmDialog::getBpm() const
 {
-    return m_UI->doubleSpinBox_BPM->value();
+    return m_ui->doubleSpinBox_BPM->value();
 }
 
 
 
 int ConfirmBpmDialog::getTimeSigNumerator() const
 {
-    return m_UI->comboBox_TimeSigNumerator->currentText().toInt();
+    return m_ui->comboBox_TimeSigNumerator->currentText().toInt();
 }
 
 
 
 int ConfirmBpmDialog::getTimeSigDenominator() const
 {
-    return m_UI->comboBox_TimeSigDenominator->currentText().toInt();
+    return m_ui->comboBox_TimeSigDenominator->currentText().toInt();
 }
 
 
@@ -94,7 +94,7 @@ void ConfirmBpmDialog::changeEvent( QEvent* event )
     switch ( event->type() )
     {
     case QEvent::LanguageChange:
-        m_UI->retranslateUi( this );
+        m_ui->retranslateUi( this );
         break;
     default:
         break;

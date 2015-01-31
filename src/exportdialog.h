@@ -79,7 +79,7 @@ private:
     void enableMidiFileTypeRadioButtons();
     void disableMidiFileTypeRadioButtons();
 
-    Ui::ExportDialog* m_UI;
+    Ui::ExportDialog* m_ui;
 
     QString m_lastOpenedExportDir;
 

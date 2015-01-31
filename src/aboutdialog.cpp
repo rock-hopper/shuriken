@@ -29,19 +29,19 @@
 
 AboutDialog::AboutDialog( QWidget* parent ) :
     QDialog( parent ),
-    m_UI( new Ui::AboutDialog )
+    m_ui( new Ui::AboutDialog )
 {
-    m_UI->setupUi( this );
+    m_ui->setupUi( this );
 
-    m_UI->textBrowser->setOpenExternalLinks( true );
-    m_UI->textBrowser->setSource( QUrl( "qrc:/resources/docs/about.html" ) );
+    m_ui->textBrowser->setOpenExternalLinks( true );
+    m_ui->textBrowser->setSource( QUrl( "qrc:/resources/docs/about.html" ) );
 }
 
 
 
 AboutDialog::~AboutDialog()
 {
-    delete m_UI;
+    delete m_ui;
 }
 
 
@@ -56,7 +56,7 @@ void AboutDialog::changeEvent( QEvent* event )
     switch ( event->type() )
     {
     case QEvent::LanguageChange:
-        m_UI->retranslateUi( this );
+        m_ui->retranslateUi( this );
         break;
     default:
         break;

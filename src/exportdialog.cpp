@@ -33,32 +33,32 @@
 
 ExportDialog::ExportDialog( QWidget* parent ) :
     QDialog( parent ),
-    m_UI( new Ui::ExportDialog ),
+    m_ui( new Ui::ExportDialog ),
     m_lastOpenedExportDir( QDir::homePath() )
 {
     // Set up user interface
-    m_UI->setupUi( this );
+    m_ui->setupUi( this );
 
 
     // Set up input validators
     m_directoryValidator = new DirectoryValidator();
-    m_UI->lineEdit_OutputDir->setValidator( m_directoryValidator );
+    m_ui->lineEdit_OutputDir->setValidator( m_directoryValidator );
 
     QObject::connect( m_directoryValidator, SIGNAL( isValid(bool) ),
                       this, SLOT( displayDirValidityText(bool) ) );
 
     QObject::connect( m_directoryValidator, SIGNAL( isValid(bool) ),
-                      m_UI->pushButton_Create, SLOT( setDisabled(bool) ) );
+                      m_ui->pushButton_Create, SLOT( setDisabled(bool) ) );
 
-    QObject::connect( m_UI->lineEdit_OutputDir, SIGNAL( textChanged(QString) ),
+    QObject::connect( m_ui->lineEdit_OutputDir, SIGNAL( textChanged(QString) ),
                       this, SLOT( enableOkButtonIfInputValid() ) );
 
-    QObject::connect( m_UI->lineEdit_FileName, SIGNAL( textChanged(QString) ),
+    QObject::connect( m_ui->lineEdit_FileName, SIGNAL( textChanged(QString) ),
                       this, SLOT( enableOkButtonIfInputValid() ) );
 
 
     // Populate combo boxes
-    m_UI->radioButton_AudioFiles->click();
+    m_ui->radioButton_AudioFiles->click();
 
 
     QStringList akaiModelTextList;
@@ -69,11 +69,11 @@ ExportDialog::ExportDialog( QWidget* parent ) :
 
     for ( int i = 0; i < akaiModelTextList.size(); i++ )
     {
-        m_UI->comboBox_Model->addItem( akaiModelTextList[ i ], akaiModelDataList[ i ] );
+        m_ui->comboBox_Model->addItem( akaiModelTextList[ i ], akaiModelDataList[ i ] );
     }
 
-    m_UI->label_Model->setVisible( false );
-    m_UI->comboBox_Model->setVisible( false );
+    m_ui->label_Model->setVisible( false );
+    m_ui->comboBox_Model->setVisible( false );
 
 
     QStringList sampleRateTextList;
@@ -84,28 +84,28 @@ ExportDialog::ExportDialog( QWidget* parent ) :
 
     for ( int i = 0; i < sampleRateTextList.size(); i++ )
     {
-        m_UI->comboBox_SampleRate->addItem( sampleRateTextList[ i ], sampleRateDataList[ i ] );
+        m_ui->comboBox_SampleRate->addItem( sampleRateTextList[ i ], sampleRateDataList[ i ] );
     }
 
 
     QStringList midiFileTextList;
     midiFileTextList << "Don't Export" << "Export" << "Export Only";
 
-    m_UI->comboBox_MidiFile->addItems( midiFileTextList );
+    m_ui->comboBox_MidiFile->addItems( midiFileTextList );
 }
 
 
 
 ExportDialog::~ExportDialog()
 {
-    delete m_UI;
+    delete m_ui;
 }
 
 
 
 QString ExportDialog::getOutputDirPath() const
 {
-    return m_UI->lineEdit_OutputDir->text();
+    return m_ui->lineEdit_OutputDir->text();
 }
 
 
@@ -114,28 +114,28 @@ int ExportDialog::getExportType() const
 {
     int exportType;
 
-    if ( m_UI->comboBox_MidiFile->currentText() == "Export Only" )
+    if ( m_ui->comboBox_MidiFile->currentText() == "Export Only" )
     {
         exportType = EXPORT_MIDI_FILE;
     }
-    else if ( m_UI->radioButton_AudioFiles->isChecked() )
+    else if ( m_ui->radioButton_AudioFiles->isChecked() )
     {
         exportType = EXPORT_AUDIO_FILES;
     }
-    else if ( m_UI->radioButton_H2Drumkit->isChecked() )
+    else if ( m_ui->radioButton_H2Drumkit->isChecked() )
     {
         exportType = EXPORT_H2DRUMKIT | EXPORT_AUDIO_FILES;
     }
-    else if ( m_UI->radioButton_SFZ->isChecked() )
+    else if ( m_ui->radioButton_SFZ->isChecked() )
     {
         exportType = EXPORT_SFZ | EXPORT_AUDIO_FILES;
     }
-    else if ( m_UI->radioButton_Akai->isChecked() )
+    else if ( m_ui->radioButton_Akai->isChecked() )
     {
         exportType = EXPORT_AKAI_PGM | EXPORT_AUDIO_FILES;
     }
 
-    if ( m_UI->comboBox_MidiFile->currentText() == "Export" )
+    if ( m_ui->comboBox_MidiFile->currentText() == "Export" )
     {
         exportType |= EXPORT_MIDI_FILE;
     }
@@ -147,7 +147,7 @@ int ExportDialog::getExportType() const
 
 int ExportDialog::getMidiFileType() const
 {
-    if ( m_UI->radioButton_MidiType0->isChecked() )
+    if ( m_ui->radioButton_MidiType0->isChecked() )
     {
         return 0;
     }
@@ -161,14 +161,14 @@ int ExportDialog::getMidiFileType() const
 
 QString ExportDialog::getFileName() const
 {
-    return m_UI->lineEdit_FileName->text();
+    return m_ui->lineEdit_FileName->text();
 }
 
 
 
 ExportDialog::NumberingStyle ExportDialog::getNumberingStyle() const
 {
-    if ( m_UI->radioButton_Prefix->isChecked() )
+    if ( m_ui->radioButton_Prefix->isChecked() )
     {
         return NUMBERING_PREFIX;
     }
@@ -182,17 +182,17 @@ ExportDialog::NumberingStyle ExportDialog::getNumberingStyle() const
 
 bool ExportDialog::isOverwriteEnabled() const
 {
-    return m_UI->checkBox_Overwrite->isChecked();
+    return m_ui->checkBox_Overwrite->isChecked();
 }
 
 
 
 int ExportDialog::getSndFileFormat() const
 {
-    const int index = m_UI->comboBox_Encoding->currentIndex();
-    const int encoding = m_UI->comboBox_Encoding->itemData( index ).toInt();
+    const int index = m_ui->comboBox_Encoding->currentIndex();
+    const int encoding = m_ui->comboBox_Encoding->itemData( index ).toInt();
 
-    QString formatName = m_UI->comboBox_Format->currentText();
+    QString formatName = m_ui->comboBox_Format->currentText();
     int format = 0;
 
     if ( formatName.contains( "WAV" ) )
@@ -227,8 +227,8 @@ int ExportDialog::getSndFileFormat() const
 
 int ExportDialog::getSampleRate() const
 {
-    const int index = m_UI->comboBox_SampleRate->currentIndex();
-    const int sampleRate = m_UI->comboBox_SampleRate->itemData( index ).toInt();
+    const int index = m_ui->comboBox_SampleRate->currentIndex();
+    const int sampleRate = m_ui->comboBox_SampleRate->itemData( index ).toInt();
 
     return sampleRate;
 }
@@ -237,8 +237,8 @@ int ExportDialog::getSampleRate() const
 
 int ExportDialog::getAkaiModelID() const
 {
-    const int index = m_UI->comboBox_Model->currentIndex();
-    const int modelID = m_UI->comboBox_Model->itemData( index ).toInt();
+    const int index = m_ui->comboBox_Model->currentIndex();
+    const int modelID = m_ui->comboBox_Model->itemData( index ).toInt();
 
     return modelID;
 }
@@ -255,7 +255,7 @@ void ExportDialog::changeEvent( QEvent* event )
     switch ( event->type() )
     {
     case QEvent::LanguageChange:
-        m_UI->retranslateUi( this );
+        m_ui->retranslateUi( this );
         break;
     default:
         break;
@@ -269,8 +269,8 @@ void ExportDialog::showEvent( QShowEvent* event )
     // If the dialog is not being maximised, i.e. it has not previoulsy been minimised...
     if ( ! event->spontaneous() )
     {
-        m_UI->lineEdit_OutputDir->setText( m_lastOpenedExportDir );
-        m_UI->lineEdit_FileName->clear();
+        m_ui->lineEdit_OutputDir->setText( m_lastOpenedExportDir );
+        m_ui->lineEdit_FileName->clear();
 
         resize( 502, 282 );
     }
@@ -291,19 +291,19 @@ void ExportDialog::setPlatformFileNameValidator()
     pattern = "[^/\\s]+"; // Match any character except forward slash and white space
 #endif
 
-    if ( m_UI->lineEdit_FileName->validator() != NULL )
+    if ( m_ui->lineEdit_FileName->validator() != NULL )
     {
-        const QValidator* validator = m_UI->lineEdit_FileName->validator();
+        const QValidator* validator = m_ui->lineEdit_FileName->validator();
         const QRegExpValidator* regExpValidator = static_cast<const QRegExpValidator*>( validator );
 
         if ( regExpValidator->regExp().pattern() != pattern )
         {
-            m_UI->lineEdit_FileName->setValidator( new QRegExpValidator( QRegExp(pattern), this ) );
+            m_ui->lineEdit_FileName->setValidator( new QRegExpValidator( QRegExp(pattern), this ) );
         }
     }
     else
     {
-        m_UI->lineEdit_FileName->setValidator( new QRegExpValidator( QRegExp(pattern), this ) );
+        m_ui->lineEdit_FileName->setValidator( new QRegExpValidator( QRegExp(pattern), this ) );
     }
 }
 
@@ -311,9 +311,9 @@ void ExportDialog::setPlatformFileNameValidator()
 
 void ExportDialog::enableMidiFileTypeRadioButtons()
 {
-    if ( m_UI->comboBox_MidiFile->currentText() == "Export" || m_UI->comboBox_MidiFile->currentText() == "Export Only" )
+    if ( m_ui->comboBox_MidiFile->currentText() == "Export" || m_ui->comboBox_MidiFile->currentText() == "Export Only" )
     {
-        foreach ( QAbstractButton* button, m_UI->buttonGroup_Midi->buttons() )
+        foreach ( QAbstractButton* button, m_ui->buttonGroup_Midi->buttons() )
         {
             button->setEnabled( true );
         }
@@ -324,7 +324,7 @@ void ExportDialog::enableMidiFileTypeRadioButtons()
 
 void ExportDialog::disableMidiFileTypeRadioButtons()
 {
-    foreach ( QAbstractButton* button, m_UI->buttonGroup_Midi->buttons() )
+    foreach ( QAbstractButton* button, m_ui->buttonGroup_Midi->buttons() )
     {
         button->setEnabled( false );
     }
@@ -339,12 +339,12 @@ void ExportDialog::displayDirValidityText( const bool isValid )
 {
     if ( isValid )
     {
-        m_UI->label_DirValidity->setVisible( false );
+        m_ui->label_DirValidity->setVisible( false );
     }
     else
     {
-        m_UI->label_DirValidity->setText( tr("Dir doesn't exist") );
-        m_UI->label_DirValidity->setVisible( true );
+        m_ui->label_DirValidity->setText( tr("Dir doesn't exist") );
+        m_ui->label_DirValidity->setVisible( true );
     }
 }
 
@@ -352,9 +352,9 @@ void ExportDialog::displayDirValidityText( const bool isValid )
 
 void ExportDialog::enableOkButtonIfInputValid()
 {
-    QPushButton* okButton = m_UI->buttonBox->button( QDialogButtonBox::Ok );
+    QPushButton* okButton = m_ui->buttonBox->button( QDialogButtonBox::Ok );
 
-    if ( m_UI->lineEdit_OutputDir->hasAcceptableInput() && m_UI->lineEdit_FileName->hasAcceptableInput() )
+    if ( m_ui->lineEdit_OutputDir->hasAcceptableInput() && m_ui->lineEdit_FileName->hasAcceptableInput() )
     {
         okButton->setEnabled( true );
     }
@@ -373,7 +373,7 @@ void ExportDialog::on_pushButton_Choose_clicked()
     // If user didn't click Cancel
     if ( ! dirPath.isEmpty() )
     {
-        m_UI->lineEdit_OutputDir->setText( dirPath );
+        m_ui->lineEdit_OutputDir->setText( dirPath );
         m_lastOpenedExportDir = dirPath;
     }
 }
@@ -382,7 +382,7 @@ void ExportDialog::on_pushButton_Choose_clicked()
 
 void ExportDialog::on_pushButton_Create_clicked()
 {
-    const QString path = m_UI->lineEdit_OutputDir->text();
+    const QString path = m_ui->lineEdit_OutputDir->text();
     File newDir;
 
     if ( QFileInfo( path ).isAbsolute() )
@@ -398,8 +398,8 @@ void ExportDialog::on_pushButton_Create_clicked()
 
     if ( result.wasOk() )
     {
-        m_UI->pushButton_Create->setEnabled( false );
-        m_UI->label_DirValidity->setVisible( false );
+        m_ui->pushButton_Create->setEnabled( false );
+        m_ui->label_DirValidity->setVisible( false );
         enableOkButtonIfInputValid();
     }
     else
@@ -456,43 +456,43 @@ void ExportDialog::on_comboBox_Format_currentIndexChanged( const QString text )
         qDebug() << "Unknown format: " << text;
     }
 
-    m_UI->comboBox_Encoding->clear();
+    m_ui->comboBox_Encoding->clear();
 
     for ( int i = 0; i < encodingTextList.size(); i++ )
     {
-        m_UI->comboBox_Encoding->addItem( encodingTextList[ i ], encodingDataList[ i ] );
+        m_ui->comboBox_Encoding->addItem( encodingTextList[ i ], encodingDataList[ i ] );
     }
 
-    m_UI->comboBox_Encoding->setCurrentIndex( index );
+    m_ui->comboBox_Encoding->setCurrentIndex( index );
 }
 
 
 
 void ExportDialog::on_radioButton_AudioFiles_clicked()
 {
-    m_UI->label_FileName->setText( tr( "File Name(s):" ) );
+    m_ui->label_FileName->setText( tr( "File Name(s):" ) );
 
-    foreach ( QAbstractButton* button, m_UI->buttonGroup_Numbering->buttons() )
+    foreach ( QAbstractButton* button, m_ui->buttonGroup_Numbering->buttons() )
     {
         button->setEnabled( true );
     }
 
     QStringList fileFormatTextList;
     fileFormatTextList << "WAV" << "AIFF" << "AU" << "FLAC" << "Ogg";
-    m_UI->comboBox_Format->clear();
-    m_UI->comboBox_Format->addItems( fileFormatTextList );
+    m_ui->comboBox_Format->clear();
+    m_ui->comboBox_Format->addItems( fileFormatTextList );
 
-    m_UI->label_Model->setVisible( false );
-    m_UI->comboBox_Model->setVisible( false );
+    m_ui->label_Model->setVisible( false );
+    m_ui->comboBox_Model->setVisible( false );
 
-    m_UI->label_SampleRate->setVisible( true );
-    m_UI->comboBox_SampleRate->setVisible( true );
+    m_ui->label_SampleRate->setVisible( true );
+    m_ui->comboBox_SampleRate->setVisible( true );
 
-    m_UI->lineEdit_FileName->clear();
+    m_ui->lineEdit_FileName->clear();
     setPlatformFileNameValidator();
 
-    const int index = m_UI->comboBox_SampleRate->findData( SAMPLE_RATE_KEEP_SAME );
-    m_UI->comboBox_SampleRate->setCurrentIndex( index );
+    const int index = m_ui->comboBox_SampleRate->findData( SAMPLE_RATE_KEEP_SAME );
+    m_ui->comboBox_SampleRate->setCurrentIndex( index );
 
     enableMidiFileTypeRadioButtons();
 }
@@ -501,31 +501,31 @@ void ExportDialog::on_radioButton_AudioFiles_clicked()
 
 void ExportDialog::on_radioButton_H2Drumkit_clicked()
 {
-    m_UI->label_FileName->setText( tr( "Kit Name:" ) );
+    m_ui->label_FileName->setText( tr( "Kit Name:" ) );
 
-    foreach ( QAbstractButton* button, m_UI->buttonGroup_Numbering->buttons() )
+    foreach ( QAbstractButton* button, m_ui->buttonGroup_Numbering->buttons() )
     {
         button->setEnabled( false );
     }
 
-    m_UI->radioButton_Suffix->setChecked( true );
+    m_ui->radioButton_Suffix->setChecked( true );
 
     QStringList fileFormatTextList;
     fileFormatTextList << "FLAC" << "WAV" << "AIFF" << "AU";
-    m_UI->comboBox_Format->clear();
-    m_UI->comboBox_Format->addItems( fileFormatTextList );
+    m_ui->comboBox_Format->clear();
+    m_ui->comboBox_Format->addItems( fileFormatTextList );
 
-    m_UI->label_Model->setVisible( false );
-    m_UI->comboBox_Model->setVisible( false );
+    m_ui->label_Model->setVisible( false );
+    m_ui->comboBox_Model->setVisible( false );
 
-    m_UI->label_SampleRate->setVisible( true );
-    m_UI->comboBox_SampleRate->setVisible( true );
+    m_ui->label_SampleRate->setVisible( true );
+    m_ui->comboBox_SampleRate->setVisible( true );
 
-    m_UI->lineEdit_FileName->clear();
+    m_ui->lineEdit_FileName->clear();
     setPlatformFileNameValidator();
 
-    const int index = m_UI->comboBox_SampleRate->findData( SAMPLE_RATE_KEEP_SAME );
-    m_UI->comboBox_SampleRate->setCurrentIndex( index );
+    const int index = m_ui->comboBox_SampleRate->findData( SAMPLE_RATE_KEEP_SAME );
+    m_ui->comboBox_SampleRate->setCurrentIndex( index );
 
     enableMidiFileTypeRadioButtons();
 }
@@ -534,31 +534,31 @@ void ExportDialog::on_radioButton_H2Drumkit_clicked()
 
 void ExportDialog::on_radioButton_SFZ_clicked()
 {
-    m_UI->label_FileName->setText( tr( "SFZ Name:" ) );
+    m_ui->label_FileName->setText( tr( "SFZ Name:" ) );
 
-    foreach ( QAbstractButton* button, m_UI->buttonGroup_Numbering->buttons() )
+    foreach ( QAbstractButton* button, m_ui->buttonGroup_Numbering->buttons() )
     {
         button->setEnabled( false );
     }
 
-    m_UI->radioButton_Suffix->setChecked( true );
+    m_ui->radioButton_Suffix->setChecked( true );
 
     QStringList fileFormatTextList;
     fileFormatTextList << "WAV" << "FLAC" << "Ogg";
-    m_UI->comboBox_Format->clear();
-    m_UI->comboBox_Format->addItems( fileFormatTextList );
+    m_ui->comboBox_Format->clear();
+    m_ui->comboBox_Format->addItems( fileFormatTextList );
 
-    m_UI->label_Model->setVisible( false );
-    m_UI->comboBox_Model->setVisible( false );
+    m_ui->label_Model->setVisible( false );
+    m_ui->comboBox_Model->setVisible( false );
 
-    m_UI->label_SampleRate->setVisible( true );
-    m_UI->comboBox_SampleRate->setVisible( true );
+    m_ui->label_SampleRate->setVisible( true );
+    m_ui->comboBox_SampleRate->setVisible( true );
 
-    m_UI->lineEdit_FileName->clear();
+    m_ui->lineEdit_FileName->clear();
     setPlatformFileNameValidator();
 
-    const int index = m_UI->comboBox_SampleRate->findData( SAMPLE_RATE_KEEP_SAME );
-    m_UI->comboBox_SampleRate->setCurrentIndex( index );
+    const int index = m_ui->comboBox_SampleRate->findData( SAMPLE_RATE_KEEP_SAME );
+    m_ui->comboBox_SampleRate->setCurrentIndex( index );
 
     enableMidiFileTypeRadioButtons();
 }
@@ -567,37 +567,37 @@ void ExportDialog::on_radioButton_SFZ_clicked()
 
 void ExportDialog::on_radioButton_Akai_clicked()
 {
-    m_UI->label_FileName->setText( tr( "PGM Name:" ) );
+    m_ui->label_FileName->setText( tr( "PGM Name:" ) );
 
-    foreach ( QAbstractButton* button, m_UI->buttonGroup_Numbering->buttons() )
+    foreach ( QAbstractButton* button, m_ui->buttonGroup_Numbering->buttons() )
     {
         button->setEnabled( false );
     }
 
-    m_UI->radioButton_Suffix->setChecked( true );
+    m_ui->radioButton_Suffix->setChecked( true );
 
     QStringList fileFormatTextList;
     fileFormatTextList << "PGM, WAV";
-    m_UI->comboBox_Format->clear();
-    m_UI->comboBox_Format->addItems( fileFormatTextList );
+    m_ui->comboBox_Format->clear();
+    m_ui->comboBox_Format->addItems( fileFormatTextList );
 
-    m_UI->label_SampleRate->setVisible( false );
-    m_UI->comboBox_SampleRate->setVisible( false );
+    m_ui->label_SampleRate->setVisible( false );
+    m_ui->comboBox_SampleRate->setVisible( false );
 
-    m_UI->label_Model->setVisible( true );
-    m_UI->comboBox_Model->setVisible( true );
+    m_ui->label_Model->setVisible( true );
+    m_ui->comboBox_Model->setVisible( true );
 
-    m_UI->lineEdit_FileName->clear();
+    m_ui->lineEdit_FileName->clear();
 
     const QRegExp regexp( AkaiFileHandler::getFileNameRegExpMPC1000() );
-    m_UI->lineEdit_FileName->setValidator( new QRegExpValidator( regexp, this ) );
+    m_ui->lineEdit_FileName->setValidator( new QRegExpValidator( regexp, this ) );
 
-    const int index = m_UI->comboBox_SampleRate->findData( 44100 );
-    m_UI->comboBox_SampleRate->setCurrentIndex( index );
+    const int index = m_ui->comboBox_SampleRate->findData( 44100 );
+    m_ui->comboBox_SampleRate->setCurrentIndex( index );
 
     disableMidiFileTypeRadioButtons();
 
-    m_UI->radioButton_MidiType1->setChecked( true );
+    m_ui->radioButton_MidiType1->setChecked( true );
 }
 
 
@@ -606,44 +606,44 @@ void ExportDialog::on_comboBox_MidiFile_activated( const QString text )
 {
     if ( text == "Export Only" )
     {
-        foreach ( QAbstractButton* button, m_UI->buttonGroup_Export->buttons() )
+        foreach ( QAbstractButton* button, m_ui->buttonGroup_Export->buttons() )
         {
             button->setEnabled( false );
         }
 
-        foreach ( QAbstractButton* button, m_UI->buttonGroup_Numbering->buttons() )
+        foreach ( QAbstractButton* button, m_ui->buttonGroup_Numbering->buttons() )
         {
             button->setEnabled( false );
         }
 
-        m_UI->comboBox_Encoding->setEnabled( false );
-        m_UI->comboBox_Format->setEnabled( false );
-        m_UI->comboBox_Model->setEnabled( false );
-        m_UI->comboBox_SampleRate->setEnabled( false );
+        m_ui->comboBox_Encoding->setEnabled( false );
+        m_ui->comboBox_Format->setEnabled( false );
+        m_ui->comboBox_Model->setEnabled( false );
+        m_ui->comboBox_SampleRate->setEnabled( false );
 
         enableMidiFileTypeRadioButtons();
     }
     else
     {
-        foreach ( QAbstractButton* button, m_UI->buttonGroup_Export->buttons() )
+        foreach ( QAbstractButton* button, m_ui->buttonGroup_Export->buttons() )
         {
             button->setEnabled( true );
         }
 
-        foreach ( QAbstractButton* button, m_UI->buttonGroup_Numbering->buttons() )
+        foreach ( QAbstractButton* button, m_ui->buttonGroup_Numbering->buttons() )
         {
             button->setEnabled( true );
         }
 
-        m_UI->comboBox_Encoding->setEnabled( true );
-        m_UI->comboBox_Format->setEnabled( true );
-        m_UI->comboBox_Model->setEnabled( true );
-        m_UI->comboBox_SampleRate->setEnabled( true );
+        m_ui->comboBox_Encoding->setEnabled( true );
+        m_ui->comboBox_Format->setEnabled( true );
+        m_ui->comboBox_Model->setEnabled( true );
+        m_ui->comboBox_SampleRate->setEnabled( true );
 
-        if ( m_UI->radioButton_Akai->isChecked() )
+        if ( m_ui->radioButton_Akai->isChecked() )
         {
             disableMidiFileTypeRadioButtons();
-            m_UI->radioButton_MidiType1->setChecked( true );
+            m_ui->radioButton_MidiType1->setChecked( true );
         }
         else if ( text == "Don't Export")
         {

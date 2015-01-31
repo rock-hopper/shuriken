@@ -29,23 +29,23 @@
 
 ApplyGainDialog::ApplyGainDialog( QWidget* parent ) :
     QDialog( parent ),
-    m_UI( new Ui::ApplyGainDialog )
+    m_ui( new Ui::ApplyGainDialog )
 {
-    m_UI->setupUi( this );
+    m_ui->setupUi( this );
 }
 
 
 
 ApplyGainDialog::~ApplyGainDialog()
 {
-    delete m_UI;
+    delete m_ui;
 }
 
 
 
 qreal ApplyGainDialog::getGainValue() const
 {
-    return m_UI->doubleSpinBox_Gain->value();
+    return m_ui->doubleSpinBox_Gain->value();
 }
 
 
@@ -60,7 +60,7 @@ void ApplyGainDialog::changeEvent( QEvent* event )
     switch ( event->type() )
     {
     case QEvent::LanguageChange:
-        m_UI->retranslateUi( this );
+        m_ui->retranslateUi( this );
         break;
     default:
         break;
@@ -74,12 +74,12 @@ void ApplyGainDialog::changeEvent( QEvent* event )
 
 void ApplyGainDialog::on_dial_Gain_valueChanged( const int value )
 {
-    m_UI->doubleSpinBox_Gain->setValue( value / 10.0 );
+    m_ui->doubleSpinBox_Gain->setValue( value / 10.0 );
 }
 
 
 
 void ApplyGainDialog::on_doubleSpinBox_Gain_valueChanged( const double value )
 {
-    m_UI->dial_Gain->setValue( value * 10 );
+    m_ui->dial_Gain->setValue( value * 10 );
 }

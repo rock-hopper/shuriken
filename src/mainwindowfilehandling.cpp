@@ -146,7 +146,7 @@ void MainWindow::openProject( const QString filePath )
 
                     foreach ( int frameNum, settings.slicePointFrameNums )
                     {
-                        new AddSlicePointItemCommand( frameNum, true, m_scene, m_UI->pushButton_Slice, parentCommand );
+                        new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, parentCommand );
                     }
                     m_undoStack.push( parentCommand );
                 }
@@ -163,15 +163,15 @@ void MainWindow::openProject( const QString filePath )
                 setUpSampler();
 
                 enableUI();
-                m_UI->actionAdd_Slice_Point->setEnabled( false );
-                m_UI->pushButton_FindBeats->setEnabled( false );
-                m_UI->pushButton_FindOnsets->setEnabled( false );
-                m_UI->pushButton_Slice->setEnabled( true );
-                m_UI->pushButton_Slice->setChecked( true );
+                m_ui->actionAdd_Slice_Point->setEnabled( false );
+                m_ui->pushButton_FindBeats->setEnabled( false );
+                m_ui->pushButton_FindOnsets->setEnabled( false );
+                m_ui->pushButton_Slice->setEnabled( true );
+                m_ui->pushButton_Slice->setChecked( true );
 
                 if ( m_rubberbandAudioSource != NULL )
                 {
-                    m_UI->actionSelective_Time_Stretch->setEnabled( true );
+                    m_ui->actionSelective_Time_Stretch->setEnabled( true );
                 }
             }
 
@@ -184,28 +184,28 @@ void MainWindow::openProject( const QString filePath )
                 m_optionsDialog->enableJackSync();
             }
 
-            m_UI->checkBox_TimeStretch->setChecked( settings.isTimeStretchChecked );
-            m_UI->checkBox_PitchCorrection->setChecked( settings.isPitchCorrectionChecked );
+            m_ui->checkBox_TimeStretch->setChecked( settings.isTimeStretchChecked );
+            m_ui->checkBox_PitchCorrection->setChecked( settings.isPitchCorrectionChecked );
 
             if ( settings.originalBpm > 0.0 )
             {
-                m_UI->doubleSpinBox_OriginalBPM->setValue( settings.originalBpm );
+                m_ui->doubleSpinBox_OriginalBPM->setValue( settings.originalBpm );
             }
             if ( settings.newBpm > 0.0 )
             {
-                m_UI->doubleSpinBox_NewBPM->setValue( settings.newBpm );
+                m_ui->doubleSpinBox_NewBPM->setValue( settings.newBpm );
             }
 
             {
-                const int i = m_UI->comboBox_TimeSigNumerator->findText( QString::number( settings.timeSigNumerator ) );
-                m_UI->comboBox_TimeSigNumerator->setCurrentIndex( i );
+                const int i = m_ui->comboBox_TimeSigNumerator->findText( QString::number( settings.timeSigNumerator ) );
+                m_ui->comboBox_TimeSigNumerator->setCurrentIndex( i );
             }
             {
-                const int i = m_UI->comboBox_TimeSigDenominator->findText( QString::number( settings.timeSigDenominator ) );
-                m_UI->comboBox_TimeSigDenominator->setCurrentIndex( i );
+                const int i = m_ui->comboBox_TimeSigDenominator->findText( QString::number( settings.timeSigDenominator ) );
+                m_ui->comboBox_TimeSigDenominator->setCurrentIndex( i );
             }
-            m_UI->spinBox_Length->setValue( settings.length );
-            m_UI->comboBox_Units->setCurrentIndex( settings.units );
+            m_ui->spinBox_Length->setValue( settings.length );
+            m_ui->comboBox_Units->setCurrentIndex( settings.units );
 
             updateSnapLoopMarkersComboBox();
 
@@ -214,7 +214,7 @@ void MainWindow::openProject( const QString filePath )
 
             m_currentProjectFilePath = filePath;
 
-            m_UI->statusBar->showMessage( tr("Project: ") + projectName );
+            m_ui->statusBar->showMessage( tr("Project: ") + projectName );
 
             m_isProjectOpen = true;
 
@@ -354,9 +354,9 @@ void MainWindow::exportAs( const QString tempDirPath,
     // Export MIDI file
     if ( isSuccessful && isExportTypeMidiFile )
     {
-        const qreal bpm = m_UI->doubleSpinBox_OriginalBPM->value();
-        const ConfirmBpmDialog::TimeSigNumerator numerator = (ConfirmBpmDialog::TimeSigNumerator) m_UI->comboBox_TimeSigNumerator->currentIndex();
-        const ConfirmBpmDialog::TimeSigDenominator denominator = (ConfirmBpmDialog::TimeSigDenominator) m_UI->comboBox_TimeSigDenominator->currentIndex();
+        const qreal bpm = m_ui->doubleSpinBox_OriginalBPM->value();
+        const ConfirmBpmDialog::TimeSigNumerator numerator = (ConfirmBpmDialog::TimeSigNumerator) m_ui->comboBox_TimeSigNumerator->currentIndex();
+        const ConfirmBpmDialog::TimeSigDenominator denominator = (ConfirmBpmDialog::TimeSigDenominator) m_ui->comboBox_TimeSigDenominator->currentIndex();
 
         QApplication::restoreOverrideCursor();
 
@@ -461,8 +461,8 @@ void MainWindow::saveProject( const QString filePath )
 
         if ( m_optionsDialog->isRealtimeModeEnabled() )
         {
-            settings.originalBpm = m_UI->doubleSpinBox_OriginalBPM->value();
-            settings.newBpm = m_UI->doubleSpinBox_NewBPM->value();
+            settings.originalBpm = m_ui->doubleSpinBox_OriginalBPM->value();
+            settings.newBpm = m_ui->doubleSpinBox_NewBPM->value();
             settings.appliedBpm = m_appliedBPM;
         }
         else
@@ -472,15 +472,15 @@ void MainWindow::saveProject( const QString filePath )
             settings.appliedBpm = m_appliedBPM;
         }
 
-        settings.isTimeStretchChecked = m_UI->checkBox_TimeStretch->isChecked();
-        settings.isPitchCorrectionChecked = m_UI->checkBox_PitchCorrection->isChecked();
+        settings.isTimeStretchChecked = m_ui->checkBox_TimeStretch->isChecked();
+        settings.isPitchCorrectionChecked = m_ui->checkBox_PitchCorrection->isChecked();
         settings.options = m_optionsDialog->getStretcherOptions();
         settings.isJackSyncChecked = m_optionsDialog->isJackSyncEnabled();
 
-        settings.timeSigNumerator = m_UI->comboBox_TimeSigNumerator->currentText().toInt();
-        settings.timeSigDenominator = m_UI->comboBox_TimeSigDenominator->currentText().toInt();
-        settings.length = m_UI->spinBox_Length->value();
-        settings.units = m_UI->comboBox_Units->currentIndex();
+        settings.timeSigNumerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
+        settings.timeSigDenominator = m_ui->comboBox_TimeSigDenominator->currentText().toInt();
+        settings.length = m_ui->spinBox_Length->value();
+        settings.units = m_ui->comboBox_Units->currentIndex();
 
         settings.audioFileNames = audioFileNames;
 
@@ -648,7 +648,7 @@ void MainWindow::importAudioFileDialog()
                 const QString rate = QString::number( sampleHeader->sampleRate ) + " Hz";
 
                 QString message = fileName + ", " + channels + ", " + bits + ", " + rate + ", " + sampleHeader->format;
-                m_UI->statusBar->showMessage( message );
+                m_ui->statusBar->showMessage( message );
             }
 
             m_isProjectOpen = true;
