@@ -74,23 +74,6 @@ MainWindow::~MainWindow()
 
 
 
-void MainWindow::connectWaveformToMainWindow( const SharedWaveformItem item )
-{
-    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                      this, SLOT( recordWaveformItemMove(QList<int>,int) ) );
-
-    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                      this, SLOT( reorderSampleBufferList(QList<int>,int) ) );
-
-    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                      this, SLOT( stopPlayback() ) );
-
-    QObject::connect( item.data(), SIGNAL( clicked(const WaveformItem*,QPointF) ),
-                      this, SLOT( playSampleRange(const WaveformItem*,QPointF) ) );
-}
-
-
-
 //==================================================================================================
 // Protected:
 
@@ -573,6 +556,20 @@ void MainWindow::disableUI()
 
 
 
+void MainWindow::connectWaveformToMainWindow( const SharedWaveformItem item )
+{
+    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
+                      this, SLOT( recordWaveformItemMove(QList<int>,int) ) );
+
+    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
+                      this, SLOT( stopPlayback() ) );
+
+    QObject::connect( item.data(), SIGNAL( clicked(const WaveformItem*,QPointF) ),
+                      this, SLOT( playSampleRange(const WaveformItem*,QPointF) ) );
+}
+
+
+
 void MainWindow::updateSnapLoopMarkersComboBox()
 {
     QStringList snapTextList;
@@ -684,52 +681,6 @@ void MainWindow::renderTimeStretch()
     {
         MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
                                          tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
-    }
-}
-
-
-
-//==================================================================================================
-// Public Slots:
-
-void MainWindow::reorderSampleBufferList( QList<int> oldOrderPositions, const int numPlacesMoved )
-{
-    const int numSelectedItems = oldOrderPositions.size();
-
-    // If waveform items have been dragged to the left...
-    if ( numPlacesMoved < 0 )
-    {
-        for ( int i = 0; i < numSelectedItems; i++ )
-        {
-            const int orderPos = oldOrderPositions.at( i );
-            m_sampleBufferList.move( orderPos, orderPos + numPlacesMoved );
-        }
-    }
-    else // If waveform items have been dragged to the right...
-    {
-        for ( int i = numSelectedItems - 1; i >= 0; i-- )
-        {
-            const int orderPos = oldOrderPositions.at( i );
-            m_sampleBufferList.move( orderPos, orderPos + numPlacesMoved );
-        }
-    }
-
-    m_samplerAudioSource->setSamples( m_sampleBufferList, m_sampleHeader->sampleRate );
-
-    if ( m_rubberbandAudioSource != NULL )
-    {
-        const int lowestAssignedMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
-
-        for ( int i = 0; i < numSelectedItems; i++ )
-        {
-            const int orderPos = oldOrderPositions.at( i );
-
-            const qreal noteTimeRatioA = m_rubberbandAudioSource->getNoteTimeRatio( lowestAssignedMidiNote + orderPos );
-            const qreal noteTimeRatioB = m_rubberbandAudioSource->getNoteTimeRatio( lowestAssignedMidiNote + orderPos + numPlacesMoved );
-
-            m_rubberbandAudioSource->setNoteTimeRatio( lowestAssignedMidiNote + orderPos + numPlacesMoved, noteTimeRatioA );
-            m_rubberbandAudioSource->setNoteTimeRatio( lowestAssignedMidiNote + orderPos, noteTimeRatioB );
-        }
     }
 }
 

@@ -233,6 +233,8 @@ public:
     void redo();
 
 private:
+    void reorderSampleBufferList( QList<int> oldOrderPositions, int numPlacesMoved );
+
     const QList<int> m_oldOrderPositions;
     const int m_numPlacesMoved;
     WaveGraphicsScene* const m_graphicsScene;

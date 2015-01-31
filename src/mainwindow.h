@@ -51,10 +51,9 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     friend class DeleteWaveformItemCommand;
+    friend class MoveWaveformItemCommand;
     friend class SliceCommand;
     friend class UnsliceCommand;
-    friend class JoinCommand;
-    friend class SplitCommand;
     friend class GlobalTimeStretchCommand;
     friend class RenderTimeStretchCommand;
     friend class SelectiveTimeStretchCommand;
@@ -62,8 +61,6 @@ class MainWindow : public QMainWindow
 public:
     MainWindow( QWidget* parent = NULL );
     ~MainWindow();
-
-    void connectWaveformToMainWindow( SharedWaveformItem item );
 
     void openProject( QString filePath );
 
@@ -80,6 +77,8 @@ private:
     void setupUI();
     void enableUI();
     void disableUI();
+
+    void connectWaveformToMainWindow( SharedWaveformItem item );
 
     void updateSnapLoopMarkersComboBox();
 
@@ -135,9 +134,6 @@ private:
     qreal m_appliedBPM;
 
     bool m_isProjectOpen;
-
-public slots:
-    void reorderSampleBufferList( QList<int> oldOrderPositions, int numPlacesMoved );
 
 private slots:
     void on_comboBox_TimeSigNumerator_activated( QString text );
