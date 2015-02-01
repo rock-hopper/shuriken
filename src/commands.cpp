@@ -496,6 +496,12 @@ MoveWaveformItemCommand::MoveWaveformItemCommand( const QList<int> oldOrderPosit
 void MoveWaveformItemCommand::undo()
 {
     reorderSampleBufferList( m_newOrderPositions, -m_numPlacesMoved );
+
+    if ( m_mainWindow->m_rubberbandAudioSource != NULL )
+    {
+        updateNoteTimeRatios( m_newOrderPositions, -m_numPlacesMoved );
+    }
+
     m_graphicsScene->moveWaveforms( m_newOrderPositions, -m_numPlacesMoved );
 }
 
@@ -504,6 +510,11 @@ void MoveWaveformItemCommand::undo()
 void MoveWaveformItemCommand::redo()
 {
     reorderSampleBufferList( m_oldOrderPositions, m_numPlacesMoved );
+
+    if ( m_mainWindow->m_rubberbandAudioSource != NULL )
+    {
+        updateNoteTimeRatios( m_oldOrderPositions, m_numPlacesMoved );
+    }
 
     if ( ! m_isFirstRedoCall )
     {
@@ -514,7 +525,7 @@ void MoveWaveformItemCommand::redo()
 
 
 
-void MoveWaveformItemCommand::reorderSampleBufferList( QList<int> oldOrderPositions, const int numPlacesMoved )
+void MoveWaveformItemCommand::reorderSampleBufferList( const QList<int> oldOrderPositions, const int numPlacesMoved )
 {
     const int numSelectedItems = oldOrderPositions.size();
 
@@ -538,21 +549,54 @@ void MoveWaveformItemCommand::reorderSampleBufferList( QList<int> oldOrderPositi
 
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                     m_mainWindow->m_sampleHeader->sampleRate );
+}
 
-    if ( m_mainWindow->m_rubberbandAudioSource != NULL )
+
+
+void MoveWaveformItemCommand::updateNoteTimeRatios( const QList<int> oldOrderPositions, const int numPlacesMoved )
+{
+    const int numSelectedItems = oldOrderPositions.size();
+    const int startMidiNote = m_mainWindow->m_samplerAudioSource->getLowestAssignedMidiNote();
+
+    QList<qreal> noteTimeRatios;
+
+    foreach ( int orderPos, oldOrderPositions )
     {
-        const int lowestAssignedMidiNote = m_mainWindow->m_samplerAudioSource->getLowestAssignedMidiNote();
+        noteTimeRatios << m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + orderPos );
+    }
 
-        for ( int i = 0; i < numSelectedItems; i++ )
+    // If waveform items have been dragged to the left...
+    if ( numPlacesMoved < 0 )
+    {
+        int orderPos = oldOrderPositions.first() + numPlacesMoved;
+
+        for ( int i = 0; i < qAbs( numPlacesMoved ); i++ )
         {
-            const int orderPos = oldOrderPositions.at( i );
+            const qreal noteTimeRatio = m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + orderPos );
 
-            const qreal noteTimeRatioA = m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( lowestAssignedMidiNote + orderPos );
-            const qreal noteTimeRatioB = m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( lowestAssignedMidiNote + orderPos + numPlacesMoved );
+            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( startMidiNote + orderPos + numSelectedItems, noteTimeRatio );
 
-            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( lowestAssignedMidiNote + orderPos + numPlacesMoved, noteTimeRatioA );
-            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( lowestAssignedMidiNote + orderPos, noteTimeRatioB );
+            orderPos++;
         }
+    }
+    else // If waveform items have been dragged to the right...
+    {
+        int orderPos = oldOrderPositions.last() + 1;
+
+        for ( int i = 0; i < numPlacesMoved; i++ )
+        {
+            const qreal noteTimeRatio = m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + orderPos );
+
+            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( startMidiNote + orderPos - numSelectedItems, noteTimeRatio );
+
+            orderPos++;
+        }
+    }
+
+    for ( int i = 0; i < numSelectedItems; i++ )
+    {
+        m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( startMidiNote + oldOrderPositions.at( i ) + numPlacesMoved,
+                                                                 noteTimeRatios.at( i ) );
     }
 }
 
