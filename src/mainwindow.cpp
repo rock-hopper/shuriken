@@ -293,8 +293,14 @@ void MainWindow::setupUI()
     m_ui->comboBox_HopSize->setCurrentIndex( 0 ); // "50%"
 
 
-    // Populate "Snap Loop Markers" combo box
-    updateSnapLoopMarkersComboBox();
+    // Populate "Snap Values" combo box
+    QStringList snapValuesTextList;
+
+    snapValuesTextList << "Beats / 64" << "Beats / 32" << "Beats / 16" << "Beats / 12" << "Beats / 10" << "Beats / 9" << "Beats / 8" << "Beats / 7" << "Beats / 6" << "Beats / 5" << "Beats / 4" << "Beats / 3" << "Beats / 2" << "Beats" << "Off";
+
+    m_ui->comboBox_SnapValues->addItems( snapValuesTextList );
+
+    m_ui->comboBox_SnapValues->setCurrentIndex( snapValuesTextList.size() - 1 );
 
 
     // Populate "Time Signature" combo boxes
@@ -327,9 +333,6 @@ void MainWindow::setupUI()
     // Connect signals to slots
     QObject::connect( m_scene, SIGNAL( slicePointPosChanged(SharedSlicePointItem,int,int,int,int) ),
                       this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int,int,int) ) );
-
-    QObject::connect( m_scene, SIGNAL( loopMarkerPosChanged() ),
-                      this, SLOT( stopPlayback() ) );
 
     QObject::connect( m_ui->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
                       this, SLOT( disableZoomOut() ) );
@@ -472,7 +475,6 @@ void MainWindow::enableUI()
     m_ui->horizontalSlider_Threshold->setEnabled( true );
     m_ui->pushButton_FindOnsets->setEnabled( true );
     m_ui->pushButton_FindBeats->setEnabled( true );
-    m_ui->checkBox_LoopMarkers->setEnabled( true );
     m_ui->comboBox_TimeSigNumerator->setEnabled( true );
     m_ui->comboBox_TimeSigDenominator->setEnabled( true );
     m_ui->spinBox_Length->setEnabled( true );
@@ -519,9 +521,7 @@ void MainWindow::disableUI()
     m_ui->horizontalSlider_Threshold->setEnabled( false );
     m_ui->pushButton_FindOnsets->setEnabled( false );
     m_ui->pushButton_FindBeats->setEnabled( false );
-    m_ui->checkBox_LoopMarkers->setEnabled( false );
-    m_ui->checkBox_LoopMarkers->setChecked( false );
-    m_ui->comboBox_SnapLoopMarkers->setEnabled( false );
+    m_ui->comboBox_SnapValues->setEnabled( false );
     m_ui->comboBox_TimeSigNumerator->setEnabled( false );
     m_ui->comboBox_TimeSigDenominator->setEnabled( false );
     m_ui->spinBox_Length->setEnabled( false );
@@ -566,25 +566,6 @@ void MainWindow::connectWaveformToMainWindow( const SharedWaveformItem item )
 
     QObject::connect( item.data(), SIGNAL( clicked(const WaveformItem*,QPointF) ),
                       this, SLOT( playSampleRange(const WaveformItem*,QPointF) ) );
-}
-
-
-
-void MainWindow::updateSnapLoopMarkersComboBox()
-{
-    QStringList snapTextList;
-
-    if ( m_sampleBufferList.size() > 1 )
-    {
-        snapTextList << "Off" << "Markers -> Slice Points";
-    }
-    else
-    {
-        snapTextList << "Off" << "Markers -> Slice Points" << "Slice Points -> Markers";
-    }
-
-    m_ui->comboBox_SnapLoopMarkers->clear();
-    m_ui->comboBox_SnapLoopMarkers->addItems( snapTextList );
 }
 
 
@@ -1367,16 +1348,7 @@ void MainWindow::on_actionAbout_triggered()
 void MainWindow::on_pushButton_CalcBPM_clicked()
 {
     qreal bpm = 0.0;
-    int numFrames = 0;
-
-    if ( m_ui->checkBox_LoopMarkers->isChecked() )
-    {
-        numFrames = m_scene->getNumFramesBetweenLoopMarkers();
-    }
-    else
-    {
-        numFrames = SampleUtils::getTotalNumFrames( m_sampleBufferList );
-    }
+    int numFrames = SampleUtils::getTotalNumFrames( m_sampleBufferList );
 
     const qreal numSeconds = numFrames / m_sampleHeader->sampleRate;
     const int numerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
@@ -1636,19 +1608,7 @@ void MainWindow::on_pushButton_PlayStop_clicked()
     }
     else
     {
-        if ( m_ui->checkBox_LoopMarkers->isChecked() )
-        {
-            int firstOrderPos;
-            QList<SharedSampleRange> sampleRanges;
-
-            m_scene->getSampleRangesBetweenLoopMarkers( firstOrderPos, sampleRanges );
-
-            m_samplerAudioSource->playSamples( firstOrderPos, sampleRanges );
-        }
-        else
-        {
-            m_samplerAudioSource->playAll();
-        }
+        m_samplerAudioSource->playAll();
         
         m_ui->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
 
@@ -1832,44 +1792,6 @@ void MainWindow::on_pushButton_TimestretchOptions_clicked()
     m_optionsDialog->move( pos );
     m_optionsDialog->setCurrentTab( OptionsDialog::TIME_STRETCH_TAB );
     m_optionsDialog->show();
-}
-
-
-
-void MainWindow::on_checkBox_LoopMarkers_clicked( const bool isChecked )
-{
-    stopPlayback();
-
-    if ( isChecked )
-    {
-        m_scene->showLoopMarkers();
-        m_ui->comboBox_SnapLoopMarkers->setEnabled( true );
-    }
-    else
-    {
-        m_scene->hideLoopMarkers();
-        m_ui->comboBox_SnapLoopMarkers->setEnabled( false );
-    }
-}
-
-
-
-void MainWindow::on_comboBox_SnapLoopMarkers_currentIndexChanged( const int index )
-{
-    switch ( index )
-    {
-    case WaveGraphicsScene::SNAP_OFF :
-        m_scene->setLoopMarkerSnapMode( WaveGraphicsScene::SNAP_OFF );
-        break;
-    case WaveGraphicsScene::SNAP_MARKERS_TO_SLICES :
-        m_scene->setLoopMarkerSnapMode( WaveGraphicsScene::SNAP_MARKERS_TO_SLICES );
-        break;
-    case WaveGraphicsScene::SNAP_SLICES_TO_MARKERS :
-        m_scene->setLoopMarkerSnapMode( WaveGraphicsScene::SNAP_SLICES_TO_MARKERS );
-        break;
-    default:
-        break;
-    }
 }
 
 

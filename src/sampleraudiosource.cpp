@@ -81,26 +81,10 @@ void SamplerAudioSource::playSample( const int sampleNum, const SharedSampleRang
     {
         stop();
     }
-    m_tempSampleRangeList << sampleRange;
+    m_tempSampleRange = sampleRange;
     m_seqStartNote = m_lowestAssignedNote + sampleNum;
     m_noteCounter = 0;
     m_noteCounterEnd = 1;
-    m_frameCounter = 0;
-    m_isPlaySeqEnabled = true;
-}
-
-
-
-void SamplerAudioSource::playSamples( const int firstSampleNum, const QList<SharedSampleRange> sampleRangeList )
-{
-    if ( m_isPlaySeqEnabled )
-    {
-        stop();
-    }
-    m_tempSampleRangeList = sampleRangeList;
-    m_seqStartNote = m_lowestAssignedNote + firstSampleNum;
-    m_noteCounter = 0;
-    m_noteCounterEnd = sampleRangeList.size();
     m_frameCounter = 0;
     m_isPlaySeqEnabled = true;
 }
@@ -129,7 +113,7 @@ void SamplerAudioSource::stop()
 
     m_isPlaySeqEnabled = false;
     m_sampler.allNotesOff( midiChannel, allowTailOff );
-    m_tempSampleRangeList.clear();
+    m_tempSampleRange.clear();
 }
 
 
@@ -193,7 +177,7 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info, 
                 else
                 {
                     m_isPlaySeqEnabled = false;  // End of sequence reached
-                    m_tempSampleRangeList.clear();
+                    m_tempSampleRange.clear();
                 }
             }
         }
@@ -212,7 +196,7 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info, 
 
                 int numFrames = 0;
 
-                if ( ! m_tempSampleRangeList.isEmpty() )
+                if ( ! m_tempSampleRange.isNull() )
                 {
                     SynthesiserSound* sound = m_sampler.getSound( m_seqStartNote - m_lowestAssignedNote + m_noteCounter );
 
@@ -220,9 +204,9 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info, 
 
                     if ( samplerSound != NULL )
                     {
-                        samplerSound->setTempSampleRange( m_tempSampleRangeList.at( m_noteCounter ) );
+                        samplerSound->setTempSampleRange( m_tempSampleRange );
                     }
-                    numFrames = m_tempSampleRangeList.at( m_noteCounter )->numFrames;
+                    numFrames = m_tempSampleRange->numFrames;
                 }
                 else
                 {

@@ -172,7 +172,6 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/akaifilehandler.cpp \
     src/midifilehandler.cpp \
     src/mainwindowfilehandling.cpp \
-    src/loopmarkeritem.cpp \
     src/confirmbpmdialog.cpp \
     src/samplebuffer.cpp \
     src/offlinetimestretcher.cpp \
@@ -390,7 +389,6 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/framemarkeritem.h \
     src/akaifilehandler.h \
     src/midifilehandler.h \
-    src/loopmarkeritem.h \
     src/confirmbpmdialog.h \
     src/offlinetimestretcher.h \
     src/wavegraphicsscene.h

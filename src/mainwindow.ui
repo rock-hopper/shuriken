@@ -462,19 +462,6 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <item>
-       <widget class="QCheckBox" name="checkBox_LoopMarkers">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="text">
-         <string>Loop Markers</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="label_Snap">
         <property name="text">
          <string>Snap:</string>
@@ -482,7 +469,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBox_SnapLoopMarkers">
+       <widget class="QComboBox" name="comboBox_SnapValues">
         <property name="enabled">
          <bool>false</bool>
         </property>

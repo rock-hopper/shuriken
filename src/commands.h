@@ -402,7 +402,6 @@ public:
 
 private:
     void updateSlicePoints( qreal timeRatio );
-    void updateLoopMarkers( qreal timeRatio );
 
     MainWindow* const m_mainWindow;
     WaveGraphicsScene* const m_graphicsScene;

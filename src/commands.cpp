@@ -195,7 +195,7 @@ void SliceCommand::undo()
     m_graphicsScene->clearWaveform();
 
     SharedWaveformItem item = m_graphicsScene->createWaveform( m_mainWindow->m_sampleBufferList.first(),
-                                                              m_mainWindow->m_sampleHeader );
+                                                               m_mainWindow->m_sampleHeader );
     m_mainWindow->connectWaveformToMainWindow( item );
 
     m_sliceButton->setChecked( false );
@@ -204,8 +204,6 @@ void SliceCommand::undo()
     m_addSlicePointAction->setEnabled( true );
     m_selectiveTimeStretchAction->setEnabled( false );
     m_auditionItemsAction->trigger();
-
-    m_mainWindow->updateSnapLoopMarkersComboBox();
 
     QApplication::restoreOverrideCursor();
 }
@@ -227,7 +225,7 @@ void SliceCommand::redo()
     m_graphicsScene->clearWaveform();
 
     const QList<SharedWaveformItem> waveformItemList = m_graphicsScene->createWaveforms( m_mainWindow->m_sampleBufferList,
-                                                                                        m_mainWindow->m_sampleHeader );
+                                                                                         m_mainWindow->m_sampleHeader );
     foreach ( SharedWaveformItem item, waveformItemList )
     {
         m_mainWindow->connectWaveformToMainWindow( item );
@@ -244,8 +242,6 @@ void SliceCommand::redo()
     }
 
     m_selectMoveItemsAction->trigger();
-
-    m_mainWindow->updateSnapLoopMarkersComboBox();
 
     QApplication::restoreOverrideCursor();
 }
@@ -308,8 +304,6 @@ void UnsliceCommand::undo()
     m_selectiveTimeStretchAction->setEnabled( true );
     m_selectMoveItemsAction->trigger();
 
-    m_mainWindow->updateSnapLoopMarkersComboBox();
-
     QApplication::restoreOverrideCursor();
 }
 
@@ -341,8 +335,6 @@ void UnsliceCommand::redo()
     m_addSlicePointAction->setEnabled( true );
     m_selectiveTimeStretchAction->setEnabled( false );
     m_auditionItemsAction->trigger();
-
-    m_mainWindow->updateSnapLoopMarkersComboBox();
 
     QApplication::restoreOverrideCursor();
 }
@@ -1008,7 +1000,6 @@ void GlobalTimeStretchCommand::undo()
 
     const qreal timeRatio = 1.0 / ( m_originalBPM / m_newBPM );
 
-    updateLoopMarkers( timeRatio );
     updateSlicePoints( timeRatio );
     m_graphicsView->redrawWaveforms();
 
@@ -1066,7 +1057,6 @@ void GlobalTimeStretchCommand::redo()
         m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                         m_mainWindow->m_sampleHeader->sampleRate );
 
-        updateLoopMarkers( timeRatio );
         updateSlicePoints( timeRatio );
         m_graphicsView->redrawWaveforms();
 
@@ -1097,27 +1087,6 @@ void GlobalTimeStretchCommand::updateSlicePoints( const qreal timeRatio )
     {
         const int newFrameNum = roundToIntAccurate( slicePoint->getFrameNum() * timeRatio );
         slicePoint->setFrameNum( newFrameNum );
-    }
-}
-
-
-
-void GlobalTimeStretchCommand::updateLoopMarkers( const qreal timeRatio )
-{
-    LoopMarkerItem* loopMarkerLeft = m_graphicsScene->getLeftLoopMarker();
-
-    if ( loopMarkerLeft != NULL )
-    {
-        const int newFrameNum = roundToIntAccurate( loopMarkerLeft->getFrameNum() * timeRatio );
-        loopMarkerLeft->setFrameNum( newFrameNum );
-    }
-
-    LoopMarkerItem* loopMarkerRight = m_graphicsScene->getRightLoopMarker();
-
-    if ( loopMarkerRight != NULL )
-    {
-        const int newFrameNum = roundToIntAccurate( loopMarkerRight->getFrameNum() * timeRatio );
-        loopMarkerRight->setFrameNum( newFrameNum );
     }
 }
 

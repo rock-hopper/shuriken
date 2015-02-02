@@ -207,8 +207,6 @@ void MainWindow::openProject( const QString filePath )
             m_ui->spinBox_Length->setValue( settings.length );
             m_ui->comboBox_Units->setCurrentIndex( settings.units );
 
-            updateSnapLoopMarkersComboBox();
-
             // Clean up temp dir
             File( projTempDir.absolutePath().toLocal8Bit().data() ).deleteRecursively();
 
@@ -636,8 +634,6 @@ void MainWindow::importAudioFileDialog()
             setUpSampler();
 
             enableUI();
-
-            updateSnapLoopMarkersComboBox();
 
             // Set status bar message
             {

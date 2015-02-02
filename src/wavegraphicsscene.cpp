@@ -29,8 +29,7 @@
 // Public:
 
 WaveGraphicsScene::WaveGraphicsScene( const qreal x, const qreal y, const qreal width, const qreal height, QObject* parent ) :
-    QGraphicsScene( x, y, width, height, parent ),
-    m_loopMarkerSnapMode( SNAP_OFF )
+    QGraphicsScene( x, y, width, height, parent )
 {
     createRuler();
 
@@ -205,19 +204,6 @@ void WaveGraphicsScene::insertWaveforms( const QList<SharedWaveformItem> wavefor
     WaveGraphicsView* view = getView();
 
     view->setInteractionMode( view->getInteractionMode() );
-
-    // Reset loop markers
-    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
-    {
-        const int startFrame = 0;
-        const int endFrame = getTotalNumFrames( m_waveformItemList ) - 1;
-
-        m_loopMarkerLeft->setFrameNum( startFrame );
-        m_loopMarkerRight->setFrameNum( endFrame );
-
-        m_loopMarkerLeft->setPos( 0.0, Ruler::HEIGHT );
-        m_loopMarkerRight->setPos( getScenePosX( endFrame ), Ruler::HEIGHT );
-    }
 }
 
 
@@ -268,19 +254,6 @@ QList<SharedWaveformItem> WaveGraphicsScene::removeWaveforms( const QList<int> w
     }
 
     resizeWaveformItems( width() / totalWidth );
-
-    // Reset loop markers
-    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
-    {
-        const int startFrame = 0;
-        const int endFrame = getTotalNumFrames( m_waveformItemList ) - 1;
-
-        m_loopMarkerLeft->setFrameNum( startFrame );
-        m_loopMarkerRight->setFrameNum( endFrame );
-
-        m_loopMarkerLeft->setPos( 0.0, Ruler::HEIGHT );
-        m_loopMarkerRight->setPos( getScenePosX( endFrame ), Ruler::HEIGHT );
-    }
 
     return removedWaveforms;
 }
@@ -497,95 +470,6 @@ QList<int> WaveGraphicsScene::getSlicePointFrameNums() const
 
 
 
-void WaveGraphicsScene::showLoopMarkers()
-{
-    if ( m_loopMarkerLeft == NULL && m_loopMarkerRight == NULL )
-    {
-        createLoopMarkers();
-    }
-
-    m_loopMarkerLeft->setVisible( true );
-    m_loopMarkerRight->setVisible( true );
-}
-
-
-
-void WaveGraphicsScene::hideLoopMarkers()
-{
-    m_loopMarkerLeft->setVisible( false );
-    m_loopMarkerRight->setVisible( false );
-}
-
-
-
-void WaveGraphicsScene::getSampleRangesBetweenLoopMarkers( int& firstOrderPos, QList<SharedSampleRange>& sampleRanges ) const
-{
-    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL)
-    {
-        const int leftMarkerFrameNum = getRelativeLoopMarkerFrameNum( m_loopMarkerLeft );
-        const int rightMarkerFrameNum = getRelativeLoopMarkerFrameNum( m_loopMarkerRight );
-
-        const int leftWaveformOrderPos = getWaveformUnderLoopMarker( m_loopMarkerLeft )->getOrderPos();
-        const int rightWaveformOrderPos = getWaveformUnderLoopMarker( m_loopMarkerRight )->getOrderPos();
-
-        const int minNumFrames = roundToIntAccurate( m_sampleHeader->sampleRate * AudioAnalyser::MIN_INTER_ONSET_SECS );
-
-        bool isFirstOrderPos = true;
-
-        for ( int orderPos = leftWaveformOrderPos; orderPos <= rightWaveformOrderPos; orderPos++ )
-        {
-            int startFrame = 0;
-            int numFrames = m_waveformItemList.at( orderPos )->getSampleBuffer()->getNumFrames();
-
-            if ( orderPos == leftWaveformOrderPos )
-            {
-                startFrame = leftMarkerFrameNum;
-            }
-
-            if ( orderPos == rightWaveformOrderPos )
-            {
-                numFrames = rightMarkerFrameNum - startFrame;
-            }
-            else
-            {
-                numFrames = numFrames - startFrame;
-            }
-
-            if ( numFrames > minNumFrames )
-            {
-                if ( isFirstOrderPos )
-                {
-                    firstOrderPos = orderPos;
-                    isFirstOrderPos = false;
-                }
-
-                SharedSampleRange range( new SampleRange );
-
-                range->startFrame = startFrame;
-                range->numFrames = numFrames;
-
-                sampleRanges << range;
-            }
-        }
-    }
-}
-
-
-
-int WaveGraphicsScene::getNumFramesBetweenLoopMarkers() const
-{
-    int numFrames = 0;
-
-    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
-    {
-        numFrames = m_loopMarkerRight->getFrameNum() - m_loopMarkerLeft->getFrameNum();
-    }
-
-    return numFrames;
-}
-
-
-
 void WaveGraphicsScene::selectNone()
 {
     foreach ( SharedSlicePointItem item, m_slicePointItemList )
@@ -617,17 +501,10 @@ void WaveGraphicsScene::startPlayhead( const bool isLoopingDesired, const qreal 
 
     if ( sampleRate > 0.0 )
     {
-        int numFrames = getTotalNumFrames( m_waveformItemList );
+        const int numFrames = getTotalNumFrames( m_waveformItemList );
 
-        qreal startPosX = 0.0;
-        qreal endPosX   = width() - 1;
-
-        if ( m_loopMarkerLeft != NULL && m_loopMarkerLeft->isVisible() )
-        {
-            numFrames = getFrameNum( m_loopMarkerRight->scenePos().x() - m_loopMarkerLeft->scenePos().x() );
-            startPosX = m_loopMarkerLeft->scenePos().x();
-            endPosX   = m_loopMarkerRight->scenePos().x();
-        }
+        const qreal startPosX = 0.0;
+        const qreal endPosX   = width() - 1;
 
         const int millis = roundToIntAccurate( (numFrames / sampleRate) * 1000 * stretchRatio );
 
@@ -720,16 +597,7 @@ void WaveGraphicsScene::updatePlayheadSpeed( const qreal stretchRatio )
         m_timer->stop();
 
         const qreal sampleRate = m_sampleHeader->sampleRate;
-        int numFrames = 0;
-
-        if ( m_loopMarkerLeft != NULL && m_loopMarkerLeft->isVisible() )
-        {
-            numFrames = getFrameNum( m_loopMarkerRight->scenePos().x() - m_loopMarkerLeft->scenePos().x() );
-        }
-        else
-        {
-            numFrames = getTotalNumFrames( m_waveformItemList );
-        }
+        const int numFrames = getTotalNumFrames( m_waveformItemList );
 
         const int newDuration = roundToInt( (numFrames / sampleRate) * 1000 * stretchRatio );
 //        const int newTime = roundToInt( mTimer->currentTime() * stretchRatio );
@@ -811,8 +679,6 @@ void WaveGraphicsScene::clearAll()
     m_waveformItemList.clear();
     m_slicePointItemList.clear();
     m_rulerMarksList.clear();
-    m_loopMarkerLeft = NULL;
-    m_loopMarkerRight = NULL;
 
     createRuler();
 }
@@ -918,25 +784,6 @@ void WaveGraphicsScene::resizePlayhead()
 
 
 
-void WaveGraphicsScene::resizeLoopMarkers( const qreal scaleFactorX )
-{
-    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
-    {
-        m_loopMarkerLeft->setHeight( height() - Ruler::HEIGHT - 1 );
-        m_loopMarkerRight->setHeight( height() - Ruler::HEIGHT - 1 );
-        {
-            const qreal newX = m_loopMarkerLeft->scenePos().x() * scaleFactorX;
-            m_loopMarkerLeft->setPos( newX, Ruler::HEIGHT );
-        }
-        {
-            const qreal newX = m_loopMarkerRight->scenePos().x() * scaleFactorX;
-            m_loopMarkerRight->setPos( newX, Ruler::HEIGHT );
-        }
-    }
-}
-
-
-
 void WaveGraphicsScene::resizeRuler( const qreal scaleFactorX )
 {
     m_rulerBackground->setRect( 0.0, 0.0, width(), Ruler::HEIGHT );
@@ -966,12 +813,6 @@ void WaveGraphicsScene::scaleItems( const qreal scaleFactorX )
         {
             item->setTransform( matrix );
         }
-
-        if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
-        {
-            m_loopMarkerLeft->setTransform( matrix );
-            m_loopMarkerRight->setTransform( matrix );
-        }
     }
 }
 
@@ -979,230 +820,6 @@ void WaveGraphicsScene::scaleItems( const qreal scaleFactorX )
 
 //==================================================================================================
 // Private:
-
-void WaveGraphicsScene::createLoopMarkers()
-{
-    m_loopMarkerLeft = new LoopMarkerItem( LoopMarkerItem::LEFT_MARKER, height() - Ruler::HEIGHT - 1 );
-
-    m_loopMarkerRight = new LoopMarkerItem( LoopMarkerItem::RIGHT_MARKER, height() - Ruler::HEIGHT - 1 );
-
-    const int startFrame = 0;
-    const int endFrame = getTotalNumFrames( m_waveformItemList ) - 1;
-
-    m_loopMarkerLeft->setFrameNum( startFrame );
-    m_loopMarkerRight->setFrameNum( endFrame );
-
-    m_loopMarkerLeft->setPos( 0.0, Ruler::HEIGHT );
-    m_loopMarkerRight->setPos( getScenePosX( endFrame ), Ruler::HEIGHT );
-
-    QTransform matrix;
-    const qreal currentScaleFactor = views().first()->transform().m11(); // m11() returns horizontal scale factor
-    matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // loop marker remains correct width if view is scaled
-    m_loopMarkerLeft->setTransform( matrix );
-    m_loopMarkerRight->setTransform( matrix );
-
-    QObject::connect( m_loopMarkerLeft, SIGNAL( scenePosChanged(FrameMarkerItem*) ),
-                      this, SLOT( updateLoopMarkerFrameNum(FrameMarkerItem*) ) );
-
-    QObject::connect( m_loopMarkerRight, SIGNAL( scenePosChanged(FrameMarkerItem*) ),
-                      this, SLOT( updateLoopMarkerFrameNum(FrameMarkerItem*) ) );
-
-    addItem( m_loopMarkerLeft );
-    addItem( m_loopMarkerRight );
-    update();
-
-    updateLoopMarkerFrameNum( m_loopMarkerLeft );
-    updateLoopMarkerFrameNum( m_loopMarkerRight );
-}
-
-
-
-void WaveGraphicsScene::setLoopMarkerFrameNum( LoopMarkerItem* const loopMarker )
-{
-    if ( loopMarker != NULL )
-    {
-        int newFrameNum = getFrameNum( loopMarker->scenePos().x() );
-
-        loopMarker->setFrameNum( newFrameNum );
-    }
-}
-
-
-
-int WaveGraphicsScene::getRelativeLoopMarkerFrameNum( const LoopMarkerItem* const loopMarker ) const
-{
-    int frameNum = 0;
-
-    if ( loopMarker != NULL )
-    {
-        frameNum = loopMarker->getFrameNum();
-
-        foreach ( SharedWaveformItem item, m_waveformItemList )
-        {
-            const int numFrames = item->getSampleBuffer()->getNumFrames();
-
-            if ( frameNum < numFrames )
-            {
-                break;
-            }
-
-            frameNum -= numFrames;
-        }
-    }
-
-    return frameNum;
-}
-
-
-
-SharedWaveformItem WaveGraphicsScene::getWaveformUnderLoopMarker( const LoopMarkerItem* const loopMarker ) const
-{
-    SharedWaveformItem waveformItem;
-
-    if ( loopMarker != NULL )
-    {
-        int frameNum = loopMarker->getFrameNum();
-
-        foreach ( SharedWaveformItem item, m_waveformItemList )
-        {
-            const int numFrames = item->getSampleBuffer()->getNumFrames();
-
-            if ( frameNum < numFrames )
-            {
-                waveformItem = item;
-                break;
-            }
-
-            frameNum -= numFrames;
-        }
-    }
-
-    return waveformItem;
-}
-
-
-
-void WaveGraphicsScene::updateLoopMarkerFrameNums()
-{
-    if ( m_loopMarkerLeft != NULL && m_loopMarkerRight != NULL )
-    {
-        setLoopMarkerFrameNum( m_loopMarkerLeft );
-        setLoopMarkerFrameNum( m_loopMarkerRight );
-
-        emit loopMarkerPosChanged();
-    }
-}
-
-
-
-void WaveGraphicsScene::snapLoopMarkerToSlicePoint( LoopMarkerItem* const loopMarker )
-{
-    if ( loopMarker != NULL )
-    {
-        const int oldFrameNum = loopMarker->getFrameNum();
-        const int minFrameNum = 0;
-        const int maxFrameNum = getTotalNumFrames( m_waveformItemList ) - 1;
-
-        QList<int> frameNumList;
-
-        frameNumList << minFrameNum;
-
-        foreach ( SharedSlicePointItem slicePoint, m_slicePointItemList )
-        {
-            const int frameNum = slicePoint->getFrameNum();
-
-            if ( frameNum > minFrameNum && frameNum < maxFrameNum )
-                frameNumList << frameNum;
-        }
-
-        frameNumList << maxFrameNum;
-
-        int newFrameNum = 0;
-        int smallestNumFrames = maxFrameNum;
-
-        foreach ( int frameNum, frameNumList )
-        {
-            const int numFrames = qAbs( oldFrameNum - frameNum );
-
-            if ( numFrames < smallestNumFrames )
-            {
-                smallestNumFrames = numFrames;
-                newFrameNum = frameNum;
-            }
-        }
-
-        loopMarker->setFrameNum( newFrameNum );
-        loopMarker->setPos( getScenePosX( newFrameNum ), Ruler::HEIGHT );
-    }
-}
-
-
-
-void WaveGraphicsScene::snapLoopMarkerToWaveform( LoopMarkerItem* const loopMarker )
-{
-    if ( loopMarker != NULL )
-    {
-        const int oldFrameNum = loopMarker->getFrameNum();
-
-        QList<int> frameNumList;
-
-        int frameNum = 0;
-
-        for ( int i = 0; i < m_waveformItemList.size(); i++ )
-        {
-            frameNumList << frameNum;
-            frameNum += m_waveformItemList.at( i )->getSampleBuffer()->getNumFrames();
-        }
-
-        frameNumList << frameNum - 1;
-
-        int newFrameNum = 0;
-        int smallestNumFrames = frameNumList.last();
-
-        foreach ( int frameNum, frameNumList )
-        {
-            const int numFrames = qAbs( oldFrameNum - frameNum );
-
-            if ( numFrames < smallestNumFrames )
-            {
-                smallestNumFrames = numFrames;
-                newFrameNum = frameNum;
-            }
-        }
-
-        loopMarker->setFrameNum( newFrameNum );
-        loopMarker->setPos( getScenePosX( newFrameNum ), Ruler::HEIGHT );
-    }
-}
-
-
-
-void WaveGraphicsScene::snapSlicePointToLoopMarker( SlicePointItem* const slicePoint )
-{
-    if ( slicePoint != NULL && m_loopMarkerLeft != NULL && m_loopMarkerLeft->isVisible() )
-    {
-        const qreal snapThreshold = 30.0;
-
-        qreal scenePosX = slicePoint->scenePos().x();
-        int frameNum = slicePoint->getFrameNum();
-
-        if ( qAbs( scenePosX - m_loopMarkerLeft->scenePos().x() ) <= snapThreshold )
-        {
-            scenePosX = m_loopMarkerLeft->scenePos().x();
-            frameNum = m_loopMarkerLeft->getFrameNum();
-        }
-        else if ( qAbs( scenePosX - m_loopMarkerRight->scenePos().x() ) <= snapThreshold )
-        {
-            scenePosX = m_loopMarkerRight->scenePos().x();
-            frameNum = m_loopMarkerRight->getFrameNum();
-        }
-
-        slicePoint->setPos( scenePosX, Ruler::HEIGHT );
-        slicePoint->setFrameNum( frameNum );
-    }
-}
-
-
 
 void WaveGraphicsScene::connectWaveform( const SharedWaveformItem item )
 {
@@ -1234,7 +851,7 @@ void WaveGraphicsScene::createRuler()
 //==================================================================================================
 // Private Static:
 
-int WaveGraphicsScene::getTotalNumFrames( QList<SharedWaveformItem> waveformItemList )
+int WaveGraphicsScene::getTotalNumFrames( const QList<SharedWaveformItem> waveformItemList )
 {
     int numFrames = 0;
 
@@ -1251,7 +868,7 @@ int WaveGraphicsScene::getTotalNumFrames( QList<SharedWaveformItem> waveformItem
 //==================================================================================================
 // Private Slots:
 
-void WaveGraphicsScene::reorderWaveformItems( QList<int> oldOrderPositions, const int numPlacesMoved )
+void WaveGraphicsScene::reorderWaveformItems( const QList<int> oldOrderPositions, const int numPlacesMoved )
 {
     const int numSelectedItems = oldOrderPositions.size();
 
@@ -1331,8 +948,6 @@ void WaveGraphicsScene::slideWaveformItemIntoPlace( const int orderPos )
     }
 
     m_waveformItemList.at( orderPos )->setPos( newScenePosX, Ruler::HEIGHT );
-
-    updateLoopMarkerFrameNums();
 }
 
 
@@ -1340,16 +955,9 @@ void WaveGraphicsScene::slideWaveformItemIntoPlace( const int orderPos )
 void WaveGraphicsScene::updateSlicePointFrameNum( FrameMarkerItem* const movedItem )
 {
     const int oldFrameNum = movedItem->getFrameNum();
+    const int newFrameNum = getFrameNum( movedItem->pos().x() );
 
-    if ( m_loopMarkerSnapMode == SNAP_SLICES_TO_MARKERS )
-    {
-        snapSlicePointToLoopMarker( dynamic_cast<SlicePointItem*>( movedItem ) );
-    }
-    else
-    {
-        const int newFrameNum = getFrameNum( movedItem->pos().x() );
-        movedItem->setFrameNum( newFrameNum );
-    }
+    movedItem->setFrameNum( newFrameNum );
 
     qSort( m_slicePointItemList.begin(), m_slicePointItemList.end(), SlicePointItem::isLessThanFrameNum );
 
@@ -1383,29 +991,6 @@ void WaveGraphicsScene::updateSlicePointFrameNum( FrameMarkerItem* const movedIt
     }
 
     emit slicePointPosChanged( sharedSlicePoint, orderPos, numFramesFromPrevSlicePoint, numFramesToNextSlicePoint, oldFrameNum );
-}
-
-
-
-void WaveGraphicsScene::updateLoopMarkerFrameNum( FrameMarkerItem* const movedItem )
-{
-    LoopMarkerItem* const item = dynamic_cast<LoopMarkerItem*>( movedItem );
-
-    setLoopMarkerFrameNum( item );
-
-    if ( m_loopMarkerSnapMode == SNAP_MARKERS_TO_SLICES )
-    {
-        if ( m_waveformItemList.size() > 1 )
-        {
-            snapLoopMarkerToWaveform( item );
-        }
-        else
-        {
-            snapLoopMarkerToSlicePoint( item );
-        }
-    }
-
-    emit loopMarkerPosChanged();
 }
 
 

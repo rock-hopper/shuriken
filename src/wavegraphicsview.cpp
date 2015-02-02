@@ -159,7 +159,6 @@ void WaveGraphicsView::resizeEvent ( QResizeEvent* event )
         m_scene->resizeWaveformItems( scaleFactorX );
         m_scene->resizeSlicePointItems( scaleFactorX );
         m_scene->resizePlayhead();
-        m_scene->resizeLoopMarkers( scaleFactorX );
         m_scene->resizeRuler( scaleFactorX );
     }
 

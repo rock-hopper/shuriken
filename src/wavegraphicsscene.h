@@ -29,7 +29,6 @@
 #include "JuceHeader.h"
 #include "waveformitem.h"
 #include "slicepointitem.h"
-#include "loopmarkeritem.h"
 #include "samplebuffer.h"
 #include "wavegraphicsview.h"
 
@@ -107,18 +106,6 @@ public:
     // Returns a list of all slice point items
     QList<SharedSlicePointItem> getSlicePointList() const   { return m_slicePointItemList; }
 
-    void showLoopMarkers();
-    void hideLoopMarkers();
-
-    LoopMarkerItem* getLeftLoopMarker() const               { return m_loopMarkerLeft; }
-    LoopMarkerItem* getRightLoopMarker() const              { return m_loopMarkerRight; }
-
-    enum LoopMarkerSnapMode { SNAP_OFF, SNAP_MARKERS_TO_SLICES, SNAP_SLICES_TO_MARKERS };
-    void setLoopMarkerSnapMode( LoopMarkerSnapMode mode )   { m_loopMarkerSnapMode = mode; }
-
-    void getSampleRangesBetweenLoopMarkers( int& firstOrderPos, QList<SharedSampleRange>& sampleRanges ) const;
-    int getNumFramesBetweenLoopMarkers() const;
-
     void selectNone();
     void selectAll();
 
@@ -144,21 +131,11 @@ public:
     void resizeWaveformItems( qreal scaleFactorX );
     void resizeSlicePointItems( qreal scaleFactorX );
     void resizePlayhead();
-    void resizeLoopMarkers( qreal scaleFactorX );
     void resizeRuler( qreal scaleFactorX );
 
     void scaleItems( qreal scaleFactorX );
 
 private:
-    void createLoopMarkers();
-    void setLoopMarkerFrameNum( LoopMarkerItem* loopMarker );
-    int getRelativeLoopMarkerFrameNum( const LoopMarkerItem* loopMarker ) const;
-    SharedWaveformItem getWaveformUnderLoopMarker( const LoopMarkerItem* loopMarker ) const;
-    void updateLoopMarkerFrameNums();
-    void snapLoopMarkerToSlicePoint( LoopMarkerItem* loopMarker );
-    void snapLoopMarkerToWaveform( LoopMarkerItem* loopMarker );
-    void snapSlicePointToLoopMarker( SlicePointItem* slicePoint );
-
     void connectWaveform( SharedWaveformItem item );
 
     void createRuler();
@@ -175,11 +152,6 @@ private:
     ScopedPointer<QTimeLine> m_timer;
     ScopedPointer<QGraphicsItemAnimation> m_animation;
 
-    ScopedPointer<LoopMarkerItem> m_loopMarkerLeft;
-    ScopedPointer<LoopMarkerItem> m_loopMarkerRight;
-
-    LoopMarkerSnapMode m_loopMarkerSnapMode;
-
 private:
     static int getTotalNumFrames( QList<SharedWaveformItem> waveformItemList );
 
@@ -189,7 +161,6 @@ signals:
                                int numFramesFromPrevSlicePoint,
                                int numFramesToNextSlicePoint,
                                int oldFrameNum );
-    void loopMarkerPosChanged();
     void playheadFinishedScrolling();
 
 private slots:
@@ -199,7 +170,6 @@ private slots:
 
     void slideWaveformItemIntoPlace( int orderPos );
     void updateSlicePointFrameNum( FrameMarkerItem* movedItem );
-    void updateLoopMarkerFrameNum( FrameMarkerItem* movedItem );
     void removePlayhead();
 
 private:

@@ -36,7 +36,6 @@ public:
     void setSamples( QList<SharedSampleBuffer> sampleBufferList, qreal sampleRate );
 
     void playSample( int sampleNum, SharedSampleRange sampleRange );
-    void playSamples( int firstSampleNum, QList<SharedSampleRange> sampleRangeList );
     void playAll();
     void stop();
     void setLooping( bool isLoopingDesired );
@@ -56,7 +55,7 @@ private:
     void clearSamples();
 
     QList<SharedSampleBuffer> m_sampleBufferList;
-    QList<SharedSampleRange> m_tempSampleRangeList;
+    SharedSampleRange m_tempSampleRange;
 
     volatile qreal m_fileSampleRate;
     volatile qreal m_playbackSampleRate;
