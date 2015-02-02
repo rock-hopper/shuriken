@@ -32,10 +32,29 @@ AddSlicePointItemCommand::AddSlicePointItemCommand( const int frameNum,
                                                     const bool canBeMovedPastOtherSlicePoints,
                                                     WaveGraphicsScene* const graphicsScene,
                                                     QPushButton* const sliceButton,
+                                                    QComboBox* const snapComboBox,
                                                     QUndoCommand* parent ) :
     QUndoCommand( parent ),
     m_graphicsScene( graphicsScene ),
-    m_sliceButton( sliceButton )
+    m_sliceButton( sliceButton ),
+    m_snapComboBox( snapComboBox )
+{
+    setText( "Add Slice Point" );
+    m_slicePointItem = m_graphicsScene->createSlicePoint( frameNum, canBeMovedPastOtherSlicePoints );
+    m_isFirstRedoCall = true;
+}
+
+
+
+AddSlicePointItemCommand::AddSlicePointItemCommand( const int frameNum,
+                                                    const bool canBeMovedPastOtherSlicePoints,
+                                                    WaveGraphicsScene* const graphicsScene,
+                                                    QComboBox* const snapComboBox,
+                                                    QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    m_graphicsScene( graphicsScene ),
+    m_sliceButton( NULL ),
+    m_snapComboBox( snapComboBox )
 {
     setText( "Add Slice Point" );
     m_slicePointItem = m_graphicsScene->createSlicePoint( frameNum, canBeMovedPastOtherSlicePoints );
@@ -48,8 +67,10 @@ void AddSlicePointItemCommand::undo()
 {
     m_graphicsScene->removeSlicePoint( m_slicePointItem );
 
-    if ( m_graphicsScene->getSlicePointFrameNums().isEmpty() )
+    if ( m_graphicsScene->getSlicePointList().isEmpty() )
     {
+        m_snapComboBox->setEnabled( false );
+
         if ( m_sliceButton != NULL )
             m_sliceButton->setEnabled( false );
     }
@@ -68,6 +89,17 @@ void AddSlicePointItemCommand::redo()
     if ( m_sliceButton != NULL )
     {
         m_sliceButton->setEnabled( true );
+    }
+
+    m_snapComboBox->setEnabled( true );
+
+    if ( m_snapComboBox->currentText() == QObject::tr( "Off" ) )
+    {
+        m_slicePointItem->disableSnap();
+    }
+    else
+    {
+        m_slicePointItem->enableSnap();
     }
 }
 
@@ -114,11 +146,28 @@ void MoveSlicePointItemCommand::redo()
 DeleteSlicePointItemCommand::DeleteSlicePointItemCommand( const SharedSlicePointItem slicePoint,
                                                           WaveGraphicsScene* const graphicsScene,
                                                           QPushButton* const sliceButton,
+                                                          QComboBox* const snapComboBox,
                                                           QUndoCommand* parent ) :
     QUndoCommand( parent ),
     m_slicePointItem( slicePoint ),
     m_graphicsScene( graphicsScene ),
-    m_sliceButton( sliceButton )
+    m_sliceButton( sliceButton ),
+    m_snapComboBox( snapComboBox )
+{
+    setText( "Delete Slice Point" );
+}
+
+
+
+DeleteSlicePointItemCommand::DeleteSlicePointItemCommand( const SharedSlicePointItem slicePoint,
+                                                          WaveGraphicsScene* const graphicsScene,
+                                                          QComboBox* const snapComboBox,
+                                                          QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    m_slicePointItem( slicePoint ),
+    m_graphicsScene( graphicsScene ),
+    m_sliceButton( NULL ),
+    m_snapComboBox( snapComboBox )
 {
     setText( "Delete Slice Point" );
 }
@@ -129,9 +178,20 @@ void DeleteSlicePointItemCommand::undo()
 {
     m_graphicsScene->addSlicePoint( m_slicePointItem );
 
+    m_snapComboBox->setEnabled( true );
+
     if ( m_sliceButton != NULL )
     {
         m_sliceButton->setEnabled( true );
+    }
+
+    if ( m_snapComboBox->currentText() == QObject::tr( "Off" ) )
+    {
+        m_slicePointItem->disableSnap();
+    }
+    else
+    {
+        m_slicePointItem->enableSnap();
     }
 }
 
@@ -141,8 +201,10 @@ void DeleteSlicePointItemCommand::redo()
 {
     m_graphicsScene->removeSlicePoint( m_slicePointItem );
 
-    if ( m_graphicsScene->getSlicePointFrameNums().isEmpty() )
+    if ( m_graphicsScene->getSlicePointList().isEmpty() )
     {
+        m_snapComboBox->setEnabled( false );
+
         if ( m_sliceButton != NULL )
             m_sliceButton->setEnabled( false );
     }
@@ -291,7 +353,7 @@ void UnsliceCommand::undo()
     m_graphicsScene->clearWaveform();
 
     const QList<SharedWaveformItem> waveformItemList = m_graphicsScene->createWaveforms( m_mainWindow->m_sampleBufferList,
-                                                                                        m_mainWindow->m_sampleHeader );
+                                                                                         m_mainWindow->m_sampleHeader );
     foreach ( SharedWaveformItem item, waveformItemList )
     {
         m_mainWindow->connectWaveformToMainWindow( item );
@@ -301,7 +363,12 @@ void UnsliceCommand::undo()
     m_findOnsetsButton->setEnabled( false );
     m_findBeatsButton->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
-    m_selectiveTimeStretchAction->setEnabled( true );
+
+    if ( m_mainWindow->m_rubberbandAudioSource != NULL )
+    {
+        m_selectiveTimeStretchAction->setEnabled( true );
+    }
+
     m_selectMoveItemsAction->trigger();
 
     QApplication::restoreOverrideCursor();
@@ -326,7 +393,7 @@ void UnsliceCommand::redo()
     m_graphicsScene->clearWaveform();
 
     SharedWaveformItem item = m_graphicsScene->createWaveform( m_mainWindow->m_sampleBufferList.first(),
-                                                              m_mainWindow->m_sampleHeader );
+                                                               m_mainWindow->m_sampleHeader );
     m_mainWindow->connectWaveformToMainWindow( item );
 
     m_sliceButton->setChecked( false );

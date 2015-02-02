@@ -120,7 +120,7 @@ public:
     void updatePlayheadSpeed( qreal stretchRatio );
 
     QList<SharedGraphicsItem> getBpmRulerMarks() const      { return m_rulerMarksList; }
-    void setBpmRulerMarks( qreal bpm, int timeSigNumerator, int divisionsPerBeat = 4 );
+    void setBpmRulerMarks( qreal bpm, int timeSigNumerator, int divisionsPerBeat = 1 );
 
     void clearAll();
     void clearWaveform();

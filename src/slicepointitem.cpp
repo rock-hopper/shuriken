@@ -38,6 +38,7 @@ SlicePointItem::SlicePointItem( const qreal height,
                      height,
                      HANDLE_TOP_BOTTOM,
                      parent ),
+    m_isSnapEnabled( false ),
     m_canBeMovedPastOtherSlicePoints( canBeMovedPastOtherSlicePoints ),
     m_minDistFromOtherItems( minDistFromOtherSlicePoints )
 {
@@ -60,15 +61,14 @@ bool SlicePointItem::isLessThanFrameNum( const SharedSlicePointItem item1, const
 
 QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& value )
 {
-    if ( ! m_canBeMovedPastOtherSlicePoints )
+    if ( change == ItemPositionChange && scene() != NULL )
     {
-        if ( change == ItemPositionChange && scene() != NULL )
-        {
-            QPointF newPos = value.toPointF();
+        QPointF newPos = value.toPointF();
 
+        if ( m_isSnapEnabled )
+        {
             WaveGraphicsScene* scene = static_cast<WaveGraphicsScene*>( this->scene() );
 
-            // Snap slice point to BPM Ruler marks
             foreach ( SharedGraphicsItem item, scene->getBpmRulerMarks() )
             {
                 const qreal itemPosX = item->scenePos().x();
@@ -76,10 +76,13 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
                 if ( qAbs( newPos.x() - itemPosX ) < 8.0 )
                 {
                     newPos.setX( itemPosX );
+                    break;
                 }
             }
+        }
 
-            // Prevent slice point from being moved past other slice points
+        if ( ! m_canBeMovedPastOtherSlicePoints )
+        {
             if ( newPos.x() < m_minScenePosX )
             {
                 newPos.setX( m_minScenePosX );
@@ -88,9 +91,9 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
             {
                 newPos.setX( m_maxScenePosX );
             }
-
-            return FrameMarkerItem::itemChange( change, newPos );
         }
+
+        return FrameMarkerItem::itemChange( change, newPos );
     }
 
     return FrameMarkerItem::itemChange( change, value );

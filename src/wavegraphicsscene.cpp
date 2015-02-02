@@ -613,7 +613,7 @@ void WaveGraphicsScene::updatePlayheadSpeed( const qreal stretchRatio )
 
 void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNumerator, const int divisionsPerBeat )
 {
-    if ( bpm > 0.0 && timeSigNumerator > 0 )
+    if ( bpm > 0.0 && timeSigNumerator > 0 && divisionsPerBeat > 0 )
     {
         foreach ( SharedGraphicsItem item, m_rulerMarksList )
         {

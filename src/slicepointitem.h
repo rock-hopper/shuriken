@@ -46,6 +46,9 @@ public:
     bool canBeMovedPastOtherSlicePoints() const         { return m_canBeMovedPastOtherSlicePoints; }
     void setMovePastOtherSlicePoints( bool canBeMoved ) { m_canBeMovedPastOtherSlicePoints = canBeMoved; }
 
+    void enableSnap()                                   { m_isSnapEnabled = true; }
+    void disableSnap()                                  { m_isSnapEnabled = false; }
+
 public:
     // For use with qSort(); sorts by frame number
     static bool isLessThanFrameNum( const SharedSlicePointItem item1, const SharedSlicePointItem item2 );
@@ -56,6 +59,7 @@ protected:
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
 
 private:
+    bool m_isSnapEnabled;
     bool m_canBeMovedPastOtherSlicePoints;
     qreal m_minDistFromOtherItems;
     qreal m_minScenePosX;

@@ -134,6 +134,7 @@ private:
     bool m_isProjectOpen;
 
 private slots:
+    void on_comboBox_SnapValues_activated( int index );
     void on_comboBox_TimeSigNumerator_activated( QString text );
     void on_pushButton_TimestretchOptions_clicked();
     void on_actionSelective_Time_Stretch_triggered( bool isChecked );

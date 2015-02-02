@@ -295,10 +295,21 @@ void MainWindow::setupUI()
 
     // Populate "Snap Values" combo box
     QStringList snapValuesTextList;
+    QList<int> snapValuesDataList;
 
-    snapValuesTextList << "Beats / 64" << "Beats / 32" << "Beats / 16" << "Beats / 12" << "Beats / 10" << "Beats / 9" << "Beats / 8" << "Beats / 7" << "Beats / 6" << "Beats / 5" << "Beats / 4" << "Beats / 3" << "Beats / 2" << "Beats" << "Off";
+    snapValuesDataList << 64 << 32 << 28 << 24 << 20 << 16 << 14 << 12 << 10 << 8 << 7 << 6 << 5 << 4 << 3 << 2 << 1 << 0;
 
-    m_ui->comboBox_SnapValues->addItems( snapValuesTextList );
+    for ( int i = 0; i < snapValuesDataList.size() - 2; i++ )
+    {
+        snapValuesTextList << tr("Beats") + " / " + QString::number( snapValuesDataList.at( i ) );
+    }
+    snapValuesTextList << tr( "Beats" );
+    snapValuesTextList << tr( "Off" );
+
+    for ( int i = 0; i < snapValuesTextList.size(); i++ )
+    {
+        m_ui->comboBox_SnapValues->addItem( snapValuesTextList[ i ], snapValuesDataList[ i ] );
+    }
 
     m_ui->comboBox_SnapValues->setCurrentIndex( snapValuesTextList.size() - 1 );
 
@@ -1105,7 +1116,8 @@ void MainWindow::on_actionDelete_triggered()
 
         QUndoCommand* command = new DeleteSlicePointItemCommand( selectedSlicePoint,
                                                                  m_scene,
-                                                                 m_ui->pushButton_Slice );
+                                                                 m_ui->pushButton_Slice,
+                                                                 m_ui->comboBox_SnapValues );
         m_undoStack.push( command );
     }
     else
@@ -1139,7 +1151,7 @@ void MainWindow::on_actionAdd_Slice_Point_triggered()
     const QPointF mouseScenePos = m_ui->waveGraphicsView->mapToScene( mousePos );
     const int frameNum = m_scene->getFrameNum( mouseScenePos.x() );
 
-    QUndoCommand* command = new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice );
+    QUndoCommand* command = new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues );
     m_undoStack.push( command );
 }
 
@@ -1400,7 +1412,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
 
         foreach ( SharedSlicePointItem slicePoint, slicePoints )
         {
-            new DeleteSlicePointItemCommand( slicePoint, m_scene, NULL, parentCommand );
+            new DeleteSlicePointItemCommand( slicePoint, m_scene, m_ui->comboBox_SnapValues, parentCommand );
         }
 
         m_undoStack.push( parentCommand );
@@ -1420,7 +1432,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
         {
             frameNum += m_sampleBufferList.at( i )->getNumFrames();
 
-            new AddSlicePointItemCommand( frameNum, true, m_scene, NULL, parentCommand );
+            new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->comboBox_SnapValues, parentCommand );
         }
 
         new UnsliceCommand( this,
@@ -1459,7 +1471,7 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
 
         foreach ( SharedSlicePointItem item, slicePointItemList )
         {
-            new DeleteSlicePointItemCommand( item, m_scene, m_ui->pushButton_Slice, parentCommand );
+            new DeleteSlicePointItemCommand( item, m_scene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
         }
     }
 
@@ -1472,7 +1484,7 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
 
         foreach ( int frameNum, slicePointFrameNumList )
         {
-            new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, parentCommand );
+            new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
         }
     }
 
@@ -1500,12 +1512,12 @@ void MainWindow::on_pushButton_FindBeats_clicked()
 
     foreach ( SharedSlicePointItem item, slicePointItemList )
     {
-        new DeleteSlicePointItemCommand( item, m_scene, m_ui->pushButton_Slice, parentCommand );
+        new DeleteSlicePointItemCommand( item, m_scene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
     }
 
     foreach ( int frameNum, slicePointFrameNumList )
     {
-        new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, parentCommand );
+        new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
     }
 
     m_undoStack.push( parentCommand );
@@ -1748,7 +1760,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
 
             frameNum += numFrames;
 
-            new AddSlicePointItemCommand( frameNum, false, m_scene, NULL, parentCommand );
+            new AddSlicePointItemCommand( frameNum, false, m_scene, m_ui->comboBox_SnapValues, parentCommand );
         }
 
         m_undoStack.push( parentCommand );
@@ -1761,7 +1773,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
 
         foreach ( SharedSlicePointItem slicePoint, slicePoints )
         {
-            new DeleteSlicePointItemCommand( slicePoint, m_scene, NULL, parentCommand );
+            new DeleteSlicePointItemCommand( slicePoint, m_scene, m_ui->comboBox_SnapValues, parentCommand );
         }
 
         new DisableSelectiveTSCommand( m_optionsDialog,
@@ -1802,4 +1814,32 @@ void MainWindow::on_comboBox_TimeSigNumerator_activated( const QString text )
     const int timeSigNumerator = text.toInt();
 
     m_scene->setBpmRulerMarks( bpm, timeSigNumerator );
+}
+
+
+
+void MainWindow::on_comboBox_SnapValues_activated( const int index )
+{
+    const qreal bpm = m_ui->doubleSpinBox_OriginalBPM->value();
+    const int numerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
+    const int divisionsPerBeat = m_ui->comboBox_SnapValues->itemData( index ).toInt();
+
+    m_scene->setBpmRulerMarks( bpm, numerator, divisionsPerBeat );
+
+    QList<SharedSlicePointItem> slicePointList = m_scene->getSlicePointList();
+
+    if ( m_ui->comboBox_SnapValues->currentText() == tr( "Off" ) )
+    {
+        foreach ( SharedSlicePointItem slicePoint, slicePointList )
+        {
+            slicePoint->disableSnap();
+        }
+    }
+    else
+    {
+        foreach ( SharedSlicePointItem slicePoint, slicePointList )
+        {
+            slicePoint->enableSnap();
+        }
+    }
 }

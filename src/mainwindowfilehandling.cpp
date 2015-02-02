@@ -146,7 +146,7 @@ void MainWindow::openProject( const QString filePath )
 
                     foreach ( int frameNum, settings.slicePointFrameNums )
                     {
-                        new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, parentCommand );
+                        new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
                     }
                     m_undoStack.push( parentCommand );
                 }

@@ -28,6 +28,7 @@
 #include <QAction>
 #include <QDoubleSpinBox>
 #include <QCheckBox>
+#include <QComboBox>
 #include "wavegraphicsscene.h"
 #include "wavegraphicsview.h"
 #include "slicepointitem.h"
@@ -41,7 +42,14 @@ public:
     AddSlicePointItemCommand( int frameNum,
                               bool canBeMovedPastOtherSlicePoints,
                               WaveGraphicsScene* graphicsScene,
-                              QPushButton* sliceButton = NULL,
+                              QPushButton* sliceButton,
+                              QComboBox* snapComboBox,
+                              QUndoCommand* parent = NULL );
+
+    AddSlicePointItemCommand( int frameNum,
+                              bool canBeMovedPastOtherSlicePoints,
+                              WaveGraphicsScene* graphicsScene,
+                              QComboBox* snapComboBox,
                               QUndoCommand* parent = NULL );
 
     void undo();
@@ -50,6 +58,7 @@ public:
 private:
     WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
+    QComboBox* const m_snapComboBox;
     SharedSlicePointItem m_slicePointItem;
     bool m_isFirstRedoCall;
 };
@@ -82,7 +91,13 @@ class DeleteSlicePointItemCommand : public QUndoCommand
 public:
     DeleteSlicePointItemCommand( SharedSlicePointItem slicePoint,
                                  WaveGraphicsScene* graphicsScene,
-                                 QPushButton* sliceButton = NULL,
+                                 QPushButton* sliceButton,
+                                 QComboBox* snapComboBox,
+                                 QUndoCommand* parent = NULL );
+
+    DeleteSlicePointItemCommand( SharedSlicePointItem slicePoint,
+                                 WaveGraphicsScene* graphicsScene,
+                                 QComboBox* snapComboBox,
                                  QUndoCommand* parent = NULL );
 
     void undo();
@@ -92,6 +107,7 @@ private:
     const SharedSlicePointItem m_slicePointItem;
     WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
+    QComboBox* const m_snapComboBox;
 };
 
 
