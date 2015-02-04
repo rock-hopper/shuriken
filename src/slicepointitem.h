@@ -46,8 +46,8 @@ public:
     bool canBeMovedPastOtherSlicePoints() const         { return m_canBeMovedPastOtherSlicePoints; }
     void setMovePastOtherSlicePoints( bool canBeMoved ) { m_canBeMovedPastOtherSlicePoints = canBeMoved; }
 
-    void enableSnap()                                   { m_isSnapEnabled = true; }
-    void disableSnap()                                  { m_isSnapEnabled = false; }
+    bool isSnapEnabled() const                          { return m_isSnapEnabled; }
+    void setSnap( bool enable )                      { m_isSnapEnabled = enable; }
 
 public:
     // For use with qSort(); sorts by frame number

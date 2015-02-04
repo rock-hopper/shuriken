@@ -150,11 +150,11 @@ void WaveGraphicsView::setInteractionMode( const InteractionMode mode )
 
 void WaveGraphicsView::resizeEvent ( QResizeEvent* event )
 {
-    scene()->setSceneRect( 0.0, 0.0, event->size().width(), event->size().height() );
+    m_scene->setSceneRect( 0.0, 0.0, event->size().width(), event->size().height() );
 
     if ( event->oldSize().width() > 0 )
     {
-        const qreal scaleFactorX = scene()->width() / event->oldSize().width();
+        const qreal scaleFactorX = m_scene->width() / event->oldSize().width();
 
         m_scene->resizeWaveformItems( scaleFactorX );
         m_scene->resizeSlicePointItems( scaleFactorX );

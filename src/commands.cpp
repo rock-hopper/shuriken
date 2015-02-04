@@ -95,11 +95,11 @@ void AddSlicePointItemCommand::redo()
 
     if ( m_snapComboBox->currentText() == QObject::tr( "Off" ) )
     {
-        m_slicePointItem->disableSnap();
+        m_slicePointItem->setSnap( false );
     }
     else
     {
-        m_slicePointItem->enableSnap();
+        m_slicePointItem->setSnap( true );
     }
 }
 
@@ -187,11 +187,11 @@ void DeleteSlicePointItemCommand::undo()
 
     if ( m_snapComboBox->currentText() == QObject::tr( "Off" ) )
     {
-        m_slicePointItem->disableSnap();
+        m_slicePointItem->setSnap( false );
     }
     else
     {
-        m_slicePointItem->enableSnap();
+        m_slicePointItem->setSnap( true );
     }
 }
 

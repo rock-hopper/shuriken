@@ -1832,14 +1832,14 @@ void MainWindow::on_comboBox_SnapValues_activated( const int index )
     {
         foreach ( SharedSlicePointItem slicePoint, slicePointList )
         {
-            slicePoint->disableSnap();
+            slicePoint->setSnap( false );
         }
     }
     else
     {
         foreach ( SharedSlicePointItem slicePoint, slicePointList )
         {
-            slicePoint->enableSnap();
+            slicePoint->setSnap( true );
         }
     }
 }

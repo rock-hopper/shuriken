@@ -622,6 +622,10 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
 
         m_rulerMarksList.clear();
 
+        QTransform matrix;
+        const qreal currentScaleFactor = views().first()->transform().m11(); // m11() returns horizontal scale factor
+        matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // ruler mark remains same width when view is scaled
+
         const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
         const qreal framesPerDivision = ( ( m_sampleHeader->sampleRate * 60 ) / bpm ) / divisionsPerBeat;
 
@@ -638,6 +642,7 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
                 textItem->setPos( getScenePosX( frameNum ), 1.0 );
                 textItem->setBrush( Qt::white );
                 textItem->setZValue( 1 );
+                textItem->setTransform( matrix );
                 m_rulerMarksList.append( SharedGraphicsItem( textItem ) );
                 bar++;
                 beat++;
@@ -648,6 +653,7 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
                 lineItem->setPos( getScenePosX( frameNum ), 2.0 );
                 lineItem->setPen( QPen( Qt::white ) );
                 lineItem->setZValue( 1 );
+                lineItem->setTransform( matrix );
                 m_rulerMarksList.append( SharedGraphicsItem( lineItem ) );
                 beat++;
             }
@@ -657,6 +663,7 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
                 lineItem->setPos( getScenePosX( frameNum ), 6.0 );
                 lineItem->setPen( QPen( Qt::white ) );
                 lineItem->setZValue( 1 );
+                lineItem->setTransform( matrix );
                 m_rulerMarksList.append( SharedGraphicsItem( lineItem ) );
             }
 
@@ -751,16 +758,22 @@ void WaveGraphicsScene::resizeWaveformItems( const qreal scaleFactorX )
 
 void WaveGraphicsScene::resizeSlicePointItems( const qreal scaleFactorX )
 {
-    foreach ( SharedSlicePointItem slicePointItem, m_slicePointItemList )
+    foreach ( SharedSlicePointItem slicePoint, m_slicePointItemList )
     {
-        slicePointItem->setHeight( height() - Ruler::HEIGHT - 1 );
+        slicePoint->setHeight( height() - Ruler::HEIGHT - 1 );
 
-        const bool canBeMoved = slicePointItem->canBeMovedPastOtherSlicePoints();
-        const qreal newX = slicePointItem->scenePos().x() * scaleFactorX;
+        const bool canBeMoved = slicePoint->canBeMovedPastOtherSlicePoints();
+        const bool isSnapEnabled = slicePoint->isSnapEnabled();
 
-        slicePointItem->setMovePastOtherSlicePoints( true );
-        slicePointItem->setPos( newX, Ruler::HEIGHT );
-        slicePointItem->setMovePastOtherSlicePoints( canBeMoved );
+        slicePoint->setMovePastOtherSlicePoints( true );
+        slicePoint->setSnap( false );
+
+        const qreal newX = slicePoint->scenePos().x() * scaleFactorX;
+
+        slicePoint->setPos( newX, Ruler::HEIGHT );
+
+        slicePoint->setMovePastOtherSlicePoints( canBeMoved );
+        slicePoint->setSnap( isSnapEnabled );
     }
 }
 
@@ -791,7 +804,7 @@ void WaveGraphicsScene::resizeRuler( const qreal scaleFactorX )
     foreach ( SharedGraphicsItem item, m_rulerMarksList )
     {
         const qreal newX = item->scenePos().x() * scaleFactorX;
-        item->setPos( newX, 1.0 );
+        item->setPos( newX, item->scenePos().y() );
     }
 }
 
