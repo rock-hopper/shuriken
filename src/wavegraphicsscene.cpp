@@ -611,10 +611,17 @@ void WaveGraphicsScene::updatePlayheadSpeed( const qreal stretchRatio )
 
 
 
-void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNumerator, const int divisionsPerBeat )
+void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNumerator, int divisionsPerBeat )
 {
-    if ( bpm > 0.0 && timeSigNumerator > 0 && divisionsPerBeat > 0 )
+    if ( bpm > 0.0 && timeSigNumerator > 0 )
     {
+        if ( divisionsPerBeat < 1 )
+        {
+            divisionsPerBeat = 1;
+        }
+
+        const int divsPerBeat = divisionsPerBeat;
+
         foreach ( SharedGraphicsItem item, m_rulerMarksList )
         {
             removeItem( item.data() );
@@ -627,7 +634,7 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
         matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // ruler mark remains same width when view is scaled
 
         const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
-        const qreal framesPerDivision = ( ( m_sampleHeader->sampleRate * 60 ) / bpm ) / divisionsPerBeat;
+        const qreal framesPerDivision = ( ( m_sampleHeader->sampleRate * 60 ) / bpm ) / divsPerBeat;
 
         int frameNum = 0;
         int bar = 1;
@@ -636,7 +643,7 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
 
         while ( frameNum < totalNumFrames )
         {
-            if ( div % (divisionsPerBeat * timeSigNumerator) == 0 ) // Bar
+            if ( div % (divsPerBeat * timeSigNumerator) == 0 ) // Bar
             {
                 QGraphicsSimpleTextItem* textItem = addSimpleText( QString::number( bar ) );
                 textItem->setPos( getScenePosX( frameNum ), 1.0 );
@@ -647,7 +654,7 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
                 bar++;
                 beat++;
             }
-            else if ( div % divisionsPerBeat == 0 ) // Beat
+            else if ( div % divsPerBeat == 0 ) // Beat
             {
                 QGraphicsLineItem* lineItem = addLine( 0.0, 0.0, 0.0, Ruler::HEIGHT - 5.0 );
                 lineItem->setPos( getScenePosX( frameNum ), 2.0 );

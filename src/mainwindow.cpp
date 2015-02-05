@@ -1359,10 +1359,6 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_pushButton_CalcBPM_clicked()
 {
-    qreal bpm = 0.0;
-    int numFrames = SampleUtils::getTotalNumFrames( m_sampleBufferList );
-
-    const qreal numSeconds = numFrames / m_sampleHeader->sampleRate;
     const int numerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
 
     int numBeats = 0;
@@ -1376,12 +1372,19 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
         numBeats = m_ui->spinBox_Length->value();
     }
 
-    bpm = numBeats / ( numSeconds / 60 );
+    const int numFrames = SampleUtils::getTotalNumFrames( m_sampleBufferList );
+
+    const qreal numSeconds = numFrames / m_sampleHeader->sampleRate;
+
+    const qreal bpm = numBeats / ( numSeconds / 60 );
 
     m_ui->doubleSpinBox_OriginalBPM->setValue( bpm );
     m_ui->doubleSpinBox_NewBPM->setValue( bpm );
 
-    m_scene->setBpmRulerMarks( bpm, numerator );
+    const int index = m_ui->comboBox_SnapValues->currentIndex();
+    const int divisionsPerBeat = m_ui->comboBox_SnapValues->itemData( index ).toInt();
+
+    m_scene->setBpmRulerMarks( bpm, numerator, divisionsPerBeat  );
 
     if ( m_rubberbandAudioSource != NULL && bpm > 0.0 )
     {
@@ -1548,7 +1551,10 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
 
     const int timeSigNumerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
 
-    m_scene->setBpmRulerMarks( originalBPM, timeSigNumerator );
+    const int index = m_ui->comboBox_SnapValues->currentIndex();
+    const int divisionsPerBeat = m_ui->comboBox_SnapValues->itemData( index ).toInt();
+
+    m_scene->setBpmRulerMarks( originalBPM, timeSigNumerator, divisionsPerBeat );
 }
 
 
@@ -1813,7 +1819,10 @@ void MainWindow::on_comboBox_TimeSigNumerator_activated( const QString text )
     const qreal bpm = m_ui->doubleSpinBox_OriginalBPM->value();
     const int timeSigNumerator = text.toInt();
 
-    m_scene->setBpmRulerMarks( bpm, timeSigNumerator );
+    const int index = m_ui->comboBox_SnapValues->currentIndex();
+    const int divisionsPerBeat = m_ui->comboBox_SnapValues->itemData( index ).toInt();
+
+    m_scene->setBpmRulerMarks( bpm, timeSigNumerator, divisionsPerBeat );
 }
 
 
