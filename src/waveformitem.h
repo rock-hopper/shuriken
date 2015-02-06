@@ -61,6 +61,9 @@ public:
     int getOrderPos() const                                         { return m_currentOrderPos; }
     void setOrderPos( int orderPos )                                { m_currentOrderPos = orderPos; }
 
+    qreal getStretchRatio() const                                   { return m_stretchRatio; }
+    void setStretchRatio( qreal ratio )                             { m_stretchRatio = ratio; }
+
 public:
     // For use with qSort(); sorts by order position
     static bool isLessThanOrderPos( const WaveformItem* item1, const WaveformItem* item2 );
@@ -90,7 +93,9 @@ private:
     int m_currentOrderPos;
     int m_orderPosBeforeMove;
 
-    qreal m_scaleFactor;
+    qreal m_globalScaleFactor;
+
+    qreal m_stretchRatio;
 
     int m_numBins;
     qreal m_binSize;

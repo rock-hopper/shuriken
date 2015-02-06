@@ -285,8 +285,11 @@ private:
     QPushButton* const m_findOnsetsButton;
     QPushButton* const m_findBeatsButton;
     QAction* const m_addSlicePointAction;
+
     QList<SharedSampleBuffer> m_removedSampleBuffers;
     QList<SharedWaveformItem> m_removedWaveforms;
+
+    QList<qreal> m_deletedNoteTimeRatios;
 };
 
 

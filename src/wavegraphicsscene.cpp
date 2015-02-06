@@ -186,7 +186,7 @@ void WaveGraphicsScene::insertWaveforms( const QList<SharedWaveformItem> wavefor
 
     foreach ( SharedWaveformItem item, m_waveformItemList )
     {
-        const qreal itemWidth = item->getSampleBuffer()->getNumFrames() * ( width() / totalNumFrames );
+        const qreal itemWidth = item->getSampleBuffer()->getNumFrames() * ( width() / totalNumFrames ) * item->getStretchRatio();
 
         item->setRect( 0.0, 0.0, itemWidth, height() );
         item->setPos( scenePosX, Ruler::HEIGHT );
@@ -226,34 +226,28 @@ QList<SharedWaveformItem> WaveGraphicsScene::removeWaveforms( const QList<int> w
     }
     update();
 
-    // If necessary, set new order positions and remove gap between remaining items
+    // If necessary, set new order positions
     if ( startOrderPos < m_waveformItemList.size() )
     {
-        qreal distanceToMove = 0.0;
-
-        foreach ( SharedWaveformItem item, removedWaveforms )
-        {
-            distanceToMove += item->rect().width();
-        }
-
         for ( int i = startOrderPos; i < m_waveformItemList.size(); i++ )
         {
             m_waveformItemList.at( i )->setOrderPos( i );
-
-            const qreal oldScenePosX = m_waveformItemList.at( i )->scenePos().x();
-            m_waveformItemList.at( i )->setPos( oldScenePosX - distanceToMove, Ruler::HEIGHT );
         }
     }
 
-    // Resize remaining waveform items
-    qreal totalWidth = 0.0;
+    // Resize and reposition all waveform items
+    const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
+    qreal scenePosX = 0.0;
 
     foreach ( SharedWaveformItem item, m_waveformItemList )
     {
-        totalWidth += item->rect().width();
-    }
+        const qreal itemWidth = item->getSampleBuffer()->getNumFrames() * ( width() / totalNumFrames ) * item->getStretchRatio();
 
-    resizeWaveformItems( width() / totalWidth );
+        item->setRect( 0.0, 0.0, itemWidth, height() );
+        item->setPos( scenePosX, Ruler::HEIGHT );
+
+        scenePosX += itemWidth;
+    }
 
     return removedWaveforms;
 }
@@ -293,31 +287,32 @@ QList<int> WaveGraphicsScene::getSelectedWaveformsOrderPositions() const
 
 
 
-void WaveGraphicsScene::resizeWaveforms( const QList<int> orderPositions, const QList<qreal> scaleFactorX )
+void WaveGraphicsScene::stretchWaveforms( const QList<int> orderPosList, const QList<qreal> ratioList )
 {
     if ( ! m_waveformItemList.isEmpty() )
     {
         const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
 
-        for ( int i = 0; i < orderPositions.size(); i++ )
+        for ( int i = 0; i < orderPosList.size() && i < ratioList.size(); i++ )
         {
-            SharedWaveformItem item = m_waveformItemList.at( orderPositions.at( i ) );
+            SharedWaveformItem item = m_waveformItemList.at( orderPosList.at( i ) );
 
             const qreal origWidth = item->getSampleBuffer()->getNumFrames() * ( width() / totalNumFrames );
-            const qreal newWidth = origWidth * scaleFactorX.at( i );
+            const qreal newWidth = origWidth * ratioList.at( i );
 
             item->setRect( 0.0, 0.0, newWidth, height() );
+            item->setStretchRatio( ratioList.at( i ) );
 
-            slideWaveformItemIntoPlace( orderPositions.at( i ) );
+            slideWaveformItemIntoPlace( orderPosList.at( i ) );
         }
     }
 }
 
 
 
-QList<qreal> WaveGraphicsScene::getWaveformScaleFactors( const QList<int> orderPositions ) const
+QList<qreal> WaveGraphicsScene::getWaveformStretchRatios( const QList<int> orderPositions ) const
 {
-    QList<qreal> scaleFactorList;
+    QList<qreal> stretchRatioList;
 
     if ( ! m_waveformItemList.isEmpty() )
     {
@@ -329,11 +324,11 @@ QList<qreal> WaveGraphicsScene::getWaveformScaleFactors( const QList<int> orderP
 
             const qreal origWidth = item->getSampleBuffer()->getNumFrames() * ( width() / totalNumFrames );
 
-            scaleFactorList << item->rect().width() / origWidth;
+            stretchRatioList << item->rect().width() / origWidth;
         }
     }
 
-    return scaleFactorList;
+    return stretchRatioList;
 }
 
 
@@ -751,13 +746,13 @@ int WaveGraphicsScene::getFrameNum( qreal scenePosX ) const
 
 void WaveGraphicsScene::resizeWaveformItems( const qreal scaleFactorX )
 {
-    foreach ( SharedWaveformItem waveformItem, m_waveformItemList )
+    foreach ( SharedWaveformItem item, m_waveformItemList )
     {
-        const qreal newWidth = waveformItem->rect().width() * scaleFactorX;
-        waveformItem->setRect( 0.0, 0.0, newWidth, height() );
+        const qreal newWidth = item->rect().width() * scaleFactorX;
+        item->setRect( 0.0, 0.0, newWidth, height() );
 
-        const qreal newX = waveformItem->scenePos().x() * scaleFactorX;
-        waveformItem->setPos( newX, Ruler::HEIGHT );
+        const qreal newX = item->scenePos().x() * scaleFactorX;
+        item->setPos( newX, Ruler::HEIGHT );
     }
 }
 

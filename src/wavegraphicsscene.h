@@ -81,10 +81,10 @@ public:
 
     QList<SharedWaveformItem> getWaveformList() const       { return m_waveformItemList; }
 
-    // Resize waveform items by a ratio of their original size (not necessarily their current size)
-    void resizeWaveforms( QList<int> orderPositions, QList<qreal> scaleFactorX );
+    // Stretch waveform items by a ratio of their original size (not necessarily their current size)
+    void stretchWaveforms( QList<int> orderPosList, QList<qreal> ratioList );
 
-    QList<qreal> getWaveformScaleFactors( QList<int> orderPositions ) const;
+    QList<qreal> getWaveformStretchRatios( QList<int> orderPositions ) const;
 
     // Create a new slice point item and add it to the scene
     SharedSlicePointItem createSlicePoint( int frameNum, bool canBeMovedPastOtherSlicePoints );

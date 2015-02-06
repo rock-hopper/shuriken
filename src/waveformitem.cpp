@@ -36,7 +36,8 @@ WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer,
     QGraphicsRectItem( 0.0, 0.0, width, height, parent ),
     m_sampleBuffer( sampleBuffer ),
     m_currentOrderPos( orderPos ),
-    m_scaleFactor( NOT_SET ),
+    m_globalScaleFactor( NOT_SET ),
+    m_stretchRatio( 1.0 ),
     m_firstCalculatedBin( NOT_SET ),
     m_lastCalculatedBin( NOT_SET )
 {
@@ -75,18 +76,18 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
     int lastVisibleFrame = 0;
     int numVisibleFrames = 0;
 
-    // If scale has changed since the last redraw then reset sample bins and establish new detail level
-    if ( m_scaleFactor != painter->worldTransform().m11() )
+    // If scale factor has changed since the last redraw then reset sample bins and establish new detail level
+    if ( m_globalScaleFactor != painter->worldTransform().m11() )
     {
-        m_scaleFactor = painter->worldTransform().m11(); // m11() returns the current horizontal scale factor
+        m_globalScaleFactor = painter->worldTransform().m11(); // m11() returns the current horizontal scale factor
         resetSampleBins();
     }
 
     if ( m_detailLevel != VERY_HIGH )
     {
         // Reduce no. of samples to draw by finding the min/max values in each consecutive sample "bin"
-        firstVisibleBin = qMax( (int) floor( option->exposedRect.left() * m_scaleFactor ), 0 );
-        lastVisibleBin = qMin( (int) ceil( option->exposedRect.right() * m_scaleFactor ), m_numBins - 1 );
+        firstVisibleBin = qMax( (int) floor( option->exposedRect.left() * m_globalScaleFactor ), 0 );
+        lastVisibleBin = qMin( (int) ceil( option->exposedRect.right() * m_globalScaleFactor ), m_numBins - 1 );
 
         if ( m_firstCalculatedBin == NOT_SET || m_lastCalculatedBin == NOT_SET )
         {
@@ -145,7 +146,7 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
     painter->translate( 0.0, 1.0 );
     painter->setPen( m_wavePen );
 
-    const qreal lineWidth = 1.0 / m_scaleFactor;
+    const qreal lineWidth = 1.0 / m_globalScaleFactor;
     const qreal leftEdge = option->exposedRect.left();
 
     float min;
@@ -471,8 +472,8 @@ void WaveformItem::resetSampleBins()
     m_firstCalculatedBin = NOT_SET;
     m_lastCalculatedBin = NOT_SET;
 
-    m_numBins = rect().width() * m_scaleFactor;
-    m_binSize = (qreal) m_sampleBuffer->getNumFrames() / ( rect().width() * m_scaleFactor );
+    m_numBins = rect().width() * m_globalScaleFactor;
+    m_binSize = (qreal) m_sampleBuffer->getNumFrames() / ( rect().width() * m_globalScaleFactor );
 
     if ( m_binSize <= DETAIL_LEVEL_VERY_HIGH_CUTOFF )
     {

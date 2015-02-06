@@ -693,6 +693,28 @@ void DeleteWaveformItemCommand::undo()
 
     const int firstOrderPos = m_orderPositions.first();
 
+    if ( m_mainWindow->m_rubberbandAudioSource != NULL )
+    {
+        const int startMidiNote = m_mainWindow->m_samplerAudioSource->getLowestAssignedMidiNote();
+        const int numDeletedItems = m_orderPositions.size();
+
+        for ( int i = m_mainWindow->m_sampleBufferList.size() - 1; i >= firstOrderPos; --i )
+        {
+            const int midiNote = startMidiNote + i;
+
+            const qreal noteTimeRatio = m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( midiNote );
+
+            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( midiNote + numDeletedItems, noteTimeRatio );
+        }
+
+        for ( int i = 0; i < m_deletedNoteTimeRatios.size(); i++ )
+        {
+            const int midiNote = startMidiNote + m_orderPositions.at( i );
+
+            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( midiNote, m_deletedNoteTimeRatios.at( i ) );
+        }
+    }
+
     for ( int i = 0; i < m_orderPositions.size(); i++ )
     {
         m_mainWindow->m_sampleBufferList.insert( firstOrderPos + i, m_removedSampleBuffers.at( i ) );
@@ -715,6 +737,44 @@ void DeleteWaveformItemCommand::redo()
     m_mainWindow->stopPlayback();
 
     m_removedWaveforms = m_graphicsScene->removeWaveforms( m_orderPositions );
+
+    if ( m_mainWindow->m_rubberbandAudioSource != NULL )
+    {
+        const int startMidiNote = m_mainWindow->m_samplerAudioSource->getLowestAssignedMidiNote();
+
+        m_deletedNoteTimeRatios.clear();
+
+        foreach ( int orderPos, m_orderPositions )
+        {
+            m_deletedNoteTimeRatios << m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + orderPos );
+        }
+
+        const int numMidiNotesToUpdate = m_mainWindow->m_sampleBufferList.size() - ( m_orderPositions.last() + 1 );
+        const int numDeletedItems = m_orderPositions.size();
+
+        if ( numMidiNotesToUpdate > 0 )
+        {
+            const int firstMidiNoteToUpdate = startMidiNote + m_orderPositions.last() + 1;
+
+            for ( int i = 0; i < numMidiNotesToUpdate; i++ )
+            {
+                const int midiNote = firstMidiNoteToUpdate + i;
+
+                const qreal noteTimeRatio = m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( midiNote );
+
+                m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( midiNote - numDeletedItems, noteTimeRatio );
+            }
+        }
+
+        const int firstMidiNoteToClear = startMidiNote + m_mainWindow->m_sampleBufferList.size() - numDeletedItems;
+
+        for ( int i = 0; i < numDeletedItems; i++ )
+        {
+            const int midiNote = firstMidiNoteToClear + i;
+
+            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( midiNote, 1.0 );
+        }
+    }
 
     m_removedSampleBuffers.clear();
 
@@ -1219,7 +1279,7 @@ void RenderTimeStretchCommand::undo()
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                     m_mainWindow->m_sampleHeader->sampleRate );
 
-    m_graphicsScene->resizeWaveforms( orderPosList, m_timeRatioList );
+    m_graphicsScene->stretchWaveforms( orderPosList, m_timeRatioList );
 
     QApplication::restoreOverrideCursor();
 }
@@ -1307,7 +1367,7 @@ SelectiveTimeStretchCommand::SelectiveTimeStretchCommand( MainWindow* const main
     m_mainWindow( mainWindow ),
     m_graphicsScene( graphicsScene ),
     m_orderPositions( orderPositions ),
-    m_origTimeRatios( graphicsScene->getWaveformScaleFactors( orderPositions ) ),
+    m_origTimeRatios( graphicsScene->getWaveformStretchRatios( orderPositions ) ),
     m_timeRatios( timeRatios ),
     m_midiNotes( midiNotes )
 {
@@ -1322,7 +1382,7 @@ void SelectiveTimeStretchCommand::undo()
     {
         m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( m_midiNotes.at( i ), m_origTimeRatios.at( i ) );
     }
-    m_graphicsScene->resizeWaveforms( m_orderPositions, m_origTimeRatios );
+    m_graphicsScene->stretchWaveforms( m_orderPositions, m_origTimeRatios );
 }
 
 
@@ -1333,5 +1393,5 @@ void SelectiveTimeStretchCommand::redo()
     {
         m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( m_midiNotes.at( i ), m_timeRatios.at( i ) );
     }
-    m_graphicsScene->resizeWaveforms( m_orderPositions, m_timeRatios );
+    m_graphicsScene->stretchWaveforms( m_orderPositions, m_timeRatios );
 }
