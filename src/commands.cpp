@@ -584,16 +584,16 @@ void MoveWaveformItemCommand::redo()
 
 
 
-void MoveWaveformItemCommand::reorderSampleBufferList( const QList<int> oldOrderPositions, const int numPlacesMoved )
+void MoveWaveformItemCommand::reorderSampleBufferList( const QList<int> orderPositions, const int numPlacesMoved )
 {
-    const int numSelectedItems = oldOrderPositions.size();
+    const int numSelectedItems = orderPositions.size();
 
     // If waveform items have been dragged to the left...
     if ( numPlacesMoved < 0 )
     {
         for ( int i = 0; i < numSelectedItems; i++ )
         {
-            const int orderPos = oldOrderPositions.at( i );
+            const int orderPos = orderPositions.at( i );
             m_mainWindow->m_sampleBufferList.move( orderPos, orderPos + numPlacesMoved );
         }
     }
@@ -601,7 +601,7 @@ void MoveWaveformItemCommand::reorderSampleBufferList( const QList<int> oldOrder
     {
         for ( int i = numSelectedItems - 1; i >= 0; i-- )
         {
-            const int orderPos = oldOrderPositions.at( i );
+            const int orderPos = orderPositions.at( i );
             m_mainWindow->m_sampleBufferList.move( orderPos, orderPos + numPlacesMoved );
         }
     }
@@ -612,50 +612,41 @@ void MoveWaveformItemCommand::reorderSampleBufferList( const QList<int> oldOrder
 
 
 
-void MoveWaveformItemCommand::updateNoteTimeRatios( const QList<int> oldOrderPositions, const int numPlacesMoved )
+void MoveWaveformItemCommand::updateNoteTimeRatios( const QList<int> orderPositions, const int numPlacesMoved )
 {
-    const int numSelectedItems = oldOrderPositions.size();
+    const int numSampleBuffers = m_mainWindow->m_sampleBufferList.size();
     const int startMidiNote = m_mainWindow->m_samplerAudioSource->getLowestAssignedMidiNote();
 
     QList<qreal> noteTimeRatios;
 
-    foreach ( int orderPos, oldOrderPositions )
+    for ( int i = 0; i < numSampleBuffers; i++ )
     {
-        noteTimeRatios << m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + orderPos );
+        noteTimeRatios << m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + i );
     }
+
+    const int numSelectedItems = orderPositions.size();
 
     // If waveform items have been dragged to the left...
     if ( numPlacesMoved < 0 )
     {
-        int orderPos = oldOrderPositions.first() + numPlacesMoved;
-
-        for ( int i = 0; i < qAbs( numPlacesMoved ); i++ )
+        for ( int i = 0; i < numSelectedItems; i++ )
         {
-            const qreal noteTimeRatio = m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + orderPos );
-
-            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( startMidiNote + orderPos + numSelectedItems, noteTimeRatio );
-
-            orderPos++;
+            const int orderPos = orderPositions.at( i );
+            noteTimeRatios.move( orderPos, orderPos + numPlacesMoved );
         }
     }
     else // If waveform items have been dragged to the right...
     {
-        int orderPos = oldOrderPositions.last() + 1;
-
-        for ( int i = 0; i < numPlacesMoved; i++ )
+        for ( int i = numSelectedItems - 1; i >= 0; i-- )
         {
-            const qreal noteTimeRatio = m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + orderPos );
-
-            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( startMidiNote + orderPos - numSelectedItems, noteTimeRatio );
-
-            orderPos++;
+            const int orderPos = orderPositions.at( i );
+            noteTimeRatios.move( orderPos, orderPos + numPlacesMoved );
         }
     }
 
-    for ( int i = 0; i < numSelectedItems; i++ )
+    for ( int i = 0; i < numSampleBuffers; i++ )
     {
-        m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( startMidiNote + oldOrderPositions.at( i ) + numPlacesMoved,
-                                                                 noteTimeRatios.at( i ) );
+        m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( startMidiNote + i, noteTimeRatios.at( i ) );
     }
 }
 

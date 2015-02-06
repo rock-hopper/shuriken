@@ -249,8 +249,8 @@ public:
     void redo();
 
 private:
-    void reorderSampleBufferList( QList<int> oldOrderPositions, int numPlacesMoved );
-    void updateNoteTimeRatios( QList<int> oldOrderPositions, int numPlacesMoved );
+    void reorderSampleBufferList( QList<int> orderPositions, int numPlacesMoved );
+    void updateNoteTimeRatios( QList<int> orderPositions, int numPlacesMoved );
 
     const QList<int> m_oldOrderPositions;
     const int m_numPlacesMoved;
