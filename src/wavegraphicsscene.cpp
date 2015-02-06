@@ -872,7 +872,7 @@ int WaveGraphicsScene::getTotalNumFrames( const QList<SharedWaveformItem> wavefo
 
     foreach ( SharedWaveformItem item, waveformItemList )
     {
-        numFrames += item->getSampleBuffer()->getNumFrames();
+        numFrames += static_cast<int>( item->getSampleBuffer()->getNumFrames() * item->getStretchRatio() );
     }
 
     return numFrames;
