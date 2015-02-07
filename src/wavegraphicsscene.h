@@ -138,7 +138,7 @@ public:
 private:
     void connectWaveform( SharedWaveformItem item );
 
-    void createRuler();
+    void createBpmRuler();
 
     QList<SharedWaveformItem> m_waveformItemList;
     QList<SharedSlicePointItem> m_slicePointItemList;

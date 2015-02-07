@@ -56,15 +56,15 @@ public:
 
 protected:
     // Subclasses that reimplement this method MUST ALWAYS call "return FrameMarkerItem::itemChange"
-    // in their reimplementation
+    // within the reimplemented method
     QVariant itemChange( GraphicsItemChange change, const QVariant& value );
 
     // Subclasses that reimplement this method MUST ALWAYS call "FrameMarkerItem::mousePressEvent"
-    // at the start of the reimplementationed method
+    // at the start of the reimplemented method
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
 
     // Subclasses that reimplement this method MUST ALWAYS call "FrameMarkerItem::mouseReleaseEvent"
-    // at the start of the reimplementated method
+    // at the start of the reimplemented method
     void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
     const qreal m_handleWidth;

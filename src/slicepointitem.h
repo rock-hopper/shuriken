@@ -47,7 +47,7 @@ public:
     void setMovePastOtherSlicePoints( bool canBeMoved ) { m_canBeMovedPastOtherSlicePoints = canBeMoved; }
 
     bool isSnapEnabled() const                          { return m_isSnapEnabled; }
-    void setSnap( bool enable )                      { m_isSnapEnabled = enable; }
+    void setSnap( bool enable )                         { m_isSnapEnabled = enable; }
 
 public:
     // For use with qSort(); sorts by frame number
@@ -57,6 +57,7 @@ protected:
     QVariant itemChange( GraphicsItemChange change, const QVariant& value );
 
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
+    void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
 private:
     bool m_isSnapEnabled;
@@ -64,6 +65,9 @@ private:
     qreal m_minDistFromOtherItems;
     qreal m_minScenePosX;
     qreal m_maxScenePosX;
+
+private:
+    static void setRulerMarkColour( QGraphicsItem* item, QColor colour );
 
     JUCE_LEAK_DETECTOR( SlicePointItem );
 };

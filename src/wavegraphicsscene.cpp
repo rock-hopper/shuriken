@@ -31,7 +31,7 @@
 WaveGraphicsScene::WaveGraphicsScene( const qreal x, const qreal y, const qreal width, const qreal height, QObject* parent ) :
     QGraphicsScene( x, y, width, height, parent )
 {
-    createRuler();
+    createBpmRuler();
 
     // Set up playhead
     m_playhead = new QGraphicsLineItem( 0.0, 0.0, 0.0, height - 1 );
@@ -689,7 +689,7 @@ void WaveGraphicsScene::clearAll()
     m_slicePointItemList.clear();
     m_rulerMarksList.clear();
 
-    createRuler();
+    createBpmRuler();
 }
 
 
@@ -850,9 +850,9 @@ void WaveGraphicsScene::connectWaveform( const SharedWaveformItem item )
 
 
 
-void WaveGraphicsScene::createRuler()
+void WaveGraphicsScene::createBpmRuler()
 {
-    m_rulerBackground = addRect( 0.0, 0.0, width(), Ruler::HEIGHT, QPen(), QBrush( Qt::black ) );
+    m_rulerBackground = addRect( 0.0, 0.0, width(), Ruler::HEIGHT, QPen( QColor(0,0,0,0) ), QBrush( Qt::darkGray ) );
 
     QGraphicsSimpleTextItem* textItem = addSimpleText( "0 BPM" );
     textItem->setPos( 1.0, 1.0 );

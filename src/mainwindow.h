@@ -33,12 +33,13 @@
 #include "audiofilehandler.h"
 #include "sampleraudiosource.h"
 #include "rubberbandaudiosource.h"
+#include "wavegraphicsscene.h"
 #include "slicepointitem.h"
 #include "audioanalyser.h"
 #include "waveformitem.h"
 #include "helpform.h"
 #include "exportdialog.h"
-#include "wavegraphicsscene.h"
+
 
 
 namespace Ui
