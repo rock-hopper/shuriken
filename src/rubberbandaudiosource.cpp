@@ -38,7 +38,7 @@ RubberbandAudioSource::RubberbandAudioSource( SamplerAudioSource* const source,
     m_numChans( numChans ),
     m_options( RubberBandStretcher::OptionProcessRealTime | options ),
     m_stretcher( NULL ),
-    m_inputBuffer( numChans, 8192 ),
+    m_inSampleBuffer( numChans, 8192 ),
     m_globalTimeRatio( 1.0 ),
     m_prevGlobalTimeRatio( 1.0 ),
     m_noteTimeRatio( 1.0 ),
@@ -56,9 +56,7 @@ RubberbandAudioSource::RubberbandAudioSource( SamplerAudioSource* const source,
     m_originalBPM( 0.0 ),
     m_isJackSyncEnabled( isJackSyncEnabled )
 {
-    m_samplePositions.resize( 20 );
-    m_noteTimeRatios.resize( 20 );
-    m_inputBufferPtrs.resize( numChans );
+    m_inFloatBuffer = new const float*[ numChans ];
 }
 
 
@@ -66,6 +64,8 @@ RubberbandAudioSource::RubberbandAudioSource( SamplerAudioSource* const source,
 RubberbandAudioSource::~RubberbandAudioSource()
 {
     releaseResources();
+
+    delete[] m_inFloatBuffer;
 }
 
 
@@ -183,72 +183,56 @@ void RubberbandAudioSource::processNextAudioBlock()
     if ( numRequired > 0 )
     {
         AudioSourceChannelInfo info;
-        info.buffer = &m_inputBuffer;
+        info.buffer = &m_inSampleBuffer;
         info.startSample = 0;
-        info.numSamples = qMin( m_inputBuffer.getNumFrames(), numRequired );
+        info.numSamples = qMin( m_inSampleBuffer.getNumFrames(), numRequired );
 
         m_source->getNextAudioBlock( info, m_midiBuffer );
 
         if ( m_midiBuffer.isEmpty() )
         {
-            m_stretcher->process( m_inputBuffer.getArrayOfReadPointers(), info.numSamples, false );
+            m_stretcher->process( m_inSampleBuffer.getArrayOfReadPointers(), info.numSamples, false );
         }
         else
         {
-            int numEvents = 0;
+            MidiBuffer::Iterator iterator( m_midiBuffer );
+            MidiMessage message;
 
+            int startFrame = info.startSample;
+            int numFramesLeftToGo = info.numSamples;
+
+            while ( numFramesLeftToGo > 0 )
             {
-                int samplePos;
-                MidiMessage midiMessage;
+                int eventPos;
+                const bool isEventValid = iterator.getNextEvent( message, eventPos ) &&
+                                          message.isNoteOn() &&
+                                          eventPos < info.numSamples;
 
-                int i = 0;
-                MidiBuffer::Iterator iterator( m_midiBuffer );
+                const int numFramesToProcess = isEventValid ? eventPos - startFrame : numFramesLeftToGo;
 
-                while ( iterator.getNextEvent( midiMessage, samplePos ) )
+                if ( numFramesToProcess > 0 )
                 {
-                    if ( midiMessage.isNoteOn() )
+                    for ( int chanNum = 0; chanNum < m_numChans; chanNum++ )
                     {
-                        const qreal noteTimeRatio = m_noteTimeRatioTable.value( midiMessage.getNoteNumber(), 1.0 );
-
-                        m_samplePositions.setUnchecked( i, samplePos );
-                        m_noteTimeRatios.setUnchecked( i, noteTimeRatio );
-
-                        i++;
+                        m_inFloatBuffer[ chanNum ] = m_inSampleBuffer.getReadPointer( chanNum, startFrame );
                     }
+
+                    m_stretcher->process( m_inFloatBuffer, numFramesToProcess, false );
                 }
 
-                numEvents = i;
-            }
-
-            // Process tail-end of previous note
-            if ( m_samplePositions.getFirst() > 0 )
-            {
-                m_stretcher->process( m_inputBuffer.getArrayOfReadPointers(), m_samplePositions.getFirst(), false );
-            }
-
-            // Set note-specific time ratio and start processing any new note
-            for ( int i = 0; i < numEvents; i++ )
-            {
-                m_noteTimeRatio = m_noteTimeRatios.getUnchecked( i );
-                m_stretcher->setTimeRatio( m_globalTimeRatio * m_noteTimeRatio );
-
-                const int samplePos = m_samplePositions.getUnchecked( i );
-
-                const int numSamples = i + 1 < numEvents ?
-                                       m_samplePositions.getUnchecked( i + 1 ) - samplePos :
-                                       info.numSamples - samplePos;
-
-                for ( int chanNum = 0; chanNum < m_numChans; chanNum++ )
+                if ( isEventValid )
                 {
-                    m_inputBufferPtrs.setUnchecked( chanNum, m_inputBuffer.getReadPointer( chanNum, samplePos ) );
+                    m_noteTimeRatio = m_noteTimeRatioTable.value( message.getNoteNumber(), 1.0 );
+                    m_stretcher->setTimeRatio( m_globalTimeRatio * m_noteTimeRatio );
                 }
 
-                m_stretcher->process( m_inputBufferPtrs.getRawDataPointer(), numSamples, false );
+                startFrame += numFramesToProcess;
+                numFramesLeftToGo -= numFramesToProcess;
             }
         }
     }
     else // numRequired == 0
     {
-        m_stretcher->process( m_inputBuffer.getArrayOfReadPointers(), 0, false );
+        m_stretcher->process( m_inSampleBuffer.getArrayOfReadPointers(), 0, false );
     }
 }

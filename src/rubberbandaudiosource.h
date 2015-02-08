@@ -69,7 +69,9 @@ private:
 
     RubberBandStretcher* m_stretcher;
 
-    SampleBuffer m_inputBuffer;
+    SampleBuffer m_inSampleBuffer;
+
+    const float** m_inFloatBuffer;
 
     MidiBuffer m_midiBuffer;
 
@@ -99,11 +101,6 @@ private:
     volatile bool m_isJackSyncEnabled;
 
     QHash<int, qreal> m_noteTimeRatioTable;
-
-    Array<int> m_samplePositions;
-    Array<qreal> m_noteTimeRatios;
-
-    Array<const float*> m_inputBufferPtrs;
 
 public slots:
     void setTransientsOption( RubberBandStretcher::Options option )       { m_transientsOption = option; }
