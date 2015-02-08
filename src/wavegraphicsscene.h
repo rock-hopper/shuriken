@@ -113,6 +113,7 @@ public:
     void startPlayhead( qreal startPosX,
                         qreal endPosX,
                         int numFrames,
+                        bool isLoopingDesired,
                         qreal stretchRatio = 1.0 );
     void stopPlayhead();
     bool isPlayheadScrolling() const                        { return m_timer->state() == QTimeLine::Running; }

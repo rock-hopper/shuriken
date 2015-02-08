@@ -492,15 +492,26 @@ void WaveGraphicsScene::selectAll()
 
 void WaveGraphicsScene::startPlayhead( const bool isLoopingDesired, const qreal stretchRatio )
 {
+    const int numFrames = getTotalNumFrames( m_waveformItemList );
+
+    const qreal startPosX = 0.0;
+    const qreal endPosX   = width() - 1;
+
+    startPlayhead( startPosX, endPosX, numFrames, isLoopingDesired, stretchRatio );
+}
+
+
+
+void WaveGraphicsScene::startPlayhead( const qreal startPosX,
+                                       const qreal endPosX,
+                                       const int numFrames,
+                                       const bool isLoopingDesired,
+                                       const qreal stretchRatio )
+{
     const qreal sampleRate = m_sampleHeader->sampleRate;
 
     if ( sampleRate > 0.0 )
     {
-        const int numFrames = getTotalNumFrames( m_waveformItemList );
-
-        const qreal startPosX = 0.0;
-        const qreal endPosX   = width() - 1;
-
         const int millis = roundToIntAccurate( (numFrames / sampleRate) * 1000 * stretchRatio );
 
         if ( isPlayheadScrolling() )
@@ -523,34 +534,6 @@ void WaveGraphicsScene::startPlayhead( const bool isLoopingDesired, const qreal 
         {
             m_timer->setLoopCount( 1 );
         }
-        m_timer->setDuration( millis );
-        m_timer->start();
-    }
-}
-
-
-
-void WaveGraphicsScene::startPlayhead( const qreal startPosX, const qreal endPosX, const int numFrames, const qreal stretchRatio )
-{
-    const qreal sampleRate = m_sampleHeader->sampleRate;
-
-    if ( sampleRate > 0.0 )
-    {
-        const int millis = roundToIntAccurate( (numFrames / sampleRate) * 1000 * stretchRatio );
-
-        if ( isPlayheadScrolling() )
-        {
-            stopPlayhead();
-        }
-
-        m_animation->setPosAt( 0.0, QPointF( startPosX, Ruler::HEIGHT ) );
-        m_animation->setPosAt( 1.0, QPointF( endPosX,   Ruler::HEIGHT ) );
-
-        m_playhead->setLine( 0.0, 0.0, 0.0, height() - 1 );
-        m_playhead->setVisible( true );
-        addItem( m_playhead );
-
-        m_timer->setLoopCount( 1 );
         m_timer->setDuration( millis );
         m_timer->start();
     }

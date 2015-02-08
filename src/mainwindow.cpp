@@ -774,17 +774,26 @@ void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPoint
     m_samplerAudioSource->playSample( waveformItem->getOrderPos(), sampleRange );
     m_ui->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
 
-    if ( m_optionsDialog != NULL && m_optionsDialog->isRealtimeModeEnabled() &&
-         m_ui->checkBox_TimeStretch->isChecked() &&
-         m_ui->doubleSpinBox_OriginalBPM->value() > 0.0 &&
-         m_ui->doubleSpinBox_NewBPM->value() > 0.0 )
+    if ( m_rubberbandAudioSource != NULL && m_ui->checkBox_TimeStretch->isChecked() )
     {
-        qreal stretchRatio = m_ui->doubleSpinBox_OriginalBPM->value() / m_ui->doubleSpinBox_NewBPM->value();
-        m_scene->startPlayhead( startPosX, endPosX, sampleRange->numFrames, stretchRatio );
+        qreal globalStretchRatio = 1.0;
+
+        if ( m_ui->doubleSpinBox_OriginalBPM->value() > 0.0 && m_ui->doubleSpinBox_NewBPM->value() > 0.0 )
+        {
+            globalStretchRatio = m_ui->doubleSpinBox_OriginalBPM->value() / m_ui->doubleSpinBox_NewBPM->value();
+        }
+
+        const int startMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
+
+        const qreal noteTimeRatio = m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + waveformItem->getOrderPos() );
+
+        const qreal stretchRatio = globalStretchRatio * noteTimeRatio;
+
+        m_scene->startPlayhead( startPosX, endPosX, sampleRange->numFrames, m_ui->pushButton_Loop->isChecked(), stretchRatio );
     }
     else
     {
-        m_scene->startPlayhead( startPosX, endPosX, sampleRange->numFrames );
+        m_scene->startPlayhead( startPosX, endPosX, sampleRange->numFrames, m_ui->pushButton_Loop->isChecked() );
     }
 }
 
@@ -1630,7 +1639,7 @@ void MainWindow::on_pushButton_PlayStop_clicked()
         
         m_ui->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
 
-        if ( m_optionsDialog != NULL && m_optionsDialog->isRealtimeModeEnabled() &&
+        if ( m_rubberbandAudioSource != NULL &&
              m_ui->checkBox_TimeStretch->isChecked() &&
              m_ui->doubleSpinBox_OriginalBPM->value() > 0.0 &&
              m_ui->doubleSpinBox_NewBPM->value() > 0.0 )
