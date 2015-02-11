@@ -62,6 +62,8 @@ public:
         int timeSigDenominator;
         int length;
         int units;
+        QList<int> midiNotes;
+        QList<qreal> noteTimeRatios;
     };
 
     static bool createProjectXmlFile( QString filePath, ProjectSettings settings );

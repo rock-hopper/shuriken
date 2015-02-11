@@ -981,7 +981,7 @@ void OptionsDialog::on_checkBox_MidiInputTestTone_clicked( const bool isChecked 
 
 void OptionsDialog::on_radioButton_Offline_clicked()
 {
-    foreach ( QAbstractButton* button, m_ui->buttonGroup_Timestretch->buttons() )
+    foreach ( QAbstractButton* button, m_ui->buttonGroup_StretchProfile->buttons() )
     {
         button->setEnabled( true );
     }
@@ -1008,7 +1008,7 @@ void OptionsDialog::on_radioButton_Offline_clicked()
 
 void OptionsDialog::on_radioButton_RealTime_clicked()
 {
-    foreach ( QAbstractButton* button, m_ui->buttonGroup_Timestretch->buttons() )
+    foreach ( QAbstractButton* button, m_ui->buttonGroup_StretchProfile->buttons() )
     {
         button->setEnabled( false );
     }

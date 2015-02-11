@@ -92,6 +92,14 @@ bool TextFileHandler::createProjectXmlFile( const QString filePath, const Projec
         docElement.addChildElement( slicePointElement );
     }
 
+    for ( int i = 0; i < settings.midiNotes.size() && i < settings.noteTimeRatios.size(); i++ )
+    {
+        XmlElement* noteTimeRatioElement = new XmlElement( "note_time_ratio" );
+        noteTimeRatioElement->setAttribute( "note", settings.midiNotes.at( i ) );
+        noteTimeRatioElement->setAttribute( "time_ratio", settings.noteTimeRatios.at( i ) );
+        docElement.addChildElement( noteTimeRatioElement );
+    }
+
     File file( filePath.toLocal8Bit().data() );
 
     return docElement.writeToFile( file, String::empty );
@@ -128,6 +136,11 @@ bool TextFileHandler::readProjectXmlFile( const QString filePath, ProjectSetting
                 else if ( elem->hasTagName( "slice_point" ) )
                 {
                     settings.slicePointFrameNums << elem->getIntAttribute( "frame_num" );
+                }
+                else if ( elem->hasTagName( "note_time_ratio" ) )
+                {
+                    settings.midiNotes << elem->getIntAttribute( "note" );
+                    settings.noteTimeRatios << elem->getDoubleAttribute( "time_ratio" );
                 }
                 else if ( elem->hasTagName( "sample" ) )
                 {

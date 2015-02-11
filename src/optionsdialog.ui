@@ -191,7 +191,7 @@
           <bool>true</bool>
          </property>
          <attribute name="buttonGroup">
-          <string>buttonGroup_Timestretch</string>
+          <string>buttonGroup_StretchProfile</string>
          </attribute>
         </widget>
        </item>
@@ -201,7 +201,7 @@
           <string>Precise</string>
          </property>
          <attribute name="buttonGroup">
-          <string>buttonGroup_Timestretch</string>
+          <string>buttonGroup_StretchProfile</string>
          </attribute>
         </widget>
        </item>
@@ -514,7 +514,7 @@
  <buttongroups>
   <buttongroup name="buttonGroup_Phase"/>
   <buttongroup name="buttonGroup_Transients"/>
-  <buttongroup name="buttonGroup_Timestretch"/>
+  <buttongroup name="buttonGroup_StretchProfile"/>
   <buttongroup name="buttonGroup_WindowSize"/>
   <buttongroup name="buttonGroup_Processing"/>
   <buttongroup name="buttonGroup_Formants"/>

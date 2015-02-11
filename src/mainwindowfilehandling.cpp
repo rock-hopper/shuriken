@@ -133,10 +133,8 @@ void MainWindow::openProject( const QString filePath )
             if ( m_sampleBufferList.size() == 1 )
             {
                 const SharedWaveformItem item = m_scene->createWaveform( m_sampleBufferList.first(),
-                                                                                       m_sampleHeader );
+                                                                         m_sampleHeader );
                 connectWaveformToMainWindow( item );
-
-                setUpSampler();
 
                 enableUI();
 
@@ -153,14 +151,12 @@ void MainWindow::openProject( const QString filePath )
             }
             else // Multiple sample buffers - waveform has been sliced
             {
-                const QList<SharedWaveformItem> waveformItemList = m_scene->createWaveforms( m_sampleBufferList, m_sampleHeader );
+                const QList<SharedWaveformItem> waveformItems = m_scene->createWaveforms( m_sampleBufferList, m_sampleHeader );
 
-                foreach ( SharedWaveformItem item, waveformItemList )
+                foreach ( SharedWaveformItem item, waveformItems )
                 {
                     connectWaveformToMainWindow( item );
                 }
-
-                setUpSampler();
 
                 enableUI();
                 m_ui->actionAdd_Slice_Point->setEnabled( false );
@@ -169,15 +165,28 @@ void MainWindow::openProject( const QString filePath )
                 m_ui->pushButton_Slice->setEnabled( true );
                 m_ui->pushButton_Slice->setChecked( true );
 
-                if ( m_rubberbandAudioSource != NULL )
-                {
-                    m_ui->actionSelective_Time_Stretch->setEnabled( true );
-                }
             }
 
             m_appliedBPM = settings.appliedBpm;
 
             m_optionsDialog->setStretcherOptions( settings.options );
+
+            if ( m_samplerAudioSource != NULL && m_rubberbandAudioSource != NULL )
+            {
+                const int startMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
+
+                QList<int> orderPositions;
+
+                for ( int i = 0; i < settings.midiNotes.size() && i < settings.noteTimeRatios.size(); i++ )
+                {
+                    m_rubberbandAudioSource->setNoteTimeRatio( settings.midiNotes.at( i ),
+                                                               settings.noteTimeRatios.at( i ) );
+
+                    orderPositions << settings.midiNotes.at( i ) - startMidiNote;
+                }
+
+                m_scene->stretchWaveforms( orderPositions, settings.noteTimeRatios );
+            }
 
             if ( settings.isJackSyncChecked )
             {
@@ -284,11 +293,11 @@ void MainWindow::exportAs( const QString tempDirPath,
             }
 
             const QString path = m_fileHandler.saveAudioFile( samplesDirPath,
-                                                             audioFileName,
-                                                             m_sampleBufferList.at( i ),
-                                                             m_sampleHeader->sampleRate,
-                                                             outputSampleRate,
-                                                             sndFileFormat );
+                                                              audioFileName,
+                                                              m_sampleBufferList.at( i ),
+                                                              m_sampleHeader->sampleRate,
+                                                              outputSampleRate,
+                                                              sndFileFormat );
 
             if ( ! path.isEmpty() )
             {
@@ -434,11 +443,11 @@ void MainWindow::saveProject( const QString filePath )
     for ( int i = 0; i < m_sampleBufferList.size(); i++ )
     {
         const QString audioFilePath = m_fileHandler.saveAudioFile( projTempDir.absolutePath(),
-                                                                  "audio" + QString::number( i ),
-                                                                  m_sampleBufferList.at( i ),
-                                                                  m_sampleHeader->sampleRate,
-                                                                  m_sampleHeader->sampleRate,
-                                                                  AudioFileHandler::SAVE_FORMAT );
+                                                                   "audio" + QString::number( i ),
+                                                                   m_sampleBufferList.at( i ),
+                                                                   m_sampleHeader->sampleRate,
+                                                                   m_sampleHeader->sampleRate,
+                                                                   AudioFileHandler::SAVE_FORMAT );
 
         if ( ! audioFilePath.isEmpty() )
         {
@@ -457,8 +466,16 @@ void MainWindow::saveProject( const QString filePath )
 
         settings.projectName = projectName;
 
-        if ( m_optionsDialog->isRealtimeModeEnabled() )
+        if ( m_rubberbandAudioSource != NULL )
         {
+            const int startMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
+
+            for ( int i = 0; i < m_sampleBufferList.size(); i++ )
+            {
+                settings.midiNotes << startMidiNote + i;
+                settings.noteTimeRatios << m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + i );
+            }
+
             settings.originalBpm = m_ui->doubleSpinBox_OriginalBPM->value();
             settings.newBpm = m_ui->doubleSpinBox_NewBPM->value();
             settings.appliedBpm = m_appliedBPM;
