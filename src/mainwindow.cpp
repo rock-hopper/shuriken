@@ -372,6 +372,12 @@ void MainWindow::setupUI()
     QObject::connect( &m_undoStack, SIGNAL( cleanChanged(bool) ),
                       m_ui->actionSave_Project, SLOT( setDisabled(bool) ) );
 
+    QObject::connect( &m_undoStack, SIGNAL( undoTextChanged(QString) ),
+                      this, SLOT( updateUndoText(QString) ) );
+
+    QObject::connect( &m_undoStack, SIGNAL( redoTextChanged(QString) ),
+                      this, SLOT( updateRedoText(QString) ) );
+
 
     // Create help form
     m_helpForm = new HelpForm();
@@ -700,6 +706,7 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
         if ( m_samplerAudioSource != NULL && m_rubberbandAudioSource != NULL )
         {
             QUndoCommand* parentCommand = new QUndoCommand();
+            parentCommand->setText( tr("Selective Time Stretch") );
 
             new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_scene, parentCommand );
 
@@ -915,6 +922,20 @@ void MainWindow::enableSaveAction()
     {
         m_ui->actionSave_Project->setEnabled( true );
     }
+}
+
+
+
+void MainWindow::updateUndoText( const QString text )
+{
+    m_ui->actionUndo->setText( tr("Undo ") + text );
+}
+
+
+
+void MainWindow::updateRedoText( const QString text )
+{
+    m_ui->actionRedo->setText( tr("Redo ") + text );
 }
 
 
@@ -1181,6 +1202,7 @@ void MainWindow::on_actionApply_Gain_triggered()
             const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
 
             QUndoCommand* parentCommand = new QUndoCommand();
+            parentCommand->setText( tr("Apply Gain") );
 
             const QString stackIndex = QString::number( m_undoStack.index() );
             int i = 0;
@@ -1227,6 +1249,7 @@ void MainWindow::on_actionApply_Gain_Ramp_triggered()
             const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
 
             QUndoCommand* parentCommand = new QUndoCommand();
+            parentCommand->setText( tr("Apply Gain Ramp") );
 
             const QString stackIndex = QString::number( m_undoStack.index() );
             int i = 0;
@@ -1268,6 +1291,7 @@ void MainWindow::on_actionNormalise_triggered()
         const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
 
         QUndoCommand* parentCommand = new QUndoCommand();
+        parentCommand->setText( tr("Normalise") );
 
         const QString stackIndex = QString::number( m_undoStack.index() );
         int i = 0;
@@ -1309,6 +1333,7 @@ void MainWindow::on_actionReverse_triggered()
     const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
 
     QUndoCommand* parentCommand = new QUndoCommand();
+    parentCommand->setText( tr("Reverse") );
 
     foreach ( int orderPos, orderPositions )
     {
@@ -1408,6 +1433,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
     if ( isChecked ) // Slice
     {
         QUndoCommand* parentCommand = new QUndoCommand();
+        parentCommand->setText( tr("Slice") );
 
         new SliceCommand( this,
                           m_scene,
@@ -1437,6 +1463,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
         }
 
         QUndoCommand* parentCommand = new QUndoCommand();
+        parentCommand->setText( tr("Unslice") );
 
         int frameNum = 0;
 
@@ -1476,6 +1503,7 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     QUndoCommand* parentCommand = new QUndoCommand();
+    parentCommand->setText( tr("Find Onsets") );
 
     // Remove current slice points if present
     {
@@ -1521,6 +1549,7 @@ void MainWindow::on_pushButton_FindBeats_clicked()
     const QList<SharedSlicePointItem> slicePointItemList = m_scene->getSlicePointList();
 
     QUndoCommand* parentCommand = new QUndoCommand();
+    parentCommand->setText( tr("Find Beats") );
 
     foreach ( SharedSlicePointItem item, slicePointItemList )
     {
@@ -1751,6 +1780,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
     if ( isChecked ) // Enable Selective Time Stretching
     {
         QUndoCommand* parentCommand = new QUndoCommand();
+        parentCommand->setText( tr("Enable Selective Time Stretching") );
 
         new EnableSelectiveTSCommand( m_optionsDialog,
                                       m_scene,
@@ -1783,6 +1813,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
     else // Disable Selective Time Stretching
     {
         QUndoCommand* parentCommand = new QUndoCommand();
+        parentCommand->setText( tr("Disable Selective Time Stretching") );
 
         QList<SharedSlicePointItem> slicePoints = m_scene->getSlicePointList();
 

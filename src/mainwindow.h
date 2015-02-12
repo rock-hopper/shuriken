@@ -179,7 +179,6 @@ private slots:
     void on_actionSave_Project_triggered();
     void on_actionOpen_Project_triggered();
 
-
     void recordWaveformItemMove( QList<int> oldOrderPositions, int numPlacesMoved );
 
     void recordSlicePointItemMove( SharedSlicePointItem slicePoint,
@@ -202,6 +201,9 @@ private slots:
 
     void enableEditActions();
     void enableSaveAction();
+
+    void updateUndoText( QString text );
+    void updateRedoText( QString text );
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( MainWindow );
