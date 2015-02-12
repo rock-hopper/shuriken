@@ -132,8 +132,8 @@ void MainWindow::openProject( const QString filePath )
             // Only one sample buffer - waveform has not been sliced
             if ( m_sampleBufferList.size() == 1 )
             {
-                const SharedWaveformItem item = m_scene->createWaveform( m_sampleBufferList.first(),
-                                                                         m_sampleHeader );
+                const SharedWaveformItem item = m_graphicsScene->createWaveform( m_sampleBufferList.first(),
+                                                                                 m_sampleHeader );
                 connectWaveformToMainWindow( item );
 
                 enableUI();
@@ -144,14 +144,14 @@ void MainWindow::openProject( const QString filePath )
 
                     foreach ( int frameNum, settings.slicePointFrameNums )
                     {
-                        new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
+                        new AddSlicePointItemCommand( frameNum, true, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
                     }
                     m_undoStack.push( parentCommand );
                 }
             }
             else // Multiple sample buffers - waveform has been sliced
             {
-                const QList<SharedWaveformItem> waveformItems = m_scene->createWaveforms( m_sampleBufferList, m_sampleHeader );
+                const QList<SharedWaveformItem> waveformItems = m_graphicsScene->createWaveforms( m_sampleBufferList, m_sampleHeader );
 
                 foreach ( SharedWaveformItem item, waveformItems )
                 {
@@ -185,7 +185,7 @@ void MainWindow::openProject( const QString filePath )
                     orderPositions << settings.midiNotes.at( i ) - startMidiNote;
                 }
 
-                m_scene->stretchWaveforms( orderPositions, settings.noteTimeRatios );
+                m_graphicsScene->stretchWaveforms( orderPositions, settings.noteTimeRatios );
             }
 
             if ( settings.isJackSyncChecked )
@@ -499,7 +499,7 @@ void MainWindow::saveProject( const QString filePath )
 
         settings.audioFileNames = audioFileNames;
 
-        settings.slicePointFrameNums = m_scene->getSlicePointFrameNums();
+        settings.slicePointFrameNums = m_graphicsScene->getSlicePointFrameNums();
 
         TextFileHandler::createProjectXmlFile( xmlFilePath, settings );
 
@@ -645,7 +645,7 @@ void MainWindow::importAudioFileDialog()
             m_sampleBufferList << sampleBuffer;
             m_sampleHeader = sampleHeader;
 
-            const SharedWaveformItem item = m_scene->createWaveform( sampleBuffer, sampleHeader );
+            const SharedWaveformItem item = m_graphicsScene->createWaveform( sampleBuffer, sampleHeader );
             connectWaveformToMainWindow( item );
 
             setUpSampler();

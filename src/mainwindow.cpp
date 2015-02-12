@@ -239,7 +239,7 @@ void MainWindow::setupUI()
 {
     // Initialise user interface
     m_ui->setupUi( this );
-    m_scene = m_ui->waveGraphicsView->getScene();
+    m_graphicsScene = m_ui->waveGraphicsView->getScene();
 
 
     // Set up interaction mode buttons to work like radio buttons
@@ -342,7 +342,7 @@ void MainWindow::setupUI()
 
 
     // Connect signals to slots
-    QObject::connect( m_scene, SIGNAL( slicePointPosChanged(SharedSlicePointItem,int,int,int,int) ),
+    QObject::connect( m_graphicsScene, SIGNAL( slicePointPosChanged(SharedSlicePointItem,int,int,int,int) ),
                       this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int,int,int) ) );
 
     QObject::connect( m_ui->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
@@ -351,10 +351,10 @@ void MainWindow::setupUI()
     QObject::connect( m_ui->waveGraphicsView, SIGNAL( maxDetailLevelReached() ),
                       this, SLOT( disableZoomIn() ) );
 
-    QObject::connect( m_scene, SIGNAL( playheadFinishedScrolling() ),
+    QObject::connect( m_graphicsScene, SIGNAL( playheadFinishedScrolling() ),
                       this, SLOT( resetPlayStopButtonIcon() ) );
 
-    QObject::connect( m_scene, SIGNAL( selectionChanged() ),
+    QObject::connect( m_graphicsScene, SIGNAL( selectionChanged() ),
                       this, SLOT( enableEditActions() ) );
 
     QObject::connect( &m_undoStack, SIGNAL( canUndoChanged(bool) ),
@@ -615,7 +615,7 @@ void MainWindow::closeProject()
     m_sampleBufferList.clear();
     tearDownSampler();
 
-    m_scene->clearAll();
+    m_graphicsScene->clearAll();
     on_actionZoom_Original_triggered();
     disableUI();
     m_ui->statusBar->clearMessage();
@@ -669,7 +669,7 @@ QUndoCommand* MainWindow::createRenderCommand( QUndoCommand* parent )
             const QString fileBaseName = QString::number( m_undoStack.index() );
 
             command = new RenderTimeStretchCommand( this,
-                                                    m_scene,
+                                                    m_graphicsScene,
                                                     m_ui->waveGraphicsView,
                                                     tempDirPath,
                                                     fileBaseName,
@@ -692,7 +692,7 @@ QUndoCommand* MainWindow::createRenderCommand( QUndoCommand* parent )
 
 void MainWindow::recordWaveformItemMove( QList<int> oldOrderPositions, const int numPlacesMoved )
 {
-    QUndoCommand* command = new MoveWaveformItemCommand( oldOrderPositions, numPlacesMoved, m_scene, this );
+    QUndoCommand* command = new MoveWaveformItemCommand( oldOrderPositions, numPlacesMoved, m_graphicsScene, this );
     m_undoStack.push( command );
 }
 
@@ -711,7 +711,7 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
             QUndoCommand* parentCommand = new QUndoCommand();
             parentCommand->setText( tr("Selective Time Stretch") );
 
-            new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_scene, parentCommand );
+            new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_graphicsScene, parentCommand );
 
             QList<int> orderPositions;
             QList<qreal> timeRatios;
@@ -726,7 +726,7 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
             midiNotes << m_samplerAudioSource->getLowestAssignedMidiNote() + orderPos + 1;
 
             new SelectiveTimeStretchCommand( this,
-                                             m_scene,
+                                             m_graphicsScene,
                                              orderPositions,
                                              timeRatios,
                                              midiNotes,
@@ -737,7 +737,7 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
     }
     else
     {
-        QUndoCommand* command = new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_scene );
+        QUndoCommand* command = new MoveSlicePointItemCommand( slicePoint, oldFrameNum, m_graphicsScene );
         m_undoStack.push( command );
     }
 }
@@ -753,12 +753,12 @@ void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPoint
     qreal startPosX = waveformItem->scenePos().x();
     qreal endPosX = startPosX + waveformItem->rect().width();
 
-    const QList<int> slicePointFrameNums = m_scene->getSlicePointFrameNums();
+    const QList<int> slicePointFrameNums = m_graphicsScene->getSlicePointFrameNums();
 
     // If slice points are present and the waveform has not yet been sliced...
     if ( slicePointFrameNums.size() > 0 && m_sampleBufferList.size() == 1 )
     {
-        const int mousePosFrameNum = m_scene->getFrameNum( mouseScenePos.x() );
+        const int mousePosFrameNum = m_graphicsScene->getFrameNum( mouseScenePos.x() );
         int endFrame = sampleRange->numFrames;
 
         foreach ( int frameNum, slicePointFrameNums )
@@ -776,8 +776,8 @@ void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPoint
 
         sampleRange->numFrames = endFrame - sampleRange->startFrame;
 
-        startPosX = m_scene->getScenePosX( sampleRange->startFrame );
-        endPosX = m_scene->getScenePosX( endFrame );
+        startPosX = m_graphicsScene->getScenePosX( sampleRange->startFrame );
+        endPosX = m_graphicsScene->getScenePosX( endFrame );
     }
 
     // Play sample range and start playhead scrolling
@@ -799,11 +799,11 @@ void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPoint
 
         const qreal stretchRatio = globalStretchRatio * noteTimeRatio;
 
-        m_scene->startPlayhead( startPosX, endPosX, sampleRange->numFrames, m_ui->pushButton_Loop->isChecked(), stretchRatio );
+        m_graphicsScene->startPlayhead( startPosX, endPosX, sampleRange->numFrames, m_ui->pushButton_Loop->isChecked(), stretchRatio );
     }
     else
     {
-        m_scene->startPlayhead( startPosX, endPosX, sampleRange->numFrames, m_ui->pushButton_Loop->isChecked() );
+        m_graphicsScene->startPlayhead( startPosX, endPosX, sampleRange->numFrames, m_ui->pushButton_Loop->isChecked() );
     }
 }
 
@@ -815,7 +815,7 @@ void MainWindow::stopPlayback()
     {
         m_samplerAudioSource->stop();
     }
-    m_scene->stopPlayhead();
+    m_graphicsScene->stopPlayhead();
     m_ui->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
 }
 
@@ -893,14 +893,14 @@ void MainWindow::resetSampler()
 
 void MainWindow::enableEditActions()
 {
-    const SharedSlicePointItem slicePoint = m_scene->getSelectedSlicePoint();
-    const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
+    const SharedSlicePointItem slicePoint = m_graphicsScene->getSelectedSlicePoint();
+    const QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
 
     m_ui->actionDelete->setEnabled( false );
 
     if ( ! slicePoint.isNull() || ! orderPositions.isEmpty() )
     {
-        if ( orderPositions.size() < m_scene->getNumWaveforms() )
+        if ( orderPositions.size() < m_graphicsScene->getNumWaveforms() )
         {
             m_ui->actionDelete->setEnabled( true );
         }
@@ -1132,45 +1132,45 @@ void MainWindow::on_actionRedo_triggered()
 
 void MainWindow::on_actionSelect_All_triggered()
 {
-    m_scene->selectAll();
+    m_graphicsScene->selectAll();
 }
 
 
 
 void MainWindow::on_actionSelect_None_triggered()
 {
-    m_scene->selectNone();
+    m_graphicsScene->selectNone();
 }
 
 
 
 void MainWindow::on_actionDelete_triggered()
 {    
-    const SharedSlicePointItem selectedSlicePoint = m_scene->getSelectedSlicePoint();
+    const SharedSlicePointItem selectedSlicePoint = m_graphicsScene->getSelectedSlicePoint();
 
     if ( ! selectedSlicePoint.isNull() )
     {
         selectedSlicePoint->setSelected( false );
 
         QUndoCommand* command = new DeleteSlicePointItemCommand( selectedSlicePoint,
-                                                                 m_scene,
+                                                                 m_graphicsScene,
                                                                  m_ui->pushButton_Slice,
                                                                  m_ui->comboBox_SnapValues );
         m_undoStack.push( command );
     }
     else
     {
-        const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
+        const QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
 
         if ( ! orderPositions.isEmpty() )
         {
             foreach ( int orderPos, orderPositions )
             {
-                m_scene->getWaveformAt( orderPos )->setSelected( false );
+                m_graphicsScene->getWaveformAt( orderPos )->setSelected( false );
             }
 
             QUndoCommand* command = new DeleteWaveformItemCommand( orderPositions,
-                                                                   m_scene,
+                                                                   m_graphicsScene,
                                                                    this,
                                                                    m_ui->pushButton_Slice,
                                                                    m_ui->pushButton_FindOnsets,
@@ -1187,9 +1187,9 @@ void MainWindow::on_actionAdd_Slice_Point_triggered()
 {
     const QPoint mousePos = m_ui->waveGraphicsView->mapFromGlobal( QCursor::pos() );
     const QPointF mouseScenePos = m_ui->waveGraphicsView->mapToScene( mousePos );
-    const int frameNum = m_scene->getFrameNum( mouseScenePos.x() );
+    const int frameNum = m_graphicsScene->getFrameNum( mouseScenePos.x() );
 
-    QUndoCommand* command = new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues );
+    QUndoCommand* command = new AddSlicePointItemCommand( frameNum, true, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues );
     m_undoStack.push( command );
 }
 
@@ -1207,7 +1207,7 @@ void MainWindow::on_actionApply_Gain_triggered()
 
         if ( result == QDialog::Accepted )
         {
-            const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
+            const QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
 
             QUndoCommand* parentCommand = new QUndoCommand();
             parentCommand->setText( tr("Apply Gain") );
@@ -1221,7 +1221,7 @@ void MainWindow::on_actionApply_Gain_triggered()
 
                 new ApplyGainCommand( dialog.getGainValue(),
                                       orderPos,
-                                      m_scene,
+                                      m_graphicsScene,
                                       m_ui->waveGraphicsView,
                                       m_sampleHeader->sampleRate,
                                       m_fileHandler,
@@ -1254,7 +1254,7 @@ void MainWindow::on_actionApply_Gain_Ramp_triggered()
 
         if ( result == QDialog::Accepted )
         {
-            const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
+            const QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
 
             QUndoCommand* parentCommand = new QUndoCommand();
             parentCommand->setText( tr("Apply Gain Ramp") );
@@ -1269,7 +1269,7 @@ void MainWindow::on_actionApply_Gain_Ramp_triggered()
                 new ApplyGainRampCommand( dialog.getStartGainValue(),
                                           dialog.getEndGainValue(),
                                           orderPos,
-                                          m_scene,
+                                          m_graphicsScene,
                                           m_ui->waveGraphicsView,
                                           m_sampleHeader->sampleRate,
                                           m_fileHandler,
@@ -1296,7 +1296,7 @@ void MainWindow::on_actionNormalise_triggered()
 
     if ( ! tempDirPath.isEmpty() )
     {
-        const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
+        const QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
 
         QUndoCommand* parentCommand = new QUndoCommand();
         parentCommand->setText( tr("Normalise") );
@@ -1309,7 +1309,7 @@ void MainWindow::on_actionNormalise_triggered()
             QString fileBaseName = stackIndex + "_" + QString::number( i++ );
 
             new NormaliseCommand( orderPos,
-                                  m_scene,
+                                  m_graphicsScene,
                                   m_ui->waveGraphicsView,
                                   m_sampleHeader->sampleRate,
                                   m_fileHandler,
@@ -1338,14 +1338,14 @@ void MainWindow::on_actionEnvelope_triggered()
 
 void MainWindow::on_actionReverse_triggered()
 {
-    const QList<int> orderPositions = m_scene->getSelectedWaveformsOrderPositions();
+    const QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
 
     QUndoCommand* parentCommand = new QUndoCommand();
     parentCommand->setText( tr("Reverse") );
 
     foreach ( int orderPos, orderPositions )
     {
-        new ReverseCommand( orderPos, m_scene, m_ui->waveGraphicsView, parentCommand );
+        new ReverseCommand( orderPos, m_graphicsScene, m_ui->waveGraphicsView, parentCommand );
     }
 
     m_undoStack.push( parentCommand );
@@ -1426,7 +1426,7 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
     const int index = m_ui->comboBox_SnapValues->currentIndex();
     const int divisionsPerBeat = m_ui->comboBox_SnapValues->itemData( index ).toInt();
 
-    m_scene->setBpmRulerMarks( bpm, numerator, divisionsPerBeat  );
+    m_graphicsScene->setBpmRulerMarks( bpm, numerator, divisionsPerBeat  );
 
     if ( m_rubberbandAudioSource != NULL && bpm > 0.0 )
     {
@@ -1444,7 +1444,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
         parentCommand->setText( tr("Slice") );
 
         new SliceCommand( this,
-                          m_scene,
+                          m_graphicsScene,
                           m_ui->pushButton_Slice,
                           m_ui->pushButton_FindOnsets,
                           m_ui->pushButton_FindBeats,
@@ -1454,11 +1454,11 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
                           m_ui->actionSelective_Time_Stretch,
                           parentCommand );
 
-        QList<SharedSlicePointItem> slicePoints = m_scene->getSlicePointList();
+        QList<SharedSlicePointItem> slicePoints = m_graphicsScene->getSlicePointList();
 
         foreach ( SharedSlicePointItem slicePoint, slicePoints )
         {
-            new DeleteSlicePointItemCommand( slicePoint, m_scene, m_ui->comboBox_SnapValues, parentCommand );
+            new DeleteSlicePointItemCommand( slicePoint, m_graphicsScene, m_ui->comboBox_SnapValues, parentCommand );
         }
 
         m_undoStack.push( parentCommand );
@@ -1480,7 +1480,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
 
                 frameNum += roundToIntAccurate( m_sampleBufferList.at( i )->getNumFrames() * timeRatio );
 
-                new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->comboBox_SnapValues, parentCommand );
+                new AddSlicePointItemCommand( frameNum, true, m_graphicsScene, m_ui->comboBox_SnapValues, parentCommand );
             }
 
             createRenderCommand( parentCommand );
@@ -1493,12 +1493,12 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
             {
                 frameNum += m_sampleBufferList.at( i )->getNumFrames();
 
-                new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->comboBox_SnapValues, parentCommand );
+                new AddSlicePointItemCommand( frameNum, true, m_graphicsScene, m_ui->comboBox_SnapValues, parentCommand );
             }
         }
 
         new UnsliceCommand( this,
-                            m_scene,
+                            m_graphicsScene,
                             m_ui->pushButton_Slice,
                             m_ui->pushButton_FindOnsets,
                             m_ui->pushButton_FindBeats,
@@ -1530,11 +1530,11 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
 
     // Remove current slice points if present
     {
-        const QList<SharedSlicePointItem> slicePointItemList = m_scene->getSlicePointList();
+        const QList<SharedSlicePointItem> slicePointItemList = m_graphicsScene->getSlicePointList();
 
         foreach ( SharedSlicePointItem item, slicePointItemList )
         {
-            new DeleteSlicePointItemCommand( item, m_scene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
+            new DeleteSlicePointItemCommand( item, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
         }
     }
 
@@ -1547,7 +1547,7 @@ void MainWindow::on_pushButton_FindOnsets_clicked()
 
         foreach ( int frameNum, slicePointFrameNumList )
         {
-            new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
+            new AddSlicePointItemCommand( frameNum, true, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
         }
     }
 
@@ -1569,19 +1569,19 @@ void MainWindow::on_pushButton_FindBeats_clicked()
     const QList<int> slicePointFrameNumList = AudioAnalyser::findBeatFrameNums( m_sampleBufferList.first(), settings );
 
     // Get list of slice point items to be removed
-    const QList<SharedSlicePointItem> slicePointItemList = m_scene->getSlicePointList();
+    const QList<SharedSlicePointItem> slicePointItemList = m_graphicsScene->getSlicePointList();
 
     QUndoCommand* parentCommand = new QUndoCommand();
     parentCommand->setText( tr("Find Beats") );
 
     foreach ( SharedSlicePointItem item, slicePointItemList )
     {
-        new DeleteSlicePointItemCommand( item, m_scene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
+        new DeleteSlicePointItemCommand( item, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
     }
 
     foreach ( int frameNum, slicePointFrameNumList )
     {
-        new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
+        new AddSlicePointItemCommand( frameNum, true, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
     }
 
     m_undoStack.push( parentCommand );
@@ -1606,7 +1606,7 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
 
             m_rubberbandAudioSource->setGlobalTimeRatio( timeRatio );
 
-            m_scene->updatePlayheadSpeed( timeRatio );
+            m_graphicsScene->updatePlayheadSpeed( timeRatio );
         }
     }
 
@@ -1615,7 +1615,7 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
     const int index = m_ui->comboBox_SnapValues->currentIndex();
     const int divisionsPerBeat = m_ui->comboBox_SnapValues->itemData( index ).toInt();
 
-    m_scene->setBpmRulerMarks( originalBPM, timeSigNumerator, divisionsPerBeat );
+    m_graphicsScene->setBpmRulerMarks( originalBPM, timeSigNumerator, divisionsPerBeat );
 }
 
 
@@ -1633,7 +1633,7 @@ void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
 
             m_rubberbandAudioSource->setGlobalTimeRatio( timeRatio );
 
-            m_scene->updatePlayheadSpeed( timeRatio );
+            m_graphicsScene->updatePlayheadSpeed( timeRatio );
         }
     }
 }
@@ -1679,10 +1679,10 @@ void MainWindow::on_checkBox_PitchCorrection_toggled( const bool isChecked )
 
 void MainWindow::on_pushButton_PlayStop_clicked()
 {
-    if ( m_scene->isPlayheadScrolling() )
+    if ( m_graphicsScene->isPlayheadScrolling() )
     {
         m_samplerAudioSource->stop();
-        m_scene->stopPlayhead();
+        m_graphicsScene->stopPlayhead();
         m_ui->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-start.png" ) );
     }
     else
@@ -1697,11 +1697,11 @@ void MainWindow::on_pushButton_PlayStop_clicked()
              m_ui->doubleSpinBox_NewBPM->value() > 0.0 )
         {
             qreal stretchRatio = m_ui->doubleSpinBox_OriginalBPM->value() / m_ui->doubleSpinBox_NewBPM->value();
-            m_scene->startPlayhead( m_ui->pushButton_Loop->isChecked(), stretchRatio );
+            m_graphicsScene->startPlayhead( m_ui->pushButton_Loop->isChecked(), stretchRatio );
         }
         else
         {
-            m_scene->startPlayhead( m_ui->pushButton_Loop->isChecked() );
+            m_graphicsScene->startPlayhead( m_ui->pushButton_Loop->isChecked() );
         }
     }
 }
@@ -1714,7 +1714,7 @@ void MainWindow::on_pushButton_Loop_clicked( const bool isChecked )
     {
         m_samplerAudioSource->setLooping( isChecked );
     }
-    m_scene->setPlayheadLooping( isChecked );
+    m_graphicsScene->setPlayheadLooping( isChecked );
 }
 
 
@@ -1758,7 +1758,7 @@ void MainWindow::on_pushButton_Apply_clicked()
             const QString fileBaseName = QString::number( m_undoStack.index() );
 
             QUndoCommand* command = new GlobalTimeStretchCommand( this,
-                                                                  m_scene,
+                                                                  m_graphicsScene,
                                                                   m_ui->waveGraphicsView,
                                                                   m_ui->doubleSpinBox_OriginalBPM,
                                                                   m_ui->doubleSpinBox_NewBPM,
@@ -1806,7 +1806,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
         parentCommand->setText( tr("Enable Selective Time Stretching") );
 
         new EnableSelectiveTSCommand( m_optionsDialog,
-                                      m_scene,
+                                      m_graphicsScene,
                                       m_ui->pushButton_Slice,
                                       m_ui->actionAdd_Slice_Point,
                                       m_ui->actionSelect_Move,
@@ -1828,7 +1828,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
 
             frameNum += numFrames;
 
-            new AddSlicePointItemCommand( frameNum, false, m_scene, m_ui->comboBox_SnapValues, parentCommand );
+            new AddSlicePointItemCommand( frameNum, false, m_graphicsScene, m_ui->comboBox_SnapValues, parentCommand );
         }
 
         m_undoStack.push( parentCommand );
@@ -1838,15 +1838,15 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
         QUndoCommand* parentCommand = new QUndoCommand();
         parentCommand->setText( tr("Disable Selective Time Stretching") );
 
-        QList<SharedSlicePointItem> slicePoints = m_scene->getSlicePointList();
+        QList<SharedSlicePointItem> slicePoints = m_graphicsScene->getSlicePointList();
 
         foreach ( SharedSlicePointItem slicePoint, slicePoints )
         {
-            new DeleteSlicePointItemCommand( slicePoint, m_scene, m_ui->comboBox_SnapValues, parentCommand );
+            new DeleteSlicePointItemCommand( slicePoint, m_graphicsScene, m_ui->comboBox_SnapValues, parentCommand );
         }
 
         new DisableSelectiveTSCommand( m_optionsDialog,
-                                       m_scene,
+                                       m_graphicsScene,
                                        m_ui->pushButton_Slice,
                                        m_ui->actionAdd_Slice_Point,
                                        m_ui->actionSelect_Move,
@@ -1885,7 +1885,7 @@ void MainWindow::on_comboBox_TimeSigNumerator_activated( const QString text )
     const int index = m_ui->comboBox_SnapValues->currentIndex();
     const int divisionsPerBeat = m_ui->comboBox_SnapValues->itemData( index ).toInt();
 
-    m_scene->setBpmRulerMarks( bpm, timeSigNumerator, divisionsPerBeat );
+    m_graphicsScene->setBpmRulerMarks( bpm, timeSigNumerator, divisionsPerBeat );
 }
 
 
@@ -1896,9 +1896,9 @@ void MainWindow::on_comboBox_SnapValues_activated( const int index )
     const int numerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
     const int divisionsPerBeat = m_ui->comboBox_SnapValues->itemData( index ).toInt();
 
-    m_scene->setBpmRulerMarks( bpm, numerator, divisionsPerBeat );
+    m_graphicsScene->setBpmRulerMarks( bpm, numerator, divisionsPerBeat );
 
-    QList<SharedSlicePointItem> slicePointList = m_scene->getSlicePointList();
+    QList<SharedSlicePointItem> slicePointList = m_graphicsScene->getSlicePointList();
 
     if ( m_ui->comboBox_SnapValues->currentText() == tr( "Off" ) )
     {

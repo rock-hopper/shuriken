@@ -105,7 +105,7 @@ private:
     QUndoCommand* createRenderCommand( QUndoCommand* parent = NULL );
 
     Ui::MainWindow* m_ui; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
-    WaveGraphicsScene* m_scene;
+    WaveGraphicsScene* m_graphicsScene;
     QActionGroup* m_interactionGroup;
 
     enum LengthUnits { UNITS_BARS, UNITS_BEATS };
