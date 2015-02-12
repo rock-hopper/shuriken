@@ -656,9 +656,11 @@ bool MainWindow::isSelectiveTimeStretchInUse() const
 
 
 
-void MainWindow::renderTimeStretch()
+QUndoCommand* MainWindow::createRenderCommand( QUndoCommand* parent )
 {
     const QString tempDirPath = m_optionsDialog->getTempDirPath();
+
+    QUndoCommand* command = NULL;
 
     if ( ! tempDirPath.isEmpty() )
     {
@@ -666,13 +668,12 @@ void MainWindow::renderTimeStretch()
         {
             const QString fileBaseName = QString::number( m_undoStack.index() );
 
-            QUndoCommand* command = new RenderTimeStretchCommand( this,
-                                                                  m_scene,
-                                                                  m_ui->waveGraphicsView,
-                                                                  tempDirPath,
-                                                                  fileBaseName );
-
-            m_undoStack.push( command );
+            command = new RenderTimeStretchCommand( this,
+                                                    m_scene,
+                                                    m_ui->waveGraphicsView,
+                                                    tempDirPath,
+                                                    fileBaseName,
+                                                    parent );
         }
     }
     else
@@ -680,6 +681,8 @@ void MainWindow::renderTimeStretch()
         MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
                                          tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
     }
+
+    return command;
 }
 
 
@@ -866,7 +869,12 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
 
         if ( isSelectiveTimeStretchInUse() )
         {
-            renderTimeStretch();
+            QUndoCommand* command = createRenderCommand();
+
+            if ( command != NULL )
+            {
+                m_undoStack.push( command );
+            }
         }
     }
 
@@ -1457,21 +1465,36 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
     }
     else // Unslice
     {
-        if ( isSelectiveTimeStretchInUse() )
-        {
-            renderTimeStretch();
-        }
-
         QUndoCommand* parentCommand = new QUndoCommand();
         parentCommand->setText( tr("Unslice") );
 
-        int frameNum = 0;
-
-        for ( int i = 0; i < m_sampleBufferList.size() - 1; i++ )
+        if ( isSelectiveTimeStretchInUse() )
         {
-            frameNum += m_sampleBufferList.at( i )->getNumFrames();
+            const int startMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
+            int frameNum = 0;
 
-            new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->comboBox_SnapValues, parentCommand );
+            for ( int i = 0; i < m_sampleBufferList.size() - 1; i++ )
+            {
+                const int midiNote = startMidiNote + i;
+                const qreal timeRatio = m_rubberbandAudioSource->getNoteTimeRatio( midiNote );
+
+                frameNum += roundToIntAccurate( m_sampleBufferList.at( i )->getNumFrames() * timeRatio );
+
+                new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->comboBox_SnapValues, parentCommand );
+            }
+
+            createRenderCommand( parentCommand );
+        }
+        else
+        {
+            int frameNum = 0;
+
+            for ( int i = 0; i < m_sampleBufferList.size() - 1; i++ )
+            {
+                frameNum += m_sampleBufferList.at( i )->getNumFrames();
+
+                new AddSlicePointItemCommand( frameNum, true, m_scene, m_ui->comboBox_SnapValues, parentCommand );
+            }
         }
 
         new UnsliceCommand( this,

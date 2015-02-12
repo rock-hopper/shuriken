@@ -1326,6 +1326,8 @@ void RenderTimeStretchCommand::redo()
 
             m_timeRatioList << timeRatio;
             m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( midiNote, 1.0 );
+
+            m_mainWindow->m_scene->getWaveformAt( i )->setStretchRatio( 1.0 );
         }
 
         m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,

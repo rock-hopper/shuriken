@@ -102,7 +102,7 @@ private:
     void exportAsDialog();
 
     bool isSelectiveTimeStretchInUse() const;
-    void renderTimeStretch();
+    QUndoCommand* createRenderCommand( QUndoCommand* parent = NULL );
 
     Ui::MainWindow* m_ui; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
     WaveGraphicsScene* m_scene;
