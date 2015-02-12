@@ -1034,7 +1034,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
-     <normaloff>:/resources/images/mixer-surround.png</normaloff>:/resources/images/mixer-surround.png</iconset>
+     <normaloff>:/resources/images/user-away-extended.png</normaloff>:/resources/images/user-away-extended.png</iconset>
    </property>
    <property name="text">
     <string>Selective Time Stretch</string>
