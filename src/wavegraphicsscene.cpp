@@ -34,7 +34,7 @@ WaveGraphicsScene::WaveGraphicsScene( const qreal x, const qreal y, const qreal 
     createBpmRuler();
 
     // Set up playhead
-    m_playhead = new QGraphicsLineItem( 0.0, 0.0, 0.0, height - 1 );
+    m_playhead = new QGraphicsLineItem( 0.0, 0.0, 0.0, height - Ruler::HEIGHT - 1 );
     m_playhead->setPen( QColor( Qt::red ) );
     m_playhead->setZValue( ZValues::PLAYHEAD );
 
@@ -337,8 +337,14 @@ SharedSlicePointItem WaveGraphicsScene::createSlicePoint( const int frameNum, co
 {
     const qreal scenePosX = getScenePosX( frameNum );
 
+#if QT_VERSION >= 0x040700  // Qt 4.7
+    const qreal scenePosY = Ruler::HEIGHT + 1;
+#else
+    const qreal scenePosY = Ruler::HEIGHT;
+#endif
+
     SlicePointItem* item = new SlicePointItem( height() - Ruler::HEIGHT - 1, canBeMovedPastOtherSlicePoints );
-    item->setPos( scenePosX, Ruler::HEIGHT );
+    item->setPos( scenePosX, scenePosY );
     item->setFrameNum( frameNum );
 
     QTransform matrix;
@@ -514,15 +520,21 @@ void WaveGraphicsScene::startPlayhead( const qreal startPosX,
     {
         const int millis = roundToIntAccurate( (numFrames / sampleRate) * 1000 * stretchRatio );
 
+#if QT_VERSION >= 0x040700  // Qt 4.7
+        const qreal scenePosY = Ruler::HEIGHT + 1;
+#else
+        const qreal scenePosY = Ruler::HEIGHT;
+#endif
+
         if ( isPlayheadScrolling() )
         {
             stopPlayhead();
         }
 
-        m_animation->setPosAt( 0.0, QPointF( startPosX, Ruler::HEIGHT ) );
-        m_animation->setPosAt( 1.0, QPointF( endPosX,   Ruler::HEIGHT ) );
+        m_animation->setPosAt( 0.0, QPointF( startPosX, scenePosY ) );
+        m_animation->setPosAt( 1.0, QPointF( endPosX,   scenePosY ) );
 
-        m_playhead->setLine( 0.0, 0.0, 0.0, height() - 1 );
+        m_playhead->setLine( 0.0, 0.0, 0.0, height() - Ruler::HEIGHT - 1 );
         m_playhead->setVisible( true );
         addItem( m_playhead );
 
@@ -611,6 +623,19 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
         const qreal currentScaleFactor = views().first()->transform().m11(); // m11() returns horizontal scale factor
         matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // ruler mark remains same width when view is scaled
 
+#if QT_VERSION >= 0x040700  // Qt 4.7
+        const qreal barScenePosY = 2.0;
+        const qreal beatScenePosY = 3.0;
+        const qreal divScenePosY = 7.0;
+#else
+        const qreal barScenePosY = 1.0;
+        const qreal beatScenePosY = 2.0;
+        const qreal divScenePosY = 6.0;
+#endif
+
+        const qreal beatLineHeight = Ruler::HEIGHT - 5.0;
+        const qreal divLineHeight = Ruler::HEIGHT - 13.0;
+
         const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
         const qreal framesPerDivision = ( ( m_sampleHeader->sampleRate * 60 ) / bpm ) / divsPerBeat;
 
@@ -624,7 +649,7 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
             if ( div % (divsPerBeat * timeSigNumerator) == 0 ) // Bar
             {
                 QGraphicsSimpleTextItem* textItem = addSimpleText( QString::number( bar ) );
-                textItem->setPos( getScenePosX( frameNum ), 1.0 );
+                textItem->setPos( getScenePosX( frameNum ), barScenePosY );
                 textItem->setBrush( Qt::white );
                 textItem->setZValue( 1 );
                 textItem->setTransform( matrix );
@@ -634,8 +659,8 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
             }
             else if ( div % divsPerBeat == 0 ) // Beat
             {
-                QGraphicsLineItem* lineItem = addLine( 0.0, 0.0, 0.0, Ruler::HEIGHT - 5.0 );
-                lineItem->setPos( getScenePosX( frameNum ), 2.0 );
+                QGraphicsLineItem* lineItem = addLine( 0.0, 0.0, 0.0, beatLineHeight );
+                lineItem->setPos( getScenePosX( frameNum ), beatScenePosY );
                 lineItem->setPen( QPen( Qt::white ) );
                 lineItem->setZValue( 1 );
                 lineItem->setTransform( matrix );
@@ -644,8 +669,8 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
             }
             else // Division
             {
-                QGraphicsLineItem* lineItem = addLine( 0.0, 0.0, 0.0, Ruler::HEIGHT - 13.0 );
-                lineItem->setPos( getScenePosX( frameNum ), 6.0 );
+                QGraphicsLineItem* lineItem = addLine( 0.0, 0.0, 0.0, divLineHeight );
+                lineItem->setPos( getScenePosX( frameNum ), divScenePosY );
                 lineItem->setPen( QPen( Qt::white ) );
                 lineItem->setZValue( 1 );
                 lineItem->setTransform( matrix );
@@ -743,9 +768,17 @@ void WaveGraphicsScene::resizeWaveformItems( const qreal scaleFactorX )
 
 void WaveGraphicsScene::resizeSlicePointItems( const qreal scaleFactorX )
 {
+#if QT_VERSION >= 0x040700  // Qt 4.7
+    const qreal scenePosY = Ruler::HEIGHT + 1;
+#else
+    const qreal scenePosY = Ruler::HEIGHT;
+#endif
+
+    const qreal height = this->height() - Ruler::HEIGHT - 1;
+
     foreach ( SharedSlicePointItem slicePoint, m_slicePointItemList )
     {
-        slicePoint->setHeight( height() - Ruler::HEIGHT - 1 );
+        slicePoint->setHeight( height );
 
         const bool canBeMoved = slicePoint->canBeMovedPastOtherSlicePoints();
         const bool isSnapEnabled = slicePoint->isSnapEnabled();
@@ -753,9 +786,9 @@ void WaveGraphicsScene::resizeSlicePointItems( const qreal scaleFactorX )
         slicePoint->setMovePastOtherSlicePoints( true );
         slicePoint->setSnap( false );
 
-        const qreal newX = slicePoint->scenePos().x() * scaleFactorX;
+        const qreal scenePosX = slicePoint->scenePos().x() * scaleFactorX;
 
-        slicePoint->setPos( newX, Ruler::HEIGHT );
+        slicePoint->setPos( scenePosX, scenePosY );
 
         slicePoint->setMovePastOtherSlicePoints( canBeMoved );
         slicePoint->setSnap( isSnapEnabled );
@@ -770,9 +803,14 @@ void WaveGraphicsScene::resizePlayhead()
     {
         m_timer->stop();
 
+#if QT_VERSION >= 0x040700  // Qt 4.7
+        const qreal scenePosY = Ruler::HEIGHT + 1;
+#else
+        const qreal scenePosY = Ruler::HEIGHT;
+#endif
         m_animation->clear();
-        m_animation->setPosAt( 0.0, QPointF( 0.0, Ruler::HEIGHT ) );
-        m_animation->setPosAt( 1.0, QPointF( width() - 1, Ruler::HEIGHT ) );
+        m_animation->setPosAt( 0.0, QPointF( 0.0, scenePosY ) );
+        m_animation->setPosAt( 1.0, QPointF( width() - 1, scenePosY ) );
 
         m_playhead->setLine( 0.0, 0.0, 0.0, height() - Ruler::HEIGHT - 1 );
 

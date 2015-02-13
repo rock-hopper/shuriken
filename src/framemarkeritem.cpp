@@ -113,8 +113,12 @@ QVariant FrameMarkerItem::itemChange( GraphicsItemChange change, const QVariant&
                 qMin( sceneRect.right() - 1, qMax( newPos.x(), sceneRect.left() ) )
             );
         }
-        newPos.setY( Ruler::HEIGHT );
 
+#if QT_VERSION >= 0x040700  // Qt 4.7
+        newPos.setY( Ruler::HEIGHT + 1 );
+#else
+        newPos.setY( Ruler::HEIGHT );
+#endif
         return newPos;
     }
 
