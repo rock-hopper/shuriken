@@ -2,8 +2,6 @@ TODO
 
 Add Features
 ------------
-Time-folding feature
-
 Qt5 compatibility
 
 JACK Session, NSM
@@ -13,8 +11,6 @@ Option to stream samples from disc
 Export Akai .snd files
 
 Copy and paste audio slices
-
-Split audio slices
 
 Display MIDI note mappings
 

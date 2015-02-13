@@ -5,14 +5,15 @@ Shuriken is an open source beat slicer which harnesses the power of aubio's onse
 
 Main features:
 
-- onset, beat-of-the-bar, and BPM detection (via aubio)
+- onset and beat-of-the-bar detection (via aubio)
+- calculate BPM
 - time stretching in offline or real-time mode (via rubberband)
 - sync BPM of a drum loop to JACK transport
 - slice and move waveform sections around
 - each audio slice automatically assigned to its own MIDI key
 - join, split, and delete audio slices
 - apply gain, gain ramp, normalise, and reverse
-- set loop markers
+- loop playback mode
 - ALSA and JACK MIDI
 - LADISH L1 session management (also compatible with NSM via nsm-proxy)
 - zoom waveform in and out
@@ -23,6 +24,10 @@ Main features:
 Shuriken can either be built using Qt Creator or the supplied build script. To use the build script, simply open a terminal in Shuriken's root directory and enter:
 
     ./build (or optionally ./build debug)
+
+If working with Qt Creator, use the build script to compile the static sndlib library first:
+
+    ./build sndlib
 
 To clean the project:
 
