@@ -670,7 +670,6 @@ QUndoCommand* MainWindow::createRenderCommand( QUndoCommand* parent )
 
             command = new RenderTimeStretchCommand( this,
                                                     m_graphicsScene,
-                                                    m_ui->waveGraphicsView,
                                                     tempDirPath,
                                                     fileBaseName,
                                                     parent );
@@ -1222,7 +1221,6 @@ void MainWindow::on_actionApply_Gain_triggered()
                 new ApplyGainCommand( dialog.getGainValue(),
                                       orderPos,
                                       m_graphicsScene,
-                                      m_ui->waveGraphicsView,
                                       m_sampleHeader->sampleRate,
                                       m_fileHandler,
                                       tempDirPath,
@@ -1270,7 +1268,6 @@ void MainWindow::on_actionApply_Gain_Ramp_triggered()
                                           dialog.getEndGainValue(),
                                           orderPos,
                                           m_graphicsScene,
-                                          m_ui->waveGraphicsView,
                                           m_sampleHeader->sampleRate,
                                           m_fileHandler,
                                           tempDirPath,
@@ -1310,7 +1307,6 @@ void MainWindow::on_actionNormalise_triggered()
 
             new NormaliseCommand( orderPos,
                                   m_graphicsScene,
-                                  m_ui->waveGraphicsView,
                                   m_sampleHeader->sampleRate,
                                   m_fileHandler,
                                   tempDirPath,
@@ -1345,7 +1341,7 @@ void MainWindow::on_actionReverse_triggered()
 
     foreach ( int orderPos, orderPositions )
     {
-        new ReverseCommand( orderPos, m_graphicsScene, m_ui->waveGraphicsView, parentCommand );
+        new ReverseCommand( orderPos, m_graphicsScene, parentCommand );
     }
 
     m_undoStack.push( parentCommand );
@@ -1759,7 +1755,6 @@ void MainWindow::on_pushButton_Apply_clicked()
 
             QUndoCommand* command = new GlobalTimeStretchCommand( this,
                                                                   m_graphicsScene,
-                                                                  m_ui->waveGraphicsView,
                                                                   m_ui->doubleSpinBox_OriginalBPM,
                                                                   m_ui->doubleSpinBox_NewBPM,
                                                                   m_ui->checkBox_PitchCorrection,
@@ -1779,21 +1774,21 @@ void MainWindow::on_pushButton_Apply_clicked()
 
 void MainWindow::on_actionSelect_Move_triggered()
 {
-    m_ui->waveGraphicsView->setInteractionMode( WaveGraphicsView::SELECT_MOVE_ITEMS );
+    m_graphicsScene->setInteractionMode( WaveGraphicsScene::SELECT_MOVE_ITEMS );
 }
 
 
 
 void MainWindow::on_actionMulti_Select_triggered()
 {
-    m_ui->waveGraphicsView->setInteractionMode( WaveGraphicsView::MULTI_SELECT_ITEMS );
+    m_graphicsScene->setInteractionMode( WaveGraphicsScene::MULTI_SELECT_ITEMS );
 }
 
 
 
 void MainWindow::on_actionAudition_triggered()
 {
-    m_ui->waveGraphicsView->setInteractionMode( WaveGraphicsView::AUDITION_ITEMS );
+    m_graphicsScene->setInteractionMode( WaveGraphicsScene::AUDITION_ITEMS );
 }
 
 

@@ -40,24 +40,15 @@ public:
 
     WaveGraphicsScene* getScene() const;
 
-    void redrawWaveforms();
-
     void zoomIn();
     void zoomOut();
     void zoomOriginal();
-
-    enum InteractionMode { SELECT_MOVE_ITEMS, MULTI_SELECT_ITEMS, AUDITION_ITEMS };
-
-    InteractionMode getInteractionMode() const              { return m_interactionMode; }
-    void setInteractionMode( InteractionMode mode );
 
 protected:
     void resizeEvent( QResizeEvent* event );
 
 private:
     ScopedPointer<WaveGraphicsScene> m_scene;
-
-    InteractionMode m_interactionMode;
 
     bool m_isViewZoomedIn;
 

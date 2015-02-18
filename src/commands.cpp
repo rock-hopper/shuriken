@@ -797,7 +797,6 @@ void DeleteWaveformItemCommand::redo()
 ApplyGainCommand::ApplyGainCommand( const float gain,
                                     const int waveformItemOrderPos,
                                     WaveGraphicsScene* const graphicsScene,
-                                    WaveGraphicsView* const graphicsView,
                                     const int sampleRate,
                                     AudioFileHandler& fileHandler,
                                     const QString tempDirPath,
@@ -807,7 +806,6 @@ ApplyGainCommand::ApplyGainCommand( const float gain,
     m_gain( gain ),
     m_orderPos( waveformItemOrderPos ),
     m_graphicsScene( graphicsScene ),
-    m_graphicsView( graphicsView ),
     m_sampleRate( sampleRate ),
     m_fileHandler( fileHandler ),
     m_tempDirPath( tempDirPath ),
@@ -836,7 +834,7 @@ void ApplyGainCommand::undo()
             sampleBuffer->copyFrom( chanNum, 0, *origSampleBuffer.data(), chanNum, 0, numFrames );
         }
 
-        m_graphicsView->redrawWaveforms();
+        m_graphicsScene->redrawWaveforms();
     }
 }
 
@@ -857,7 +855,7 @@ void ApplyGainCommand::redo()
     if ( ! m_filePath.isEmpty() )
     {
         sampleBuffer->applyGain( 0, sampleBuffer->getNumFrames(), m_gain );
-        m_graphicsView->redrawWaveforms();
+        m_graphicsScene->redrawWaveforms();
     }
     else
     {
@@ -873,7 +871,6 @@ ApplyGainRampCommand::ApplyGainRampCommand( const float startGain,
                                             const float endGain,
                                             const int waveformItemOrderPos,
                                             WaveGraphicsScene* const graphicsScene,
-                                            WaveGraphicsView* const graphicsView,
                                             const int sampleRate,
                                             AudioFileHandler& fileHandler,
                                             const QString tempDirPath,
@@ -884,7 +881,6 @@ ApplyGainRampCommand::ApplyGainRampCommand( const float startGain,
     m_endGain( endGain ),
     m_orderPos( waveformItemOrderPos ),
     m_graphicsScene( graphicsScene ),
-    m_graphicsView( graphicsView ),
     m_sampleRate( sampleRate ),
     m_fileHandler( fileHandler ),
     m_tempDirPath( tempDirPath ),
@@ -913,7 +909,7 @@ void ApplyGainRampCommand::undo()
             sampleBuffer->copyFrom( chanNum, 0, *origSampleBuffer.data(), chanNum, 0, numFrames );
         }
 
-        m_graphicsView->redrawWaveforms();
+        m_graphicsScene->redrawWaveforms();
     }
 }
 
@@ -934,7 +930,7 @@ void ApplyGainRampCommand::redo()
     if ( ! m_filePath.isEmpty() )
     {
         sampleBuffer->applyGainRamp( 0, sampleBuffer->getNumFrames(), m_startGain, m_endGain );
-        m_graphicsView->redrawWaveforms();
+        m_graphicsScene->redrawWaveforms();
     }
     else
     {
@@ -948,7 +944,6 @@ void ApplyGainRampCommand::redo()
 
 NormaliseCommand::NormaliseCommand( const int waveformItemOrderPos,
                                     WaveGraphicsScene* const graphicsScene,
-                                    WaveGraphicsView* const graphicsView,
                                     const int sampleRate,
                                     AudioFileHandler& fileHandler,
                                     const QString tempDirPath,
@@ -957,7 +952,6 @@ NormaliseCommand::NormaliseCommand( const int waveformItemOrderPos,
     QUndoCommand( parent ),
     m_orderPos( waveformItemOrderPos ),
     m_graphicsScene( graphicsScene ),
-    m_graphicsView( graphicsView ),
     m_sampleRate( sampleRate ),
     m_fileHandler( fileHandler ),
     m_tempDirPath( tempDirPath ),
@@ -986,7 +980,7 @@ void NormaliseCommand::undo()
             sampleBuffer->copyFrom( chanNum, 0, *origSampleBuffer.data(), chanNum, 0, numFrames );
         }
 
-        m_graphicsView->redrawWaveforms();
+        m_graphicsScene->redrawWaveforms();
     }
 }
 
@@ -1012,7 +1006,7 @@ void NormaliseCommand::redo()
         if ( magnitude > 0.0 )
         {
             sampleBuffer->applyGain( 0, numFrames, 1.0 / magnitude );
-            m_graphicsView->redrawWaveforms();
+            m_graphicsScene->redrawWaveforms();
         }
     }
     else
@@ -1027,12 +1021,10 @@ void NormaliseCommand::redo()
 
 ReverseCommand::ReverseCommand( const int waveformItemOrderPos,
                                 WaveGraphicsScene* const graphicsScene,
-                                WaveGraphicsView* const graphicsView,
                                 QUndoCommand* parent ) :
     QUndoCommand( parent ),
     mOrderPos( waveformItemOrderPos ),
-    m_graphicsScene( graphicsScene ),
-    m_graphicsView( graphicsView )
+    m_graphicsScene( graphicsScene )
 {
     setText( "Reverse" );
 }
@@ -1053,7 +1045,7 @@ void ReverseCommand::redo()
 
     sampleBuffer->reverse( 0, sampleBuffer->getNumFrames() );
 
-    m_graphicsView->redrawWaveforms();
+    m_graphicsScene->redrawWaveforms();
 }
 
 
@@ -1062,7 +1054,6 @@ void ReverseCommand::redo()
 
 GlobalTimeStretchCommand::GlobalTimeStretchCommand( MainWindow* const mainWindow,
                                                   WaveGraphicsScene* const graphicsScene,
-                                                  WaveGraphicsView* const graphicsView,
                                                   QDoubleSpinBox* const spinBoxOriginalBPM,
                                                   QDoubleSpinBox* const spinBoxNewBPM,
                                                   QCheckBox* const checkBoxPitchCorrection,
@@ -1072,7 +1063,6 @@ GlobalTimeStretchCommand::GlobalTimeStretchCommand( MainWindow* const mainWindow
     QUndoCommand( parent ),
     m_mainWindow( mainWindow ),
     m_graphicsScene( graphicsScene ),
-    m_graphicsView( graphicsView ),
     m_spinBoxOriginalBPM( spinBoxOriginalBPM ),
     m_spinBoxNewBPM( spinBoxNewBPM ),
     m_checkBoxPitchCorrection( checkBoxPitchCorrection ),
@@ -1119,7 +1109,7 @@ void GlobalTimeStretchCommand::undo()
     const qreal timeRatio = 1.0 / ( m_originalBPM / m_newBPM );
 
     updateSlicePoints( timeRatio );
-    m_graphicsView->redrawWaveforms();
+    m_graphicsScene->redrawWaveforms();
 
     m_spinBoxOriginalBPM->setValue( m_originalBPM );
     m_spinBoxNewBPM->setValue( m_originalBPM );
@@ -1176,7 +1166,7 @@ void GlobalTimeStretchCommand::redo()
                                                         m_mainWindow->m_sampleHeader->sampleRate );
 
         updateSlicePoints( timeRatio );
-        m_graphicsView->redrawWaveforms();
+        m_graphicsScene->redrawWaveforms();
 
         m_spinBoxOriginalBPM->setValue( m_newBPM );
         m_spinBoxNewBPM->setValue( m_newBPM );
@@ -1214,14 +1204,12 @@ void GlobalTimeStretchCommand::updateSlicePoints( const qreal timeRatio )
 
 RenderTimeStretchCommand::RenderTimeStretchCommand( MainWindow* const mainWindow,
                                                     WaveGraphicsScene* const graphicsScene,
-                                                    WaveGraphicsView* const graphicsView,
                                                     const QString tempDirPath,
                                                     const QString fileBaseName,
                                                     QUndoCommand* parent ) :
     QUndoCommand( parent ),
     m_mainWindow( mainWindow ),
     m_graphicsScene( graphicsScene ),
-    m_graphicsView( graphicsView ),
     m_options( m_mainWindow->m_optionsDialog->getStretcherOptions() & ~RubberBandStretcher::OptionProcessRealTime ),
     m_tempDirPath( tempDirPath ),
     m_fileBaseName( fileBaseName )
@@ -1327,13 +1315,13 @@ void RenderTimeStretchCommand::redo()
             m_timeRatioList << timeRatio;
             m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( midiNote, 1.0 );
 
-            m_mainWindow->m_graphicsScene->getWaveformAt( i )->setStretchRatio( 1.0 );
+            m_graphicsScene->getWaveformAt( i )->setStretchRatio( 1.0 );
         }
 
         m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                         m_mainWindow->m_sampleHeader->sampleRate );
 
-        m_graphicsView->redrawWaveforms();
+        m_graphicsScene->redrawWaveforms();
 
         QApplication::restoreOverrideCursor();
     }

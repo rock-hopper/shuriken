@@ -44,7 +44,10 @@ class WaveGraphicsScene : public QGraphicsScene
 public:
     WaveGraphicsScene( qreal x, qreal y, qreal width, qreal height, QObject* parent = NULL );
 
-    WaveGraphicsView* getView() const;
+    enum InteractionMode { SELECT_MOVE_ITEMS, MULTI_SELECT_ITEMS, AUDITION_ITEMS };
+
+    InteractionMode getInteractionMode() const              { return m_interactionMode; }
+    void setInteractionMode( InteractionMode mode );
 
     // Creates a new waveform item and adds it to the scene. If 'width' is not specified by the caller
     // then the waveform's width will be the same as the scene width
@@ -85,6 +88,9 @@ public:
     void stretchWaveforms( QList<int> orderPosList, QList<qreal> ratioList );
 
     QList<qreal> getWaveformStretchRatios( QList<int> orderPositions ) const;
+
+    // Redraw all waveform items
+    void redrawWaveforms();
 
     // Create a new slice point item and add it to the scene
     SharedSlicePointItem createSlicePoint( int frameNum, bool canBeMovedPastOtherSlicePoints );
@@ -137,9 +143,13 @@ public:
     void scaleItems( qreal scaleFactorX );
 
 private:
+    WaveGraphicsView* getView() const;
+
     void connectWaveform( SharedWaveformItem item );
 
     void createBpmRuler();
+
+    InteractionMode m_interactionMode;
 
     QList<SharedWaveformItem> m_waveformItemList;
     QList<SharedSlicePointItem> m_slicePointItemList;

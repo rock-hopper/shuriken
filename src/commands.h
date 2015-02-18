@@ -300,7 +300,6 @@ public:
     ApplyGainCommand( float gain,
                       int waveformItemOrderPos,
                       WaveGraphicsScene* graphicsScene,
-                      WaveGraphicsView* graphicsView,
                       int sampleRate,
                       AudioFileHandler& fileHandler,
                       QString tempDirPath,
@@ -314,7 +313,6 @@ private:
     const float m_gain;
     const int m_orderPos;
     WaveGraphicsScene* const m_graphicsScene;
-    WaveGraphicsView* const m_graphicsView;
     const int m_sampleRate;
     AudioFileHandler& m_fileHandler;
     const QString m_tempDirPath;
@@ -331,7 +329,6 @@ public:
                           float endGain,
                           int waveformItemOrderPos,
                           WaveGraphicsScene* graphicsScene,
-                          WaveGraphicsView* graphicsView,
                           int sampleRate,
                           AudioFileHandler& fileHandler,
                           QString tempDirPath,
@@ -346,7 +343,6 @@ private:
     const float m_endGain;
     const int m_orderPos;
     WaveGraphicsScene* const m_graphicsScene;
-    WaveGraphicsView* const m_graphicsView;
     const int m_sampleRate;
     AudioFileHandler& m_fileHandler;
     const QString m_tempDirPath;
@@ -361,7 +357,6 @@ class NormaliseCommand : public QUndoCommand
 public:
     NormaliseCommand( int waveformItemOrderPos,
                       WaveGraphicsScene* graphicsScene,
-                      WaveGraphicsView* graphicsView,
                       int sampleRate,
                       AudioFileHandler& fileHandler,
                       QString tempDirPath,
@@ -374,7 +369,6 @@ public:
 private:
     const int m_orderPos;
     WaveGraphicsScene* const m_graphicsScene;
-    WaveGraphicsView* const m_graphicsView;
     const int m_sampleRate;
     AudioFileHandler& m_fileHandler;
     const QString m_tempDirPath;
@@ -389,7 +383,6 @@ class ReverseCommand : public QUndoCommand
 public:
     ReverseCommand( int waveformItemOrderPos,
                     WaveGraphicsScene* graphicsScene,
-                    WaveGraphicsView* graphicsView,
                     QUndoCommand* parent = NULL );
 
     void undo();
@@ -398,7 +391,6 @@ public:
 private:
     const int mOrderPos;
     WaveGraphicsScene* const m_graphicsScene;
-    WaveGraphicsView* const m_graphicsView;
 };
 
 
@@ -408,7 +400,6 @@ class GlobalTimeStretchCommand : public QUndoCommand
 public:
     GlobalTimeStretchCommand( MainWindow* mainWindow,
                               WaveGraphicsScene* graphicsScene,
-                              WaveGraphicsView* graphicsView,
                               QDoubleSpinBox* spinBoxOriginalBPM,
                               QDoubleSpinBox* spinBoxNewBPM,
                               QCheckBox* checkBoxPitchCorrection,
@@ -424,7 +415,6 @@ private:
 
     MainWindow* const m_mainWindow;
     WaveGraphicsScene* const m_graphicsScene;
-    WaveGraphicsView* const m_graphicsView;
     QDoubleSpinBox* const m_spinBoxOriginalBPM;
     QDoubleSpinBox* const m_spinBoxNewBPM;
     QCheckBox* const m_checkBoxPitchCorrection;
@@ -445,7 +435,6 @@ class RenderTimeStretchCommand : public QUndoCommand
 public:
     RenderTimeStretchCommand( MainWindow* mainWindow,
                               WaveGraphicsScene* graphicsScene,
-                              WaveGraphicsView* graphicsView,
                               QString tempDirPath,
                               QString fileBaseName,
                               QUndoCommand* parent = NULL );
@@ -456,7 +445,6 @@ public:
 private:
     MainWindow* const m_mainWindow;
     WaveGraphicsScene* const m_graphicsScene;
-    WaveGraphicsView* const m_graphicsView;
     const RubberBandStretcher::Options m_options;
     const QString m_tempDirPath;
     const QString m_fileBaseName;

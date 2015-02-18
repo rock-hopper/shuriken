@@ -29,7 +29,8 @@
 // Public:
 
 WaveGraphicsScene::WaveGraphicsScene( const qreal x, const qreal y, const qreal width, const qreal height, QObject* parent ) :
-    QGraphicsScene( x, y, width, height, parent )
+    QGraphicsScene( x, y, width, height, parent ),
+    m_interactionMode( AUDITION_ITEMS )
 {
     createBpmRuler();
 
@@ -56,9 +57,41 @@ WaveGraphicsScene::WaveGraphicsScene( const qreal x, const qreal y, const qreal 
 
 
 
-WaveGraphicsView* WaveGraphicsScene::getView() const
+void WaveGraphicsScene::setInteractionMode( const InteractionMode mode )
 {
-    return static_cast<WaveGraphicsView*>( views().first() );
+    WaveGraphicsView* const view = getView();
+
+    switch ( mode )
+    {
+    case SELECT_MOVE_ITEMS:
+        foreach ( SharedWaveformItem item, m_waveformItemList )
+        {
+            item->setFlag( QGraphicsItem::ItemIsMovable, true );
+            item->setFlag( QGraphicsItem::ItemIsSelectable, true );
+        }
+        view->setDragMode( QGraphicsView::NoDrag );
+        break;
+    case MULTI_SELECT_ITEMS:
+        foreach ( SharedWaveformItem item, m_waveformItemList )
+        {
+            item->setFlag( QGraphicsItem::ItemIsMovable, false );
+            item->setFlag( QGraphicsItem::ItemIsSelectable, true );
+        }
+        view->setDragMode( QGraphicsView::RubberBandDrag );
+        break;
+    case AUDITION_ITEMS:
+        foreach ( SharedWaveformItem item, m_waveformItemList )
+        {
+            item->setFlag( QGraphicsItem::ItemIsMovable, false );
+            item->setFlag( QGraphicsItem::ItemIsSelectable, false );
+        }
+        view->setDragMode( QGraphicsView::NoDrag );
+        break;
+    default:
+        break;
+    }
+
+    m_interactionMode = mode;
 }
 
 
@@ -88,9 +121,7 @@ SharedWaveformItem WaveGraphicsScene::createWaveform( const SharedSampleBuffer s
     addItem( waveformItem.data() );
     update();
 
-    WaveGraphicsView* view = getView();
-
-    view->setInteractionMode( view->getInteractionMode() );
+    setInteractionMode( m_interactionMode );
 
     return waveformItem;
 }
@@ -139,9 +170,7 @@ QList<SharedWaveformItem> WaveGraphicsScene::createWaveforms( const QList<Shared
         orderPos++;
     }
 
-    WaveGraphicsView* view = getView();
-
-    view->setInteractionMode( view->getInteractionMode() );
+    setInteractionMode( m_interactionMode );
 
     return newWaveformItems;
 }
@@ -201,9 +230,7 @@ void WaveGraphicsScene::insertWaveforms( const QList<SharedWaveformItem> wavefor
     }
     update();
 
-    WaveGraphicsView* view = getView();
-
-    view->setInteractionMode( view->getInteractionMode() );
+    setInteractionMode( m_interactionMode );
 }
 
 
@@ -329,6 +356,14 @@ QList<qreal> WaveGraphicsScene::getWaveformStretchRatios( const QList<int> order
     }
 
     return stretchRatioList;
+}
+
+
+
+void WaveGraphicsScene::redrawWaveforms()
+{
+    resizeWaveformItems( 1.0 );
+    getView()->viewport()->update();
 }
 
 
@@ -856,6 +891,13 @@ void WaveGraphicsScene::scaleItems( const qreal scaleFactorX )
 
 //==================================================================================================
 // Private:
+
+WaveGraphicsView* WaveGraphicsScene::getView() const
+{
+    return static_cast<WaveGraphicsView*>( views().first() );
+}
+
+
 
 void WaveGraphicsScene::connectWaveform( const SharedWaveformItem item )
 {
