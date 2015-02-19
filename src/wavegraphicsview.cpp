@@ -100,7 +100,7 @@ void WaveGraphicsView::zoomOriginal()
 //==================================================================================================
 // Protected:
 
-void WaveGraphicsView::resizeEvent ( QResizeEvent* event )
+void WaveGraphicsView::resizeEvent( QResizeEvent* event )
 {
     m_scene->setSceneRect( 0.0, 0.0, event->size().width(), event->size().height() );
 

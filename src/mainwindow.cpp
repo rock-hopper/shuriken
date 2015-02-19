@@ -139,6 +139,37 @@ void MainWindow::keyPressEvent( QKeyEvent* event )
 
 
 
+void MainWindow::wheelEvent( QWheelEvent* event )
+{
+    const int numDegrees = event->delta() / 8; // delta() returns distance mouse wheel was rotated in eighths of a degree
+    const int numSteps = numDegrees / 15;      // Most mouse types work in steps of 15 degrees
+
+    if ( event->orientation() == Qt::Vertical )
+    {
+        if ( numSteps > 0 && m_ui->actionZoom_In->isEnabled() )
+        {
+            on_actionZoom_In_triggered();
+            event->accept();
+        }
+        else if ( numSteps < 0 && m_ui->actionZoom_Out->isEnabled() )
+        {
+            on_actionZoom_Out_triggered();
+            event->accept();
+        }
+        else
+        {
+            event->ignore();
+        }
+    }
+    else
+    {
+        event->ignore();
+    }
+
+}
+
+
+
 //==================================================================================================
 // Private:
 
