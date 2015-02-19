@@ -25,6 +25,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDesktopWidget>
+#include <QScrollBar>
 #include "commands.h"
 #include "globals.h"
 #include "applygaindialog.h"
@@ -139,21 +140,33 @@ void MainWindow::keyPressEvent( QKeyEvent* event )
 
 
 
-void MainWindow::wheelEvent( QWheelEvent* event )
+void MainWindow::wheelEvent( QWheelEvent* const event )
 {
     const int numDegrees = event->delta() / 8; // delta() returns distance mouse wheel was rotated in eighths of a degree
     const int numSteps = numDegrees / 15;      // Most mouse types work in steps of 15 degrees
 
     if ( event->orientation() == Qt::Vertical )
     {
+        const QPoint mouseViewPos = m_ui->waveGraphicsView->mapFromGlobal( event->globalPos() );
+        const QPointF mouseScenePos = m_ui->waveGraphicsView->mapToScene( mouseViewPos );
+        const qreal ratio = mouseScenePos.x() / m_graphicsScene->width();
+
+        QScrollBar* const scrollBar = m_ui->waveGraphicsView->horizontalScrollBar();
+
         if ( numSteps > 0 && m_ui->actionZoom_In->isEnabled() )
         {
             on_actionZoom_In_triggered();
+
+            scrollBar->setValue( scrollBar->maximum() * ratio );
+
             event->accept();
         }
         else if ( numSteps < 0 && m_ui->actionZoom_Out->isEnabled() )
         {
             on_actionZoom_Out_triggered();
+
+            scrollBar->setValue( scrollBar->maximum() * ratio );
+
             event->accept();
         }
         else

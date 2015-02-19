@@ -78,7 +78,7 @@ void WaveGraphicsView::zoomOut()
 
     m_scene->scaleItems( newXScaleFactor );
 
-    if ( newXScaleFactor == 1.0 )
+    if ( newXScaleFactor <= 1.0 )
     {
         emit minDetailLevelReached();
         m_isViewZoomedIn = false;
