@@ -107,7 +107,7 @@ public:
     void pitchWheelMoved( int newValue );
     void controllerMoved( int controllerNumber, int newValue ) override;
 
-    void renderNextBlock( AudioSampleBuffer&, int startSample, int numSamples ) override;
+    void renderNextBlock( AudioSampleBuffer&, int startFrame, int numFrames ) override;
 
 private:
     qreal m_pitchRatio;

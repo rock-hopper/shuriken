@@ -212,7 +212,7 @@ void ShurikenSamplerVoice::controllerMoved( const int /*controllerNumber*/,
 
 
 //==============================================================================
-void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int startSample, int numSamples )
+void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int startFrame, int numFrames )
 {
     if ( const ShurikenSamplerSound* const playingSound =
          static_cast<ShurikenSamplerSound*>( getCurrentlyPlayingSound().get() ) )
@@ -221,18 +221,31 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
         const float* const inR = playingSound->m_data->getNumChannels() > 1
                                     ? playingSound->m_data->getReadPointer( 1 ) : nullptr;
 
-        float* outL = outputBuffer.getWritePointer( 0, startSample );
-        float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer( 1, startSample ) : nullptr;
+        float* outL = outputBuffer.getWritePointer( 0, startFrame );
+        float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer( 1, startFrame ) : nullptr;
 
-        while ( --numSamples >= 0 )
+        const int totalnumFrames = playingSound->m_data->getNumFrames();
+
+        while ( --numFrames >= 0 )
         {
             const int pos = (int) m_sourceSamplePosition;
             const float alpha = (float) ( m_sourceSamplePosition - pos );
             const float invAlpha = 1.0f - alpha;
 
+            float l = 0;
+            float r = 0;
+
             // just using a very simple linear interpolation here..
-            float l = ( inL [pos] * invAlpha + inL [pos + 1] * alpha );
-            float r = ( inR != nullptr ) ? ( inR [pos] * invAlpha + inR [pos + 1] * alpha ) : l;
+            if ( pos + 1 < totalnumFrames )
+            {
+                l = ( inL [pos] * invAlpha + inL [pos + 1] * alpha );
+                r = ( inR != nullptr ) ? ( inR [pos] * invAlpha + inR [pos + 1] * alpha ) : l;
+            }
+            else
+            {
+                l = ( inL [pos] * invAlpha );
+                r = ( inR != nullptr ) ? ( inR [pos] * invAlpha ) : l;
+            }
 
             l *= m_leftGain;
             r *= m_rightGain;
