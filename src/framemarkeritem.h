@@ -45,6 +45,7 @@ public:
     void paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = NULL );
 
     void setHeight( qreal height );
+    void setPos( qreal x, qreal y );
 
     qreal getHandleWidth() const                { return m_handleWidth; }
     qreal getHandleHeight() const               { return m_handleHeight; }

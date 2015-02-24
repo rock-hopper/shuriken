@@ -48,7 +48,7 @@ WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer,
     m_centreLinePen = QPen( QColor(127, 127, 127, 191) );
 
     // Don't draw rect border
-    setPen( QPen( QColor(0, 0, 0, 0) ) );
+    setPen( Qt::NoPen );
 
     // Set up min/max sample "bins"
     const int numChans = m_sampleBuffer->getNumChannels();

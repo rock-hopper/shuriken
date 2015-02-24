@@ -70,27 +70,40 @@ void FrameMarkerItem::setHeight( const qreal height )
 {
     QPolygonF polygon;
 
+    const qreal h = height - 1;
+
     if ( m_handle == HANDLE_TOP_BOTTOM )
     {
         polygon << QPointF( -m_handleWidth * 0.5, 0.0 ) << QPointF( m_handleWidth * 0.5, 0.0 ) << QPointF( 0.0, m_handleHeight )
-                << QPointF( 0.0, height - m_handleHeight )
-                << QPointF( -m_handleWidth * 0.5, height ) << QPointF( m_handleWidth * 0.5, height ) << QPointF( 0.0, height - m_handleHeight )
+                << QPointF( 0.0, h - m_handleHeight )
+                << QPointF( -m_handleWidth * 0.5, h ) << QPointF( m_handleWidth * 0.5, h ) << QPointF( 0.0, h - m_handleHeight )
                 << QPointF( 0.0, m_handleHeight );
     }
     else if ( m_handle == HANDLE_CENTRE_RIGHT )
     {
-        polygon << QPointF( 0.0, 0.0 ) << QPointF( 0.0, (height * 0.5) - (m_handleHeight * 0.5) )
-                << QPointF( m_handleWidth, height * 0.5 ) << QPointF( 0.0, (height * 0.5) + (m_handleHeight * 0.5) )
-                << QPointF( 0.0, (height * 0.5) - (m_handleHeight * 0.5) ) << QPointF( 0.0, height );
+        polygon << QPointF( 0.0, 0.0 ) << QPointF( 0.0, (h * 0.5) - (m_handleHeight * 0.5) )
+                << QPointF( m_handleWidth, h * 0.5 ) << QPointF( 0.0, (h * 0.5) + (m_handleHeight * 0.5) )
+                << QPointF( 0.0, (h * 0.5) - (m_handleHeight * 0.5) ) << QPointF( 0.0, h );
     }
     else if ( m_handle == HANDLE_CENTRE_LEFT )
     {
-        polygon << QPointF( 0.0, 0.0 ) << QPointF( 0.0, (height * 0.5) - (m_handleHeight * 0.5) )
-                << QPointF( -m_handleWidth, height * 0.5 ) << QPointF( 0.0, (height * 0.5) + (m_handleHeight * 0.5) )
-                << QPointF( 0.0, (height * 0.5) - (m_handleHeight * 0.5) ) << QPointF( 0.0, height );
+        polygon << QPointF( 0.0, 0.0 ) << QPointF( 0.0, (h * 0.5) - (m_handleHeight * 0.5) )
+                << QPointF( -m_handleWidth, h * 0.5 ) << QPointF( 0.0, (h * 0.5) + (m_handleHeight * 0.5) )
+                << QPointF( 0.0, (h * 0.5) - (m_handleHeight * 0.5) ) << QPointF( 0.0, h );
     }
 
     setPolygon( polygon );
+}
+
+
+
+void FrameMarkerItem::setPos( const qreal x, const qreal y )
+{
+#if QT_VERSION >= 0x040700  // Qt 4.7
+    QGraphicsItem::setPos( QPointF(x, y+1) );
+#else
+    QGraphicsItem::setPos( QPointF(x, y) );
+#endif
 }
 
 
