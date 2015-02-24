@@ -38,8 +38,9 @@ SlicePointItem::SlicePointItem( const qreal height,
                      height,
                      HANDLE_TOP_BOTTOM,
                      parent ),
-    m_isSnapEnabled( false ),
     m_canBeMovedPastOtherSlicePoints( canBeMovedPastOtherSlicePoints ),
+    m_isSnapEnabled( false ),
+    m_isMousePressed( false ),
     m_minDistFromOtherItems( minDistFromOtherSlicePoints )
 {
 }
@@ -86,7 +87,7 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
             }
         }
 
-        if ( ! m_canBeMovedPastOtherSlicePoints ) // Prevent slice point from being moved past other slice points
+        if ( ! m_canBeMovedPastOtherSlicePoints && m_isMousePressed ) // Prevent slice point from being moved past other slice points
         {
             if ( newPos.x() < m_minScenePosX )
             {
@@ -136,6 +137,8 @@ void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 
     m_minScenePosX = minX + m_minDistFromOtherItems;
     m_maxScenePosX = maxX - m_minDistFromOtherItems;
+
+    m_isMousePressed = true;
 }
 
 
@@ -145,12 +148,14 @@ void SlicePointItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
     FrameMarkerItem::mouseReleaseEvent( event );
 
     // Reset colour of BPM ruler marks
-    WaveGraphicsScene* scene = static_cast<WaveGraphicsScene*>( this->scene() );
+    WaveGraphicsScene* const scene = static_cast<WaveGraphicsScene*>( this->scene() );
 
     foreach ( SharedGraphicsItem item, scene->getBpmRulerMarks() )
     {
         setRulerMarkColour( item.data(), Qt::white );
     }
+
+    m_isMousePressed = false;
 }
 
 

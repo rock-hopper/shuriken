@@ -794,17 +794,14 @@ void WaveGraphicsScene::resizeSlicePointItems( const qreal scaleFactorX )
     {
         slicePoint->setHeight( height );
 
-        const bool canBeMoved = slicePoint->canBeMovedPastOtherSlicePoints();
         const bool isSnapEnabled = slicePoint->isSnapEnabled();
 
-        slicePoint->setMovePastOtherSlicePoints( true );
         slicePoint->setSnap( false );
 
         const qreal scenePosX = slicePoint->scenePos().x() * scaleFactorX;
 
         slicePoint->setPos( scenePosX, Ruler::HEIGHT );
 
-        slicePoint->setMovePastOtherSlicePoints( canBeMoved );
         slicePoint->setSnap( isSnapEnabled );
     }
 }

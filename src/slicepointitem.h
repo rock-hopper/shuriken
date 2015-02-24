@@ -43,9 +43,6 @@ public:
 
     int type() const    { return Type; }
 
-    bool canBeMovedPastOtherSlicePoints() const         { return m_canBeMovedPastOtherSlicePoints; }
-    void setMovePastOtherSlicePoints( bool canBeMoved ) { m_canBeMovedPastOtherSlicePoints = canBeMoved; }
-
     bool isSnapEnabled() const                          { return m_isSnapEnabled; }
     void setSnap( bool enable )                         { m_isSnapEnabled = enable; }
 
@@ -60,8 +57,9 @@ protected:
     void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
 private:
+    const bool m_canBeMovedPastOtherSlicePoints;
     bool m_isSnapEnabled;
-    bool m_canBeMovedPastOtherSlicePoints;
+    bool m_isMousePressed;
     qreal m_minDistFromOtherItems;
     qreal m_minScenePosX;
     qreal m_maxScenePosX;
