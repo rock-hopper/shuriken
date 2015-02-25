@@ -671,7 +671,7 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
                 QGraphicsSimpleTextItem* textItem = addSimpleText( QString::number( bar ) );
                 textItem->setPos( getScenePosX( frameNum ), barScenePosY );
                 textItem->setBrush( Qt::white );
-                textItem->setZValue( 1 );
+                textItem->setZValue( ZValues::BPM_RULER_TEXT );
                 textItem->setTransform( matrix );
                 m_rulerMarksList.append( SharedGraphicsItem( textItem ) );
                 bar++;
@@ -682,7 +682,7 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
                 QGraphicsLineItem* lineItem = addLine( 0.0, 0.0, 0.0, beatLineHeight );
                 lineItem->setPos( getScenePosX( frameNum ), beatScenePosY );
                 lineItem->setPen( QPen( Qt::white ) );
-                lineItem->setZValue( 1 );
+                lineItem->setZValue( ZValues::BPM_RULER_TEXT );
                 lineItem->setTransform( matrix );
                 m_rulerMarksList.append( SharedGraphicsItem( lineItem ) );
                 beat++;
@@ -692,7 +692,7 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
                 QGraphicsLineItem* lineItem = addLine( 0.0, 0.0, 0.0, divLineHeight );
                 lineItem->setPos( getScenePosX( frameNum ), divScenePosY );
                 lineItem->setPen( QPen( Qt::white ) );
-                lineItem->setZValue( 1 );
+                lineItem->setZValue( ZValues::BPM_RULER_TEXT );
                 lineItem->setTransform( matrix );
                 m_rulerMarksList.append( SharedGraphicsItem( lineItem ) );
             }
@@ -887,11 +887,12 @@ void WaveGraphicsScene::connectWaveform( const SharedWaveformItem item )
 void WaveGraphicsScene::createBpmRuler()
 {
     m_rulerBackground = addRect( 0.0, 0.0, width(), Ruler::HEIGHT, QPen( QColor(0,0,0,0) ), QBrush( Qt::darkGray ) );
+    m_rulerBackground->setZValue( ZValues::BPM_RULER );
 
     QGraphicsSimpleTextItem* textItem = addSimpleText( "0 BPM" );
     textItem->setPos( 1.0, 1.0 );
     textItem->setBrush( Qt::white );
-    textItem->setZValue( 1 );
+    textItem->setZValue( ZValues::BPM_RULER_TEXT );
     m_rulerMarksList.append( SharedGraphicsItem( textItem ) );
 }
 

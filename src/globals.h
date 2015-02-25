@@ -52,6 +52,8 @@ namespace ZValues
     static const int SELECTED_FRAME_MARKER  = 3;
     static const int LOOP_MARKER            = 4;
     static const int PLAYHEAD               = 5;
+    static const int BPM_RULER              = 6;
+    static const int BPM_RULER_TEXT         = 7;
 }
 
 namespace Ruler
