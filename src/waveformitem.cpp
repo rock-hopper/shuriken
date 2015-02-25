@@ -156,8 +156,9 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
     {
         if ( m_detailLevel == LOW )
         {
+#if QT_VERSION < 0x040700  // Qt 4.6 or less
             painter->setRenderHint( QPainter::Antialiasing, false );
-
+#endif
             for ( int binCount = 0; binCount < numVisibleBins; binCount++ )
             {
                 min = (*m_minSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
@@ -172,8 +173,9 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
         }
         else if ( m_detailLevel == HIGH )
         {
+#if QT_VERSION < 0x040700  // Qt 4.6 or less
             painter->setRenderHint( QPainter::Antialiasing, true );
-
+#endif
             QPointF points[ numVisibleBins * 2 ];
 
             for ( int binCount = 0; binCount < numVisibleBins; binCount++ )
@@ -188,8 +190,9 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
         }
         else // mDetailLevel == VERY_HIGH
         {
+#if QT_VERSION < 0x040700  // Qt 4.6 or less
             painter->setRenderHint( QPainter::Antialiasing, true );
-
+#endif
             QPointF points[ numVisibleFrames ];
             const float* sampleData = m_sampleBuffer->getReadPointer( chanNum, firstVisibleFrame );
 

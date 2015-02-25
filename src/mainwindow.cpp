@@ -285,6 +285,11 @@ void MainWindow::setupUI()
     m_ui->setupUi( this );
     m_graphicsScene = m_ui->waveGraphicsView->getScene();
 
+#if QT_VERSION < 0x040700
+    // This must be set in Qt 4.6, otherwise the proprietary AMD video driver may cause the CPU to max out when scrolling
+    m_ui->waveGraphicsView->setFrameShape( QFrame::Panel );
+#endif
+
 
     // Set up interaction mode buttons to work like radio buttons
     m_interactionGroup = new QActionGroup( this );

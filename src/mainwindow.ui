@@ -455,7 +455,7 @@
     <item>
      <widget class="WaveGraphicsView" name="waveGraphicsView">
       <property name="frameShape">
-       <enum>QFrame::Panel</enum>
+       <enum>QFrame::NoFrame</enum>
       </property>
      </widget>
     </item>
