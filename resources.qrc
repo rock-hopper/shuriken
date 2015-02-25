@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>resources/akai/Template.pgm</file>
         <file>resources/docs/about.html</file>
-        <file>resources/docs/index.html</file>
         <file>resources/images/application-exit.png</file>
         <file>resources/images/document-close.png</file>
         <file>resources/images/document-export.png</file>
@@ -30,5 +29,6 @@
         <file>resources/images/zoom-out.png</file>
         <file>resources/images/view-refresh_blue.png</file>
         <file>resources/images/user-away-extended.png</file>
+        <file>resources/docs/help.html</file>
     </qresource>
 </RCC>

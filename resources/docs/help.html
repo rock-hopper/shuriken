@@ -20,32 +20,32 @@ audio and MIDI behind the scenes.</p>
 <p><a href="http://aubio.org/">http://aubio.org/</a></p>
 <p><a href="http://www.breakfastquay.com/rubberband/">http://www.breakfastquay.com/rubberband/</a></p>
 <p><a href="http://www.juce.com/">http://www.juce.com/</a></p>
+
+<br>
+
+<h1>Contents</h1>
+
+<ul>
+<li><p><a href="#Audio_Setup">Audio Setup</a></p></li>
+<li><p><a href="#Importing_Audio_Files">Importing Audio Files</a></p></li>
+<li><p><a href="#Slice_n_Dice">Slice 'n' Dice</a></p></li>
+<li><p><a href="#Detection_Options">Detection Options</a></p></li>
+<li><p><a href="#Calculating_BPM">Calculating BPM</a></p></li>
+<li><p><a href="#Time_Stretching">Time Stretching</a></p></li>
+<ul>
+<li><p><a href="#Global_Time_Stretch">Global Time Stretch</a></p></li>
+<li><p><a href="#Selective_Time_Stretch">Selective Time Stretch</a></p></li>
+<li><p><a href="#Stretch_Options">Stretch Options</a></p></li>
+<li><p><a href="#JACK_Sync">JACK Sync</a></p></li>
+</ul>
+<li><p><a href="#Export_Options">Export Options</a></p></li>
+<li><p><a href="#Session_Management">Session Management</a></p></li>
+<li><p><a href="#Hints__Tips">Hints &amp; Tips</a></p></li>
+</ul>
 <p><br></p>
 
 
-<h2>Contents</h2>
-
-<p><a href="#Audio_Setup">Audio Setup</a></p>
-
-<p><a href="#Importing_Audio_Files">Importing Audio Files</a></p>
-
-<p><a href="#Slice_n_Dice">Slice 'n' Dice</a></p>
-
-<p><a href="#Detection_Options">Detection Options</a></p>
-
-<p><a href="#Calculating_BPM">Calculating BPM</a></p>
-
-<p><a href="#Time_Stretching">Time Stretching</a></p>
-
-<p><a href="#Export_Options">Export Options</a></p>
-
-<p><a href="#Session_Management">Session Management</a></p>
-
-<p><a href="#Hints__Tips">Hints &amp; Tips</a></p>
-<p><br></p>
-
-
-<h2><a name="Audio_Setup"></a>Audio Setup</h2>
+<h1><a name="Audio_Setup"></a>Audio Setup</h1>
 
 <p>The Audio Setup dialogue, launched from the Options menu, allows you to
 select your preferred sound card and audio back-end (ALSA, JACK,
@@ -54,7 +54,7 @@ set up correctly with the aid of a simple test tone.</p>
 <p><br></p>
 
 
-<h2><a name="Importing_Audio_Files"></a>Importing Audio Files</h2>
+<h1><a name="Importing_Audio_Files"></a>Importing Audio Files</h1>
 
 <p>To get started with Shuriken, first import an audio file.&nbsp; Audio samples are loaded
 into RAM before editing so the original files always remain untouched.</p>
@@ -65,21 +65,62 @@ For full details of supported file formats please see: <a href="http://www.mega-
 <p>Shuriken also comes with sndlib statically built in.&nbsp; sndlib can read the
 following file formats:</p>
 
-<p>NeXT/Sun/DEC/Afsp, AIFF/AIFC, RIFF (WAV), RF64, IRCAM (old style),
-NIST-sphere, CAFF, no header ("raw"), 8SVX (IFF), EBICSF, INRS, ESPS,
-SPPACK, ADC (OGI), AVR, VOC, PVF, Sound Tools, Turtle Beach SMP,
-SoundFont 2.0, Sound Designer I, PSION, MAUD, Kurzweil 2000, Gravis
-Ultrasound, ASF, PAF, CSL, Comdisco SPW, Goldwave sample, omf,
-quicktime, sox, Sonic Foundry, SBStudio II, Delusion digital,
-Digiplayer ST3, Farandole Composer WaveSample, Ultratracker WaveSample,
-Sample Dump exchange, Yamaha SY85, SY99, and TX16, Covox v8, AVI,
-Impulse tracker, Korg, Akai, Turtle Beach, Matlab-5.</p>
+<p><ul>
+<li>NeXT/Sun/DEC/Afsp</li>
+<li>AIFF/AIFC</li>
+<li>RIFF (WAV)</li>
+<li>RF64</li>
+<li>IRCAM (old style)</li>
+<li>NIST-sphere</li>
+<li>CAFF</li>
+<li>no header ("raw")</li>
+<li>8SVX (IFF)</li>
+<li>EBICSF</li>
+<li>INRS</li>
+<li>ESPS</li>
+<li>SPPACK</li>
+<li>ADC (OGI)</li>
+<li>AVR</li>
+<li>VOC</li>
+<li>PVF</li>
+<li>Sound Tools</li>
+<li>Turtle Beach SMP</li>
+<li>SoundFont 2.0</li>
+<li>Sound Designer I</li>
+<li>PSION</li>
+<li>MAUD</li>
+<li>Kurzweil 2000</li>
+<li>Gravis Ultrasound</li>
+<li>ASF</li>
+<li>PAF</li>
+<li>CSL</li>
+<li>Comdisco SPW</li>
+<li>Goldwave sample</li>
+<li>omf</li>
+<li>quicktime</li>
+<li>sox</li>
+<li>Sonic Foundry</li>
+<li>SBStudio II</li>
+<li>Delusion digital</li>
+<li>Digiplayer ST3</li>
+<li>Farandole Composer WaveSample</li>
+<li>Ultratracker WaveSample</li>
+<li>Sample Dump exchange</li>
+<li>Yamaha SY85, SY99, and TX16</li>
+<li>Covox v8</li>
+<li>AVI</li>
+<li>Impulse tracker</li>
+<li>Korg</li>
+<li>Akai</li>
+<li>Turtle Beach</li>
+<li>Matlab-5</li>
+</ul></p>
 
 <p>For more info on sndlib please see: <a href="https://ccrma.stanford.edu/software/snd/sndlib/">https://ccrma.stanford.edu/software/snd/sndlib/</a></p>
 <p><br></p>
 
 
-<h2><a name="Slice_n_Dice"></a>Slice 'n' Dice</h2>
+<h1><a name="Slice_n_Dice"></a>Slice 'n' Dice</h1>
 
 <p>Once an audio file has been imported, its waveform is displayed in the
 main window.&nbsp; Clicking on &#8220;Find Onsets&#8221; will place a slice point
@@ -97,13 +138,13 @@ audition each section of audio before slicing.</p>
 assigned to a separate MIDI key starting from middle C (C4) and
 ascending chromatically.&nbsp; You can drag an audio slice left or
 right to assign it to a different key.&nbsp; Slices can be reordered
-and joined together, and joined slices can be split.&nbsp; To select
-multiple slices, click &#8220;Select&#8221; on the toolbar then drag the mouse over
+and joined together by toggling the &#8220;Slice&#8221; button.&nbsp; To select
+multiple slices, click &#8220;Multi Select&#8221; on the toolbar then drag the mouse over
 the waveform.</p>
 <p><br></p>
 
 
-<h2><a name="Detection_Options"></a>Detection Options</h2>
+<h1><a name="Detection_Options"></a>Detection Options</h1>
 
 <p>&#8220;Detection Method&#8221;, &#8220;Window Size&#8221;, &#8220;Hop Size&#8221;, and &#8220;Threshold&#8221; affect
 the accuracy of aubio's onset and beat detection routines.&nbsp; The default settings should
@@ -136,20 +177,26 @@ raising it will result in fewer.</dd>
 <p><br></p>
 
 
-<h2><a name="Calculating_BPM"></a>Calculating BPM</h2>
+<h1><a name="Calculating_BPM"></a>Calculating BPM</h1>
 
-<p>The time signature and loop length widgets
+<p>The &#8220;Time Signature&#8221; and &#8220;Length&#8221; widgets
 allow you to specify the length of an audio loop in bars or beats.&nbsp; Shuriken 
 then does the appropriate maths to calculate the BPM once the &#8220;Calc&#8221; button is clicked.</p>
-
-<p>If the loop markers are enabled, Shuriken assumes you are specifying the no. of bars/beats between the markers.</p>
 <p><br></p>
 
 
-<h2><a name="Time_Stretching"></a>Time Stretching</h2>
+<h1><a name="Time_Stretching"></a>Time Stretching</h1>
 
 <p>The Rubber Band library takes care of time stretching duties within
-Shuriken and provides two mode of operation: offline and real-time.</p>
+Shuriken and provides two modes of operation: offline and real-time.&nbsp; To switch between 
+offline and real-time mode, click &#8220;Stretch Options&#8221;
+then toggle the appropriate radio button.</p>
+
+<br>
+
+<h2><a name="Global_Time_Stretch"></a>Global Time Stretch</h2>
+
+<p>Global time stretching allows you to stretch/squeeze the entire audio loop.</p>
 
 <p>In offline mode, first click the &#8220;Calc&#8221; button (or manually enter the
 current BPM in the &#8220;Original BPM&#8221; box) then enter the desired BPM in
@@ -157,15 +204,30 @@ the &#8220;New BPM&#8221; box and click &#8220;Apply&#8221;.</p>
 
 <p>In real-time mode, enter values into the &#8220;Original BPM&#8221; and &#8220;New BPM&#8221;
 boxes as before, but now the tempo of the audio can be changed on the
-fly &#8211; try clicking the up and down arrows on the &#8220;New BPM&#8221; box.</p>
-
-<p>To switch between offline and real-time mode, click &#8220;Stretch Options&#8221;
-then toggle the appropriate radio button.&nbsp; The other options
-available are as follows (taken from the Rubber Band documentation):</p>
+fly.&nbsp; Try clicking the up and down arrows on the &#8220;New BPM&#8221; box.</p>
 
 <br>
 
-<h4>Stretch Profile</h4>
+<h2><a name="Selective_Time_Stretch"></a>Selective Time Stretch</h2>
+
+<p>Selective time stretching allows you to stretch/squeeze individual audio slices.&nbsp; You 
+must be in real-time mode and the waveform must be sliced 
+before the &#8220;Selective Time Stretch&#8221; button is enabled.&nbsp; Toggling this button will display 
+markers between each audio slice.&nbsp; Simply drag a marker to stretch/squeeze the audio either 
+side of it.&nbsp; Markers can be snapped to beats or divisions of a beat by selecting the 
+desired setting from the &#8220;Snap&#8221; combo box (BPM must be set first).&nbsp; Toggle the &#8220;Selective 
+Time Stretch&#8221; button again to leave this mode.</p>
+
+<p>Note that un-slicing the waveform or switching to offline mode after working in selective time 
+stretch mode causes any stretches to be rendered offline.</p>
+
+<br>
+
+<h2><a name="Stretch_Options"></a>Stretch Options</h2>
+
+<p>Options to fine-tune Rubber Band's operation are available as follows (taken from the Rubber Band documentation):</p>
+
+<h3>Stretch Profile</h3>
 
 Control the profile used for variable time
 stretching.&nbsp; Rubber Band always adjusts the stretch profile to
@@ -188,7 +250,7 @@ is always used when running in real-time mode.</dd>
 
 <br>
 
-<h4>Transients</h4>
+<h3>Transients</h3>
 
 Control the component frequency phase-reset mechanism that
 may be used at transient points to provide clarity and realism to
@@ -215,7 +277,7 @@ either of the other transients options.</dd>
 
 <br>
 
-<h4>Phase</h4>
+<h3>Phase</h3>
 
 Control the adjustment of component frequency phases from one
 analysis window to the next during non-transient segments.
@@ -234,7 +296,7 @@ phasier sound.</dd>
 
 <br>
 
-<h4>Window Size</h4>
+<h3>Window Size</h3>
 
 Control the window size for FFT (Fast Fourier Transform)
 processing.&nbsp; The window size actually used will depend on many
@@ -257,7 +319,7 @@ sound at the expense of clarity and timing.</dd>
 
 <br>
 
-<h4>Formant</h4>
+<h3>Formant</h3>
 
 Control the handling of formant shape (spectral envelope) when
 pitch-shifting.&nbsp; Only effective when pitch correction is turned off.
@@ -275,7 +337,7 @@ instrument.</dd>
 
 <br>
 
-<h4>Pitch Shifting</h4>
+<h3>Pitch Shifting</h3>
 
 Control the method used for pitch shifting (only effective when pitch 
 correction is turned off).&nbsp; These
@@ -301,7 +363,7 @@ CPU than the others in the case where the pitch scale is exactly 1.0.</dd>
 
 <br>
 
-<h4>JACK Sync</h4>
+<h2><a name="JACK_Sync"></a>JACK Sync</h2>
 
 <p>If &#8220;Audio Back-end&#8221; has been set to JACK (under the &#8220;Audio Setup&#8221; tab)
 then the &#8220;JACK Sync&#8221; option will also be made available.&nbsp; Use this
@@ -309,12 +371,12 @@ option to synchronise the BPM of the audio with tempo changes in a
 sequencer.&nbsp; For this to work, you need to ensure that the
 sequencer is actually sending tempo change information via JACK (e.g.
 in Ardour 3 click the &#8220;external positional sync&#8221; button to change its
-text from &#8220;Internal&#8221; to &#8220;JACK&#8221;).&nbsp; Original BPM has to be fairly
+text from &#8220;Internal&#8221; to &#8220;JACK&#8221;).&nbsp; &#8220;Original BPM&#8221; has to be fairly
 accurate for this to work well, so you may need to adjust it manually.</p>
 <p><br></p>
 
 
-<h2><a name="Export_Options"></a>Export Options</h2>
+<h1><a name="Export_Options"></a>Export Options</h1>
 
 <p>Shuriken allows audio slices to be exported as individual audio files in WAV, AIFF, AU, 
 FLAC or Ogg format, with options for encoding (e.g. 16-bit PCM) and sample rate.&nbsp; There are 
@@ -327,11 +389,11 @@ would have a tempo of 70 quarter notes per minute.</p>
 <p><br></p>
 
 
-<h2><a name="Session_Management"></a>Session Management</h2>
+<h1><a name="Session_Management"></a>Session Management</h1>
 
-<p>Shuriken has support for LADISH L1 session management.  On receiving the SIGUSR1 Unix signal, 
-Shuriken will save the current project.  On receiving the SIGTERM signal, Shuriken will ask 
-the user if any unsaved changes should be saved, then exit cleanly.  Shuriken can deal with 
+<p>Shuriken has support for LADISH L1 session management.&nbsp; On receiving the SIGUSR1 Unix signal, 
+Shuriken will save the current project.&nbsp; On receiving the SIGTERM signal, Shuriken will ask 
+the user if any unsaved changes should be saved, then exit cleanly.&nbsp; Shuriken can deal with 
 these signals being sent in quick succession and in any order; any save operation will 
 complete before the application shuts down.</p>
 
@@ -345,16 +407,17 @@ in the Options dialogue otherwise Shuriken will terminate when you try to save t
 <p><br></p>
 
 
-<h2><a name="Hints__Tips"></a>Hints &amp; Tips</h2>
+<h1><a name="Hints__Tips"></a>Hints &amp; Tips</h1>
 
-<p>Zoom the waveform in and out using the keyboard shortcuts &#8220;Ctrl++&#8221; and
-&#8220;Ctrl+-&#8221; respectively (on a UK keyboard you'll need to use the + key on
-the keypad if you want to avoid pressing &#8220;Ctrl+Shift++&#8221;).&nbsp;
-&#8220;Ctrl+0&#8221; zooms the waveform out to its original size.</p>
+<p>The waveform may be zoomed in and out using the mouse wheel.&nbsp; Alternatively, 
+zooming may be controlled using the keyboard shortcuts Ctrl++ and 
+Ctrl+- (on a UK keyboard you'll need to use the + key on
+the keypad if you want to avoid pressing Ctrl+Shift++).&nbsp;
+Ctrl+0 zooms the waveform out to its original size.</p>
 
 <p>The function of the mouse pointer within the waveform display can be
-changed with the keyboard shortcuts 1, 2, and 3 to switch between Move,
-Select, and Audition respectively.</p>
+changed with the keyboard shortcuts 1, 2, and 3 to switch between &#8220;Select/Move&#8221;,
+&#8220;Multi Select&#8221;, and &#8220;Audition&#8221; respectively.</p>
 
 <p>If you find that JACK's DSP load is too high when time stretching in
 real-time mode, try setting &#8220;Window Size&#8221; to &#8220;Short&#8221; in the time
