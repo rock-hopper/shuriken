@@ -9,14 +9,14 @@ Main features:
 - calculate BPM
 - time stretching in offline or real-time mode (via rubberband)
 - sync BPM of a drum loop to JACK transport
-- slice and move waveform sections around
+- slice and un-slice waveform
 - each audio slice automatically assigned to its own MIDI key
-- join, split, and delete audio slices
+- move and delete audio slices
 - apply gain, gain ramp, normalise, and reverse
-- loop playback mode
+- loop audio playback
 - ALSA and JACK MIDI
 - LADISH L1 session management (also compatible with NSM via nsm-proxy)
-- zoom waveform in and out
+- zoom waveform in and out with mouse wheel
 - import a wide range of audio file formats (via libsndfile and the built-in sndlib library)
 - export audio slices in WAV, AIFF, AU, FLAC, or Ogg format, with options for encoding and sample rate
 - export Hydrogen Drumkit, SFZ, Akai .pgm, or MIDI file
