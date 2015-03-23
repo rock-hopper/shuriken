@@ -1,7 +1,7 @@
 /*
   This file is part of Shuriken Beat Slicer.
 
-  Copyright (C) 2014 Andrew M Taylor <a.m.taylor303@gmail.com>
+  Copyright (C) 2014, 2015 Andrew M Taylor <a.m.taylor303@gmail.com>
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -36,12 +36,12 @@ public:
     SignalListener( QObject* parent = NULL );
 
 public:
-    static void sigusr1Handler( int sigNum );
-    static void sigtermHandler( int sigNum );
+    static void sigusr1Callback( int sigNum );
+    static void sigtermCallback( int sigNum );
 
 public slots:
-    void handleSigusr1();
-    void handleSigterm();
+    void handleSigUsr1();
+    void handleSigTerm();
 
 signals:
     void save();

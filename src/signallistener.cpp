@@ -1,7 +1,7 @@
 /*
   This file is part of Shuriken Beat Slicer.
 
-  Copyright (C) 2014 Andrew M Taylor <a.m.taylor303@gmail.com>
+  Copyright (C) 2014, 2015 Andrew M Taylor <a.m.taylor303@gmail.com>
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -23,7 +23,7 @@
 #include "signallistener.h"
 #include <unistd.h>
 #include <sys/socket.h>
-//#include <QDebug>
+#include <QDebug>
 
 
 int SignalListener::sigusr1SocketID[ 2 ];
@@ -39,23 +39,23 @@ SignalListener::SignalListener( QObject* parent ) :
 {
     if ( socketpair( AF_UNIX, SOCK_STREAM, 0, sigusr1SocketID ) )
     {
-        qFatal( "Couldn't create SIGUSR1 socketpair" );
+        qCritical( "Couldn't create SIGUSR1 socketpair" );
     }
 
     if ( socketpair( AF_UNIX, SOCK_STREAM, 0, sigtermSocketID ) )
     {
-        qFatal( "Couldn't create SIGTERM socketpair" );
+        qCritical( "Couldn't create SIGTERM socketpair" );
     }
 
     m_sigusr1Notifier = new QSocketNotifier( sigusr1SocketID[ READ ], QSocketNotifier::Read, this );
 
     QObject::connect( m_sigusr1Notifier, SIGNAL( activated(int) ),
-                      this, SLOT( handleSigusr1() ) );
+                      this, SLOT( handleSigUsr1() ) );
 
     m_sigtermNotifier = new QSocketNotifier( sigtermSocketID[ READ ], QSocketNotifier::Read, this );
 
     QObject::connect( m_sigtermNotifier, SIGNAL( activated(int) ),
-                      this, SLOT( handleSigterm() ) );
+                      this, SLOT( handleSigTerm() ) );
 }
 
 
@@ -63,7 +63,7 @@ SignalListener::SignalListener( QObject* parent ) :
 //==================================================================================================
 // Public Static:
 
-void SignalListener::sigusr1Handler( int /* sigNum */ )
+void SignalListener::sigusr1Callback( int /* sigNum */ )
 {
     char c = 1;
     write( sigusr1SocketID[ WRITE ], &c, sizeof( c ) );
@@ -71,7 +71,7 @@ void SignalListener::sigusr1Handler( int /* sigNum */ )
 
 
 
-void SignalListener::sigtermHandler( int /* sigNum */ )
+void SignalListener::sigtermCallback( int /* sigNum */ )
 {
     char c = 1;
     write( sigtermSocketID[ WRITE ], &c, sizeof( c ) );
@@ -82,8 +82,10 @@ void SignalListener::sigtermHandler( int /* sigNum */ )
 //==================================================================================================
 // Public Slots:
 
-void SignalListener::handleSigusr1()
+void SignalListener::handleSigUsr1()
 {
+    qDebug() << "handleSigUsr1";
+
     m_sigusr1Notifier->setEnabled( false );
     char c;
     read( sigusr1SocketID[ READ ], &c, sizeof( c ) );
@@ -98,14 +100,18 @@ void SignalListener::handleSigusr1()
 
 
 
-void SignalListener::handleSigterm()
+void SignalListener::handleSigTerm()
 {
+    qDebug() << "handleSigTerm";
+
     m_sigtermNotifier->setEnabled( false );
     char c;
     read( sigtermSocketID[ READ ], &c, sizeof( c ) );
 
     m_isAppQuitting = true;
     emit quit();
+
+    qDebug() << "quit signal sent";
 
     m_sigtermNotifier->setEnabled( true );
 }

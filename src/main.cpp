@@ -1,7 +1,7 @@
 /*
   This file is part of Shuriken Beat Slicer.
 
-  Copyright (C) 2014 Andrew M Taylor <a.m.taylor303@gmail.com>
+  Copyright (C) 2014, 2015 Andrew M Taylor <a.m.taylor303@gmail.com>
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -24,10 +24,41 @@
 #include "mainwindow.h"
 #include <signal.h>
 #include "signallistener.h"
-#include <QThread>
-#include <QFileInfo>
-#include <QDesktopWidget>
-#include <QDebug>
+#include "JuceHeader.h"
+#include <QtDebug>
+#include <QFile>
+#include <QTextStream>
+
+
+void messageHandler( QtMsgType type, const char* message )
+{
+    QString text;
+
+    switch ( type )
+    {
+    case QtDebugMsg:
+        text = QString( "Debug: %1" ).arg( message );
+        break;
+    case QtWarningMsg:
+        text = QString( "Warning: %1" ).arg( message );
+        break;
+    case QtCriticalMsg:
+        text = QString( "Critical: %1" ).arg( message );
+        break;
+    case QtFatalMsg:
+        text = QString( "Fatal: %1" ).arg( message );
+        abort();
+    }
+
+    QFile outFile( "/dev/shm/debuglog.txt" );
+
+    if ( outFile.open( QIODevice::WriteOnly | QIODevice::Append ) )
+    {
+        QTextStream textStream( &outFile );
+        textStream << text << endl;
+    }
+}
+
 
 
 static void setupSignalHandlers()
@@ -35,107 +66,53 @@ static void setupSignalHandlers()
     struct sigaction sigusr1Action;
     struct sigaction sigtermAction;
 
-    sigusr1Action.sa_handler = SignalListener::sigusr1Handler;
+    sigusr1Action.sa_handler = SignalListener::sigusr1Callback;
     sigemptyset( &sigusr1Action.sa_mask );
     sigusr1Action.sa_flags = SA_RESTART;
 
     if ( sigaction( SIGUSR1, &sigusr1Action, NULL ) > 0 )
     {
-        std::cerr << "Failed to set up signal handler for SIGUSR1 \n";
+        qCritical() << "Failed to set up signal handler for SIGUSR1";
     }
 
-    sigtermAction.sa_handler = SignalListener::sigtermHandler;
+    sigtermAction.sa_handler = SignalListener::sigtermCallback;
     sigemptyset( &sigtermAction.sa_mask );
     sigtermAction.sa_flags = SA_RESTART;
 
     if ( sigaction( SIGTERM, &sigtermAction, NULL ) > 0 )
     {
-        std::cerr << "Failed to set up signal handler for SIGTERM \n";
+        qCritical() << "Failed to set up signal handler for SIGTERM";
     }
 }
+
 
 
 int main( int argc, char* argv[] )
 {
     QApplication app( argc, argv );
+
+    // Register custom message handler; useful for debugging when Shuriken is launched by nsm
+    //qInstallMsgHandler( messageHandler );
+
+    // Create main window
     MainWindow window;
-    SignalListener listener;
-    QThread listenerThread;
 
-
-    // Set up signal listeners
-    listenerThread.start();
-    listener.moveToThread( &listenerThread );
+    // Set up signal handlers
+    SignalListener signalListener;
 
     setupSignalHandlers();
 
-    QObject::connect( &listener, SIGNAL( save() ),
-                      &window, SLOT( on_actionSave_Project_triggered() ),
-                      Qt::BlockingQueuedConnection );
+    QObject::connect( &signalListener, SIGNAL( save() ),
+                      &window, SLOT( on_actionSave_Project_triggered() ) );
 
-    QObject::connect( &listener, SIGNAL( quit() ),
-                      &window, SLOT( close() ),
-                      Qt::BlockingQueuedConnection );
+    QObject::connect( &signalListener, SIGNAL( quit() ),
+                      &window, SLOT( on_actionQuit_triggered() ) );
 
-
-    // Make sure window isn't larger than desktop
-    const int desktopWidth = app.desktop()->availableGeometry().width();
-    const int desktopHeight = app.desktop()->availableGeometry().height();
-
-    const int frameWidth = window.frameSize().width();
-    const int frameHeight = window.frameSize().height();
-
-    int windowWidth = window.size().width();
-    int windowHeight = window.size().height();
-
-    int maxWidth = window.maximumWidth();
-    int maxHeight = window.maximumHeight();
-
-    if ( frameWidth > desktopWidth )
-    {
-        windowWidth = desktopWidth - ( frameWidth - windowWidth );
-        maxWidth = windowWidth;
-    }
-
-    if ( frameHeight > desktopHeight )
-    {
-        windowHeight = desktopHeight - ( frameHeight - windowHeight );
-        maxHeight = windowHeight;
-    }
-
-    window.resize( windowWidth, windowHeight );
-    window.setMaximumSize( maxWidth, maxHeight );
-
-    // Centre window in desktop
-    window.setGeometry
-    (
-        QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, window.size(), app.desktop()->availableGeometry() )
-    );
-
-    // Show window
+    // Show main window
     window.show();
 
-
-    // Try to open project if a file name has been passed on the command line
-    if ( app.arguments().size() > 1 )
-    {
-        QString filePath = app.arguments().at( 1 );
-        QFileInfo projFile( filePath );
-
-        if ( projFile.exists() )
-        {
-            window.openProject( filePath );
-        }
-    }
-
-
-    // Start main event loop
+    // Start application event loop
     const int exitValue = app.exec();
-
-
-    // Wait for listener thread to finish before exiting
-    listenerThread.quit();
-    listenerThread.wait( 2000 );
 
     return exitValue;
 }

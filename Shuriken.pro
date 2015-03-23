@@ -175,7 +175,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/confirmbpmdialog.cpp \
     src/samplebuffer.cpp \
     src/offlinetimestretcher.cpp \
-    src/wavegraphicsscene.cpp
+    src/wavegraphicsscene.cpp \
+    src/nsmlistenerthread.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -391,7 +392,9 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/midifilehandler.h \
     src/confirmbpmdialog.h \
     src/offlinetimestretcher.h \
-    src/wavegraphicsscene.h
+    src/wavegraphicsscene.h \
+    src/nonlib/nsm.h \
+    src/nsmlistenerthread.h
 FORMS += src/mainwindow.ui \
     src/optionsdialog.ui \
     src/helpform.ui \
@@ -414,7 +417,8 @@ LIBS += -Llib \
     -lpthread \
     -lrt \
     -lsndfile \
-    -lsamplerate
+    -lsamplerate \
+    -llo
 unix:DEFINES += "LINUX=1"
 CONFIG(debug, debug|release) { 
     DESTDIR = $$OUT_PWD/debug

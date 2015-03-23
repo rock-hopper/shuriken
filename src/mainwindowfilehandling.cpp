@@ -33,11 +33,150 @@
 #include "akaifilehandler.h"
 #include "midifilehandler.h"
 #include "confirmbpmdialog.h"
-#include <QDebug>
+//#include <QDebug>
 
 
 //==================================================================================================
-// Public:
+// Private:
+
+void MainWindow::saveProject( const QString filePath, const bool isNsmSessionExport )
+{
+    if ( m_optionsDialog == NULL )
+    {
+        return;
+    }
+
+    const QString tempDirPath = m_optionsDialog->getTempDirPath();
+
+    if ( tempDirPath.isEmpty() )
+    {
+        MessageBoxes::showWarningDialog( tr("Temp directory is invalid!"),
+                                         tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
+        return;
+    }
+
+    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+    const QString zipFileName = QFileInfo( filePath ).fileName();
+    const QString projectName = QFileInfo( filePath ).baseName();
+
+    QDir tempDir( tempDirPath );
+
+    // Should not happen, but just as a precaution...
+    if ( tempDir.exists( projectName ) )
+    {
+        tempDir.rename( projectName, projectName + ".bak" );
+    }
+
+    tempDir.mkdir( projectName );
+
+    QDir projTempDir( tempDir.absoluteFilePath( projectName ) );
+
+    const QString zipFilePath = tempDir.absoluteFilePath( zipFileName );
+
+    const QString xmlFilePath = projTempDir.absoluteFilePath( "shuriken.xml" );
+
+    bool isOkToContinue = true;
+    QStringList audioFileNames;
+
+    for ( int i = 0; i < m_sampleBufferList.size(); i++ )
+    {
+        const QString audioFilePath = m_fileHandler.saveAudioFile( projTempDir.absolutePath(),
+                                                                   "audio" + QString::number( i ),
+                                                                   m_sampleBufferList.at( i ),
+                                                                   m_sampleHeader->sampleRate,
+                                                                   m_sampleHeader->sampleRate,
+                                                                   AudioFileHandler::SAVE_FORMAT );
+
+        if ( ! audioFilePath.isEmpty() )
+        {
+            audioFileNames << QFileInfo( audioFilePath ).fileName();
+        }
+        else
+        {
+            isOkToContinue = false;
+            break;
+        }
+    }
+
+    if ( isOkToContinue )
+    {
+        TextFileHandler::ProjectSettings settings;
+
+        settings.projectName = projectName;
+
+        if ( m_rubberbandAudioSource != NULL )
+        {
+            const int startMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
+
+            for ( int i = 0; i < m_sampleBufferList.size(); i++ )
+            {
+                settings.midiNotes << startMidiNote + i;
+                settings.noteTimeRatios << m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + i );
+            }
+
+            settings.originalBpm = m_ui->doubleSpinBox_OriginalBPM->value();
+            settings.newBpm = m_ui->doubleSpinBox_NewBPM->value();
+            settings.appliedBpm = m_appliedBPM;
+        }
+        else
+        {
+            settings.originalBpm = m_appliedBPM;
+            settings.newBpm = m_appliedBPM;
+            settings.appliedBpm = m_appliedBPM;
+        }
+
+        settings.isTimeStretchChecked = m_ui->checkBox_TimeStretch->isChecked();
+        settings.isPitchCorrectionChecked = m_ui->checkBox_PitchCorrection->isChecked();
+        settings.options = m_optionsDialog->getStretcherOptions();
+        settings.isJackSyncChecked = m_optionsDialog->isJackSyncEnabled();
+
+        settings.timeSigNumerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
+        settings.timeSigDenominator = m_ui->comboBox_TimeSigDenominator->currentText().toInt();
+        settings.length = m_ui->spinBox_Length->value();
+        settings.units = m_ui->comboBox_Units->currentIndex();
+
+        settings.audioFileNames = audioFileNames;
+
+        settings.slicePointFrameNums = m_graphicsScene->getSlicePointFrameNums();
+
+        TextFileHandler::createProjectXmlFile( xmlFilePath, settings );
+
+        Zipper::compress( projTempDir.absolutePath(), zipFilePath );
+
+        QFile::remove( filePath );
+        QFile::copy( zipFilePath, filePath );
+        QFile::remove( zipFilePath );
+        File( projTempDir.absolutePath().toLocal8Bit().data() ).deleteRecursively();
+
+        if ( m_nsmThread != NULL )
+        {
+            if ( m_undoStack.isClean() && ! isNsmSessionExport )
+            {
+                m_nsmThread->sendMessage( NsmListenerThread::MSG_IS_CLEAN );
+                m_ui->actionSave_Project->setEnabled( false );
+            }
+        }
+        else
+        {
+            m_currentProjectFilePath = filePath;
+        }
+
+        if ( ! isNsmSessionExport )
+        {
+            m_undoStack.setClean();
+        }
+
+        QApplication::restoreOverrideCursor();
+    }
+    else // An error occurred while writing the audio files
+    {
+        QApplication::restoreOverrideCursor();
+        MessageBoxes::showWarningDialog( m_fileHandler.getLastErrorTitle(), m_fileHandler.getLastErrorInfo() );
+    }
+}
+
+
 
 void MainWindow::openProject( const QString filePath )
 {
@@ -219,7 +358,11 @@ void MainWindow::openProject( const QString filePath )
             // Clean up temp dir
             File( projTempDir.absolutePath().toLocal8Bit().data() ).deleteRecursively();
 
-            m_currentProjectFilePath = filePath;
+            // Store file path for later use unless under nsm management
+            if ( m_nsmThread == NULL )
+            {
+                m_currentProjectFilePath = filePath;
+            }
 
             m_ui->statusBar->showMessage( tr("Project: ") + projectName );
 
@@ -240,9 +383,6 @@ void MainWindow::openProject( const QString filePath )
 }
 
 
-
-//==================================================================================================
-// Private:
 
 void MainWindow::exportAs( const QString tempDirPath,
                            const QString outputDirPath,
@@ -400,137 +540,13 @@ void MainWindow::exportAs( const QString tempDirPath,
 
 
 
-void MainWindow::saveProject( const QString filePath )
-{
-    if ( m_optionsDialog == NULL )
-    {
-        return;
-    }
-
-    const QString tempDirPath = m_optionsDialog->getTempDirPath();
-
-    if ( tempDirPath.isEmpty() )
-    {
-        MessageBoxes::showWarningDialog( tr("Temp directory is invalid!"),
-                                         tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
-        return;
-    }
-
-    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
-
-    const QString zipFileName = QFileInfo( filePath ).fileName();
-    const QString projectName = QFileInfo( filePath ).baseName();
-
-    QDir tempDir( tempDirPath );
-
-    // Should not happen, but just as a precaution...
-    if ( tempDir.exists( projectName ) )
-    {
-        tempDir.rename( projectName, projectName + ".bak" );
-    }
-
-    tempDir.mkdir( projectName );
-
-    QDir projTempDir( tempDir.absoluteFilePath( projectName ) );
-
-    const QString zipFilePath = tempDir.absoluteFilePath( zipFileName );
-
-    const QString xmlFilePath = projTempDir.absoluteFilePath( "shuriken.xml" );
-
-    bool isOkToContinue = true;
-    QStringList audioFileNames;
-
-    for ( int i = 0; i < m_sampleBufferList.size(); i++ )
-    {
-        const QString audioFilePath = m_fileHandler.saveAudioFile( projTempDir.absolutePath(),
-                                                                   "audio" + QString::number( i ),
-                                                                   m_sampleBufferList.at( i ),
-                                                                   m_sampleHeader->sampleRate,
-                                                                   m_sampleHeader->sampleRate,
-                                                                   AudioFileHandler::SAVE_FORMAT );
-
-        if ( ! audioFilePath.isEmpty() )
-        {
-            audioFileNames << QFileInfo( audioFilePath ).fileName();
-        }
-        else
-        {
-            isOkToContinue = false;
-            break;
-        }
-    }
-
-    if ( isOkToContinue )
-    {
-        TextFileHandler::ProjectSettings settings;
-
-        settings.projectName = projectName;
-
-        if ( m_rubberbandAudioSource != NULL )
-        {
-            const int startMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
-
-            for ( int i = 0; i < m_sampleBufferList.size(); i++ )
-            {
-                settings.midiNotes << startMidiNote + i;
-                settings.noteTimeRatios << m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + i );
-            }
-
-            settings.originalBpm = m_ui->doubleSpinBox_OriginalBPM->value();
-            settings.newBpm = m_ui->doubleSpinBox_NewBPM->value();
-            settings.appliedBpm = m_appliedBPM;
-        }
-        else
-        {
-            settings.originalBpm = m_appliedBPM;
-            settings.newBpm = m_appliedBPM;
-            settings.appliedBpm = m_appliedBPM;
-        }
-
-        settings.isTimeStretchChecked = m_ui->checkBox_TimeStretch->isChecked();
-        settings.isPitchCorrectionChecked = m_ui->checkBox_PitchCorrection->isChecked();
-        settings.options = m_optionsDialog->getStretcherOptions();
-        settings.isJackSyncChecked = m_optionsDialog->isJackSyncEnabled();
-
-        settings.timeSigNumerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
-        settings.timeSigDenominator = m_ui->comboBox_TimeSigDenominator->currentText().toInt();
-        settings.length = m_ui->spinBox_Length->value();
-        settings.units = m_ui->comboBox_Units->currentIndex();
-
-        settings.audioFileNames = audioFileNames;
-
-        settings.slicePointFrameNums = m_graphicsScene->getSlicePointFrameNums();
-
-        TextFileHandler::createProjectXmlFile( xmlFilePath, settings );
-
-        Zipper::compress( projTempDir.absolutePath(), zipFilePath );
-
-        QFile::remove( filePath );
-        QFile::copy( zipFilePath, filePath );
-        QFile::remove( zipFilePath );
-        File( projTempDir.absolutePath().toLocal8Bit().data() ).deleteRecursively();
-
-        m_undoStack.setClean();
-
-        m_currentProjectFilePath = filePath;
-
-        QApplication::restoreOverrideCursor();
-    }
-    else // An error occurred while writing the audio files
-    {
-        QApplication::restoreOverrideCursor();
-        MessageBoxes::showWarningDialog( m_fileHandler.getLastErrorTitle(), m_fileHandler.getLastErrorInfo() );
-    }
-}
-
-
-
 void MainWindow::saveProjectDialog()
 {
     // Save file dialog
-    const QString filter = "Shuriken Project (*.shuriken)";
+    const QString caption = m_nsmThread == NULL ? tr("Save Project") : tr("Export Project");
+    const QString filter = tr("Shuriken Project") + "(*" + FILE_EXTENSION + ")";
     QString selectedFilter;
-    QString filePath = QFileDialog::getSaveFileName( this, tr("Save Project"), m_lastOpenedProjDir, filter, &selectedFilter );
+    QString filePath = QFileDialog::getSaveFileName( this, caption, m_lastOpenedProjDir, filter, &selectedFilter );
 
     // If user didn't click "Cancel"
     if ( ! filePath.isEmpty() )
@@ -541,7 +557,7 @@ void MainWindow::saveProjectDialog()
         if ( projectFile.completeSuffix() != "shuriken" )
         {
             QDir dir = projectFile.absoluteDir();
-            QString newFileName = projectFile.baseName().append( ".shuriken" );
+            QString newFileName = projectFile.baseName().append( FILE_EXTENSION );
 
             filePath = dir.absoluteFilePath( newFileName );
             projectFile.setFile( filePath );
@@ -584,8 +600,17 @@ void MainWindow::saveProjectDialog()
 
             if ( parentDir.isWritable() )
             {
-                saveProject( filePath );
+                if ( m_nsmThread != NULL )
+                {
+                    saveProject( filePath, true );
+                }
+                else
+                {
+                    saveProject( filePath );
+                }
+
                 m_lastOpenedProjDir = projectFile.absolutePath();
+
             }
             else
             {
@@ -601,13 +626,21 @@ void MainWindow::saveProjectDialog()
 void MainWindow::openProjectDialog()
 {
     // Open file dialog
-    const QString filePath = QFileDialog::getOpenFileName( this, tr( "Open Project" ), m_lastOpenedProjDir,
-                                                           tr( "Shuriken Project (*.shuriken)" ) );
+    const QString caption = m_nsmThread == NULL ? tr("Open Project") : tr("Import Project");
+    const QString filter = tr("Shuriken Project") + "(*" + FILE_EXTENSION + ")";
+    const QString filePath = QFileDialog::getOpenFileName( this, caption, m_lastOpenedProjDir, filter );
 
     // If user didn't click "Cancel"
     if ( ! filePath.isEmpty() )
     {
         openProject( filePath );
+
+        if ( m_nsmThread != NULL )
+        {
+            m_nsmThread->sendMessage( NsmListenerThread::MSG_IS_DIRTY );
+            m_ui->actionSave_Project->setEnabled( true );
+        }
+
         m_lastOpenedProjDir = QFileInfo( filePath ).absolutePath();
     }
 }
@@ -662,6 +695,12 @@ void MainWindow::importAudioFileDialog()
 
                 QString message = fileName + ", " + channels + ", " + bits + ", " + rate + ", " + sampleHeader->format;
                 m_ui->statusBar->showMessage( message );
+            }
+
+            if ( m_nsmThread != NULL )
+            {
+                m_nsmThread->sendMessage( NsmListenerThread::MSG_IS_DIRTY );
+                m_ui->actionSave_Project->setEnabled( true );
             }
 
             m_isProjectOpen = true;

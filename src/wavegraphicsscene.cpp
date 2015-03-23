@@ -23,6 +23,7 @@
 #include "wavegraphicsscene.h"
 #include "audioanalyser.h"
 #include "globals.h"
+#include <QDebug>
 
 
 //==================================================================================================

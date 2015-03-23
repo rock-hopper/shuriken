@@ -108,17 +108,14 @@ void WaveGraphicsView::zoomOriginal()
 
 void WaveGraphicsView::resizeEvent( QResizeEvent* event )
 {
+    const qreal scaleFactorX = event->size().width() / m_scene->width();
+
     m_scene->setSceneRect( 0.0, 0.0, event->size().width(), event->size().height() );
 
-    if ( event->oldSize().width() > 0 )
-    {
-        const qreal scaleFactorX = m_scene->width() / event->oldSize().width();
-
-        m_scene->resizeWaveformItems( scaleFactorX );
-        m_scene->resizeSlicePointItems( scaleFactorX );
-        m_scene->resizePlayhead();
-        m_scene->resizeRuler( scaleFactorX );
-    }
+    m_scene->resizeWaveformItems( scaleFactorX );
+    m_scene->resizeSlicePointItems( scaleFactorX );
+    m_scene->resizePlayhead();
+    m_scene->resizeRuler( scaleFactorX );
 
     QGraphicsView::resizeEvent( event );
 }

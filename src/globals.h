@@ -33,6 +33,8 @@
 #define AUDIO_CONFIG_FILE_PATH      "~/.shuriken/audioconfig.xml"
 #define PATHS_CONFIG_FILE_PATH      "~/.shuriken/pathsconfig.xml"
 
+#define FILE_EXTENSION              ".shuriken"
+
 
 #include <QGraphicsItem>
 
@@ -71,13 +73,21 @@ namespace Midi
 
 namespace Jack
 {
-    // This gets set in: JuceLibraryCode/modules/juce_audio_devices/native/juce_linux_JackAudio.cpp
-    //                   void process (int numFrames)
-    //
-    // and is read in:   rubberbandaudiosource.cpp
-    //                   void getNextAudioBlock( AudioSourceChannelInfo& bufferToFill )
-    //
+    /* This gets set in: JuceLibraryCode/modules/juce_audio_devices/native/juce_linux_JackAudio.cpp
+                         void process (int numFrames)
+
+       and is read in:   rubberbandaudiosource.cpp
+                         void getNextAudioBlock( AudioSourceChannelInfo& bufferToFill )
+    */
     extern volatile double g_currentBPM;
+
+    /* This gets set in: mainwindow.cpp
+                         int nsmOpenCallback( ... )
+
+       and is read in:   JuceLibraryCode/modules/juce_audio_devices/native/jack_device.h
+                         void getDefaultJackClientConfig (JackClientConfig &conf)
+    */
+    extern QString g_clientId;
 }
 
 

@@ -33,7 +33,7 @@
 #include "aboutdialog.h"
 #include "messageboxes.h"
 #include <rubberband/RubberBandStretcher.h>
-#include <QDebug>
+//#include <QtDebug>
 
 
 using namespace RubberBand;
@@ -50,8 +50,41 @@ MainWindow::MainWindow( QWidget* parent ) :
     m_appliedBPM( 0.0 ),
     m_isProjectOpen( false )
 {
+    // Check if a file path has been passed on the command line
+    if ( QApplication::arguments().size() > 1 )
+    {
+        m_currentProjectFilePath = QApplication::arguments().at( 1 );
+    }
+
+    // Check if non session manager is running
+    const char* nsmUrl = getenv( "NSM_URL" );
+
+    if ( nsmUrl != NULL && m_currentProjectFilePath.isEmpty() )
+    {
+        m_nsmThread = new NsmListenerThread();
+
+        // Set JACK client name
+        Jack::g_clientId = m_nsmThread->getJackClientId();
+
+        // Create save dir and store path for later
+        const QString savePath = m_nsmThread->getSavePath();
+        const QString fileName = QString("project") + FILE_EXTENSION;
+
+        QDir().mkpath( savePath );
+        m_currentProjectFilePath = QDir( savePath ).absoluteFilePath( fileName );
+
+        // Connect save signal to slot and start thread
+        connect( m_nsmThread, SIGNAL(save()), this, SLOT(on_actionSave_Project_triggered()) );
+        m_nsmThread->start();
+    }
+
     initialiseAudio();
     setupUI();
+
+    if ( QFileInfo( m_currentProjectFilePath ).exists() )
+    {
+        openProject( m_currentProjectFilePath );
+    }
 }
 
 
@@ -60,7 +93,7 @@ MainWindow::~MainWindow()
 {
     closeProject();
 
-    if ( m_optionsDialog != NULL)
+    if ( m_optionsDialog != NULL )
     {
         const QString tempDirPath = m_optionsDialog->getTempDirPath();
 
@@ -68,6 +101,12 @@ MainWindow::~MainWindow()
         {
             File( tempDirPath.toLocal8Bit().data() ).deleteRecursively();
         }
+    }
+
+    if ( m_nsmThread != NULL )
+    {
+        m_nsmThread->quit();
+        m_nsmThread->wait( 2000 );
     }
 
     delete m_ui;
@@ -81,6 +120,7 @@ MainWindow::~MainWindow()
 void MainWindow::changeEvent( QEvent* event )
 {
     QMainWindow::changeEvent( event );
+
     switch ( event->type() )
     {
     case QEvent::LanguageChange:
@@ -142,8 +182,8 @@ void MainWindow::keyPressEvent( QKeyEvent* event )
 
 void MainWindow::wheelEvent( QWheelEvent* const event )
 {
-    const int numDegrees = event->delta() / 8; // delta() returns distance mouse wheel was rotated in eighths of a degree
-    const int numSteps = numDegrees / 15;      // Most mouse types work in steps of 15 degrees
+    const int numDegrees = event->delta() / 8; // delta() returns how much mouse wheel was rotated in eighths of a degree
+    const int numSteps = numDegrees / 15;      // Most mouse wheels work in steps of 15 degrees
 
     if ( event->orientation() == Qt::Vertical )
     {
@@ -291,6 +331,15 @@ void MainWindow::setupUI()
 #endif
 
 
+    // If nsm is running, change text for "Open Project" and "Save As" to "Import Project" and "Export Project"
+    if ( m_nsmThread != NULL )
+    {
+        m_ui->actionOpen_Project->setText( tr( "Import Project" ) );
+        m_ui->actionOpen_Project->setToolTip( tr( "Import Project" ) );
+        m_ui->actionSave_As->setText( tr( "Export Project" ) );
+        m_ui->actionSave_As->setToolTip( tr( "Export Project" ) );
+    }
+
     // Set up interaction mode buttons to work like radio buttons
     m_interactionGroup = new QActionGroup( this );
     m_interactionGroup->addAction( m_ui->actionSelect_Move );
@@ -390,42 +439,53 @@ void MainWindow::setupUI()
     m_ui->checkBox_TimeStretch->setVisible( false );
 
 
+    // Set max window size and centre in desktop
+    setMaxWindowSize( this );
+    centreWindow( this );
+
+
     // Connect signals to slots
-    QObject::connect( m_graphicsScene, SIGNAL( slicePointPosChanged(SharedSlicePointItem,int,int,int,int) ),
-                      this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int,int,int) ) );
+    connect( m_graphicsScene, SIGNAL( slicePointPosChanged(SharedSlicePointItem,int,int,int,int) ),
+             this, SLOT( recordSlicePointItemMove(SharedSlicePointItem,int,int,int,int) ) );
 
-    QObject::connect( m_ui->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
-                      this, SLOT( disableZoomOut() ) );
+    connect( m_ui->waveGraphicsView, SIGNAL( minDetailLevelReached() ),
+             this, SLOT( disableZoomOut() ) );
 
-    QObject::connect( m_ui->waveGraphicsView, SIGNAL( maxDetailLevelReached() ),
-                      this, SLOT( disableZoomIn() ) );
+    connect( m_ui->waveGraphicsView, SIGNAL( maxDetailLevelReached() ),
+             this, SLOT( disableZoomIn() ) );
 
-    QObject::connect( m_graphicsScene, SIGNAL( playheadFinishedScrolling() ),
-                      this, SLOT( resetPlayStopButtonIcon() ) );
+    connect( m_graphicsScene, SIGNAL( playheadFinishedScrolling() ),
+             this, SLOT( resetPlayStopButtonIcon() ) );
 
-    QObject::connect( m_graphicsScene, SIGNAL( selectionChanged() ),
-                      this, SLOT( enableEditActions() ) );
+    connect( m_graphicsScene, SIGNAL( selectionChanged() ),
+             this, SLOT( enableEditActions() ) );
 
-    QObject::connect( &m_undoStack, SIGNAL( canUndoChanged(bool) ),
-                      m_ui->actionUndo, SLOT( setEnabled(bool) ) );
+    connect( &m_undoStack, SIGNAL( canUndoChanged(bool) ),
+             m_ui->actionUndo, SLOT( setEnabled(bool) ) );
 
-    QObject::connect( &m_undoStack, SIGNAL( canRedoChanged(bool) ),
-                      m_ui->actionRedo, SLOT( setEnabled(bool) ) );
+    connect( &m_undoStack, SIGNAL( canRedoChanged(bool) ),
+             m_ui->actionRedo, SLOT( setEnabled(bool) ) );
 
-    QObject::connect( m_ui->actionUndo, SIGNAL( triggered() ),
-                      &m_undoStack, SLOT( undo() ) );
+    connect( m_ui->actionUndo, SIGNAL( triggered() ),
+             &m_undoStack, SLOT( undo() ) );
 
-    QObject::connect( m_ui->actionRedo, SIGNAL( triggered() ),
-                      &m_undoStack, SLOT( redo() ) );
+    connect( m_ui->actionRedo, SIGNAL( triggered() ),
+             &m_undoStack, SLOT( redo() ) );
 
-    QObject::connect( &m_undoStack, SIGNAL( cleanChanged(bool) ),
-                      m_ui->actionSave_Project, SLOT( setDisabled(bool) ) );
+    connect( &m_undoStack, SIGNAL( cleanChanged(bool) ),
+             m_ui->actionSave_Project, SLOT( setDisabled(bool) ) );
 
-    QObject::connect( &m_undoStack, SIGNAL( undoTextChanged(QString) ),
-                      this, SLOT( updateUndoText(QString) ) );
+    connect( &m_undoStack, SIGNAL( undoTextChanged(QString) ),
+             this, SLOT( updateUndoText(QString) ) );
 
-    QObject::connect( &m_undoStack, SIGNAL( redoTextChanged(QString) ),
-                      this, SLOT( updateRedoText(QString) ) );
+    connect( &m_undoStack, SIGNAL( redoTextChanged(QString) ),
+             this, SLOT( updateRedoText(QString) ) );
+
+    if ( m_nsmThread != NULL )
+    {
+        connect( &m_undoStack, SIGNAL( cleanChanged(bool) ),
+                 this, SLOT( notifyNsmOfUnsavedChanges(bool) ) );
+    }
 
 
     // Create help form
@@ -433,40 +493,8 @@ void MainWindow::setupUI()
 
     if ( m_helpForm != NULL )
     {
-        // Make sure help form isn't larger than desktop
-        const int desktopWidth = QApplication::desktop()->availableGeometry().width();
-        const int desktopHeight = QApplication::desktop()->availableGeometry().height();
-
-        const int frameWidth = m_helpForm->frameSize().width();
-        const int frameHeight = m_helpForm->frameSize().height();
-
-        int formWidth = m_helpForm->size().width();
-        int formHeight = m_helpForm->size().height();
-
-        int maxWidth = m_helpForm->maximumWidth();
-        int maxHeight = m_helpForm->maximumHeight();
-
-        if ( frameWidth > desktopWidth )
-        {
-            formWidth = desktopWidth - ( frameWidth - formWidth );
-            maxWidth = formWidth;
-        }
-
-        if ( frameHeight > desktopHeight )
-        {
-            formHeight = desktopHeight - ( frameHeight - formHeight );
-            maxHeight = formHeight;
-        }
-
-        m_helpForm->resize( formWidth, formHeight );
-        m_helpForm->setMaximumSize( maxWidth, maxHeight );
-
-        // Centre form in desktop
-        m_helpForm->setGeometry
-        (
-            QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, m_helpForm->size(), QApplication::desktop()->availableGeometry() )
-        );
-
+        setMaxWindowSize( m_helpForm );
+        centreWindow( m_helpForm );
         m_ui->actionHelp->setEnabled( true );
     }
 
@@ -476,11 +504,7 @@ void MainWindow::setupUI()
 
     if ( m_exportDialog != NULL )
     {
-        // Centre form in desktop
-        m_exportDialog->setGeometry
-        (
-            QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, m_exportDialog->size(), QApplication::desktop()->availableGeometry() )
-        );
+        centreWindow( m_exportDialog );
     }
 
 
@@ -489,11 +513,7 @@ void MainWindow::setupUI()
 
     if ( m_optionsDialog != NULL )
     {
-        // Centre form in desktop
-        m_optionsDialog->setGeometry
-        (
-            QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, m_optionsDialog->size(), QApplication::desktop()->availableGeometry() )
-        );
+        centreWindow( m_optionsDialog );
 
         QObject::connect( m_optionsDialog, SIGNAL( realtimeModeToggled(bool) ),
                           this, SLOT( enableRealtimeControls(bool) ) );
@@ -547,7 +567,10 @@ void MainWindow::enableUI()
     m_ui->comboBox_Units->setEnabled( true );
 
     m_ui->actionSave_As->setEnabled( true );
-    m_ui->actionClose_Project->setEnabled( true );
+    if ( m_nsmThread == NULL )
+    {
+        m_ui->actionClose_Project->setEnabled( true );
+    }
     m_ui->actionExport_As->setEnabled( true );
     m_ui->actionSelect_All->setEnabled( true );
     m_ui->actionSelect_None->setEnabled( true );
@@ -673,7 +696,10 @@ void MainWindow::closeProject()
 
     m_appliedBPM = 0.0;
 
-    m_currentProjectFilePath.clear();
+    if ( m_nsmThread == NULL )
+    {
+        m_currentProjectFilePath.clear();
+    }
     m_isProjectOpen = false;
 }
 
@@ -731,6 +757,51 @@ QUndoCommand* MainWindow::createRenderCommand( QUndoCommand* parent )
     }
 
     return command;
+}
+
+
+
+//==================================================================================================
+// Private Static:
+
+void MainWindow::setMaxWindowSize( QWidget* const window )
+{
+    const int desktopWidth = QApplication::desktop()->availableGeometry().width();
+    const int desktopHeight = QApplication::desktop()->availableGeometry().height();
+
+    const int frameWidth = window->frameSize().width();
+    const int frameHeight = window->frameSize().height();
+
+    int windowWidth = window->size().width();
+    int windowHeight = window->size().height();
+
+    int maxWidth = window->maximumWidth();
+    int maxHeight = window->maximumHeight();
+
+    if ( frameWidth > desktopWidth )
+    {
+        windowWidth = desktopWidth - ( frameWidth - windowWidth );
+        maxWidth = windowWidth;
+    }
+
+    if ( frameHeight > desktopHeight )
+    {
+        windowHeight = desktopHeight - ( frameHeight - windowHeight );
+        maxHeight = windowHeight;
+    }
+
+    window->resize( windowWidth, windowHeight );
+    window->setMaximumSize( maxWidth, maxHeight );
+}
+
+
+
+void MainWindow::centreWindow( QWidget* const window )
+{
+    window->setGeometry
+    (
+        QStyle::alignedRect( Qt::LeftToRight, Qt::AlignCenter, window->size(), QApplication::desktop()->availableGeometry() )
+    );
 }
 
 
@@ -992,6 +1063,23 @@ void MainWindow::updateUndoText( const QString text )
 void MainWindow::updateRedoText( const QString text )
 {
     m_ui->actionRedo->setText( tr("Redo ") + text );
+}
+
+
+
+void MainWindow::notifyNsmOfUnsavedChanges( const bool isClean )
+{
+    if ( m_nsmThread != NULL )
+    {
+        if ( isClean )
+        {
+            m_nsmThread->sendMessage( NsmListenerThread::MSG_IS_CLEAN );
+        }
+        else
+        {
+            m_nsmThread->sendMessage( NsmListenerThread::MSG_IS_DIRTY );
+        }
+    }
 }
 
 

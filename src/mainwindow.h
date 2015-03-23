@@ -39,7 +39,7 @@
 #include "waveformitem.h"
 #include "helpform.h"
 #include "exportdialog.h"
-
+#include "nsmlistenerthread.h"
 
 
 namespace Ui
@@ -63,8 +63,6 @@ public:
     MainWindow( QWidget* parent = NULL );
     ~MainWindow();
 
-    void openProject( QString filePath );
-
 protected:
     void changeEvent( QEvent* event );
     void closeEvent( QCloseEvent* event );
@@ -86,6 +84,9 @@ private:
 
     void closeProject();
 
+    void saveProject( QString filePath, bool isNsmSessionExport = false );
+    void openProject( QString filePath );
+
     void exportAs( QString tempDirPath,
                    QString outputDirPath,
                    QString samplesDirPath,
@@ -94,8 +95,6 @@ private:
                    int sndFileFormat,
                    int outputSampleRate,
                    int numSamplesToExport );
-
-    void saveProject( QString filePath );
 
     void saveProjectDialog();
     void openProjectDialog();
@@ -134,6 +133,15 @@ private:
     qreal m_appliedBPM;
 
     bool m_isProjectOpen;
+
+    ScopedPointer<NsmListenerThread> m_nsmThread;
+
+private:
+    // Make sure window isn't larger than desktop
+    static void setMaxWindowSize( QWidget* window );
+
+    // Centre window in desktop
+    static void centreWindow( QWidget* window );
 
 private slots:
     void on_comboBox_SnapValues_activated( int index );
@@ -205,6 +213,8 @@ private slots:
 
     void updateUndoText( QString text );
     void updateRedoText( QString text );
+
+    void notifyNsmOfUnsavedChanges( bool isClean );
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( MainWindow );

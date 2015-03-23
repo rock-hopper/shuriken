@@ -12,6 +12,9 @@
 #ifndef JACK_DEVICE_H
 #define JACK_DEVICE_H
 
+#include "globals.h"
+
+
 struct JackSessionCallbackArg
 {
     String session_directory;
@@ -19,6 +22,7 @@ struct JackSessionCallbackArg
     String command_line;
     bool quit;
 };
+
 
 
 struct JackClientConfig
@@ -39,13 +43,22 @@ struct JackClientConfig
 };
 
 
+
 void getDefaultJackClientConfig (JackClientConfig &conf)
 {
-    conf.clientName = APPLICATION_NAME;
+    if ( ! Jack::g_clientId.isEmpty() )
+    {
+        conf.clientName = Jack::g_clientId.toLocal8Bit().data();
+    }
+    else
+    {
+        conf.clientName = APPLICATION_NAME;
+    }
     conf.outputChannels.addTokens (OUTPUT_CHAN_NAMES, false);
     conf.isMidiEnabled = false;
     conf.isAutoConnectEnabled = false;
     conf.sessionCallback = nullptr;
 }
+
 
 #endif // JACK_DEVICE_H
