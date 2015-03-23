@@ -391,7 +391,10 @@ would have a tempo of 70 quarter notes per minute.</p>
 
 <h1><a name="Session_Management"></a>Session Management</h1>
 
-<p>Shuriken has support for LADISH L1 session management.&nbsp; On receiving the SIGUSR1 Unix signal, 
+<p>Shuriken has full support for Non Session Management.&nbsp; It is possible to import an existing project
+into a NSM session as well as export a project from a session.</p>
+
+<p>Shuriken also has support for LADISH L1 session management.&nbsp; On receiving the SIGUSR1 Unix signal, 
 Shuriken will save the current project.&nbsp; On receiving the SIGTERM signal, Shuriken will ask 
 the user if any unsaved changes should be saved, then exit cleanly.&nbsp; Shuriken can deal with 
 these signals being sent in quick succession and in any order; any save operation will 
