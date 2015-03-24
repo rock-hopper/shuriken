@@ -1,11 +1,121 @@
 #!/bin/bash
 
+# Text colours
+declare -r BLACK='\e[0;30m'
+declare -r RED='\e[0;31m'
+declare -r GREEN='\e[0;32m'
+declare -r BROWN='\e[0;33m'
+declare -r BLUE='\e[0;34m'
+declare -r PURPLE='\e[0;35m'
+declare -r CYAN='\e[0;36m'
+declare -r LIGHT_GREY='\e[0;37m'
+declare -r DARK_GREY='\e[0;90m'
+declare -r LIGHT_RED='\e[0;91m'
+declare -r LIGHT_GREEN='\e[0;92m'
+declare -r YELLOW='\e[0;93m'
+declare -r LIGHT_BLUE='\e[0;94m'
+declare -r LIGHT_PURPLE='\e[0;95m'
+declare -r LIGHT_CYAN='\e[0;96m'
+declare -r WHITE='\e[0;97m'
+
+# Bold text
+declare -r BOLD_DARK_GREY='\e[1;30m'
+declare -r BOLD_LIGHT_RED='\e[1;31m'
+declare -r BOLD_LIGHT_GREEN='\e[1;32m'
+declare -r BOLD_YELLOW='\e[1;33m'
+declare -r BOLD_LIGHT_BLUE='\e[1;34m'
+declare -r BOLD_LIGHT_PURPLE='\e[1;35m'
+declare -r BOLD_LIGHT_CYAN='\e[1;36m'
+declare -r BOLD_WHITE='\e[1;37m'
+
+# Underlined text
+declare -r UNDERLINE_BLACK='\e[4;30m'
+declare -r UNDERLINE_RED='\e[4;31m'
+declare -r UNDERLINE_GREEN='\e[4;32m'
+declare -r UNDERLINE_BROWN='\e[4;33m'
+declare -r UNDERLINE_BLUE='\e[4;34m'
+declare -r UNDERLINE_PURPLE='\e[4;35m'
+declare -r UNDERLINE_CYAN='\e[4;36m'
+declare -r UNDERLINE_LIGHT_GREY='\e[4;37m'
+
+# Default text
+declare -r DEFAULT_TEXT='\e[0m'
+
+# Arguments
 declare -ra ARGS=("$@")
 declare -ri NUM_ARGS=$#
 
+# Globals
 declare isShurikenWanted=true
 declare isDebugWanted=false
 declare isCleanWanted=false
+
+
+# Use this function to set the text colour/style
+#
+#   Usage: setTextStyle $RED
+#          setTextStyle $UNDERLINE_GREEN
+#
+function setTextStyle() { echo -en "$1"; }
+
+
+# Use this function to move the cursor up by the specified no. of lines
+#
+#   Usage: moveCursorUp 1
+#
+function moveCursorUp() { echo -en "\033[$1A"; }
+
+
+# Use this function to move the cursor down by the specified no. of lines
+#
+#   Usage: moveCursorDown 1
+#
+function moveCursorDown() { echo -en "\033[$1B"; }
+
+
+# Use this function to display an error message and exit
+#
+#   Usage: exitWithError "Something went wrong!"
+#
+function exitWithError() 
+{
+    setTextStyle $RED
+    echo -e "\n$1\n"
+    setTextStyle $DEFAULT_TEXT
+    exit 1
+}
+
+
+# Use this function to get input from the user
+#
+# This function takes two parameters. The first is a variable which will be set 
+# to either true or false depending  on whether the user enters yes or no respectively. 
+# The second parameter is the default value to use if the user simply hits enter
+#
+# If the user enters gibberish the script shows an error message and exits
+#
+#   Usage: readInput isFeatureWanted "yes"
+#
+function readInput()
+{
+    declare __var=$1
+    declare default=$2
+    declare input
+
+    read -e input
+    
+    if [[ $input == "" ]]; then 
+        input=$default; moveCursorUp 1; echo "$input"
+    fi
+
+    if [[ $input == [yY] ]] || [[ $input == [yY][eE][sS] ]]; then
+        eval $__var="'true'"
+    elif [[ $input == [nN] ]] || [[ $input == [nN][oO] ]]; then
+        eval $__var="'false'"
+    else 
+        exitWithError "Invalid value: \"$input\""
+    fi
+}
 
 
 function showUsage() 
@@ -31,26 +141,68 @@ function clean()
 }
 
 
+function checkDependencies()
+{
+    declare -i errorCode=0
+
+    pkg-config --exists 'alsa > 1.0.18
+                         aubio >= 0.4.1
+                         jack >= 0.118
+                         liblo >= 0.26
+                         QtOpenGL >= 4.5.3
+                         QtCore >= 4.6.1
+                         QtGui >= 4.5.3
+                         rubberband
+                         samplerate
+                         sndfile >= 1.0.20
+                         uuid >= 2.17.0
+                         x11' --print-errors
+
+    errorCode=$?
+
+    if [ ! -e "/usr/bin/qmake-qt4" ]; then
+        echo "qmake-qt4 not found"
+        errorCode=1
+    fi
+
+    if [ ! -e "/usr/bin/automake" ]; then
+        echo "automake not found"
+        errorCode=1
+    fi
+
+    if [ ! -e "/usr/bin/libtool" ]; then
+        echo "libtool not found"
+        errorCode=1
+    fi
+
+    return $errorCode
+}
+
+
 function makeSndlib()
 {
+    declare -i errorCode=0
+
     mkdir -p lib
     cd src/SndLibShuriken
     ./configure --without-audio --without-s7
+
     make -w
+    errorCode=$?
+
     mv -v libsndlib_shuriken.a ../../lib/
     cd ../..
+
+    return $errorCode
 }
 
 
 function makeShuriken()
 {
-    declare archString=""
     declare arch=""
     declare configOptions=""
 
-    archString=$( lscpu | grep 'Architecture' )
-
-    if [[ $archString =~ (x86_64) ]]; then
+    if [[ $( lscpu | grep 'Architecture' ) =~ (x86_64) ]]; then
         arch="-64"
     fi
 
@@ -60,10 +212,6 @@ function makeShuriken()
 
     qmake-qt4 ./Shuriken.pro -r -spec linux-g++$arch $configOptions
     make -w
-
-    if [ $? -eq 0 ]; then
-        echo -e "\nSuccessfully built shuriken\n"
-    fi
 }
 
 
@@ -88,16 +236,65 @@ function processArgs()
 
 
 # Script starts executing from here
+#==================================
 
 processArgs
 
 if $isCleanWanted; then
+    setTextStyle $BOLD_LIGHT_RED
+    echo -e "\nCleaning..."
+
+    setTextStyle $DEFAULT_TEXT
     clean
 else
+    setTextStyle $BOLD_LIGHT_RED
+    echo -e "\nChecking dependencies..."
+
+    setTextStyle $DEFAULT_TEXT
+    checkDependencies
+
+    if [ $? -eq 0 ]; then
+        echo "OK"
+    else
+        setTextStyle $BOLD_LIGHT_RED;
+        echo -e "\nOne or more packages needed to build Shuriken couldn't be found."
+        echo -e "\nWould you like to continue anyway?"
+        setTextStyle $DEFAULT_TEXT
+
+        declare keepGoing=false
+        readInput keepGoing "no"
+
+        if ! $keepGoing; then
+            exit 1
+        fi
+    fi
+
+    setTextStyle $BOLD_LIGHT_RED
+    echo -e "\nBuilding sndlib..."
+
+    setTextStyle $DEFAULT_TEXT
     makeSndlib
 
+    if [ $? -eq 0 ]; then
+        setTextStyle $BOLD_LIGHT_RED
+        echo -e "\nSuccessfully built sndlib\n"
+        setTextStyle $DEFAULT_TEXT
+    else
+        exit 1
+    fi
+
     if $isShurikenWanted; then
+        setTextStyle $BOLD_LIGHT_RED
+        echo "Building Shuriken..."
+
+        setTextStyle $DEFAULT_TEXT
         makeShuriken
+
+        if [ $? -eq 0 ]; then
+            setTextStyle $BOLD_LIGHT_RED
+            echo -e "\nSuccessfully built Shuriken\n"
+            setTextStyle $DEFAULT_TEXT
+        fi
     fi
 fi
 
