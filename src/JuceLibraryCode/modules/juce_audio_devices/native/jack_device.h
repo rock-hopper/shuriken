@@ -15,16 +15,6 @@
 #include "globals.h"
 
 
-struct JackSessionCallbackArg
-{
-    String session_directory;
-    String session_uuid;
-    String command_line;
-    bool quit;
-};
-
-
-
 struct JackClientConfig
 {
     String clientName;
@@ -35,11 +25,6 @@ struct JackClientConfig
 
     bool isMidiEnabled;
     bool isAutoConnectEnabled;
-
-    String session_uuid;
-
-    typedef void (*SessionCallback)(JackSessionCallbackArg &arg);
-    SessionCallback sessionCallback;
 };
 
 
@@ -57,7 +42,6 @@ void getDefaultJackClientConfig (JackClientConfig &conf)
     conf.outputChannels.addTokens (OUTPUT_CHAN_NAMES, false);
     conf.isMidiEnabled = false;
     conf.isAutoConnectEnabled = false;
-    conf.sessionCallback = nullptr;
 }
 
 

@@ -36,7 +36,6 @@
 #include <jack/jack.h>
 #include <jack/midiport.h>
 #include <jack/transport.h>
-#include <jack/session.h>
 
 #include "jack_device.h"
 #include "linux_midi.h"
@@ -44,7 +43,6 @@
 
 
 extern "C" int libjack_is_present;
-extern "C" int libjack_session_is_supported;
 
 
 //==============================================================================
@@ -75,16 +73,7 @@ public:
         jack_set_error_function (JackAudioIODevice::errorCallback);
         jack_status_t status;
 
-        if (m_config.session_uuid.isNotEmpty() && libjack_session_is_supported)
-        {
-            //std::cerr << "JackAudioIODevice: opening with session_uuid: '" << config.session_uuid << "'\n";
-            m_jackClient = jack_client_open (m_config.clientName.toUTF8().getAddress(), JackSessionID, &status, m_config.session_uuid.toUTF8().getAddress());
-        }
-        else
-        {
-            //std::cerr << "JackAudioIODevice: opening WITHOUT session_uuid: '" << config.session_uuid << "'\n";
-            m_jackClient = jack_client_open (m_config.clientName.toUTF8().getAddress(), JackNoStartServer, &status);
-        }
+        m_jackClient = jack_client_open (m_config.clientName.toUTF8().getAddress(), JackNoStartServer, &status);
 
         if (m_jackClient == nullptr)
         {
@@ -122,11 +111,6 @@ public:
             if (m_config.isMidiEnabled)
             {
                 m_midiPortIn = jack_port_register(m_jackClient, "midi_in", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
-            }
-
-            if (libjack_session_is_supported && m_config.sessionCallback)
-            {
-                jack_set_session_callback(m_jackClient, sessionCallback, this);
             }
         }
 
@@ -415,43 +399,6 @@ private:
             device->process (nframes);
 
         return 0;
-    }
-
-
-
-    struct SessionCallbackMessage
-    {
-        jack_session_event_t *event;
-    };
-
-
-
-//    void handleMessage(const Message &msg) {
-//      const SessionCallbackMessage *sm;
-//      //printf("sessionCallback, received message\n");
-//      if ((sm = dynamic_cast<const SessionCallbackMessage*>(&msg))) {
-//        if (config.sessionCallback) {
-//          JackSessionCallbackArg arg;
-//          arg.session_directory = sm->event->session_dir;
-//          arg.session_uuid = sm->event->client_uuid;
-//          arg.quit = (sm->event->type == JackSessionSaveAndQuit);
-//          config.sessionCallback(arg);
-//
-//          sm->event->command_line = strdup(arg.command_line.toUTF8().getAddress());
-//        }
-//        jack_session_reply(client, sm->event);
-//        jack_session_event_free(sm->event);
-//      }
-//    }
-
-
-
-    static void sessionCallback (jack_session_event_t *event, void *callbackArgument)
-    {
-//      //printf("sessionCallback, posting message\n");
-//      JackAudioIODevice* device = (JackAudioIODevice*) callbackArgument;
-//      SessionCallbackMessage *m = new SessionCallbackMessage;
-//      device->postMessage(m);
     }
 
 
