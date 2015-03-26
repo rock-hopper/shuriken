@@ -30,8 +30,7 @@
 // Public:
 
 NsmListenerThread::NsmListenerThread() :
-    m_nsmClient( NULL ),
-    m_clientId( NULL )
+    m_nsmClient( NULL )
 {
     const char* nsmUrl = getenv( "NSM_URL" );
 
