@@ -144,6 +144,8 @@ private:
     static void centreWindow( QWidget* window );
 
 private slots:
+    void on_toolButton_RightArrow_clicked();
+    void on_toolButton_LeftArrow_clicked();
     void on_comboBox_SnapValues_activated( int index );
     void on_comboBox_TimeSigNumerator_activated( QString text );
     void on_pushButton_TimestretchOptions_clicked();

@@ -21,7 +21,6 @@
         <file>resources/images/kdenlive-select-all.png</file>
         <file>resources/images/media-playback-start.png</file>
         <file>resources/images/media-playback-stop.png</file>
-        <file>resources/images/shuriken.png</file>
         <file>resources/images/shuriken_small.png</file>
         <file>resources/images/text-speak.png</file>
         <file>resources/images/zoom-in.png</file>
@@ -30,5 +29,40 @@
         <file>resources/images/view-refresh_blue.png</file>
         <file>resources/images/user-away-extended.png</file>
         <file>resources/docs/help.html</file>
+        <file>resources/images/pushbutton.png</file>
+        <file>resources/images/pushbutton_hover.png</file>
+        <file>resources/images/pushbutton_pressed.png</file>
+        <file>resources/images/down_arrow.png</file>
+        <file>resources/images/up_arrow.png</file>
+        <file>resources/images/frame.png</file>
+        <file>resources/images/frame_hover.png</file>
+        <file>resources/images/frame_focus.png</file>
+        <file>resources/images/down_arrow_disabled.png</file>
+        <file>resources/images/down_arrow_hover.png</file>
+        <file>resources/images/up_arrow_disabled.png</file>
+        <file>resources/images/up_arrow_hover.png</file>
+        <file>resources/images/checkbox_unchecked.png</file>
+        <file>resources/images/checkbox_unchecked_hover.png</file>
+        <file>resources/images/checkbox_checked.png</file>
+        <file>resources/images/checkbox_checked_hover.png</file>
+        <file>resources/images/checkbox_pressed.png</file>
+        <file>resources/images/checkbox_disabled.png</file>
+        <file>resources/images/radiobutton_checked.png</file>
+        <file>resources/images/radiobutton_checked_disabled.png</file>
+        <file>resources/images/radiobutton_checked_hover.png</file>
+        <file>resources/images/radiobutton_pressed.png</file>
+        <file>resources/images/radiobutton_unchecked.png</file>
+        <file>resources/images/radiobutton_unchecked_hover.png</file>
+        <file>resources/images/slider_handle.png</file>
+        <file>resources/images/slider_handle_hover.png</file>
+        <file>resources/images/slider_handle_pressed.png</file>
+        <file>resources/images/left_arrow.png</file>
+        <file>resources/images/right_arrow.png</file>
+        <file>resources/images/shuriken_logo.png</file>
+        <file>resources/images/shuriken_background.png</file>
+        <file>resources/images/toolbutton_hover.png</file>
+        <file>resources/images/toolbutton_pressed.png</file>
+        <file>resources/stylesheets/blue_theme.qss</file>
+        <file>resources/stylesheets/blue_theme_4.6.qss</file>
     </qresource>
 </RCC>

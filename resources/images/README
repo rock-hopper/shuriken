@@ -1,37 +1,44 @@
 The following files are part of Oxygen Icons <http://www.oxygen-icons.org/> and are licensed under the GNU LGPL v3:
 
-application-exit.png
-document-close.png
-document-export.png
-document-import.png
-document-open.png
-document-save-as.png
-document-save.png
-edit-delete.png
-edit-redo.png
-edit-select.png
-edit-undo.png
-go-home.png
-go-next.png
-go-previous.png
-help-about.png
-help-contents.png
-kdenlive-select-all.png
-media-playback-start.png
-media-playback-stop.png
-text-speak.png
-user-away-extended.png
-view-refresh.png
-zoom-in.png
-zoom-original.png
-zoom-out.png
-
-
+    application-exit.png
+    document-close.png
+    document-export.png
+    document-import.png
+    document-open.png
+    document-save-as.png
+    document-save.png
+    edit-delete.png
+    edit-redo.png
+    edit-select.png
+    edit-undo.png
+    go-home.png
+    go-next.png
+    go-previous.png
+    help-about.png
+    help-contents.png
+    kdenlive-select-all.png
+    media-playback-start.png
+    media-playback-stop.png
+    text-speak.png
+    user-away-extended.png
+    view-refresh.png
+    zoom-in.png
+    zoom-original.png
+    zoom-out.png
 
 The following file(s) are modified versions of one or more of the above:
 
-view-refresh_blue.png
-
-
+    view-refresh_blue.png
 
 For full details of the GNU LGPL v3 please read images/LICENSE
+
+
+The following files are modified versions of "Shuriken Shaken Iga" photographed by Kaliostro:
+
+    shuriken_background.png
+    shuriken_logo.png
+
+Original "Shuriken Shaken Iga" photograph by Kaliostro (CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>), via Wikimedia Commons <https://commons.wikimedia.org/wiki/File%3AShuriken_Shaken_Iga.jpg>. Image modified by Andrew M Taylor.
+
+
+All other images in this directory by Andrew M Taylor (CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0>)

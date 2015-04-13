@@ -91,8 +91,22 @@ int main( int argc, char* argv[] )
 {
     QApplication app( argc, argv );
 
-    // Register custom message handler; useful for debugging when Shuriken is launched by nsm
+    // Register custom message handler. This is useful for debugging when Shuriken is launched by NSM
     //qInstallMsgHandler( messageHandler );
+
+    // Set style sheet
+#if QT_VERSION < 0x040700
+    QFile file( ":/resources/stylesheets/blue_theme_4.6.qss" );
+#else
+    QFile file( ":/resources/stylesheets/blue_theme.qss" );
+#endif
+
+    if ( file.open( QFile::ReadOnly ) )
+    {
+        const QString styleSheet = QLatin1String( file.readAll() );
+        file.close();
+        app.setStyleSheet( styleSheet );
+    }
 
     // Create main window
     MainWindow window;

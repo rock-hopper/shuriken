@@ -33,7 +33,7 @@
 #include "aboutdialog.h"
 #include "messageboxes.h"
 #include <rubberband/RubberBandStretcher.h>
-//#include <QtDebug>
+#include <QtDebug>
 
 
 using namespace RubberBand;
@@ -557,7 +557,7 @@ void MainWindow::enableUI()
     m_ui->comboBox_DetectMethod->setEnabled( true );
     m_ui->comboBox_WindowSize->setEnabled( true );
     m_ui->comboBox_HopSize->setEnabled( true );
-    m_ui->lcdNumber_Threshold->setEnabled( true );
+    m_ui->doubleSpinBox_Threshold->setEnabled( true );
     m_ui->horizontalSlider_Threshold->setEnabled( true );
     m_ui->pushButton_FindOnsets->setEnabled( true );
     m_ui->pushButton_FindBeats->setEnabled( true );
@@ -606,7 +606,7 @@ void MainWindow::disableUI()
     m_ui->comboBox_DetectMethod->setEnabled( false );
     m_ui->comboBox_WindowSize->setEnabled( false );
     m_ui->comboBox_HopSize->setEnabled( false );
-    m_ui->lcdNumber_Threshold->setEnabled( false );
+    m_ui->doubleSpinBox_Threshold->setEnabled( false );
     m_ui->horizontalSlider_Threshold->setEnabled( false );
     m_ui->pushButton_FindOnsets->setEnabled( false );
     m_ui->pushButton_FindBeats->setEnabled( false );
@@ -667,7 +667,7 @@ void MainWindow::getDetectionSettings( AudioAnalyser::DetectionSettings& setting
     currentIndex = m_ui->comboBox_DetectMethod->currentIndex();
     settings.detectionMethod = m_ui->comboBox_DetectMethod->itemData( currentIndex ).toString().toLocal8Bit();
 
-    settings.threshold = qreal( m_ui->horizontalSlider_Threshold->value() ) / 1000.0;
+    settings.threshold = m_ui->doubleSpinBox_Threshold->value();
 
     currentIndex = m_ui->comboBox_WindowSize->currentIndex();
     settings.windowSize = (uint_t) m_ui->comboBox_WindowSize->itemData( currentIndex ).toInt();
@@ -1649,7 +1649,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
 
 void MainWindow::on_horizontalSlider_Threshold_valueChanged( const int value )
 {
-    m_ui->lcdNumber_Threshold->display( qreal( value ) / 1000.0 );
+    m_ui->doubleSpinBox_Threshold->setValue( value / 100.0 );
 }
 
 
@@ -2046,4 +2046,26 @@ void MainWindow::on_comboBox_SnapValues_activated( const int index )
             slicePoint->setSnap( true );
         }
     }
+}
+
+
+
+void MainWindow::on_toolButton_LeftArrow_clicked()
+{
+    int index = m_ui->stackedWidget->currentIndex();
+
+    index = index > 0 ? index - 1 : m_ui->stackedWidget->count() - 1;
+
+    m_ui->stackedWidget->setCurrentIndex( index );
+}
+
+
+
+void MainWindow::on_toolButton_RightArrow_clicked()
+{
+    int index = m_ui->stackedWidget->currentIndex();
+
+    index = index < m_ui->stackedWidget->count() - 1 ? index + 1 : 0;
+
+    m_ui->stackedWidget->setCurrentIndex( index );
 }
