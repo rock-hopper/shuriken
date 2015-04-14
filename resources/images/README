@@ -1,6 +1,8 @@
 The following files are part of Oxygen Icons <http://www.oxygen-icons.org/> and are licensed under the GNU LGPL v3:
 
     application-exit.png
+    configure.png
+    debug-execute-from-cursor.png
     document-close.png
     document-export.png
     document-import.png
@@ -19,6 +21,9 @@ The following files are part of Oxygen Icons <http://www.oxygen-icons.org/> and 
     kdenlive-select-all.png
     media-playback-start.png
     media-playback-stop.png
+    mixer-master.png
+    mixer-pcm.png
+    object-rotate-left.png
     text-speak.png
     user-away-extended.png
     view-refresh.png
@@ -28,6 +33,10 @@ The following files are part of Oxygen Icons <http://www.oxygen-icons.org/> and 
 
 The following file(s) are modified versions of one or more of the above:
 
+    gain.png.png
+    gain_ramp.png
+    normalise.png
+    reverse.png
     view-refresh_blue.png
 
 For full details of the GNU LGPL v3 please read images/LICENSE

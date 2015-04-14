@@ -64,5 +64,10 @@
         <file>resources/images/toolbutton_pressed.png</file>
         <file>resources/stylesheets/blue_theme.qss</file>
         <file>resources/stylesheets/blue_theme_4.6.qss</file>
+        <file>resources/images/normalise.png</file>
+        <file>resources/images/reverse.png</file>
+        <file>resources/images/gain.png</file>
+        <file>resources/images/gain_ramp.png</file>
+        <file>resources/images/configure.png</file>
     </qresource>
 </RCC>

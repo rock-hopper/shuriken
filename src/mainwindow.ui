@@ -857,12 +857,21 @@
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
    <addaction name="separator"/>
+   <addaction name="actionNormalise"/>
+   <addaction name="actionReverse"/>
+   <addaction name="actionApply_Gain"/>
+   <addaction name="actionApply_Gain_Ramp"/>
+   <addaction name="separator"/>
+   <addaction name="actionDelete"/>
+   <addaction name="separator"/>
    <addaction name="actionSelect_Move"/>
    <addaction name="actionMulti_Select"/>
    <addaction name="actionAudition"/>
    <addaction name="separator"/>
    <addaction name="actionSelective_Time_Stretch"/>
    <addaction name="separator"/>
+   <addaction name="actionHelp"/>
+   <addaction name="actionAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="sideToolBar">
@@ -910,6 +919,10 @@
    </property>
   </action>
   <action name="actionOptions">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/configure.png</normaloff>:/resources/images/configure.png</iconset>
+   </property>
    <property name="text">
     <string>Options</string>
    </property>
@@ -1040,6 +1053,10 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/reverse.png</normaloff>:/resources/images/reverse.png</iconset>
+   </property>
    <property name="text">
     <string>Reverse</string>
    </property>
@@ -1097,10 +1114,17 @@
    <property name="toolTip">
     <string>Select None</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+A</string>
+   </property>
   </action>
   <action name="actionApply_Gain">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/gain.png</normaloff>:/resources/images/gain.png</iconset>
    </property>
    <property name="text">
     <string>Apply Gain</string>
@@ -1112,6 +1136,10 @@
   <action name="actionNormalise">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/normalise.png</normaloff>:/resources/images/normalise.png</iconset>
    </property>
    <property name="text">
     <string>Normalise</string>
@@ -1243,6 +1271,10 @@
   <action name="actionApply_Gain_Ramp">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/gain_ramp.png</normaloff>:/resources/images/gain_ramp.png</iconset>
    </property>
    <property name="text">
     <string>Apply Gain Ramp</string>
