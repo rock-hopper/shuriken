@@ -48,6 +48,14 @@ QMenuBar::item:pressed {
 }
 
 
+/* Toolbars */
+
+QToolBar {
+    background: none;
+    border: none;
+}
+
+
 /* Background gradient for main window and dialogs */
 
 QMainWindow, QDialog#AboutDialog, QDialog#OptionsDialog, QWidget#HelpForm {
@@ -71,9 +79,28 @@ QMainWindow {
 }
 
 
-/* Border image for line edits, spin boxes, and list views */
+/* Text colour for enabled/disabled widgets */
 
-QLineEdit, QSpinBox, QDoubleSpinBox, QListView {
+QLineEdit:enabled, QListView::item:enabled,
+QSpinBox:enabled, QDoubleSpinBox:enabled,
+QTextBrowser:enabled, QRadioButton:enabled,
+QPushButton:enabled, QComboBox:enabled,
+QCheckBox:enabled {
+    color: black;
+}
+
+QLineEdit:disabled, QListView::item:disabled,
+QSpinBox:disabled, QDoubleSpinBox:disabled,
+QTextBrowser:disabled, QRadioButton:disabled,
+QPushButton:disabled, QComboBox:disabled,
+QCheckBox:disabled {
+    color: silver;
+}
+
+
+/* Border image for line edits, spin boxes, list views, and text browsers */
+
+QLineEdit, QSpinBox, QDoubleSpinBox, QListView, QTextBrowser {
     border-image: url(:/resources/images/frame.png) 5;
     border-width: 5;
 }
@@ -83,12 +110,12 @@ QSpinBox, QDoubleSpinBox {
     padding-bottom: -4px;
 }
 
-QLineEdit, QListView {
+QLineEdit, QListView, QTextBrowser {
     padding-top: -3px;
     padding-bottom: -3px;
 }
 
-QListView {
+QListView, QTextBrowser {
     padding-left: -3px;
     padding-right: -3px;
 }
@@ -106,9 +133,18 @@ QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus {
 
 /* Spin box buttons */
 
-QSpinBox::up-button, QSpinBox::down-button,
-QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {
+QSpinBox::up-button, QDoubleSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
     border: none;
+    margin-top: 2px;
+}
+
+QSpinBox::down-button, QDoubleSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    border: none;
+    margin-bottom: 2px;
 }
 
 
@@ -132,14 +168,6 @@ QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {
 
 *::up-arrow:disabled, *::up-arrow:off {
     image: url(:/resources/images/up_arrow_disabled.png);
-}
-
-QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
-    margin-top: 2px;
-}
-
-QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {
-    margin-bottom: 2px;
 }
 
 QSpinBox::down-arrow:hover, QSpinBox::down-arrow:pressed, 
@@ -197,14 +225,6 @@ QRadioButton {
 
 QRadioButton:focus {
     outline: none;
-}
-
-QRadioButton:enabled {
-    color: black;
-}
-
-QRadioButton:disabled {
-    color: silver;
 }
 
 QRadioButton::indicator {
@@ -279,14 +299,6 @@ QPushButton {
     outline: none;
 }
 
-QPushButton:enabled {
-    color: black;
-}
-
-QPushButton:diabled {
-    color: silver;
-}
-
 
 /* Combo boxes */
 
@@ -341,14 +353,6 @@ QToolButton[autoRaise="false"]:pressed {
 
 QCheckBox {
     spacing: 5px;
-}
-
-QCheckBox:enabled {
-    color: black;
-}
-
-QCheckBox:disabled {
-    color: silver;
 }
 
 QCheckBox::indicator {
