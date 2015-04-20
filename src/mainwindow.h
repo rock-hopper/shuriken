@@ -176,7 +176,6 @@ private slots:
     void on_actionAbout_triggered();
     void on_actionHelp_triggered();
     void on_actionOptions_triggered();
-    void on_actionEnvelope_triggered();
     void on_actionReverse_triggered();
     void on_actionDelete_triggered();
     void on_actionAdd_Slice_Point_triggered();

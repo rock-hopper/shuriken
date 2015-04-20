@@ -1462,13 +1462,6 @@ void MainWindow::on_actionNormalise_triggered()
 
 
 
-void MainWindow::on_actionEnvelope_triggered()
-{
-    // TODO
-}
-
-
-
 void MainWindow::on_actionReverse_triggered()
 {
     const QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
