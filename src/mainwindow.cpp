@@ -557,7 +557,7 @@ void MainWindow::enableUI()
     m_ui->comboBox_DetectMethod->setEnabled( true );
     m_ui->comboBox_WindowSize->setEnabled( true );
     m_ui->comboBox_HopSize->setEnabled( true );
-    m_ui->doubleSpinBox_Threshold->setEnabled( true );
+    m_ui->lineEdit_Threshold->setEnabled( true );
     m_ui->horizontalSlider_Threshold->setEnabled( true );
     m_ui->pushButton_FindOnsets->setEnabled( true );
     m_ui->pushButton_FindBeats->setEnabled( true );
@@ -606,7 +606,7 @@ void MainWindow::disableUI()
     m_ui->comboBox_DetectMethod->setEnabled( false );
     m_ui->comboBox_WindowSize->setEnabled( false );
     m_ui->comboBox_HopSize->setEnabled( false );
-    m_ui->doubleSpinBox_Threshold->setEnabled( false );
+    m_ui->lineEdit_Threshold->setEnabled( false );
     m_ui->horizontalSlider_Threshold->setEnabled( false );
     m_ui->pushButton_FindOnsets->setEnabled( false );
     m_ui->pushButton_FindBeats->setEnabled( false );
@@ -667,7 +667,7 @@ void MainWindow::getDetectionSettings( AudioAnalyser::DetectionSettings& setting
     currentIndex = m_ui->comboBox_DetectMethod->currentIndex();
     settings.detectionMethod = m_ui->comboBox_DetectMethod->itemData( currentIndex ).toString().toLocal8Bit();
 
-    settings.threshold = m_ui->doubleSpinBox_Threshold->value();
+    settings.threshold = m_ui->horizontalSlider_Threshold->value() / 100.0;
 
     currentIndex = m_ui->comboBox_WindowSize->currentIndex();
     settings.windowSize = (uint_t) m_ui->comboBox_WindowSize->itemData( currentIndex ).toInt();
@@ -1649,7 +1649,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
 
 void MainWindow::on_horizontalSlider_Threshold_valueChanged( const int value )
 {
-    m_ui->doubleSpinBox_Threshold->setValue( value / 100.0 );
+    m_ui->lineEdit_Threshold->setText( QString::number( value / 100.0, 'f', 2 ) );
 }
 
 
