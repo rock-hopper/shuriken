@@ -25,26 +25,45 @@
 QMenuBar {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                       stop: 1 steelblue, stop: 0 black);
-    border-image: none;
-    border-style: none;
+    border: none;
 }
 
 QMenuBar::item {
     spacing: 3px;
     padding: 1px 4px;
     background: transparent;
-    border-radius: 4px;
     color: white;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
 }
 
 QMenuBar::item:selected {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                      stop: 0 steelblue, stop: 1 silver);
+                                      stop: 0 steelblue, stop: 1 lightgrey);
 }
 
 QMenuBar::item:pressed {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                       stop: 0 steelblue, stop: 1 lightgrey);
+}
+
+
+/* Menu */
+
+QMenu {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                      stop: 0 lightgrey, stop: 1 steelblue);
+    padding: 5px;
+}
+
+QMenu::item {
+    padding: 2px 10px 2px 25px;
+    background: transparent;
+    border: none;
+}
+
+QMenu::item:selected {
+    background-color: whitesmoke;
 }
 
 
@@ -59,7 +78,6 @@ QDialog {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                       stop: 0 lightgrey, stop: 1 steelblue);
 }
-
 
 
 /* Main window background image */
@@ -77,7 +95,7 @@ QLineEdit:enabled, QListView::item:enabled,
 QSpinBox:enabled, QDoubleSpinBox:enabled,
 QTextBrowser:enabled, QRadioButton:enabled,
 QPushButton:enabled, QComboBox:enabled,
-QCheckBox:enabled {
+QCheckBox:enabled, QMenu::item:enabled {
     color: black;
 }
 
@@ -85,8 +103,8 @@ QLineEdit:disabled, QListView::item:disabled,
 QSpinBox:disabled, QDoubleSpinBox:disabled,
 QTextBrowser:disabled, QRadioButton:disabled,
 QPushButton:disabled, QComboBox:disabled,
-QCheckBox:disabled {
-    color: silver;
+QCheckBox:disabled, QMenu::item:disabled {
+    color: darkgrey;
 }
 
 
@@ -296,6 +314,15 @@ QPushButton {
 
 QComboBox::drop-down {
     border: none;
+}
+
+QComboBox QAbstractItemView {
+    background-color: white;
+    selection-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                                stop: 0 whitesmoke, stop: 1 lightgrey);
+    border-radius: 5px;
+    color: black;
+    selection-color: black;
 }
 
 
