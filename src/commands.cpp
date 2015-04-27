@@ -721,13 +721,22 @@ void DeleteWaveformItemCommand::undo()
         }
     }
 
+    SamplerAudioSource::EnvelopeSettings envelopes;
+
+    m_mainWindow->m_samplerAudioSource->getEnvelopeSettings( envelopes );
+
     for ( int i = 0; i < m_orderPositions.size(); i++ )
     {
         m_mainWindow->m_sampleBufferList.insert( firstOrderPos + i, m_removedSampleBuffers.at( i ) );
+        envelopes.attackValues.insert( firstOrderPos + i, 0.0 );
+        envelopes.releaseValues.insert( firstOrderPos + i, 0.0 );
+        envelopes.oneShotSettings.insert( firstOrderPos + i, true );
     }
 
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                     m_mainWindow->m_sampleHeader->sampleRate );
+
+    m_mainWindow->m_samplerAudioSource->setEnvelopeSettings( envelopes );
 
     m_sliceButton->setEnabled( true );
     m_sliceButton->setChecked( true );
@@ -782,6 +791,10 @@ void DeleteWaveformItemCommand::redo()
         }
     }
 
+    SamplerAudioSource::EnvelopeSettings envelopes;
+
+    m_mainWindow->m_samplerAudioSource->getEnvelopeSettings( envelopes );
+
     m_removedSampleBuffers.clear();
 
     const int firstOrderPos = m_orderPositions.first();
@@ -790,10 +803,15 @@ void DeleteWaveformItemCommand::redo()
     {
         m_removedSampleBuffers << m_mainWindow->m_sampleBufferList.at( firstOrderPos );
         m_mainWindow->m_sampleBufferList.removeAt( firstOrderPos );
+        envelopes.attackValues.removeAt( firstOrderPos );
+        envelopes.releaseValues.removeAt( firstOrderPos );
+        envelopes.oneShotSettings.removeAt( firstOrderPos );
     }
 
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                     m_mainWindow->m_sampleHeader->sampleRate );
+
+    m_mainWindow->m_samplerAudioSource->setEnvelopeSettings( envelopes );
 
     if ( m_mainWindow->m_sampleBufferList.size() == 1 )
     {
