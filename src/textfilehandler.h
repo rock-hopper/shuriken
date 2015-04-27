@@ -77,7 +77,12 @@ public:
     static bool createH2DrumkitXmlFile( QString dirPath, QString kitName, QStringList audioFileNames,
                                         const SamplerAudioSource::EnvelopeSettings& envelopes );
 
-    static bool createSFZFile( QString sfzFilePath, QString samplesDirName, QStringList audioFileNames );
+    static bool createSFZFile( QString sfzFilePath,
+                               QString samplesDirName,
+                               QStringList audioFileNames,
+                               QList<SharedSampleBuffer> sampleBufferList,
+                               qreal sampleRate,
+                               const SamplerAudioSource::EnvelopeSettings& envelopes );
 };
 
 #endif // TEXTFILEHANDLER_H

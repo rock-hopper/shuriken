@@ -495,10 +495,14 @@ void MainWindow::exportAs( const QString tempDirPath,
     // Export SFZ
     else if ( isSuccessful && isExportTypeSFZ )
     {
+        SamplerAudioSource::EnvelopeSettings envelopes;
+
+        m_samplerAudioSource->getEnvelopeSettings( envelopes );
+
         const QString sfzFilePath = outputDir.absoluteFilePath( fileName + ".sfz" );
         const QString samplesDirName = QFileInfo( samplesDirPath ).fileName();
 
-        TextFileHandler::createSFZFile( sfzFilePath, samplesDirName, audioFileNames );
+        TextFileHandler::createSFZFile( sfzFilePath, samplesDirName, audioFileNames, m_sampleBufferList, m_sampleHeader->sampleRate, envelopes );
     }
     // Export Akai PGM
     else if ( isSuccessful && isExportTypeAkaiPgm )

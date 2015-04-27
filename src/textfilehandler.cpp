@@ -397,25 +397,41 @@ bool TextFileHandler::createH2DrumkitXmlFile( const QString dirPath, const QStri
 
 
 
-bool TextFileHandler::createSFZFile( const QString sfzFilePath, const QString samplesDirName, const QStringList audioFileNames )
+bool TextFileHandler::createSFZFile( const QString sfzFilePath,
+                                     const QString samplesDirName,
+                                     const QStringList audioFileNames,
+                                     const QList<SharedSampleBuffer> sampleBufferList,
+                                     const qreal sampleRate,
+                                     const SamplerAudioSource::EnvelopeSettings& envelopes )
 {
+    Q_ASSERT( sampleBufferList.size() == audioFileNames.size() &&
+              sampleBufferList.size() == envelopes.attackValues.size() );
+
     File file( sfzFilePath.toLocal8Bit().data() );
 
     const bool isSuccessful = file.create();
 
     if ( isSuccessful )
     {
-        int key = 60;
+        int key = Midi::MIDDLE_C;
 
         if ( audioFileNames.size() > Midi::MAX_POLYPHONY - Midi::MIDDLE_C )
         {
             key = qMax( Midi::MAX_POLYPHONY - audioFileNames.size(), 0 );
         }
 
-        foreach ( QString fileName, audioFileNames )
+        for ( int i = 0; i < audioFileNames.size() && i < Midi::MAX_POLYPHONY; i++ )
         {
-            QString groupText = "<group> key=" + QString::number( key ) + " loop_mode=one_shot\n";
-            QString regionText = "<region> sample=" + samplesDirName + "\\" + fileName + "\n";
+            const QString fileName = audioFileNames.at( i );
+            const qreal attackValue = ( envelopes.attackValues.at( i ) * sampleBufferList.at( i )->getNumFrames() ) / sampleRate;
+            const qreal releaseValue = ( envelopes.releaseValues.at( i ) * sampleBufferList.at( i )->getNumFrames() ) / sampleRate;
+            const QString loopMode = envelopes.oneShotSettings.at( i ) ? "one_shot" : "no_loop";
+
+            const QString groupText = "<group> key=" + QString::number( key ) +
+                                      " ampeg_attack=" + QString::number( attackValue ) +
+                                      " ampeg_release=" + QString::number( releaseValue ) +
+                                      " loop_mode=" + loopMode + "\n";
+            const QString regionText = "<region> sample=" + samplesDirName + "\\" + fileName + "\n";
 
             file.appendText( groupText.toLocal8Bit().data() );
             file.appendText( regionText.toLocal8Bit().data() );
