@@ -81,5 +81,11 @@ void ApplyGainDialog::on_dial_Gain_valueChanged( const int value )
 
 void ApplyGainDialog::on_doubleSpinBox_Gain_valueChanged( const double value )
 {
+    disconnect( m_ui->dial_Gain, SIGNAL( valueChanged(int) ),
+                this, SLOT( on_dial_Gain_valueChanged(int) ) );
+
     m_ui->dial_Gain->setValue( value * 10 );
+
+    connect( m_ui->dial_Gain, SIGNAL( valueChanged(int) ),
+             this, SLOT( on_dial_Gain_valueChanged(int) ) );
 }

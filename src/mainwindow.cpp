@@ -2167,7 +2167,13 @@ void MainWindow::on_doubleSpinBox_Attack_valueChanged( const double value )
         m_samplerAudioSource->setAttack( orderPositions.first(), value );
     }
 
+    disconnect( m_ui->dial_Attack, SIGNAL( valueChanged(int) ),
+                this, SLOT( on_dial_Attack_valueChanged(int) ) );
+
     m_ui->dial_Attack->setValue( value * 100 );
+
+    connect( m_ui->dial_Attack, SIGNAL( valueChanged(int) ),
+             this, SLOT( on_dial_Attack_valueChanged(int) ) );
 }
 
 
@@ -2188,7 +2194,13 @@ void MainWindow::on_doubleSpinBox_Release_valueChanged( const double value )
         m_samplerAudioSource->setRelease( orderPositions.first(), value );
     }
 
+    disconnect( m_ui->dial_Release, SIGNAL( valueChanged(int) ),
+                this, SLOT( on_dial_Release_valueChanged(int) ) );
+
     m_ui->dial_Release->setValue( value * 100 );
+
+    connect( m_ui->dial_Release, SIGNAL( valueChanged(int) ),
+             this, SLOT( on_dial_Release_valueChanged(int) ) );
 }
 
 

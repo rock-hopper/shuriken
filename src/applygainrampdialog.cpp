@@ -88,7 +88,13 @@ void ApplyGainRampDialog::on_dial_StartGain_valueChanged( const int value )
 
 void ApplyGainRampDialog::on_doubleSpinBox_StartGain_valueChanged( const double value )
 {
+    disconnect( m_ui->dial_StartGain, SIGNAL( valueChanged(int) ),
+                this, SLOT( on_dial_StartGain_valueChanged(int) ) );
+
     m_ui->dial_StartGain->setValue( value * 10 );
+
+    connect( m_ui->dial_StartGain, SIGNAL( valueChanged(int) ),
+             this, SLOT( on_dial_StartGain_valueChanged(int) ) );
 }
 
 
@@ -102,5 +108,11 @@ void ApplyGainRampDialog::on_dial_EndGain_valueChanged( const int value )
 
 void ApplyGainRampDialog::on_doubleSpinBox_EndGain_valueChanged( const double value )
 {
+    disconnect( m_ui->dial_EndGain, SIGNAL( valueChanged(int) ),
+                this, SLOT( on_dial_EndGain_valueChanged(int) ) );
+
     m_ui->dial_EndGain->setValue( value * 10 );
+
+    connect( m_ui->dial_EndGain, SIGNAL( valueChanged(int) ),
+             this, SLOT( on_dial_EndGain_valueChanged(int) ) );
 }
