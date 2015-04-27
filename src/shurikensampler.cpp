@@ -4,6 +4,9 @@
    This file contains code which forms part of the JUCE library.
    Copyright (c) 2013 - Raw Material Software Ltd.
 
+   See "JuceLibraryCode/modules/juce_audio_formats/sampler/juce_Sampler.cpp"
+   for the original code.
+
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
    b) the Affero GPL v3
