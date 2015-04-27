@@ -1028,7 +1028,10 @@ void MainWindow::recreateSampler()
 {
     SamplerAudioSource::EnvelopeSettings envelopes;
 
-    m_samplerAudioSource->getEnvelopeSettings( envelopes );
+    if ( m_samplerAudioSource != NULL )
+    {
+        m_samplerAudioSource->getEnvelopeSettings( envelopes );
+    }
 
     tearDownSampler();
     setUpSampler();

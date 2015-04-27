@@ -126,6 +126,14 @@ void MainWindow::saveProject( const QString filePath, const bool isNsmSessionExp
             settings.appliedBpm = m_appliedBPM;
         }
 
+        SamplerAudioSource::EnvelopeSettings envelopes;
+
+        m_samplerAudioSource->getEnvelopeSettings( envelopes );
+
+        settings.attackValues = envelopes.attackValues;
+        settings.releaseValues = envelopes.releaseValues;
+        settings.oneShotSettings = envelopes.oneShotSettings;
+
         settings.isTimeStretchChecked = m_ui->checkBox_TimeStretch->isChecked();
         settings.isPitchCorrectionChecked = m_ui->checkBox_PitchCorrection->isChecked();
         settings.options = m_optionsDialog->getStretcherOptions();
@@ -354,6 +362,14 @@ void MainWindow::openProject( const QString filePath )
             }
             m_ui->spinBox_Length->setValue( settings.length );
             m_ui->comboBox_Units->setCurrentIndex( settings.units );
+
+            SamplerAudioSource::EnvelopeSettings envelopes;
+
+            envelopes.attackValues = settings.attackValues;
+            envelopes.releaseValues = settings.releaseValues;
+            envelopes.oneShotSettings = settings.oneShotSettings;
+
+            m_samplerAudioSource->setEnvelopeSettings( envelopes );
 
             // Clean up temp dir
             File( projTempDir.absolutePath().toLocal8Bit().data() ).deleteRecursively();

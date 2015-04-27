@@ -29,7 +29,7 @@
 //==================================================================================================
 // Public Static:
 
-bool TextFileHandler::createProjectXmlFile( const QString filePath, const ProjectSettings settings )
+bool TextFileHandler::createProjectXmlFile( const QString filePath, const ProjectSettings& settings )
 {
     XmlElement docElement( "project" );
     docElement.setAttribute( "name", settings.projectName.toLocal8Bit().data() );
@@ -100,6 +100,17 @@ bool TextFileHandler::createProjectXmlFile( const QString filePath, const Projec
         docElement.addChildElement( noteTimeRatioElement );
     }
 
+    for ( int i = 0; i < settings.attackValues.size(); i++ )
+    {
+        XmlElement* envelopeElement = new XmlElement( "envelope" );
+
+        envelopeElement->setAttribute( "attack", settings.attackValues.at( i ) );
+        envelopeElement->setAttribute( "release", settings.releaseValues.at( i ) );
+        envelopeElement->setAttribute( "one_shot", settings.oneShotSettings.at( i ) );
+
+        docElement.addChildElement( envelopeElement );
+    }
+
     File file( filePath.toLocal8Bit().data() );
 
     return docElement.writeToFile( file, String::empty );
@@ -141,6 +152,12 @@ bool TextFileHandler::readProjectXmlFile( const QString filePath, ProjectSetting
                 {
                     settings.midiNotes << elem->getIntAttribute( "note" );
                     settings.noteTimeRatios << elem->getDoubleAttribute( "time_ratio" );
+                }
+                else if ( elem->hasTagName( "envelope" ) )
+                {
+                    settings.attackValues << elem->getDoubleAttribute( "attack" );
+                    settings.releaseValues << elem->getDoubleAttribute( "release" );
+                    settings.oneShotSettings << elem->getBoolAttribute( "one_shot" );
                 }
                 else if ( elem->hasTagName( "sample" ) )
                 {

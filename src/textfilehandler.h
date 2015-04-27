@@ -64,9 +64,12 @@ public:
         int units;
         QList<int> midiNotes;
         QList<qreal> noteTimeRatios;
+        QList<qreal> attackValues;
+        QList<qreal> releaseValues;
+        QList<bool> oneShotSettings;
     };
 
-    static bool createProjectXmlFile( QString filePath, ProjectSettings settings );
+    static bool createProjectXmlFile( QString filePath, const ProjectSettings& settings );
 
     static bool readProjectXmlFile( QString filePath, ProjectSettings& settings );
 
