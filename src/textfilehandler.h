@@ -27,6 +27,7 @@
 #include <QStringList>
 #include "samplebuffer.h"
 #include <rubberband/RubberBandStretcher.h>
+#include "sampleraudiosource.h"
 
 using namespace RubberBand;
 
@@ -73,7 +74,8 @@ public:
 
     static bool readProjectXmlFile( QString filePath, ProjectSettings& settings );
 
-    static bool createH2DrumkitXmlFile( QString dirPath, QString kitName, QStringList audioFileNames );
+    static bool createH2DrumkitXmlFile( QString dirPath, QString kitName, QStringList audioFileNames,
+                                        const SamplerAudioSource::EnvelopeSettings& envelopes );
 
     static bool createSFZFile( QString sfzFilePath, QString samplesDirName, QStringList audioFileNames );
 };

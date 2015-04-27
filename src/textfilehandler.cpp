@@ -228,8 +228,12 @@ bool TextFileHandler::readProjectXmlFile( const QString filePath, ProjectSetting
 
 
 
-bool TextFileHandler::createH2DrumkitXmlFile( const QString dirPath, const QString kitName, const QStringList audioFileNames )
+bool TextFileHandler::createH2DrumkitXmlFile( const QString dirPath, const QString kitName,
+                                              const QStringList audioFileNames,
+                                              const SamplerAudioSource::EnvelopeSettings& envelopes )
 {
+    Q_ASSERT( audioFileNames.size() == envelopes.attackValues.size() );
+
     const String infoFormattingText = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'Lucida Grande'; font-size:10pt; font-weight:400; font-style:normal;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p></body></html>";
 
     XmlElement docElement( "drumkit_info" );
@@ -306,7 +310,8 @@ bool TextFileHandler::createH2DrumkitXmlFile( const QString dirPath, const QStri
         instrumentElement->addChildElement( filterResonanceElement );
 
         XmlElement* AttackElement = new XmlElement( "Attack" );
-        AttackElement->addTextElement( "0" );
+        const int attackValue = static_cast<int>( envelopes.attackValues.at( i ) * envelopes.attackValues.at( i ) * 100000 );
+        AttackElement->addTextElement( String( attackValue ) );
         instrumentElement->addChildElement( AttackElement );
 
         XmlElement* DecayElement = new XmlElement( "Decay" );
@@ -318,7 +323,8 @@ bool TextFileHandler::createH2DrumkitXmlFile( const QString dirPath, const QStri
         instrumentElement->addChildElement( SustainElement );
 
         XmlElement* ReleaseElement = new XmlElement( "Release" );
-        ReleaseElement->addTextElement( "1000" );
+        const int releaseValue = static_cast<int>( envelopes.releaseValues.at( i ) * envelopes.releaseValues.at( i ) * 100000 );
+        ReleaseElement->addTextElement( String( releaseValue ) );
         instrumentElement->addChildElement( ReleaseElement );
 
         XmlElement* muteGroupElement = new XmlElement( "muteGroup" );

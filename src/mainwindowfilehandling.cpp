@@ -477,7 +477,11 @@ void MainWindow::exportAs( const QString tempDirPath,
     // Export Hydrogen drumkit
     if ( isSuccessful && isExportTypeH2Drumkit )
     {
-        TextFileHandler::createH2DrumkitXmlFile( samplesDirPath, fileName, audioFileNames );
+        SamplerAudioSource::EnvelopeSettings envelopes;
+
+        m_samplerAudioSource->getEnvelopeSettings( envelopes );
+
+        TextFileHandler::createH2DrumkitXmlFile( samplesDirPath, fileName, audioFileNames, envelopes );
 #ifdef LINUX
         const QString cdCommand  = "cd '" + outputDirPath + "'";
         const QString tarCommand = "tar --create --gzip --file '" + fileName + ".h2drumkit' '" + fileName + "'";
