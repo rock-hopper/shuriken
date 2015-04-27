@@ -23,7 +23,7 @@
 #include "sampleraudiosource.h"
 #include "shurikensampler.h"
 #include "globals.h"
-#include <QDebug>
+//#include <QtDebug>
 
 
 //==================================================================================================
@@ -121,6 +121,129 @@ void SamplerAudioSource::stop()
 void SamplerAudioSource::setLooping( const bool isLoopingDesired )
 {
     m_isLoopingEnabled = isLoopingDesired;
+}
+
+
+
+void SamplerAudioSource::setAttack( const int sampleNum, const qreal value )
+{
+    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
+
+    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
+
+    if ( samplerSound != NULL )
+    {
+        samplerSound->setAttack( value );
+    }
+}
+
+
+
+void SamplerAudioSource::setRelease( const int sampleNum, const qreal value )
+{
+    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
+
+    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
+
+    if ( samplerSound != NULL )
+    {
+        samplerSound->setRelease( value );
+    }
+}
+
+
+
+qreal SamplerAudioSource::getAttack( const int sampleNum ) const
+{
+    qreal value = 0.0;
+
+    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
+
+    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
+
+    if ( samplerSound != NULL )
+    {
+        value = samplerSound->getAttack();
+    }
+
+    return value;
+}
+
+
+
+qreal SamplerAudioSource::getRelease( const int sampleNum ) const
+{
+    qreal value = 0.0;
+
+    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
+
+    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
+
+    if ( samplerSound != NULL )
+    {
+        value = samplerSound->getRelease();
+    }
+
+    return value;
+}
+
+
+
+void SamplerAudioSource::setOneShot( const int sampleNum, const bool set )
+{
+    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
+
+    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
+
+    if ( samplerSound != NULL )
+    {
+        samplerSound->setOneShot( set );
+    }
+}
+
+
+
+bool SamplerAudioSource::isOneShotSet( const int sampleNum ) const
+{
+    bool isEnabled = false;
+
+    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
+
+    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
+
+    if ( samplerSound != NULL )
+    {
+        isEnabled = samplerSound->isOneShotSet();
+    }
+
+    return isEnabled;
+}
+
+
+
+void SamplerAudioSource::getEnvelopeSettings( EnvelopeSettings& settings ) const
+{
+    for ( int i = 0; i < m_sampleBufferList.size(); i++ )
+    {
+        settings.attackValues << getAttack( i );
+        settings.releaseValues << getRelease( i );
+        settings.oneShotSettings << isOneShotSet( i );
+    }
+}
+
+
+
+void SamplerAudioSource::setEnvelopeSettings( const EnvelopeSettings& settings )
+{
+    if ( settings.attackValues.size() == m_sampleBufferList.size() )
+    {
+        for ( int i = 0; i < m_sampleBufferList.size(); i++ )
+        {
+            setAttack( i, settings.attackValues.at( i ) );
+            setRelease( i, settings.releaseValues.at( i ) );
+            setOneShot( i, settings.oneShotSettings.at( i ) );
+        }
+    }
 }
 
 

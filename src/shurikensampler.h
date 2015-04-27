@@ -23,7 +23,7 @@
 
   This file is part of Shuriken Beat Slicer.
 
-  Copyright (C) 2014 Andrew M Taylor <a.m.taylor303@gmail.com>
+  Copyright (C) 2014, 2015 Andrew M Taylor <a.m.taylor303@gmail.com>
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -63,10 +63,19 @@ public:
 
     ~ShurikenSamplerSound();
 
-    SharedSampleBuffer getAudioData() const     { return m_data; }
+    void setAttack( qreal value );  // Value should be 0.00 - 1.00
+    void setRelease( qreal value ); // Value should be 0.00 - 1.00
+
+    qreal getAttack() const                     { return m_attackValue; }
+    qreal getRelease() const                    { return m_releaseValue; }
+
+    void setOneShot( bool set )                 { m_isOneShotSet = set; }
+    bool isOneShotSet() const                   { return m_isOneShotSet; }
 
     // Set temporary sample range; only lasts for duration of one note
     void setTempSampleRange( SharedSampleRange sampleRange );
+
+    SharedSampleBuffer getSampleBuffer() const  { return m_sampleBuffer; }
 
     bool appliesToNote( int midiNoteNumber ) override;
     bool appliesToChannel( int midiChannel ) override;
@@ -75,16 +84,17 @@ public:
 private:
     friend class ShurikenSamplerVoice;
 
-    const SharedSampleBuffer m_data;
+    const SharedSampleBuffer m_sampleBuffer;
     const int m_originalStartFrame, m_originalEndFrame;
     const qreal m_sourceSampleRate;
     BigInteger m_midiNotes;
     int m_midiRootNote;
-    int m_attackSamples, m_releaseSamples;
 
+    volatile qreal m_attackValue, m_releaseValue;
     volatile int m_startFrame, m_endFrame;
     volatile int m_tempStartFrame, m_tempEndFrame;
     volatile bool m_isTempSampleRangeSet;
+    volatile bool m_isOneShotSet;
 };
 
 

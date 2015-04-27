@@ -23,7 +23,7 @@
 #include "commands.h"
 #include <QApplication>
 #include <QDir>
-#include <QDebug>
+#include <QtDebug>
 #include "messageboxes.h"
 #include "offlinetimestretcher.h"
 
@@ -554,7 +554,7 @@ MoveWaveformItemCommand::MoveWaveformItemCommand( const QList<int> oldOrderPosit
 
 void MoveWaveformItemCommand::undo()
 {
-    reorderSampleBufferList( m_newOrderPositions, -m_numPlacesMoved );
+    reorderSampleBuffer( m_newOrderPositions, -m_numPlacesMoved );
 
     if ( m_mainWindow->m_rubberbandAudioSource != NULL )
     {
@@ -568,7 +568,7 @@ void MoveWaveformItemCommand::undo()
 
 void MoveWaveformItemCommand::redo()
 {
-    reorderSampleBufferList( m_oldOrderPositions, m_numPlacesMoved );
+    reorderSampleBuffer( m_oldOrderPositions, m_numPlacesMoved );
 
     if ( m_mainWindow->m_rubberbandAudioSource != NULL )
     {
@@ -584,8 +584,12 @@ void MoveWaveformItemCommand::redo()
 
 
 
-void MoveWaveformItemCommand::reorderSampleBufferList( const QList<int> orderPositions, const int numPlacesMoved )
+void MoveWaveformItemCommand::reorderSampleBuffer( const QList<int> orderPositions, const int numPlacesMoved )
 {
+    SamplerAudioSource::EnvelopeSettings envelopes;
+
+    m_mainWindow->m_samplerAudioSource->getEnvelopeSettings( envelopes );
+
     const int numSelectedItems = orderPositions.size();
 
     // If waveform items have been dragged to the left...
@@ -593,21 +597,32 @@ void MoveWaveformItemCommand::reorderSampleBufferList( const QList<int> orderPos
     {
         for ( int i = 0; i < numSelectedItems; i++ )
         {
-            const int orderPos = orderPositions.at( i );
-            m_mainWindow->m_sampleBufferList.move( orderPos, orderPos + numPlacesMoved );
+            moveSampleBuffer( orderPositions.at( i ), numPlacesMoved, envelopes );
         }
     }
     else // If waveform items have been dragged to the right...
     {
         for ( int i = numSelectedItems - 1; i >= 0; i-- )
         {
-            const int orderPos = orderPositions.at( i );
-            m_mainWindow->m_sampleBufferList.move( orderPos, orderPos + numPlacesMoved );
+            moveSampleBuffer( orderPositions.at( i ), numPlacesMoved, envelopes );
         }
     }
 
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                     m_mainWindow->m_sampleHeader->sampleRate );
+
+    m_mainWindow->m_samplerAudioSource->setEnvelopeSettings( envelopes );
+}
+
+
+
+void MoveWaveformItemCommand::moveSampleBuffer( const int orderPos, const int numPlaces,
+                                                SamplerAudioSource::EnvelopeSettings& envelopes )
+{
+    m_mainWindow->m_sampleBufferList.move( orderPos, orderPos + numPlaces );
+    envelopes.attackValues.move( orderPos, orderPos + numPlaces );
+    envelopes.releaseValues.move( orderPos, orderPos + numPlaces );
+    envelopes.oneShotSettings.move( orderPos, orderPos + numPlaces );
 }
 
 
@@ -1103,8 +1118,7 @@ void GlobalTimeStretchCommand::undo()
         }
     }
 
-    m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
-                                                    m_mainWindow->m_sampleHeader->sampleRate );
+    m_mainWindow->resetSamples();
 
     const qreal timeRatio = 1.0 / ( m_originalBPM / m_newBPM );
 
@@ -1162,8 +1176,7 @@ void GlobalTimeStretchCommand::redo()
             OfflineTimeStretcher::stretch( sampleBuffer, sampleRate, numChans, m_options, timeRatio, pitchScale );
         }
 
-        m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
-                                                        m_mainWindow->m_sampleHeader->sampleRate );
+        m_mainWindow->resetSamples();
 
         updateSlicePoints( timeRatio );
         m_graphicsScene->redrawWaveforms();
@@ -1255,8 +1268,7 @@ void RenderTimeStretchCommand::undo()
         orderPosList << i;
     }
 
-    m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
-                                                    m_mainWindow->m_sampleHeader->sampleRate );
+    m_mainWindow->resetSamples();
 
     m_graphicsScene->stretchWaveforms( orderPosList, m_timeRatioList );
 
@@ -1318,8 +1330,7 @@ void RenderTimeStretchCommand::redo()
             m_graphicsScene->getWaveformAt( i )->setStretchRatio( 1.0 );
         }
 
-        m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
-                                                        m_mainWindow->m_sampleHeader->sampleRate );
+        m_mainWindow->resetSamples();
 
         m_graphicsScene->redrawWaveforms();
 

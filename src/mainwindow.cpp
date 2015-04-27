@@ -616,6 +616,11 @@ void MainWindow::disableUI()
     m_ui->spinBox_Length->setEnabled( false );
     m_ui->spinBox_Length->setValue( 0 );
     m_ui->comboBox_Units->setEnabled( false );
+    m_ui->doubleSpinBox_Attack->setEnabled( false );
+    m_ui->dial_Attack->setEnabled( false );
+    m_ui->doubleSpinBox_Release->setEnabled( false );
+    m_ui->dial_Release->setEnabled( false );
+    m_ui->checkBox_OneShot->setEnabled( false );
 
     m_ui->actionSave_Project->setEnabled( false );
     m_ui->actionSave_As->setEnabled( false );
@@ -757,6 +762,23 @@ QUndoCommand* MainWindow::createRenderCommand( QUndoCommand* parent )
     }
 
     return command;
+}
+
+
+
+void MainWindow::resetSamples()
+{
+    if ( m_samplerAudioSource != NULL &&
+         ! m_sampleBufferList.isEmpty() && ! m_sampleHeader.isNull() )
+    {
+        SamplerAudioSource::EnvelopeSettings envelopes;
+
+        m_samplerAudioSource->getEnvelopeSettings( envelopes );
+
+        m_samplerAudioSource->setSamples( m_sampleBufferList, m_sampleHeader->sampleRate );
+
+        m_samplerAudioSource->setEnvelopeSettings( envelopes );
+    }
 }
 
 
@@ -974,7 +996,7 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
         }
 
         QObject::connect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
-                          this, SLOT( resetSampler() ) );
+                          this, SLOT( recreateSampler() ) );
     }
     else // Offline mode
     {
@@ -984,7 +1006,7 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
         m_ui->actionSelective_Time_Stretch->setEnabled( false );
 
         QObject::disconnect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
-                             this, SLOT( resetSampler() ) );
+                             this, SLOT( recreateSampler() ) );
 
         if ( isSelectiveTimeStretchInUse() )
         {
@@ -997,15 +1019,21 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
         }
     }
 
-    resetSampler();
+    recreateSampler();
 }
 
 
 
-void MainWindow::resetSampler()
+void MainWindow::recreateSampler()
 {
+    SamplerAudioSource::EnvelopeSettings envelopes;
+
+    m_samplerAudioSource->getEnvelopeSettings( envelopes );
+
     tearDownSampler();
     setUpSampler();
+
+    m_samplerAudioSource->setEnvelopeSettings( envelopes );
 }
 
 
@@ -1015,6 +1043,7 @@ void MainWindow::enableEditActions()
     const SharedSlicePointItem slicePoint = m_graphicsScene->getSelectedSlicePoint();
     const QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
 
+    // Enable/disable delete action
     m_ui->actionDelete->setEnabled( false );
 
     if ( ! slicePoint.isNull() || ! orderPositions.isEmpty() )
@@ -1025,6 +1054,7 @@ void MainWindow::enableEditActions()
         }
     }
 
+    // Enable/disable other edit actions
     if ( ! orderPositions.isEmpty() )
     {
         m_ui->actionApply_Gain->setEnabled( true );
@@ -1038,6 +1068,66 @@ void MainWindow::enableEditActions()
         m_ui->actionApply_Gain_Ramp->setEnabled( false );
         m_ui->actionNormalise->setEnabled( false );
         m_ui->actionReverse->setEnabled( false );
+    }
+
+    // Enable/disable envelope widgets
+    if ( orderPositions.size() == 1 )
+    {
+        disconnect( m_ui->doubleSpinBox_Attack, SIGNAL( valueChanged(double) ),
+                    this, SLOT( on_doubleSpinBox_Attack_valueChanged(double) ) );
+
+        disconnect( m_ui->dial_Attack, SIGNAL( valueChanged(int) ),
+                    this, SLOT( on_dial_Attack_valueChanged(int) ) );
+
+        disconnect( m_ui->doubleSpinBox_Release, SIGNAL( valueChanged(double) ),
+                    this, SLOT( on_doubleSpinBox_Release_valueChanged(double) ) );
+
+        disconnect( m_ui->dial_Release, SIGNAL( valueChanged(int) ),
+                    this, SLOT( on_dial_Release_valueChanged(int) ) );
+
+        const qreal attackValue = m_samplerAudioSource->getAttack( orderPositions.first() );
+        const qreal releaseValue = m_samplerAudioSource->getRelease( orderPositions.first() );
+
+        m_ui->doubleSpinBox_Attack->setValue( attackValue );
+        m_ui->dial_Attack->setValue( attackValue * 100 );
+
+        m_ui->doubleSpinBox_Release->setValue( releaseValue );
+        m_ui->dial_Release->setValue( releaseValue * 100 );
+
+        connect( m_ui->doubleSpinBox_Attack, SIGNAL( valueChanged(double) ),
+                 this, SLOT( on_doubleSpinBox_Attack_valueChanged(double) ) );
+
+        connect( m_ui->dial_Attack, SIGNAL( valueChanged(int) ),
+                 this, SLOT( on_dial_Attack_valueChanged(int) ) );
+
+        connect( m_ui->doubleSpinBox_Release, SIGNAL( valueChanged(double) ),
+                 this, SLOT( on_doubleSpinBox_Release_valueChanged(double) ) );
+
+        connect( m_ui->dial_Release, SIGNAL( valueChanged(int) ),
+                 this, SLOT( on_dial_Release_valueChanged(int) ) );
+
+        m_ui->doubleSpinBox_Attack->setEnabled( true );
+        m_ui->dial_Attack->setEnabled( true );
+
+        const bool isOneShotSet = m_samplerAudioSource->isOneShotSet( orderPositions.first() );
+
+        // Setting this will enable/disable the "Release" spin box and dial
+        m_ui->checkBox_OneShot->setChecked( isOneShotSet );
+
+        m_ui->checkBox_OneShot->setEnabled( true );
+    }
+    else
+    {
+        m_ui->doubleSpinBox_Attack->setEnabled( false );
+        m_ui->dial_Attack->setEnabled( false );
+
+        m_ui->doubleSpinBox_Release->setEnabled( false );
+        m_ui->dial_Release->setEnabled( false );
+
+        m_ui->doubleSpinBox_Attack->setValue( 0 );
+        m_ui->doubleSpinBox_Release->setValue( 0 );
+
+        m_ui->checkBox_OneShot->setEnabled( false );
     }
 }
 
@@ -2061,4 +2151,61 @@ void MainWindow::on_toolButton_RightArrow_clicked()
     index = index < m_ui->stackedWidget->count() - 1 ? index + 1 : 0;
 
     m_ui->stackedWidget->setCurrentIndex( index );
+}
+
+
+
+void MainWindow::on_doubleSpinBox_Attack_valueChanged( const double value )
+{
+    const QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
+
+    if ( orderPositions.size() == 1 )
+    {
+        m_samplerAudioSource->setAttack( orderPositions.first(), value );
+    }
+
+    m_ui->dial_Attack->setValue( value * 100 );
+}
+
+
+
+void MainWindow::on_dial_Attack_valueChanged( const int value )
+{
+    m_ui->doubleSpinBox_Attack->setValue( value / 100.0 );
+}
+
+
+
+void MainWindow::on_doubleSpinBox_Release_valueChanged( const double value )
+{
+    const QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
+
+    if ( orderPositions.size() == 1 )
+    {
+        m_samplerAudioSource->setRelease( orderPositions.first(), value );
+    }
+
+    m_ui->dial_Release->setValue( value * 100 );
+}
+
+
+
+void MainWindow::on_dial_Release_valueChanged( const int value )
+{
+    m_ui->doubleSpinBox_Release->setValue( value / 100.0 );
+}
+
+
+
+void MainWindow::on_checkBox_OneShot_toggled( const bool isChecked )
+{
+    const QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
+
+    if ( orderPositions.size() == 1 )
+    {
+        m_samplerAudioSource->setOneShot( orderPositions.first(), isChecked );
+
+        m_ui->doubleSpinBox_Release->setDisabled( isChecked );
+        m_ui->dial_Release->setDisabled( isChecked );
+    }
 }

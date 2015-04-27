@@ -217,7 +217,7 @@
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>36</width>
+           <width>40</width>
            <height>20</height>
           </size>
          </property>
@@ -520,7 +520,7 @@
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>109</width>
+                 <width>40</width>
                  <height>20</height>
                 </size>
                </property>
@@ -538,12 +538,21 @@
                <property name="enabled">
                 <bool>false</bool>
                </property>
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
               </widget>
              </item>
              <item>
               <widget class="QDial" name="dial_Attack">
                <property name="enabled">
                 <bool>false</bool>
+               </property>
+               <property name="maximum">
+                <number>100</number>
                </property>
               </widget>
              </item>
@@ -554,7 +563,7 @@
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>108</width>
+                 <width>40</width>
                  <height>20</height>
                 </size>
                </property>
@@ -572,12 +581,47 @@
                <property name="enabled">
                 <bool>false</bool>
                </property>
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
               </widget>
              </item>
              <item>
               <widget class="QDial" name="dial_Release">
                <property name="enabled">
                 <bool>false</bool>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_19">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_OneShot">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>One Shot</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -588,7 +632,7 @@
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>109</width>
+                 <width>40</width>
                  <height>20</height>
                 </size>
                </property>

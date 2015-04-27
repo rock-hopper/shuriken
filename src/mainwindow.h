@@ -104,6 +104,9 @@ private:
     bool isSelectiveTimeStretchInUse() const;
     QUndoCommand* createRenderCommand( QUndoCommand* parent = NULL );
 
+    // Pass sample buffers to the sampler audio source, preserving current envelope settings
+    void resetSamples();
+
     Ui::MainWindow* m_ui; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
     WaveGraphicsScene* m_graphicsScene;
     QActionGroup* m_interactionGroup;
@@ -144,6 +147,12 @@ private:
     static void centreWindow( QWidget* window );
 
 private slots:
+    // Automatically connected
+    void on_checkBox_OneShot_toggled( bool isChecked );
+    void on_dial_Release_valueChanged( int value );
+    void on_doubleSpinBox_Release_valueChanged( double value );
+    void on_dial_Attack_valueChanged( int value );
+    void on_doubleSpinBox_Attack_valueChanged( double value );
     void on_toolButton_RightArrow_clicked();
     void on_toolButton_LeftArrow_clicked();
     void on_comboBox_SnapValues_activated( int index );
@@ -189,6 +198,7 @@ private slots:
     void on_actionSave_Project_triggered();
     void on_actionOpen_Project_triggered();
 
+    // Programmatically connected
     void recordWaveformItemMove( QList<int> oldOrderPositions, int numPlacesMoved );
 
     void recordSlicePointItemMove( SharedSlicePointItem slicePoint,
@@ -207,7 +217,9 @@ private slots:
     void disableZoomOut();
 
     void enableRealtimeControls( bool isEnabled );
-    void resetSampler();
+
+    // Tear down and set up sampler, preserving current envelope settings if possible
+    void recreateSampler();
 
     void enableEditActions();
     void enableSaveAction();

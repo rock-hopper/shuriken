@@ -249,7 +249,8 @@ public:
     void redo();
 
 private:
-    void reorderSampleBufferList( QList<int> orderPositions, int numPlacesMoved );
+    void reorderSampleBuffer( QList<int> orderPositions, int numPlacesMoved );
+    void moveSampleBuffer( int orderPos, int numPlaces, SamplerAudioSource::EnvelopeSettings& envelopes );
     void updateNoteTimeRatios( QList<int> orderPositions, int numPlacesMoved );
 
     const QList<int> m_oldOrderPositions;

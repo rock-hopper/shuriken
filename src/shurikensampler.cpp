@@ -23,7 +23,7 @@
 
   This file is part of Shuriken Beat Slicer.
 
-  Copyright (C) 2014 Andrew M Taylor <a.m.taylor303@gmail.com>
+  Copyright (C) 2014, 2015 Andrew M Taylor <a.m.taylor303@gmail.com>
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -43,36 +43,57 @@
 */
 
 #include "shurikensampler.h"
-//#include <QDebug>
+#include <QtDebug>
 
+
+//==================================================================================================
+// Public:
 
 ShurikenSamplerSound::ShurikenSamplerSound( const SharedSampleBuffer sampleBuffer,
                                             const qreal sampleRate,
                                             const BigInteger& notes,
                                             const int midiNoteForNormalPitch ) :
-    m_data( sampleBuffer ),
+    m_sampleBuffer( sampleBuffer ),
     m_originalStartFrame( 0 ),
     m_originalEndFrame( sampleBuffer->getNumFrames() - 1 ),
     m_sourceSampleRate( sampleRate ),
     m_midiNotes( notes ),
-    m_midiRootNote( midiNoteForNormalPitch )
+    m_midiRootNote( midiNoteForNormalPitch ),
+    m_attackValue( 0 ),
+    m_releaseValue( 0 ),
+    m_startFrame( m_originalStartFrame ),
+    m_endFrame( m_originalEndFrame ),
+    m_tempStartFrame( m_originalStartFrame ),
+    m_tempEndFrame( m_originalEndFrame ),
+    m_isTempSampleRangeSet( false ),
+    m_isOneShotSet( true )
 {
-    m_attackSamples = 0;
-    m_releaseSamples = 0;
-
-    m_startFrame = m_originalStartFrame;
-    m_endFrame = m_originalEndFrame;
-
-    m_tempStartFrame = m_originalStartFrame;
-    m_tempEndFrame = m_originalEndFrame;
-
-    m_isTempSampleRangeSet = false;
 }
 
 
 
 ShurikenSamplerSound::~ShurikenSamplerSound()
 {
+}
+
+
+
+void ShurikenSamplerSound::setAttack( qreal value )
+{
+    if ( value > 1.0 ) { value = 1.0; }
+    else if ( value < 0.0 ) { value = 0.0; }
+
+    m_attackValue = value;
+}
+
+
+
+void ShurikenSamplerSound::setRelease( qreal value )
+{
+    if ( value > 1.0 ) { value = 1.0; }
+    else if ( value < 0.0 ) { value = 0.0; }
+
+    m_releaseValue = value;
 }
 
 
@@ -101,13 +122,15 @@ bool ShurikenSamplerSound::appliesToChannel( const int /*midiChannel*/ )
 
 
 
-//==============================================================================
-ShurikenSamplerVoice::ShurikenSamplerVoice()
-    : m_pitchRatio( 0.0 ),
-      m_sourceSamplePosition( 0.0 ),
-      m_leftGain( 0.0f ), m_rightGain( 0.0f ),
-      m_attackReleaseLevel( 0 ), m_attackDelta( 0 ), m_releaseDelta( 0 ),
-      m_isInAttack( false ), m_isInRelease( false )
+//==================================================================================================
+// Public:
+
+ShurikenSamplerVoice::ShurikenSamplerVoice() :
+    m_pitchRatio( 0.0 ),
+    m_sourceSamplePosition( 0.0 ),
+    m_leftGain( 0.0f ), m_rightGain( 0.0f ),
+    m_attackReleaseLevel( 0 ), m_attackDelta( 0 ), m_releaseDelta( 0 ),
+    m_isInAttack( false ), m_isInRelease( false )
 {
 }
 
@@ -147,13 +170,16 @@ void ShurikenSamplerVoice::startNote( const int midiNoteNumber,
         m_leftGain = velocity;
         m_rightGain = velocity;
 
-        m_isInAttack =( sound->m_attackSamples > 0 );
+        const int numAttackFrames = static_cast<int>( sound->m_attackValue * sound->m_sampleBuffer->getNumFrames() );
+        const int numReleaseFrames = static_cast<int>( sound->m_releaseValue * sound->m_sampleBuffer->getNumFrames() );
+
+        m_isInAttack =( numAttackFrames > 0 );
         m_isInRelease = false;
 
         if ( m_isInAttack )
         {
             m_attackReleaseLevel = 0.0f;
-            m_attackDelta = (float) (m_pitchRatio / sound->m_attackSamples);
+            m_attackDelta = (float) ( m_pitchRatio / numAttackFrames );
         }
         else
         {
@@ -161,14 +187,21 @@ void ShurikenSamplerVoice::startNote( const int midiNoteNumber,
             m_attackDelta = 0.0f;
         }
 
-        if ( sound->m_releaseSamples > 0 )
-            m_releaseDelta = (float) ( -m_pitchRatio / sound->m_releaseSamples );
-        else
+        if ( sound->m_isOneShotSet )
+        {
             m_releaseDelta = 0.0f;
+        }
+        else
+        {
+            if ( numReleaseFrames > 0 )
+                m_releaseDelta = (float) ( -m_pitchRatio / numReleaseFrames );
+            else
+                m_releaseDelta = -1.0f;
+        }
     }
     else
     {
-        jassertfalse; // this object can only play ShurikenSamplerSounds!
+        jassertfalse; // This object can only play ShurikenSamplerSounds!
     }
 }
 
@@ -177,22 +210,32 @@ void ShurikenSamplerVoice::startNote( const int midiNoteNumber,
 void ShurikenSamplerVoice::stopNote( const float /*velocity*/, const bool allowTailOff )
 {
     ShurikenSamplerSound* const playingSound =
-             dynamic_cast<ShurikenSamplerSound*>( getCurrentlyPlayingSound().get() );
+            static_cast<ShurikenSamplerSound*>( getCurrentlyPlayingSound().get() );
 
     if ( allowTailOff )
     {
-        m_isInAttack = false;
-        m_isInRelease = true;
+        bool isOneShotSet = false;
+
+        if ( playingSound != NULL )
+        {
+            isOneShotSet = playingSound->m_isOneShotSet;
+        }
+
+        if ( ! isOneShotSet )
+        {
+            m_isInAttack = false;
+            m_isInRelease = true;
+        }
     }
     else
     {
         clearCurrentNote();
-    }
 
-    if ( playingSound != NULL )
-    {
-        playingSound->m_startFrame = playingSound->m_originalStartFrame;
-        playingSound->m_endFrame = playingSound->m_originalEndFrame;
+        if ( playingSound != NULL )
+        {
+            playingSound->m_startFrame = playingSound->m_originalStartFrame;
+            playingSound->m_endFrame = playingSound->m_originalEndFrame;
+        }
     }
 }
 
@@ -211,20 +254,19 @@ void ShurikenSamplerVoice::controllerMoved( const int /*controllerNumber*/,
 
 
 
-//==============================================================================
 void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int startFrame, int numFrames )
 {
     if ( const ShurikenSamplerSound* const playingSound =
          static_cast<ShurikenSamplerSound*>( getCurrentlyPlayingSound().get() ) )
     {
-        const float* const inL = playingSound->m_data->getReadPointer( 0 );
-        const float* const inR = playingSound->m_data->getNumChannels() > 1
-                                    ? playingSound->m_data->getReadPointer( 1 ) : nullptr;
+        const float* const inL = playingSound->m_sampleBuffer->getReadPointer( 0 );
+        const float* const inR = playingSound->m_sampleBuffer->getNumChannels() > 1
+                                    ? playingSound->m_sampleBuffer->getReadPointer( 1 ) : nullptr;
 
         float* outL = outputBuffer.getWritePointer( 0, startFrame );
         float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer( 1, startFrame ) : nullptr;
 
-        const int totalnumFrames = playingSound->m_data->getNumFrames();
+        const int totalnumFrames = playingSound->m_sampleBuffer->getNumFrames();
 
         while ( --numFrames >= 0 )
         {
@@ -235,16 +277,16 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
             float l = 0;
             float r = 0;
 
-            // just using a very simple linear interpolation here..
             if ( pos + 1 < totalnumFrames )
             {
-                l = ( inL [pos] * invAlpha + inL [pos + 1] * alpha );
-                r = ( inR != nullptr ) ? ( inR [pos] * invAlpha + inR [pos + 1] * alpha ) : l;
+                // Simple linear interpolation
+                l = ( inL[ pos ] * invAlpha + inL[ pos + 1 ] * alpha );
+                r = ( inR != nullptr ) ? ( inR[ pos ] * invAlpha + inR[ pos + 1 ] * alpha ) : l;
             }
             else
             {
-                l = ( inL [pos] * invAlpha );
-                r = ( inR != nullptr ) ? ( inR [pos] * invAlpha ) : l;
+                l = ( inL[ pos ] * invAlpha );
+                r = ( inR != nullptr ) ? ( inR[ pos ] * invAlpha ) : l;
             }
 
             l *= m_leftGain;

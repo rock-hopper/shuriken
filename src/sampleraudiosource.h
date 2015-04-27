@@ -40,6 +40,25 @@ public:
     void stop();
     void setLooping( bool isLoopingDesired );
 
+    void setAttack( int sampleNum, qreal value );   // Value should be 0.00 - 1.00
+    void setRelease( int sampleNum, qreal value );  // Value should be 0.00 - 1.00
+
+    qreal getAttack( int sampleNum ) const;
+    qreal getRelease( int sampleNum ) const;
+
+    void setOneShot( int sampleNum, bool set );
+    bool isOneShotSet( int sampleNum ) const;
+
+    struct EnvelopeSettings
+    {
+        QList<qreal> attackValues;      // Values in the range 0.00 - 1.00
+        QList<qreal> releaseValues;     // Values in the range 0.00 - 1.00
+        QList<bool> oneShotSettings;
+    };
+
+    void getEnvelopeSettings( EnvelopeSettings& settings ) const;
+    void setEnvelopeSettings( const EnvelopeSettings& settings );
+
     int getLowestAssignedMidiNote() const           { return m_lowestAssignedNote; }
 
     MidiMessageCollector* getMidiInputCallback()    { return &m_midiCollector; }
