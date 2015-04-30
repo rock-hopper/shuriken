@@ -507,15 +507,19 @@ void MainWindow::exportAs( const QString tempDirPath,
     // Export Akai PGM
     else if ( isSuccessful && isExportTypeAkaiPgm )
     {
+        SamplerAudioSource::EnvelopeSettings envelopes;
+
+        m_samplerAudioSource->getEnvelopeSettings( envelopes );
+
         const int modelID = m_exportDialog->getAkaiModelID();
 
         switch ( modelID )
         {
         case AkaiModelID::MPC1000_ID:
-            AkaiFileHandler::writePgmFileMPC1000( audioFileNames, fileName, samplesDirPath, tempDirPath );
+            AkaiFileHandler::writePgmFileMPC1000( audioFileNames, fileName, samplesDirPath, tempDirPath, envelopes );
             break;
         case AkaiModelID::MPC500_ID:
-            AkaiFileHandler::writePgmFileMPC500( audioFileNames, fileName, samplesDirPath, tempDirPath );
+            AkaiFileHandler::writePgmFileMPC500( audioFileNames, fileName, samplesDirPath, tempDirPath, envelopes );
             break;
         default:
             break;

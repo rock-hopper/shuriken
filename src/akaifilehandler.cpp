@@ -55,6 +55,7 @@ bool AkaiFileHandler::writePgmFileMPC1000( QStringList sampleNames,
                                            const QString fileBaseName,
                                            const QString outputDirPath,
                                            const QString tempDirPath,
+                                           const SamplerAudioSource::EnvelopeSettings& envelopes,
                                            const bool isOverwriteEnabled )
 {
     const QString fileName = fileBaseName + getFileExtension();
@@ -69,7 +70,7 @@ bool AkaiFileHandler::writePgmFileMPC1000( QStringList sampleNames,
         sampleNames.removeLast();
     }
 
-    QByteArray pgmData( MPC1000_PGM::FILE_SIZE, PAD_BYTE );
+    QByteArray pgmData( MPC1000_PGM::FILE_SIZE, PADDING );
 
     bool isSuccessful = getTemplateDataMPC1000( pgmData );
 
@@ -79,43 +80,84 @@ bool AkaiFileHandler::writePgmFileMPC1000( QStringList sampleNames,
 
         for ( quint8 padNum = 0; padNum < sampleNames.size(); padNum++ )
         {
-            // Add sample names to PGM data
+            // Add sample name to PGM data
             {
-                QByteArray sampleName = sampleNames.at( padNum ).toLatin1().leftJustified( MPC1000_PGM::SAMPLE_NAME_SIZE, PAD_BYTE, true );
+                QByteArray sampleName = sampleNames.at( padNum ).toLatin1().leftJustified( MPC1000_PGM::SAMPLE_NAME_SIZE, PADDING, true );
 
                 const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE );
 
                 pgmData.replace( pos, MPC1000_PGM::SAMPLE_NAME_SIZE, sampleName );
             }
 
-            // Add sample volume to PGM data
+            // Add sample volume level
             {
-                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::PAD_DATA_LEVEL_OFFSET;
+                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::LEVEL_OFFSET;
 
-                QByteArray byteArray;
-                byteArray += quint8( 100 );
+                QByteArray level;
+                level += quint8( 100 );
 
-                pgmData.replace( pos, 1, byteArray );
+                pgmData.replace( pos, 1, level );
             }
 
-            // Add "pad" -> "MIDI note" mapping to PGM data
+            // Add play mode
+            {
+                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::PLAY_MODE_OFFSET;
+
+                QByteArray playMode;
+                playMode += envelopes.oneShotSettings.at( padNum ) ? (char) 0x0     // 0 - One shot is set
+                                                                   : quint8( 1 );   // 1 - One shot is not set
+
+                pgmData.replace( pos, 1, playMode );
+            }
+
+            // Add attack
+            {
+                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::ATTACK_OFFSET;
+
+                QByteArray attack;
+                attack += quint8( envelopes.attackValues.at( padNum ) * 100 );
+
+                pgmData.replace( pos, 1, attack );
+            }
+
+            // Add decay
+            {
+                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::DECAY_OFFSET;
+
+                QByteArray decay;
+                decay += quint8( envelopes.releaseValues.at( padNum ) * 100 );
+
+                pgmData.replace( pos, 1, decay );
+            }
+
+            // Add decay mode
+            {
+                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::DECAY_MODE_OFFSET;
+
+                QByteArray decayMode;
+                decayMode += (char) 0x0;
+
+                pgmData.replace( pos, 1, decayMode );
+            }
+
+            // Add "pad" -> "MIDI note" mapping
             {
                 const int pos = MPC1000_PGM::PAD_MIDI_DATA_START + padNum;
 
-                QByteArray byteArray;
-                byteArray += noteNum;
+                QByteArray value;
+                value += noteNum;
 
-                pgmData.replace( pos, 1, byteArray );
+                pgmData.replace( pos, 1, value );
             }
 
-            // Add "MIDI note" -> "pad" mapping to PGM data
+            // Add "MIDI note" -> "pad" mapping
             {
                 const int pos = MPC1000_PGM::MIDI_NOTE_DATA_START + noteNum;
 
-                QByteArray byteArray;
-                byteArray += padNum;
+                QByteArray value;
+                value += padNum;
 
-                pgmData.replace( pos, 1, byteArray );
+                pgmData.replace( pos, 1, value );
             }
 
             noteNum++;
@@ -158,6 +200,7 @@ bool AkaiFileHandler::writePgmFileMPC500( QStringList sampleNames,
                                           const QString fileBaseName,
                                           const QString outputDirPath,
                                           const QString tempDirPath,
+                                          const SamplerAudioSource::EnvelopeSettings& envelopes,
                                           const bool isOverwriteEnabled )
 {
     while ( sampleNames.size() > MPC500_Profile::NUM_PADS )
@@ -165,7 +208,7 @@ bool AkaiFileHandler::writePgmFileMPC500( QStringList sampleNames,
         sampleNames.removeLast();
     }
 
-    return writePgmFileMPC1000( sampleNames, fileBaseName, outputDirPath, tempDirPath, isOverwriteEnabled );
+    return writePgmFileMPC1000( sampleNames, fileBaseName, outputDirPath, tempDirPath, envelopes, isOverwriteEnabled );
 }
 
 
