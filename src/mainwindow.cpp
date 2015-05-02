@@ -184,6 +184,12 @@ void MainWindow::keyPressEvent( QKeyEvent* event )
         case Qt::Key_Q:
             m_graphicsScene->selectPreviousWaveform();
             break;
+        case Qt::Key_A:
+            if ( m_graphicsScene->getSelectedWaveforms().size() == 1 )
+            {
+                playSample( m_graphicsScene->getSelectedWaveforms().first(), QPointF() );
+            }
+            break;
         default:
             QMainWindow::keyPressEvent( event );
             break;
@@ -676,7 +682,7 @@ void MainWindow::connectWaveformToMainWindow( const SharedWaveformItem item )
                       this, SLOT( stopPlayback() ) );
 
     QObject::connect( item.data(), SIGNAL( clicked(const WaveformItem*,QPointF) ),
-                      this, SLOT( playSampleRange(const WaveformItem*,QPointF) ) );
+                      this, SLOT( playSample(const WaveformItem*,QPointF) ) );
 }
 
 
@@ -902,7 +908,7 @@ void MainWindow::recordSlicePointItemMove( const SharedSlicePointItem slicePoint
 
 
 
-void MainWindow::playSampleRange( const WaveformItem* waveformItem, const QPointF mouseScenePos )
+void MainWindow::playSample( const WaveformItem* waveformItem, const QPointF mouseScenePos )
 {
     SharedSampleRange sampleRange( new SampleRange );
     sampleRange->startFrame = 0;
