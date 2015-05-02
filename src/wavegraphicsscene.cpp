@@ -312,6 +312,62 @@ QList<int> WaveGraphicsScene::getSelectedWaveformsOrderPositions() const
 
 
 
+void WaveGraphicsScene::selectNextWaveform()
+{
+    const QList<int> orderPositions = getSelectedWaveformsOrderPositions();
+
+    foreach ( SharedWaveformItem item, m_waveformItemList )
+    {
+        item->setSelected( false );
+    }
+
+    if ( ! orderPositions.isEmpty() )
+    {
+        int orderPos = orderPositions.last() + 1;
+
+        if ( orderPos >= m_waveformItemList.size() )
+        {
+            orderPos = 0;
+        }
+
+        m_waveformItemList.at( orderPos )->setSelected( true );
+    }
+    else
+    {
+        m_waveformItemList.first()->setSelected( true );
+    }
+}
+
+
+
+void WaveGraphicsScene::selectPreviousWaveform()
+{
+    const QList<int> orderPositions = getSelectedWaveformsOrderPositions();
+
+    foreach ( SharedWaveformItem item, m_waveformItemList )
+    {
+        item->setSelected( false );
+    }
+
+    if ( ! orderPositions.isEmpty() )
+    {
+        int orderPos = orderPositions.first() - 1;
+
+        if ( orderPos < 0 )
+        {
+            orderPos = m_waveformItemList.size() - 1;
+        }
+
+        m_waveformItemList.at( orderPos )->setSelected( true );
+    }
+    else
+    {
+        m_waveformItemList.last()->setSelected( true );
+    }
+}
+
+
+
 void WaveGraphicsScene::stretchWaveforms( const QList<int> orderPosList, const QList<qreal> ratioList )
 {
     if ( ! m_waveformItemList.isEmpty() )

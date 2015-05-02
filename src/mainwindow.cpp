@@ -168,9 +168,26 @@ void MainWindow::closeEvent( QCloseEvent* event )
 
 void MainWindow::keyPressEvent( QKeyEvent* event )
 {
-    if ( event->key() == Qt::Key_Space && ! event->isAutoRepeat() && m_samplerAudioSource != NULL )
+    if ( m_samplerAudioSource != NULL )
     {
-        on_pushButton_PlayStop_clicked();
+        switch ( event->key() )
+        {
+        case Qt::Key_Space:
+            if ( ! event->isAutoRepeat() ) on_pushButton_PlayStop_clicked();
+            break;
+        case Qt::Key_Return:
+            if ( ! event->isAutoRepeat() ) on_pushButton_Slice_clicked( ! m_ui->pushButton_Slice->isChecked() );
+            break;
+        case Qt::Key_Z:
+            m_graphicsScene->selectNextWaveform();
+            break;
+        case Qt::Key_Q:
+            m_graphicsScene->selectPreviousWaveform();
+            break;
+        default:
+            QMainWindow::keyPressEvent( event );
+            break;
+        }
     }
     else
     {

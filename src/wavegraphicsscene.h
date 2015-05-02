@@ -78,6 +78,10 @@ public:
 
     QList<int> getSelectedWaveformsOrderPositions() const;
 
+    void selectNextWaveform();
+
+    void selectPreviousWaveform();
+
     SharedWaveformItem getWaveformAt( int orderPos ) const  { return m_waveformItemList.at( orderPos ); }
 
     int getNumWaveforms() const                             { return m_waveformItemList.size(); }
