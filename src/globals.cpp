@@ -25,7 +25,6 @@
 
 namespace Jack
 {
-    volatile double g_currentBPM = 0.0;
-
+    double g_currentBPM = 0.0;
     QString g_clientId;
 }

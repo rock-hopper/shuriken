@@ -26,8 +26,8 @@
 
 #define APPLICATION_NAME            "Shuriken"
 #define JUCE_ALSA_MIDI_INPUT_NAME   "Midi_In"
-#define NUM_INPUT_CHANS             0
-#define NUM_OUTPUT_CHANS            2
+#define MAX_INPUT_CHANS             0
+#define MAX_OUTPUT_CHANS            2
 #define OUTPUT_CHAN_NAMES           "out_L out_R"   // Names must be separated by whitespace
 
 #define AUDIO_CONFIG_FILE_PATH      "~/.shuriken/audioconfig.xml"
@@ -40,34 +40,34 @@
 
 namespace UserTypes
 {
-    static const int WAVEFORM       = QGraphicsItem::UserType + 1;
-    static const int FRAME_MARKER   = QGraphicsItem::UserType + 2;
-    static const int SLICE_POINT    = QGraphicsItem::UserType + 3;
-    static const int LOOP_MARKER    = QGraphicsItem::UserType + 4;
+    const int WAVEFORM       = QGraphicsItem::UserType + 1;
+    const int FRAME_MARKER   = QGraphicsItem::UserType + 2;
+    const int SLICE_POINT    = QGraphicsItem::UserType + 3;
+    const int LOOP_MARKER    = QGraphicsItem::UserType + 4;
 }
 
 namespace ZValues
 {
-    static const int WAVEFORM               = 0;
-    static const int SELECTED_WAVEFORM      = 1;
-    static const int FRAME_MARKER           = 2;
-    static const int SELECTED_FRAME_MARKER  = 3;
-    static const int LOOP_MARKER            = 4;
-    static const int PLAYHEAD               = 5;
-    static const int BPM_RULER              = 6;
-    static const int BPM_RULER_TEXT         = 7;
+    const int WAVEFORM               = 0;
+    const int SELECTED_WAVEFORM      = 1;
+    const int FRAME_MARKER           = 2;
+    const int SELECTED_FRAME_MARKER  = 3;
+    const int LOOP_MARKER            = 4;
+    const int PLAYHEAD               = 5;
+    const int BPM_RULER              = 6;
+    const int BPM_RULER_TEXT         = 7;
 }
 
-namespace Ruler
+namespace BpmRuler
 {
-    static const qreal HEIGHT = 18.0;
+    const qreal HEIGHT = 18.0;
 }
 
 
 namespace Midi
 {
-    static const int MIDDLE_C       = 60;
-    static const int MAX_POLYPHONY  = 128;
+    const int MIDDLE_C       = 60;
+    const int MAX_POLYPHONY  = 128;
 }
 
 
@@ -79,7 +79,7 @@ namespace Jack
        and is read in:   rubberbandaudiosource.cpp
                          void getNextAudioBlock( AudioSourceChannelInfo& bufferToFill )
     */
-    extern volatile double g_currentBPM;
+    extern double g_currentBPM;
 
     /* This gets set in: mainwindow.cpp
                          int nsmOpenCallback( ... )

@@ -261,7 +261,7 @@ void MainWindow::initialiseAudio()
     }
 
     // Initialise the audio device manager
-    const String error = m_deviceManager.initialise( NUM_INPUT_CHANS, NUM_OUTPUT_CHANS, stateXml, false );
+    const String error = m_deviceManager.initialise( MAX_INPUT_CHANS, MAX_OUTPUT_CHANS, stateXml, false );
 
     if ( error.isNotEmpty() )
     {

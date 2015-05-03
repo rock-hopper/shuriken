@@ -36,7 +36,7 @@ WaveGraphicsScene::WaveGraphicsScene( const qreal x, const qreal y, const qreal 
     createBpmRuler();
 
     // Set up playhead
-    m_playhead = new QGraphicsLineItem( 0.0, 0.0, 0.0, height - Ruler::HEIGHT );
+    m_playhead = new QGraphicsLineItem( 0.0, 0.0, 0.0, height - BpmRuler::HEIGHT );
     m_playhead->setPen( QColor( Qt::red ) );
     m_playhead->setZValue( ZValues::PLAYHEAD );
 
@@ -112,8 +112,8 @@ SharedWaveformItem WaveGraphicsScene::createWaveform( const SharedSampleBuffer s
         width = this->width();
     }
 
-    SharedWaveformItem waveformItem( new WaveformItem( sampleBuffer, orderPos, width, height() - Ruler::HEIGHT ) );
-    waveformItem->setPos( scenePosX, Ruler::HEIGHT );
+    SharedWaveformItem waveformItem( new WaveformItem( sampleBuffer, orderPos, width, height() - BpmRuler::HEIGHT ) );
+    waveformItem->setPos( scenePosX, BpmRuler::HEIGHT );
 
     m_waveformItemList.insert( orderPos, waveformItem );
 
@@ -153,8 +153,8 @@ QList<SharedWaveformItem> WaveGraphicsScene::createWaveforms( const QList<Shared
     {
         const qreal sliceWidth = sampleBuffer->getNumFrames() * ( totalWidth / totalNumFrames );
 
-        SharedWaveformItem waveformItem( new WaveformItem( sampleBuffer, orderPos, sliceWidth, height() - Ruler::HEIGHT ) );
-        waveformItem->setPos( scenePosX, Ruler::HEIGHT );
+        SharedWaveformItem waveformItem( new WaveformItem( sampleBuffer, orderPos, sliceWidth, height() - BpmRuler::HEIGHT ) );
+        waveformItem->setPos( scenePosX, BpmRuler::HEIGHT );
 
         m_waveformItemList.insert( orderPos, waveformItem );
         newWaveformItems << waveformItem;
@@ -215,8 +215,8 @@ void WaveGraphicsScene::insertWaveforms( const QList<SharedWaveformItem> wavefor
     {
         const qreal itemWidth = item->getSampleBuffer()->getNumFrames() * ( width() / totalNumFrames ) * item->getStretchRatio();
 
-        item->setRect( 0.0, 0.0, itemWidth, height() - Ruler::HEIGHT );
-        item->setPos( scenePosX, Ruler::HEIGHT );
+        item->setRect( 0.0, 0.0, itemWidth, height() - BpmRuler::HEIGHT );
+        item->setPos( scenePosX, BpmRuler::HEIGHT );
 
         scenePosX += itemWidth;
     }
@@ -268,8 +268,8 @@ QList<SharedWaveformItem> WaveGraphicsScene::removeWaveforms( const QList<int> w
     {
         const qreal itemWidth = item->getSampleBuffer()->getNumFrames() * ( width() / totalNumFrames ) * item->getStretchRatio();
 
-        item->setRect( 0.0, 0.0, itemWidth, height() - Ruler::HEIGHT );
-        item->setPos( scenePosX, Ruler::HEIGHT );
+        item->setRect( 0.0, 0.0, itemWidth, height() - BpmRuler::HEIGHT );
+        item->setPos( scenePosX, BpmRuler::HEIGHT );
 
         scenePosX += itemWidth;
     }
@@ -381,7 +381,7 @@ void WaveGraphicsScene::stretchWaveforms( const QList<int> orderPosList, const Q
             const qreal origWidth = item->getSampleBuffer()->getNumFrames() * ( width() / totalNumFrames );
             const qreal newWidth = origWidth * ratioList.at( i );
 
-            item->setRect( 0.0, 0.0, newWidth, height() - Ruler::HEIGHT );
+            item->setRect( 0.0, 0.0, newWidth, height() - BpmRuler::HEIGHT );
             item->setStretchRatio( ratioList.at( i ) );
 
             slideWaveformItemIntoPlace( orderPosList.at( i ) );
@@ -426,8 +426,8 @@ SharedSlicePointItem WaveGraphicsScene::createSlicePoint( const int frameNum, co
 {
     const qreal scenePosX = getScenePosX( frameNum );
 
-    SlicePointItem* item = new SlicePointItem( height() - Ruler::HEIGHT, canBeMovedPastOtherSlicePoints );
-    item->setPos( scenePosX, Ruler::HEIGHT );
+    SlicePointItem* item = new SlicePointItem( height() - BpmRuler::HEIGHT, canBeMovedPastOtherSlicePoints );
+    item->setPos( scenePosX, BpmRuler::HEIGHT );
     item->setFrameNum( frameNum );
 
     QTransform matrix;
@@ -459,8 +459,8 @@ void WaveGraphicsScene::addSlicePoint( const SharedSlicePointItem slicePoint )
     matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // slice point remains same width when view is scaled
     slicePoint.data()->setTransform( matrix );
 
-    slicePoint.data()->setHeight( height() - Ruler::HEIGHT );
-    slicePoint.data()->setPos( scenePosX, Ruler::HEIGHT );
+    slicePoint.data()->setHeight( height() - BpmRuler::HEIGHT );
+    slicePoint.data()->setPos( scenePosX, BpmRuler::HEIGHT );
 
     m_slicePointItemList.append( slicePoint );
 
@@ -485,7 +485,7 @@ void WaveGraphicsScene::moveSlicePoint( const SharedSlicePointItem slicePointIte
     const qreal newScenePosX = getScenePosX( newFrameNum );
 
     slicePointItem->setFrameNum( newFrameNum );
-    slicePointItem->setPos( newScenePosX, Ruler::HEIGHT );
+    slicePointItem->setPos( newScenePosX, BpmRuler::HEIGHT );
 }
 
 
@@ -608,10 +608,10 @@ void WaveGraphicsScene::startPlayhead( const qreal startPosX,
             stopPlayhead();
         }
 
-        m_animation->setPosAt( 0.0, QPointF( startPosX, Ruler::HEIGHT ) );
-        m_animation->setPosAt( 1.0, QPointF( endPosX,   Ruler::HEIGHT ) );
+        m_animation->setPosAt( 0.0, QPointF( startPosX, BpmRuler::HEIGHT ) );
+        m_animation->setPosAt( 1.0, QPointF( endPosX,   BpmRuler::HEIGHT ) );
 
-        m_playhead->setLine( 0.0, 0.0, 0.0, height() - Ruler::HEIGHT );
+        m_playhead->setLine( 0.0, 0.0, 0.0, height() - BpmRuler::HEIGHT );
         m_playhead->setVisible( true );
         addItem( m_playhead );
 
@@ -710,8 +710,8 @@ void WaveGraphicsScene::setBpmRulerMarks( const qreal bpm, const int timeSigNume
         const qreal divScenePosY = 6.0;
 #endif
 
-        const qreal beatLineHeight = Ruler::HEIGHT - 5.0;
-        const qreal divLineHeight = Ruler::HEIGHT - 13.0;
+        const qreal beatLineHeight = BpmRuler::HEIGHT - 5.0;
+        const qreal divLineHeight = BpmRuler::HEIGHT - 13.0;
 
         const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
         const qreal framesPerDivision = ( ( m_sampleHeader->sampleRate * 60 ) / bpm ) / divsPerBeat;
@@ -834,10 +834,10 @@ void WaveGraphicsScene::resizeWaveformItems( const qreal scaleFactorX )
     foreach ( SharedWaveformItem item, m_waveformItemList )
     {
         const qreal newWidth = item->rect().width() * scaleFactorX;
-        item->setRect( 0.0, 0.0, newWidth, height() - Ruler::HEIGHT );
+        item->setRect( 0.0, 0.0, newWidth, height() - BpmRuler::HEIGHT );
 
         const qreal newX = item->scenePos().x() * scaleFactorX;
-        item->setPos( newX, Ruler::HEIGHT );
+        item->setPos( newX, BpmRuler::HEIGHT );
     }
 }
 
@@ -845,7 +845,7 @@ void WaveGraphicsScene::resizeWaveformItems( const qreal scaleFactorX )
 
 void WaveGraphicsScene::resizeSlicePointItems( const qreal scaleFactorX )
 {
-    const qreal height = this->height() - Ruler::HEIGHT;
+    const qreal height = this->height() - BpmRuler::HEIGHT;
 
     foreach ( SharedSlicePointItem slicePoint, m_slicePointItemList )
     {
@@ -857,7 +857,7 @@ void WaveGraphicsScene::resizeSlicePointItems( const qreal scaleFactorX )
 
         const qreal scenePosX = slicePoint->scenePos().x() * scaleFactorX;
 
-        slicePoint->setPos( scenePosX, Ruler::HEIGHT );
+        slicePoint->setPos( scenePosX, BpmRuler::HEIGHT );
 
         slicePoint->setSnap( isSnapEnabled );
     }
@@ -872,10 +872,10 @@ void WaveGraphicsScene::resizePlayhead()
         m_timer->stop();
 
         m_animation->clear();
-        m_animation->setPosAt( 0.0, QPointF( 0.0, Ruler::HEIGHT ) );
-        m_animation->setPosAt( 1.0, QPointF( width() - 1, Ruler::HEIGHT ) );
+        m_animation->setPosAt( 0.0, QPointF( 0.0, BpmRuler::HEIGHT ) );
+        m_animation->setPosAt( 1.0, QPointF( width() - 1, BpmRuler::HEIGHT ) );
 
-        m_playhead->setLine( 0.0, 0.0, 0.0, height() - Ruler::HEIGHT );
+        m_playhead->setLine( 0.0, 0.0, 0.0, height() - BpmRuler::HEIGHT );
 
         m_timer->resume();
     }
@@ -885,7 +885,7 @@ void WaveGraphicsScene::resizePlayhead()
 
 void WaveGraphicsScene::resizeRuler( const qreal scaleFactorX )
 {
-    m_rulerBackground->setRect( 0.0, 0.0, width(), Ruler::HEIGHT );
+    m_rulerBackground->setRect( 0.0, 0.0, width(), BpmRuler::HEIGHT );
 
     foreach ( SharedGraphicsItem item, m_rulerMarksList )
     {
@@ -943,7 +943,7 @@ void WaveGraphicsScene::connectWaveform( const SharedWaveformItem item )
 
 void WaveGraphicsScene::createBpmRuler()
 {
-    m_rulerBackground = addRect( 0.0, 0.0, width(), Ruler::HEIGHT, QPen( QColor(0,0,0,0) ), QBrush( Qt::darkGray ) );
+    m_rulerBackground = addRect( 0.0, 0.0, width(), BpmRuler::HEIGHT, QPen( QColor(0,0,0,0) ), QBrush( Qt::darkGray ) );
     m_rulerBackground->setZValue( ZValues::BPM_RULER );
 
     QGraphicsSimpleTextItem* textItem = addSimpleText( "0 BPM" );
@@ -1002,7 +1002,7 @@ void WaveGraphicsScene::reorderWaveformItems( const QList<int> oldOrderPositions
         {
             const qreal currentScenePosX = m_waveformItemList.at( orderPos )->scenePos().x();
 
-            m_waveformItemList.at( orderPos )->setPos( currentScenePosX + distanceToMove, Ruler::HEIGHT );
+            m_waveformItemList.at( orderPos )->setPos( currentScenePosX + distanceToMove, BpmRuler::HEIGHT );
             m_waveformItemList.at( orderPos )->setOrderPos( orderPos + numSelectedItems );
         }
 
@@ -1027,7 +1027,7 @@ void WaveGraphicsScene::reorderWaveformItems( const QList<int> oldOrderPositions
         {
             const qreal currentScenePosX = m_waveformItemList.at( orderPos )->scenePos().x();
 
-            m_waveformItemList.at( orderPos )->setPos( currentScenePosX - distanceToMove, Ruler::HEIGHT );
+            m_waveformItemList.at( orderPos )->setPos( currentScenePosX - distanceToMove, BpmRuler::HEIGHT );
             m_waveformItemList.at( orderPos )->setOrderPos( orderPos - numSelectedItems );
         }
 
@@ -1054,7 +1054,7 @@ void WaveGraphicsScene::slideWaveformItemIntoPlace( const int orderPos )
         newScenePosX += m_waveformItemList.at( i )->rect().width();
     }
 
-    m_waveformItemList.at( orderPos )->setPos( newScenePosX, Ruler::HEIGHT );
+    m_waveformItemList.at( orderPos )->setPos( newScenePosX, BpmRuler::HEIGHT );
 }
 
 

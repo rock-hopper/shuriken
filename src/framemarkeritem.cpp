@@ -128,9 +128,9 @@ QVariant FrameMarkerItem::itemChange( GraphicsItemChange change, const QVariant&
         }
 
 #if QT_VERSION >= 0x040700  // Qt 4.7
-        newPos.setY( Ruler::HEIGHT + 1 );
+        newPos.setY( BpmRuler::HEIGHT + 1 );
 #else
-        newPos.setY( Ruler::HEIGHT );
+        newPos.setY( BpmRuler::HEIGHT );
 #endif
         return newPos;
     }
