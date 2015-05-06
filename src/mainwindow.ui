@@ -1025,6 +1025,8 @@
    <addaction name="separator"/>
    <addaction name="actionSelective_Time_Stretch"/>
    <addaction name="separator"/>
+   <addaction name="actionJack_Outputs"/>
+   <addaction name="separator"/>
    <addaction name="actionHelp"/>
    <addaction name="actionAbout"/>
   </widget>
@@ -1443,6 +1445,15 @@
    </property>
    <property name="text">
     <string>Selective Time Stretch</string>
+   </property>
+  </action>
+  <action name="actionJack_Outputs">
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/mixer-line.png</normaloff>:/resources/images/mixer-line.png</iconset>
+   </property>
+   <property name="text">
+    <string>Jack Outputs</string>
    </property>
   </action>
  </widget>

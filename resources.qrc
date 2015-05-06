@@ -69,5 +69,6 @@
         <file>resources/images/gain.png</file>
         <file>resources/images/gain_ramp.png</file>
         <file>resources/images/configure.png</file>
+        <file>resources/images/mixer-line.png</file>
     </qresource>
 </RCC>

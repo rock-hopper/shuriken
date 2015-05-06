@@ -40,6 +40,7 @@
 #include "helpform.h"
 #include "exportdialog.h"
 #include "nsmlistenerthread.h"
+#include "jackoutputsdialog.h"
 
 
 namespace Ui
@@ -113,9 +114,10 @@ private:
 
     enum LengthUnits { UNITS_BARS, UNITS_BEATS };
 
-    ScopedPointer<OptionsDialog> m_optionsDialog;
+    OptionsDialog* m_optionsDialog;
     ScopedPointer<HelpForm> m_helpForm;
-    ScopedPointer<ExportDialog> m_exportDialog;
+    ExportDialog* m_exportDialog;
+    JackOutputsDialog* m_jackOutputsDialog;
 
     AudioDeviceManager m_deviceManager;
     AudioFileHandler m_fileHandler;
@@ -148,6 +150,7 @@ private:
 
 private slots:
     // Automatically connected
+    void on_actionJack_Outputs_triggered();
     void on_checkBox_OneShot_toggled( bool isChecked );
     void on_dial_Release_valueChanged( int value );
     void on_doubleSpinBox_Release_valueChanged( double value );

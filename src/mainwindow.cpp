@@ -522,8 +522,18 @@ void MainWindow::setupUI()
     }
 
 
+    // Create JACK Outputs form
+    m_jackOutputsDialog = new JackOutputsDialog( this );
+
+    if ( m_jackOutputsDialog != NULL )
+    {
+        setMaxWindowSize( m_jackOutputsDialog );
+        centreWindow( m_jackOutputsDialog );
+    }
+
+
     // Create export dialog
-    m_exportDialog = new ExportDialog();
+    m_exportDialog = new ExportDialog( this );
 
     if ( m_exportDialog != NULL )
     {
@@ -532,7 +542,7 @@ void MainWindow::setupUI()
 
 
     // Create options dialog
-    m_optionsDialog = new OptionsDialog( m_deviceManager );
+    m_optionsDialog = new OptionsDialog( m_deviceManager, this );
 
     if ( m_optionsDialog != NULL )
     {
@@ -2246,4 +2256,18 @@ void MainWindow::on_checkBox_OneShot_toggled( const bool isChecked )
         m_ui->doubleSpinBox_Release->setDisabled( isChecked );
         m_ui->dial_Release->setDisabled( isChecked );
     }
+}
+
+
+
+void MainWindow::on_actionJack_Outputs_triggered()
+{
+    QPoint pos = m_jackOutputsDialog->pos();
+    if ( pos.x() < 0 )
+        pos.setX( 0 );
+    if ( pos.y() < 0 )
+        pos.setY( 0 );
+
+    m_jackOutputsDialog->move( pos );
+    m_jackOutputsDialog->exec();
 }

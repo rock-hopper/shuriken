@@ -176,7 +176,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/samplebuffer.cpp \
     src/offlinetimestretcher.cpp \
     src/wavegraphicsscene.cpp \
-    src/nsmlistenerthread.cpp
+    src/nsmlistenerthread.cpp \
+    src/jackoutputsdialog.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -394,7 +395,8 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/offlinetimestretcher.h \
     src/wavegraphicsscene.h \
     src/nonlib/nsm.h \
-    src/nsmlistenerthread.h
+    src/nsmlistenerthread.h \
+    src/jackoutputsdialog.h
 FORMS += src/mainwindow.ui \
     src/optionsdialog.ui \
     src/helpform.ui \
@@ -402,7 +404,8 @@ FORMS += src/mainwindow.ui \
     src/applygainrampdialog.ui \
     src/aboutdialog.ui \
     src/exportdialog.ui \
-    src/confirmbpmdialog.ui
+    src/confirmbpmdialog.ui \
+    src/jackoutputsdialog.ui
 INCLUDEPATH += src \
     src/SndLibShuriken \
     src/JuceLibraryCode
