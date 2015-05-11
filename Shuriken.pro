@@ -213,7 +213,6 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/juce_audio_devices/midi_io/juce_MidiOutput.h \
     src/JuceLibraryCode/modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.h \
     src/JuceLibraryCode/modules/juce_audio_devices/midi_io/juce_MidiInput.h \
-    src/JuceLibraryCode/modules/juce_audio_devices/native/jack_device.h \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_MidiDataConcatenator.h \
     src/JuceLibraryCode/modules/juce_audio_devices/native/linux_midi.h \
     src/JuceLibraryCode/modules/juce_audio_devices/sources/juce_AudioTransportSource.h \

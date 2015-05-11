@@ -37,7 +37,6 @@
 #include <jack/midiport.h>
 #include <jack/transport.h>
 
-#include "jack_device.h"
 #include "linux_midi.h"
 #include "globals.h"
 
@@ -46,6 +45,18 @@ extern "C" int libjack_is_present;
 
 
 //==============================================================================
+
+struct JackClientConfig
+{
+    String clientName;
+    int numInputChans;
+    int numOutputChans;
+    bool isAutoConnectEnabled;
+    bool isMidiEnabled;
+};
+
+//==============================================================================
+
 
 class JackAudioIODevice : public AudioIODevice
 {
@@ -61,15 +72,6 @@ public:
         m_midiPortIn (nullptr),
         m_positionInfo (new jack_position_t)
     {
-        for (int i=0; i < m_config.inputChannels.size(); ++i)
-        {
-            if (m_config.inputChannels[i].length() == 0) m_config.inputChannels.set(i, "in_"+String(i+1));
-        }
-        for (int i = 0; i < m_config.outputChannels.size(); i++)
-        {
-            if (m_config.outputChannels[i].length() == 0) m_config.outputChannels.set(i, "out_"+String(i+1));
-        }
-
         jack_set_error_function (JackAudioIODevice::errorCallback);
         jack_status_t status;
 
@@ -93,19 +95,24 @@ public:
         }
         else
         {
-
-            for (int i=0; i < m_config.inputChannels.size(); ++i)
+            for (int i=0; i < m_config.numInputChans; ++i)
             {
-                jack_port_t* input =
-                        jack_port_register (m_jackClient, m_config.inputChannels[i].toUTF8().getAddress(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+                String portName = "in_"+String(i+1);
+
+                jack_port_t* input = jack_port_register (m_jackClient, portName.toUTF8().getAddress(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+
                 m_inputPorts.add (input);
+                m_inputChanNames.add (portName);
             }
 
-            for (int i = 0; i < m_config.outputChannels.size(); i++)
+            for (int i = 0; i < m_config.numOutputChans; ++i)
             {
-                jack_port_t* output =
-                        jack_port_register (m_jackClient, m_config.outputChannels[i].toUTF8().getAddress(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+                String portName = "out_"+String(i+1);
+
+                jack_port_t* output = jack_port_register (m_jackClient, portName.toUTF8().getAddress(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+
                 m_outputPorts.add (output);
+                m_outputChanNames.add (portName);
             }
 
             if (m_config.isMidiEnabled)
@@ -114,8 +121,8 @@ public:
             }
         }
 
-        m_inChanBuffers  = (float**)malloc(m_config.inputChannels.size() *sizeof(float*));
-        m_outChanBuffers = (float**)malloc(m_config.outputChannels.size()*sizeof(float*));
+        m_inChanBuffers  = (float**) malloc (m_config.numInputChans * sizeof (float*));
+        m_outChanBuffers = (float**) malloc (m_config.numOutputChans * sizeof (float*));
     }
 
 
@@ -135,11 +142,11 @@ public:
 
 
 
-    StringArray getOutputChannelNames() { return m_config.outputChannels; }
+    StringArray getOutputChannelNames() { return m_outputChanNames; }
 
 
 
-    StringArray getInputChannelNames() { return m_config.inputChannels; }
+    StringArray getInputChannelNames() { return m_inputChanNames; }
 
 
 
@@ -434,6 +441,10 @@ private:
 
 
     JackClientConfig m_config;
+
+    StringArray m_inputChanNames;
+    StringArray m_outputChanNames;
+
     bool m_isDeviceOpen, m_isDevicePlaying;
     bool m_isClientActivated;
 
@@ -511,10 +522,21 @@ public:
                                  const String& /*inputDeviceName*/)
     {
         JackClientConfig config;
-        getDefaultJackClientConfig (config);
 
-        config.isMidiEnabled = outputDeviceName.contains ("MIDI");
+        if ( ! Jack::g_clientId.isEmpty() )
+        {
+            config.clientName = Jack::g_clientId.toLocal8Bit().data();
+        }
+        else
+        {
+            config.clientName = APPLICATION_NAME;
+        }
+
+        config.numInputChans = Jack::NUM_INPUT_CHANS;
+        config.numOutputChans = Jack::g_numOutputChans;
+
         config.isAutoConnectEnabled = outputDeviceName.contains ("Auto-Connect");
+        config.isMidiEnabled = outputDeviceName.contains ("MIDI");
 
         return new JackAudioIODevice (outputDeviceName, config);
     }

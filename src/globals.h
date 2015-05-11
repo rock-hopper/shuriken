@@ -23,12 +23,11 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <QGraphicsItem>
+
 
 #define APPLICATION_NAME            "Shuriken"
 #define JUCE_ALSA_MIDI_INPUT_NAME   "Midi_In"
-#define MAX_INPUT_CHANS             0
-#define MAX_OUTPUT_CHANS            2
-#define OUTPUT_CHAN_NAMES           "out_L out_R"   // Names must be separated by whitespace
 
 #define AUDIO_CONFIG_FILE_PATH      "~/.shuriken/audioconfig.xml"
 #define PATHS_CONFIG_FILE_PATH      "~/.shuriken/pathsconfig.xml"
@@ -36,7 +35,19 @@
 #define FILE_EXTENSION              ".shuriken"
 
 
-#include <QGraphicsItem>
+namespace InputChannels
+{
+    const int MIN = 0;
+    const int MAX = 0;
+}
+
+
+namespace OutputChannels
+{
+    const int MIN = 2;
+    const int MAX = 32;
+}
+
 
 namespace UserTypes
 {
@@ -45,6 +56,7 @@ namespace UserTypes
     const int SLICE_POINT    = QGraphicsItem::UserType + 3;
     const int LOOP_MARKER    = QGraphicsItem::UserType + 4;
 }
+
 
 namespace ZValues
 {
@@ -57,6 +69,7 @@ namespace ZValues
     const int BPM_RULER              = 6;
     const int BPM_RULER_TEXT         = 7;
 }
+
 
 namespace BpmRuler
 {
@@ -88,6 +101,10 @@ namespace Jack
                          void getDefaultJackClientConfig (JackClientConfig &conf)
     */
     extern QString g_clientId;
+
+    extern int g_numOutputChans;
+
+    const int NUM_INPUT_CHANS = 0;
 }
 
 

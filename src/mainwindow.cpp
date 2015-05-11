@@ -261,7 +261,7 @@ void MainWindow::initialiseAudio()
     }
 
     // Initialise the audio device manager
-    const String error = m_deviceManager.initialise( MAX_INPUT_CHANS, MAX_OUTPUT_CHANS, stateXml, false );
+    const String error = m_deviceManager.initialise( InputChannels::MAX, OutputChannels::MAX, stateXml, false );
 
     if ( error.isNotEmpty() )
     {
@@ -519,16 +519,6 @@ void MainWindow::setupUI()
         setMaxWindowSize( m_helpForm );
         centreWindow( m_helpForm );
         m_ui->actionHelp->setEnabled( true );
-    }
-
-
-    // Create JACK Outputs form
-    m_jackOutputsDialog = new JackOutputsDialog( this );
-
-    if ( m_jackOutputsDialog != NULL )
-    {
-        setMaxWindowSize( m_jackOutputsDialog );
-        centreWindow( m_jackOutputsDialog );
     }
 
 
@@ -2262,12 +2252,18 @@ void MainWindow::on_checkBox_OneShot_toggled( const bool isChecked )
 
 void MainWindow::on_actionJack_Outputs_triggered()
 {
-    QPoint pos = m_jackOutputsDialog->pos();
-    if ( pos.x() < 0 )
-        pos.setX( 0 );
-    if ( pos.y() < 0 )
-        pos.setY( 0 );
+    if ( ! m_sampleBufferList.isEmpty() && ! m_sampleHeader.isNull() )
+    {
+        ScopedPointer<JackOutputsDialog> dialog( new JackOutputsDialog( m_sampleBufferList.size(),
+                                                                        m_sampleHeader->numChans,
+                                                                        m_deviceManager ) );
 
-    m_jackOutputsDialog->move( pos );
-    m_jackOutputsDialog->exec();
+        if ( dialog != NULL )
+        {
+            setMaxWindowSize( dialog );
+            centreWindow( dialog );
+        }
+
+        dialog->exec();
+    }
 }

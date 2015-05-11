@@ -117,7 +117,6 @@ private:
     OptionsDialog* m_optionsDialog;
     ScopedPointer<HelpForm> m_helpForm;
     ExportDialog* m_exportDialog;
-    JackOutputsDialog* m_jackOutputsDialog;
 
     AudioDeviceManager m_deviceManager;
     AudioFileHandler m_fileHandler;

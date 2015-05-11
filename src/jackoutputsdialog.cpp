@@ -1,22 +1,26 @@
 #include "jackoutputsdialog.h"
 #include "ui_jackoutputsdialog.h"
 #include <QtDebug>
+#include "globals.h"
 
 
-JackOutputsDialog::JackOutputsDialog( QWidget* parent ) :
+JackOutputsDialog::JackOutputsDialog( const int numSampleBuffers, const int numSampleChans, AudioDeviceManager& deviceManager, QWidget* parent ) :
     QDialog( parent ),
-    m_ui( new Ui::JackOutputsDialog )
+    m_numSampleChans( numSampleChans ),
+    m_ui( new Ui::JackOutputsDialog ),
+    m_deviceManager( deviceManager )
 {
     m_ui->setupUi( this );
 
-    m_ui->tableWidget->setRowCount( NUM_OUTPUT_CHANS );
-    m_ui->tableWidget->setColumnCount( NUM_SAMPLE_BUFFERS );
+    // Set up table widget
+    m_ui->tableWidget->setRowCount( Jack::g_numOutputChans / m_numSampleChans );
+    m_ui->tableWidget->setColumnCount( numSampleBuffers );
 
     QStringList verticalHeaders;
 
-    for ( int row = 0; row < NUM_OUTPUT_CHANS; row++ )
+    for ( int row = 0; row < m_ui->tableWidget->rowCount(); row++ )
     {
-        if ( NUM_AUDIO_CHANS == 1)
+        if ( m_numSampleChans == 1)
         {
             verticalHeaders << tr("Channel ") + QString::number( row + 1 );
         }
@@ -25,7 +29,7 @@ JackOutputsDialog::JackOutputsDialog( QWidget* parent ) :
             verticalHeaders << tr("Channel ") + QString::number( row * 2 + 1 ) + " + " + QString::number( row * 2 + 2 );
         }
 
-        for ( int column = 0; column < NUM_SAMPLE_BUFFERS; column++ )
+        for ( int column = 0; column < m_ui->tableWidget->columnCount(); column++ )
         {
             QTableWidgetItem* newItem = new QTableWidgetItem();
             newItem->setFlags( Qt::ItemIsUserCheckable | Qt::ItemIsEnabled );
@@ -35,6 +39,12 @@ JackOutputsDialog::JackOutputsDialog( QWidget* parent ) :
     }
 
     m_ui->tableWidget->setVerticalHeaderLabels( verticalHeaders );
+
+    // Set up "No. of Outputs" spinbox
+    m_ui->spinBox_NumOutputs->setMinimum( OutputChannels::MIN );
+    m_ui->spinBox_NumOutputs->setMaximum( OutputChannels::MAX );
+    m_ui->spinBox_NumOutputs->setSingleStep( m_numSampleChans );
+    m_ui->spinBox_NumOutputs->setValue( Jack::g_numOutputChans );
 }
 
 
@@ -66,7 +76,7 @@ void JackOutputsDialog::on_tableWidget_itemClicked( QTableWidgetItem* item )
 {
     QList<int> outputChans;
 
-    if ( NUM_AUDIO_CHANS == 1)
+    if ( m_numSampleChans == 1)
     {
         outputChans << item->row();
     }
@@ -80,4 +90,22 @@ void JackOutputsDialog::on_tableWidget_itemClicked( QTableWidgetItem* item )
     bool isChecked = item->checkState() == Qt::Checked;
 
     qDebug() << outputChans << sampleBufferId << isChecked;
+}
+
+
+
+void JackOutputsDialog::on_spinBox_NumOutputs_valueChanged( const int value )
+{
+    if ( Jack::g_numOutputChans != value )
+    {
+        Jack::g_numOutputChans = value;
+
+        m_deviceManager.closeAudioDevice();
+        m_deviceManager.restartLastAudioDevice();
+    }
+
+    if (  m_ui->tableWidget->rowCount() != value / m_numSampleChans )
+    {
+        ;
+    }
 }
