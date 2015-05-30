@@ -27,5 +27,4 @@ namespace Jack
 {
     double g_currentBPM = 0.0;
     QString g_clientId;
-    int g_numOutputChans = 2;
 }

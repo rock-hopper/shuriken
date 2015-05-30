@@ -24,7 +24,7 @@
   This file contains code originally written by "jpo"
   <http://www.juce.com/comment/296820#comment-296820>
 
-  Additional modifications to this file by Andrew M Taylor <a.m.taylor303@gmail.com>, 2014
+  Additional modifications to this file by Andrew M Taylor <a.m.taylor303@gmail.com>
 
   All modifications to the original file are released into the public domain.
   Please read UNLICENSE for more details, or refer to <http://unlicense.org/>
@@ -49,8 +49,6 @@ extern "C" int libjack_is_present;
 struct JackClientConfig
 {
     String clientName;
-    int numInputChans;
-    int numOutputChans;
     bool isAutoConnectEnabled;
     bool isMidiEnabled;
 };
@@ -68,6 +66,8 @@ public:
         m_isDevicePlaying (false),
         m_isClientActivated (false),
         m_audioIOCallback (nullptr),
+        m_inChanBuffers (nullptr),
+        m_outChanBuffers (nullptr),
         m_jackClient (nullptr),
         m_midiPortIn (nullptr),
         m_positionInfo (new jack_position_t)
@@ -95,49 +95,24 @@ public:
         }
         else
         {
-            for (int i=0; i < m_config.numInputChans; ++i)
-            {
-                String portName = "in_"+String(i+1);
-
-                jack_port_t* input = jack_port_register (m_jackClient, portName.toUTF8().getAddress(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
-
-                m_inputPorts.add (input);
-                m_inputChanNames.add (portName);
-            }
-
-            for (int i = 0; i < m_config.numOutputChans; ++i)
-            {
-                String portName = "out_"+String(i+1);
-
-                jack_port_t* output = jack_port_register (m_jackClient, portName.toUTF8().getAddress(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
-
-                m_outputPorts.add (output);
-                m_outputChanNames.add (portName);
-            }
-
             if (m_config.isMidiEnabled)
             {
                 m_midiPortIn = jack_port_register(m_jackClient, "midi_in", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
             }
         }
-
-        m_inChanBuffers  = (float**) malloc (m_config.numInputChans * sizeof (float*));
-        m_outChanBuffers = (float**) malloc (m_config.numOutputChans * sizeof (float*));
     }
 
 
 
     ~JackAudioIODevice()
     {
-        if (m_jackClient)
+        if (m_jackClient != nullptr)
         {
-            close ();
+            close();
 
             jack_client_close (m_jackClient);
             m_jackClient = nullptr;
         }
-        free(m_inChanBuffers);
-        free(m_outChanBuffers);
     }
 
 
@@ -186,19 +161,46 @@ public:
 
 
 
-    String open (const BitArray& /*inputChannels*/,
-                 const BitArray& /*outputChannels*/,
+    String open (const BigInteger& inputChannels,
+                 const BigInteger& outputChannels,
                  double /*sampleRate*/,
                  int /*bufferSizeSamples*/) override
     {
-        if (! m_jackClient)
+        if (m_jackClient == nullptr)
         {
-            return "Jack server is not running";
+            return String ("JACK server is not running");
         }
 
         close();
 
-        // activate client !
+        // Register input and output ports
+        const int numInputs = inputChannels.countNumberOfSetBits();
+        const int numOutputs = outputChannels.countNumberOfSetBits();
+
+        for (int i=0; i < numInputs; ++i)
+        {
+            String portName = "in" + (i >= 2 ? "_" + String(i/2 + 1) : "") + String(i % 2 == 0 ? "_L" : "_R");
+
+            jack_port_t* input = jack_port_register (m_jackClient, portName.toUTF8().getAddress(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+
+            m_inputPorts.add (input);
+            m_inputChanNames.add (portName);
+        }
+
+        for (int i = 0; i < numOutputs; ++i)
+        {
+            String portName = "out" + (i >= 2 ? "_" + String(i/2 + 1) : "") + String(i % 2 == 0 ? "_L" : "_R");
+
+            jack_port_t* output = jack_port_register (m_jackClient, portName.toUTF8().getAddress(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+
+            m_outputPorts.add (output);
+            m_outputChanNames.add (portName);
+        }
+
+        m_inChanBuffers  = (float**) malloc (numInputs * sizeof (float*));
+        m_outChanBuffers = (float**) malloc (numOutputs * sizeof (float*));
+
+        // Activate client
         jack_set_process_callback (m_jackClient, JackAudioIODevice::processCallback, this);
         jack_on_shutdown (m_jackClient, JackAudioIODevice::shutdownCallback, this);
 
@@ -206,8 +208,9 @@ public:
 
         if (m_config.isAutoConnectEnabled)
         {
-            const char **ports = jack_get_ports (m_jackClient, NULL, NULL, JackPortIsPhysical|JackPortIsInput);
-            for (int i=0; i < 2 && i < m_outputPorts.size() && ports[i]; ++i)
+            const char** ports = jack_get_ports (m_jackClient, nullptr, nullptr, JackPortIsPhysical|JackPortIsInput);
+
+            for (int i=0; i < m_outputPorts.size() && ports[i]; ++i)
             {
                 jack_connect(m_jackClient, jack_port_name(m_outputPorts[i]), ports[i]);
             }
@@ -235,6 +238,18 @@ public:
         m_isDeviceOpen = false;
 
         Jack::g_currentBPM = 0.0;
+
+        if (m_inChanBuffers != nullptr)
+        {
+            free (m_inChanBuffers);
+            m_inChanBuffers = nullptr;
+        }
+
+        if (m_outChanBuffers != nullptr)
+        {
+            free (m_outChanBuffers);
+            m_outChanBuffers = nullptr;
+        }
     }
 
 
@@ -294,18 +309,18 @@ public:
 
 
 
-    BitArray getActiveOutputChannels() const override
+    BigInteger getActiveOutputChannels() const override
     {
-        BitArray outputBits;
+        BigInteger outputBits;
         outputBits.setRange(0, m_outputPorts.size(), true);
         return outputBits;
     }
 
 
 
-    BitArray getActiveInputChannels() const override
+    BigInteger getActiveInputChannels() const override
     {
-        BitArray inputBits;
+        BigInteger inputBits;
         inputBits.setRange(0, m_inputPorts.size(), true);
         return inputBits;
     }
@@ -469,16 +484,11 @@ private:
 class JackAudioIODeviceType  : public AudioIODeviceType
 {
 public:
-
-    //==============================================================================
-
     JackAudioIODeviceType() : AudioIODeviceType("JACK") {}
 
 
     ~JackAudioIODeviceType() {}
 
-
-    //==============================================================================
 
     void scanForDevices() {}
 
@@ -487,8 +497,8 @@ public:
     {
         StringArray deviceNames;
 
-        deviceNames.add ("JACK Audio + MIDI, Auto-Connect Outputs");
-        deviceNames.add ("JACK Audio Only, Auto-Connect Outputs");
+        deviceNames.add ("JACK Audio + MIDI (auto-connect outputs)");
+        deviceNames.add ("JACK Audio Only (auto-connect outputs)");
         deviceNames.add ("JACK Audio + MIDI");
         deviceNames.add ("JACK Audio Only");
 
@@ -499,7 +509,7 @@ public:
 
     int getDefaultDeviceIndex (const bool /*forInput*/) const
     {
-        return 0; // "JACK Audio + MIDI, Auto-Connect Outputs"
+        return 0; // "JACK Audio + MIDI (auto-connect outputs)"
     }
 
 
@@ -532,25 +542,15 @@ public:
             config.clientName = APPLICATION_NAME;
         }
 
-        config.numInputChans = Jack::NUM_INPUT_CHANS;
-        config.numOutputChans = Jack::g_numOutputChans;
-
-        config.isAutoConnectEnabled = outputDeviceName.contains ("Auto-Connect");
+        config.isAutoConnectEnabled = outputDeviceName.contains ("auto-connect");
         config.isMidiEnabled = outputDeviceName.contains ("MIDI");
 
         return new JackAudioIODevice (outputDeviceName, config);
     }
 
 
-
-    //==============================================================================
-
-    juce_UseDebuggingNewOperator
-
 private:
-
-    JackAudioIODeviceType (const JackAudioIODeviceType&);
-    const JackAudioIODeviceType& operator= (const JackAudioIODeviceType&);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JackAudioIODeviceType)
 };
 
 
@@ -560,8 +560,13 @@ private:
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()
 {
     // Detect if libjack.so is available using relaytool on linux
+
     if (!libjack_is_present)
+    {
         return nullptr;
+    }
     else
+    {
         return new JackAudioIODeviceType();
+    }
 }

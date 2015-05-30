@@ -101,10 +101,6 @@ namespace Jack
                          void getDefaultJackClientConfig (JackClientConfig &conf)
     */
     extern QString g_clientId;
-
-    extern int g_numOutputChans;
-
-    const int NUM_INPUT_CHANS = 0;
 }
 
 

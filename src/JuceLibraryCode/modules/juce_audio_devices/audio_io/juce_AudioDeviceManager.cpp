@@ -385,9 +385,11 @@ void AudioDeviceManager::deleteCurrentDevice()
     currentSetup.outputDeviceName.clear();
 }
 
-void AudioDeviceManager::setCurrentAudioDeviceType (const String& type,
+String AudioDeviceManager::setCurrentAudioDeviceType (const String& type,
                                                     const bool treatAsChosenDevice)
 {
+    String error;
+    
     for (int i = 0; i < availableDeviceTypes.size(); ++i)
     {
         if (availableDeviceTypes.getUnchecked(i)->getTypeName() == type
@@ -405,12 +407,14 @@ void AudioDeviceManager::setCurrentAudioDeviceType (const String& type,
             AudioDeviceSetup s (*lastDeviceTypeConfigs.getUnchecked(i));
             insertDefaultDeviceNames (s);
 
-            setAudioDeviceSetup (s, treatAsChosenDevice);
+            error = setAudioDeviceSetup (s, treatAsChosenDevice);
 
             sendChangeMessage();
             break;
         }
     }
+    
+    return error;
 }
 
 AudioIODeviceType* AudioDeviceManager::getCurrentDeviceTypeObject() const

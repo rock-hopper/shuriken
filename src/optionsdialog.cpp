@@ -610,33 +610,33 @@ void OptionsDialog::tearDownMidiInputTestSynth()
 
 
 
-void OptionsDialog::setJackMidiInput( const String deviceName )
+void OptionsDialog::setJackMidiInput( const String audioDeviceName )
 {
-    const StringArray deviceNames = MidiInput::getDevices();
+    const StringArray midiDeviceNames = MidiInput::getDevices();
 
-    if ( deviceName.startsWith( "JACK" ) && deviceName.contains( "MIDI" ) )
+    if ( audioDeviceName.startsWith( "JACK" ) && audioDeviceName.contains( "MIDI" ) )
     {
         // Disable ALSA MIDI inputs as they conflict with JACK MIDI inputs
-        for ( int i = 0; i < deviceNames.size(); ++i )
+        for ( int i = 0; i < midiDeviceNames.size(); ++i )
         {
-            if ( isJackMidiDevice( deviceNames[i] ) )
+            if ( isJackMidiDevice( midiDeviceNames[i] ) )
             {
-                m_deviceManager.setMidiInputEnabled( deviceNames[i], true );
+                m_deviceManager.setMidiInputEnabled( midiDeviceNames[i], true );
             }
             else
             {
-                m_deviceManager.setMidiInputEnabled( deviceNames[i], false );
+                m_deviceManager.setMidiInputEnabled( midiDeviceNames[i], false );
             }
         }
     }
     else
     {
         // Disable JACK MIDI inputs
-        for ( int i = 0; i < deviceNames.size(); ++i )
+        for ( int i = 0; i < midiDeviceNames.size(); ++i )
         {
-            if ( isJackMidiDevice( deviceNames[i] ) )
+            if ( isJackMidiDevice( midiDeviceNames[i] ) )
             {
-                m_deviceManager.setMidiInputEnabled( deviceNames[i], false );
+                m_deviceManager.setMidiInputEnabled( midiDeviceNames[i], false );
             }
         }
     }
@@ -711,9 +711,9 @@ String OptionsDialog::getNameForChannelPair( const String& name1, const String& 
 
 
 
-bool OptionsDialog::isJackMidiDevice( const String deviceName )
+bool OptionsDialog::isJackMidiDevice( const String midiDeviceName )
 {
-    if ( deviceName == "jackmidi" || deviceName == "a2jmidid" )
+    if ( midiDeviceName == "jackmidi" || midiDeviceName == "a2jmidid" )
     {
         return true;
     }
@@ -781,14 +781,23 @@ void OptionsDialog::on_comboBox_AudioBackend_activated( const int index )
     // Set audio backend
     AudioIODeviceType* const audioBackendType = m_deviceManager.getAvailableDeviceTypes()[ index ];
     const String audioBackendName = audioBackendType->getTypeName();
-    m_deviceManager.setCurrentAudioDeviceType( audioBackendName, true );
+    String error = m_deviceManager.setCurrentAudioDeviceType( audioBackendName, true );
 
-    // Get current audio settings
     AudioDeviceManager::AudioDeviceSetup config;
     m_deviceManager.getAudioDeviceSetup( config );
 
-    // Set current settings again simply to get any error message that may be produced
-    String error = m_deviceManager.setAudioDeviceSetup( config, true );
+    if ( error.isEmpty() )
+    {
+        // Set the default number of JACK outputs
+        if ( config.outputDeviceName.startsWith( "JACK" ) )
+        {
+            config.outputChannels.clear();
+            config.outputChannels.setRange( 0, OutputChannels::MIN, true);
+            config.useDefaultOutputChannels = false;
+
+            error = m_deviceManager.setAudioDeviceSetup( config, true );
+        }
+    }
 
     // If this is a JACK audio device then also enable JACK MIDI if required
     setJackMidiInput( config.outputDeviceName );

@@ -257,8 +257,8 @@ public:
 
         For a list of types, see getAvailableDeviceTypes().
     */
-    void setCurrentAudioDeviceType (const String& type,
-                                    bool treatAsChosenDevice);
+    String setCurrentAudioDeviceType (const String& type,
+                                      bool treatAsChosenDevice);
 
     /** Closes the currently-open device.
         You can call restartLastAudioDevice() later to reopen it in the same state
