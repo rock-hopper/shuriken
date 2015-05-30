@@ -27,17 +27,67 @@
 #include "messageboxes.h"
 
 
+//==================================================================================================
+// Public:
+
 JackOutputsDialog::JackOutputsDialog( const int numSampleBuffers, const int numSampleChans, AudioDeviceManager& deviceManager, QWidget* parent ) :
     QDialog( parent ),
+    m_numSampleBuffers( numSampleBuffers ),
     m_numSampleChans( numSampleChans ),
     m_ui( new Ui::JackOutputsDialog ),
     m_deviceManager( deviceManager )
 {
-    Q_ASSERT( numSampleBuffers > 0 );
+    Q_ASSERT( m_numSampleBuffers > 0 );
     Q_ASSERT( m_numSampleChans > 0 );
 
     m_ui->setupUi( this );
 
+    updateTableWidget();
+
+    // Set up "No. of Outputs" spinbox
+    m_ui->spinBox_NumOutputs->setMinimum( OutputChannels::MIN / 2 );
+    m_ui->spinBox_NumOutputs->setMaximum( OutputChannels::MAX / 2 );
+
+    AudioDeviceManager::AudioDeviceSetup config;
+    m_deviceManager.getAudioDeviceSetup( config );
+
+    const int numOutputs = config.outputChannels.countNumberOfSetBits();
+    m_ui->spinBox_NumOutputs->setValue( numOutputs / 2 );
+}
+
+
+
+JackOutputsDialog::~JackOutputsDialog()
+{
+    delete m_ui;
+}
+
+
+
+//==================================================================================================
+// Protected:
+
+void JackOutputsDialog::changeEvent( QEvent* event )
+{
+    QDialog::changeEvent( event );
+
+    switch ( event->type() )
+    {
+    case QEvent::LanguageChange:
+        m_ui->retranslateUi( this );
+        break;
+    default:
+        break;
+    }
+}
+
+
+
+//==================================================================================================
+// Private:
+
+void JackOutputsDialog::updateTableWidget()
+{
     AudioDeviceManager::AudioDeviceSetup config;
     m_deviceManager.getAudioDeviceSetup( config );
 
@@ -45,7 +95,7 @@ JackOutputsDialog::JackOutputsDialog( const int numSampleBuffers, const int numS
 
     // Set up table widget
     m_ui->tableWidget->setRowCount( numOutputs / 2 );
-    m_ui->tableWidget->setColumnCount( numSampleBuffers );
+    m_ui->tableWidget->setColumnCount( m_numSampleBuffers );
 
     QStringList verticalHeaders;
 
@@ -63,37 +113,12 @@ JackOutputsDialog::JackOutputsDialog( const int numSampleBuffers, const int numS
     }
 
     m_ui->tableWidget->setVerticalHeaderLabels( verticalHeaders );
-
-    // Set up "No. of Outputs" spinbox
-    m_ui->spinBox_NumOutputs->setMinimum( OutputChannels::MIN / 2 );
-    m_ui->spinBox_NumOutputs->setMaximum( OutputChannels::MAX / 2 );
-    m_ui->spinBox_NumOutputs->setValue( numOutputs / 2 );
 }
 
 
 
-JackOutputsDialog::~JackOutputsDialog()
-{
-    delete m_ui;
-}
-
-
-
-void JackOutputsDialog::changeEvent( QEvent* event )
-{
-    QDialog::changeEvent( event );
-
-    switch ( event->type() )
-    {
-    case QEvent::LanguageChange:
-        m_ui->retranslateUi( this );
-        break;
-    default:
-        break;
-    }
-}
-
-
+//==================================================================================================
+// Private Slots:
 
 void JackOutputsDialog::on_tableWidget_itemClicked( QTableWidgetItem* item )
 {
@@ -140,6 +165,6 @@ void JackOutputsDialog::on_spinBox_NumOutputs_valueChanged( const int value )
 
     if (  m_ui->tableWidget->rowCount() != value )
     {
-        ;
+        updateTableWidget();
     }
 }

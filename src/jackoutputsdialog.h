@@ -46,6 +46,9 @@ protected:
     void changeEvent( QEvent* event );
 
 private:
+    void updateTableWidget();
+
+    const int m_numSampleBuffers;
     const int m_numSampleChans;
 
     Ui::JackOutputsDialog* m_ui;
