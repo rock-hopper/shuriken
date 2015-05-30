@@ -299,20 +299,20 @@ void MainWindow::setUpSampler()
         m_rubberbandAudioSource = new RubberbandAudioSource( m_samplerAudioSource, numChans, options, isJackSyncEnabled );
         m_audioSourcePlayer.setSource( m_rubberbandAudioSource );
 
-        QObject::connect( m_optionsDialog, SIGNAL( transientsOptionChanged(RubberBandStretcher::Options) ),
-                          m_rubberbandAudioSource, SLOT( setTransientsOption(RubberBandStretcher::Options) ) );
+        connect( m_optionsDialog, SIGNAL( transientsOptionChanged(RubberBandStretcher::Options) ),
+                 m_rubberbandAudioSource, SLOT( setTransientsOption(RubberBandStretcher::Options) ) );
 
-        QObject::connect( m_optionsDialog, SIGNAL( phaseOptionChanged(RubberBandStretcher::Options) ),
-                          m_rubberbandAudioSource, SLOT( setPhaseOption(RubberBandStretcher::Options) ) );
+        connect( m_optionsDialog, SIGNAL( phaseOptionChanged(RubberBandStretcher::Options) ),
+                 m_rubberbandAudioSource, SLOT( setPhaseOption(RubberBandStretcher::Options) ) );
 
-        QObject::connect( m_optionsDialog, SIGNAL( formantOptionChanged(RubberBandStretcher::Options) ),
-                          m_rubberbandAudioSource, SLOT( setFormantOption(RubberBandStretcher::Options) ) );
+        connect( m_optionsDialog, SIGNAL( formantOptionChanged(RubberBandStretcher::Options) ),
+                 m_rubberbandAudioSource, SLOT( setFormantOption(RubberBandStretcher::Options) ) );
 
-        QObject::connect( m_optionsDialog, SIGNAL( pitchOptionChanged(RubberBandStretcher::Options) ),
-                          m_rubberbandAudioSource, SLOT( setPitchOption(RubberBandStretcher::Options) ) );
+        connect( m_optionsDialog, SIGNAL( pitchOptionChanged(RubberBandStretcher::Options) ),
+                 m_rubberbandAudioSource, SLOT( setPitchOption(RubberBandStretcher::Options) ) );
 
-        QObject::connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
-                          m_rubberbandAudioSource, SLOT( enableJackSync(bool) ) );
+        connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
+                 m_rubberbandAudioSource, SLOT( enableJackSync(bool) ) );
 
         on_checkBox_TimeStretch_toggled( m_ui->checkBox_TimeStretch->isChecked() );
     }
@@ -354,7 +354,7 @@ void MainWindow::setupUI()
 #endif
 
 
-    // If nsm is running, change text for "Open Project" and "Save As" to "Import Project" and "Export Project"
+    // If NSM is running, change text for "Open Project" and "Save As" to "Import Project" and "Export Project"
     if ( m_nsmThread != NULL )
     {
         m_ui->actionOpen_Project->setText( tr( "Import Project" ) );
@@ -538,17 +538,20 @@ void MainWindow::setupUI()
     {
         centreWindow( m_optionsDialog );
 
-        QObject::connect( m_optionsDialog, SIGNAL( realtimeModeToggled(bool) ),
-                          this, SLOT( enableRealtimeControls(bool) ) );
+        connect( m_optionsDialog, SIGNAL( realtimeModeToggled(bool) ),
+                 this, SLOT( enableRealtimeControls(bool) ) );
 
-        QObject::connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
-                          m_ui->doubleSpinBox_NewBPM, SLOT( setHidden(bool) ) );
+        connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
+                 m_ui->doubleSpinBox_NewBPM, SLOT( setHidden(bool) ) );
 
-        QObject::connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
-                          m_ui->label_JackSync, SLOT( setVisible(bool) ) );
+        connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
+                 m_ui->label_JackSync, SLOT( setVisible(bool) ) );
 
-        QObject::connect( m_optionsDialog, SIGNAL( timeStretchOptionsChanged() ),
-                          this, SLOT( enableSaveAction() ) );
+        connect( m_optionsDialog, SIGNAL( timeStretchOptionsChanged() ),
+                 this, SLOT( enableSaveAction() ) );
+
+        connect( m_optionsDialog, SIGNAL( jackAudioEnabled(bool) ),
+                 this, SLOT( enableJackOutputsAction(bool) ) );
 
         m_optionsDialog->disableTab( OptionsDialog::TIME_STRETCH_TAB );
     }
@@ -603,6 +606,10 @@ void MainWindow::enableUI()
     m_ui->actionSelect_Move->setEnabled( true );
     m_ui->actionMulti_Select->setEnabled( true );
     m_ui->actionAudition->setEnabled( true );
+    if ( m_optionsDialog->isJackAudioEnabled() )
+    {
+        m_ui->actionJack_Outputs->setEnabled( true );
+    }
 
     m_ui->actionAudition->trigger();
 
@@ -661,6 +668,7 @@ void MainWindow::disableUI()
     m_ui->actionSelect_Move->setEnabled( false );
     m_ui->actionMulti_Select->setEnabled( false );
     m_ui->actionAudition->setEnabled( false );
+    m_ui->actionJack_Outputs->setEnabled( false );
 
     if ( m_ui->actionSelective_Time_Stretch->isChecked() )
     {
@@ -675,14 +683,14 @@ void MainWindow::disableUI()
 
 void MainWindow::connectWaveformToMainWindow( const SharedWaveformItem item )
 {
-    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                      this, SLOT( recordWaveformItemMove(QList<int>,int) ) );
+    connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
+             this, SLOT( recordWaveformItemMove(QList<int>,int) ) );
 
-    QObject::connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
-                      this, SLOT( stopPlayback() ) );
+    connect( item.data(), SIGNAL( orderPosHasChanged(QList<int>,int) ),
+             this, SLOT( stopPlayback() ) );
 
-    QObject::connect( item.data(), SIGNAL( clicked(const WaveformItem*,QPointF) ),
-                      this, SLOT( playSample(const WaveformItem*,QPointF) ) );
+    connect( item.data(), SIGNAL( clicked(const WaveformItem*,QPointF) ),
+             this, SLOT( playSample(const WaveformItem*,QPointF) ) );
 }
 
 
@@ -1195,6 +1203,20 @@ void MainWindow::notifyNsmOfUnsavedChanges( const bool isClean )
         {
             m_nsmThread->sendMessage( NsmListenerThread::MSG_IS_DIRTY );
         }
+    }
+}
+
+
+
+void MainWindow::enableJackOutputsAction( const bool isJackAudioEnabled )
+{
+    if ( isJackAudioEnabled && ! m_sampleBufferList.isEmpty() && ! m_sampleHeader.isNull() )
+    {
+        m_ui->actionJack_Outputs->setEnabled( true );
+    }
+    else
+    {
+        m_ui->actionJack_Outputs->setEnabled( false );
     }
 }
 
@@ -2257,7 +2279,6 @@ void MainWindow::on_actionJack_Outputs_triggered()
         ScopedPointer<JackOutputsDialog> dialog( new JackOutputsDialog( m_sampleBufferList.size(),
                                                                         m_sampleHeader->numChans,
                                                                         m_deviceManager ) );
-
         if ( dialog != NULL )
         {
             setMaxWindowSize( dialog );

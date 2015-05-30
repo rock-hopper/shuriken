@@ -1448,6 +1448,9 @@
    </property>
   </action>
   <action name="actionJack_Outputs">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="../resources.qrc">
      <normaloff>:/resources/images/mixer-line.png</normaloff>:/resources/images/mixer-line.png</iconset>

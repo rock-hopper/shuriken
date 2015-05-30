@@ -227,6 +227,13 @@ void OptionsDialog::enableJackSync()
 
 
 
+bool OptionsDialog::isJackAudioEnabled() const
+{
+    return ( m_deviceManager.getCurrentAudioDeviceType() == "JACK" );
+}
+
+
+
 //==================================================================================================
 // Protected:
 
@@ -332,13 +339,6 @@ void OptionsDialog::setTempDirPath()
     {
         m_tempDirPath = tempDir.absoluteFilePath( subDirName );
     }
-}
-
-
-
-bool OptionsDialog::isJackAudioEnabled() const
-{
-    return ( m_deviceManager.getCurrentAudioDeviceType() == "JACK" );
 }
 
 
@@ -788,9 +788,9 @@ void OptionsDialog::on_comboBox_AudioBackend_activated( const int index )
 
     if ( error.isEmpty() )
     {
-        // Set the default number of JACK outputs
-        if ( config.outputDeviceName.startsWith( "JACK" ) )
+        if ( isJackAudioEnabled() )
         {
+            // Set the default number of JACK outputs
             config.outputChannels.clear();
             config.outputChannels.setRange( 0, OutputChannels::MIN, true);
             config.useDefaultOutputChannels = false;
@@ -817,6 +817,15 @@ void OptionsDialog::on_comboBox_AudioBackend_activated( const int index )
     {
         m_ui->checkBox_JackSync->setEnabled( false );
         m_ui->checkBox_JackSync->setChecked( false );
+    }
+
+    if ( isJackAudioEnabled() && error.isEmpty() )
+    {
+        emit jackAudioEnabled( true );
+    }
+    else
+    {
+        emit jackAudioEnabled( false );
     }
 
     if ( error.isNotEmpty() )

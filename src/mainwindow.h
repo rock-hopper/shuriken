@@ -148,7 +148,7 @@ private:
     static void centreWindow( QWidget* window );
 
 private slots:
-    // Automatically connected
+    // Automatically connected...
     void on_actionJack_Outputs_triggered();
     void on_checkBox_OneShot_toggled( bool isChecked );
     void on_dial_Release_valueChanged( int value );
@@ -200,7 +200,7 @@ private slots:
     void on_actionSave_Project_triggered();
     void on_actionOpen_Project_triggered();
 
-    // Programmatically connected
+    // Programmatically connected...
     void recordWaveformItemMove( QList<int> oldOrderPositions, int numPlacesMoved );
 
     void recordSlicePointItemMove( SharedSlicePointItem slicePoint,
@@ -230,6 +230,8 @@ private slots:
     void updateRedoText( QString text );
 
     void notifyNsmOfUnsavedChanges( bool isClean );
+
+    void enableJackOutputsAction( bool isJackAudioEnabled );
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( MainWindow );

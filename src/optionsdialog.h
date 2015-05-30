@@ -66,6 +66,8 @@ public:
     bool isJackSyncEnabled() const;
     void enableJackSync();
 
+    bool isJackAudioEnabled() const;
+
     // Returns the absolute path of the user-defined temp directory if
     // it is valid and writable, otherwise returns an empty string
     QString getTempDirPath() const                              { return m_tempDirPath; }
@@ -78,7 +80,6 @@ protected:
 private:
     void setTempDirPath();
 
-    bool isJackAudioEnabled() const;
     void updateAudioDeviceComboBox();
     void updateOutputChannelComboBox();
     void updateSampleRateComboBox();
@@ -124,6 +125,7 @@ signals:
     void formantOptionChanged( RubberBandStretcher::Options option );
     void pitchOptionChanged( RubberBandStretcher::Options option );
     void jackSyncToggled( bool isEnabled );
+    void jackAudioEnabled( bool isEnabled );
 
 private slots:
     void on_pushButton_ChooseTempDir_clicked();
