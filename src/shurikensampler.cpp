@@ -102,7 +102,7 @@ void ShurikenSamplerSound::setRelease( qreal value )
 
 
 
-void ShurikenSamplerSound::setOutputPairNum( int outputPairNum )
+void ShurikenSamplerSound::setOutputPair( int outputPairNum )
 {
     if ( outputPairNum < 0 )
     {

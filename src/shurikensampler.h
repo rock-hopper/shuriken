@@ -75,7 +75,7 @@ public:
     void setOneShot( bool set )                     { m_isOneShotSet = set; }
     bool isOneShotSet() const                       { return m_isOneShotSet; }
 
-    void setOutputPairNum( int outputPairNum );
+    void setOutputPair( int outputPairNum );
     int getOutputPairNum() const                    { return m_outputPairNum; }
 
     // Set temporary sample range; only lasts for duration of one note

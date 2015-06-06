@@ -249,6 +249,24 @@ void SamplerAudioSource::setEnvelopeSettings( const EnvelopeSettings& settings )
 
 
 
+int SamplerAudioSource::getOutputPairNum( const int sampleNum ) const
+{
+    int outputPairNum = 0;
+
+    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
+
+    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
+
+    if ( samplerSound != NULL )
+    {
+        outputPairNum = samplerSound->getOutputPairNum();
+    }
+
+    return outputPairNum;
+}
+
+
+
 void SamplerAudioSource::prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate )
 {
     m_playbackSampleRate = sampleRate;
@@ -364,7 +382,7 @@ void SamplerAudioSource::setOutputPair( const int sampleNum, const int outputPai
 
     if ( samplerSound != NULL )
     {
-        samplerSound->setOutputPairNum( outputPairNum );
+        samplerSound->setOutputPair( outputPairNum );
     }
 }
 

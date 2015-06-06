@@ -30,11 +30,16 @@
 //==================================================================================================
 // Public:
 
-JackOutputsDialog::JackOutputsDialog( const int numSampleBuffers, const int numSampleChans, AudioDeviceManager& deviceManager, QWidget* parent ) :
+JackOutputsDialog::JackOutputsDialog( const int numSampleBuffers,
+                                      const int numSampleChans,
+                                      QList<int> audioOutputPairNos,
+                                      AudioDeviceManager& deviceManager,
+                                      QWidget* parent ) :
     QDialog( parent ),
     m_numSampleBuffers( numSampleBuffers ),
     m_numSampleChans( numSampleChans ),
     m_ui( new Ui::JackOutputsDialog ),
+    m_audioOutputPairNos( audioOutputPairNos ),
     m_deviceManager( deviceManager )
 {
     Q_ASSERT( m_numSampleBuffers > 0 );
@@ -42,16 +47,18 @@ JackOutputsDialog::JackOutputsDialog( const int numSampleBuffers, const int numS
 
     m_ui->setupUi( this );
 
-    updateTableWidget();
-
-    // Set up "No. of Outputs" spinbox
-    m_ui->spinBox_NumOutputs->setMinimum( OutputChannels::MIN / 2 );
-    m_ui->spinBox_NumOutputs->setMaximum( OutputChannels::MAX / 2 );
-
+    // Get the current number of output channels
     AudioDeviceManager::AudioDeviceSetup config;
     m_deviceManager.getAudioDeviceSetup( config );
 
     const int numOutputChans = config.outputChannels.countNumberOfSetBits();
+
+    // Set up table widget
+    updateTableWidget( numOutputChans / 2 );
+
+    // Set up "No. of Outputs" spinbox
+    m_ui->spinBox_NumOutputs->setMinimum( OutputChannels::MIN / 2 );
+    m_ui->spinBox_NumOutputs->setMaximum( OutputChannels::MAX / 2 );
     m_ui->spinBox_NumOutputs->setValue( numOutputChans / 2 );
 }
 
@@ -86,14 +93,9 @@ void JackOutputsDialog::changeEvent( QEvent* event )
 //==================================================================================================
 // Private:
 
-void JackOutputsDialog::updateTableWidget()
+void JackOutputsDialog::updateTableWidget( const int numOutputPairs )
 {
-    AudioDeviceManager::AudioDeviceSetup config;
-    m_deviceManager.getAudioDeviceSetup( config );
-
-    const int numOutputs = config.outputChannels.countNumberOfSetBits();
-
-    m_ui->tableWidget->setRowCount( numOutputs / 2 );
+    m_ui->tableWidget->setRowCount( numOutputPairs );
     m_ui->tableWidget->setColumnCount( m_numSampleBuffers );
 
     QStringList verticalHeaders;
@@ -106,7 +108,16 @@ void JackOutputsDialog::updateTableWidget()
         {
             QTableWidgetItem* newItem = new QTableWidgetItem();
             newItem->setFlags( Qt::ItemIsUserCheckable | Qt::ItemIsEnabled );
-            newItem->setCheckState( Qt::Unchecked );
+
+            if ( m_audioOutputPairNos.at( column ) == row )
+            {
+                newItem->setCheckState( Qt::Checked );
+            }
+            else
+            {
+                newItem->setCheckState( Qt::Unchecked );
+            }
+
             m_ui->tableWidget->setItem( row, column, newItem );
         }
     }
@@ -128,7 +139,7 @@ void JackOutputsDialog::on_tableWidget_itemClicked( QTableWidgetItem* const item
 
         emit outputPairChanged( sampleNum, outputPairNum );
 
-        // Only one output pair can be selected for each sample so uncheck all other items in this column
+        // Only one output pair can be selected per audio slice so uncheck all other items in this column
         const int selectedCol = item->column();
         const int selectedRow = item->row();
 
@@ -148,17 +159,17 @@ void JackOutputsDialog::on_tableWidget_itemClicked( QTableWidgetItem* const item
 
 
 
-void JackOutputsDialog::on_spinBox_NumOutputs_valueChanged( const int value )
+void JackOutputsDialog::on_spinBox_NumOutputs_valueChanged( const int numOutputPairs )
 {
     AudioDeviceManager::AudioDeviceSetup config;
     m_deviceManager.getAudioDeviceSetup( config );
 
-    const int currentNumOutputs = config.outputChannels.countNumberOfSetBits();
+    const int currentNumOutputChans = config.outputChannels.countNumberOfSetBits();
 
-    if ( currentNumOutputs != value * 2 )
+    if ( currentNumOutputChans != numOutputPairs * 2 )
     {
         config.outputChannels.clear();
-        config.outputChannels.setRange( 0, value * 2, true );
+        config.outputChannels.setRange( 0, numOutputPairs * 2, true );
         config.useDefaultOutputChannels = false;
 
         String error = m_deviceManager.setAudioDeviceSetup( config, true );
@@ -169,8 +180,8 @@ void JackOutputsDialog::on_spinBox_NumOutputs_valueChanged( const int value )
         }
     }
 
-    if (  m_ui->tableWidget->rowCount() != value )
+    if ( m_ui->tableWidget->rowCount() != numOutputPairs )
     {
-        updateTableWidget();
+        updateTableWidget( numOutputPairs );
     }
 }

@@ -62,6 +62,8 @@ public:
     void getEnvelopeSettings( EnvelopeSettings& settings ) const;
     void setEnvelopeSettings( const EnvelopeSettings& settings );
 
+    int getOutputPairNum( int sampleNum ) const;
+
     int getLowestAssignedMidiNote() const           { return m_lowestAssignedNote; }
 
     MidiMessageCollector* getMidiInputCallback()    { return &m_midiCollector; }
