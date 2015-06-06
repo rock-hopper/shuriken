@@ -55,9 +55,15 @@ private:
 
     AudioDeviceManager& m_deviceManager;
 
+signals:
+    void outputPairChanged( int sampleNum, int outputPairNum );
+
 private slots:
     void on_spinBox_NumOutputs_valueChanged( int value );
     void on_tableWidget_itemClicked( QTableWidgetItem* item );
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( JackOutputsDialog );
 };
 
 

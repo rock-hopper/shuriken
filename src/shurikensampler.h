@@ -69,16 +69,19 @@ public:
     void setAttack( qreal value );  // Value should be 0.00 - 1.00
     void setRelease( qreal value ); // Value should be 0.00 - 1.00
 
-    qreal getAttack() const                     { return m_attackValue; }
-    qreal getRelease() const                    { return m_releaseValue; }
+    qreal getAttack() const                         { return m_attackValue; }
+    qreal getRelease() const                        { return m_releaseValue; }
 
-    void setOneShot( bool set )                 { m_isOneShotSet = set; }
-    bool isOneShotSet() const                   { return m_isOneShotSet; }
+    void setOneShot( bool set )                     { m_isOneShotSet = set; }
+    bool isOneShotSet() const                       { return m_isOneShotSet; }
+
+    void setOutputPairNum( int outputPairNum );
+    int getOutputPairNum() const                    { return m_outputPairNum; }
 
     // Set temporary sample range; only lasts for duration of one note
     void setTempSampleRange( SharedSampleRange sampleRange );
 
-    SharedSampleBuffer getSampleBuffer() const  { return m_sampleBuffer; }
+    SharedSampleBuffer getSampleBuffer() const      { return m_sampleBuffer; }
 
     bool appliesToNote( int midiNoteNumber ) override;
     bool appliesToChannel( int midiChannel ) override;
@@ -98,6 +101,7 @@ private:
     volatile int m_tempStartFrame, m_tempEndFrame;
     volatile bool m_isTempSampleRangeSet;
     volatile bool m_isOneShotSet;
+    volatile int m_outputPairNum;
 };
 
 

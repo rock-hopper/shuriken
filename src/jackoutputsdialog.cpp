@@ -51,8 +51,8 @@ JackOutputsDialog::JackOutputsDialog( const int numSampleBuffers, const int numS
     AudioDeviceManager::AudioDeviceSetup config;
     m_deviceManager.getAudioDeviceSetup( config );
 
-    const int numOutputs = config.outputChannels.countNumberOfSetBits();
-    m_ui->spinBox_NumOutputs->setValue( numOutputs / 2 );
+    const int numOutputChans = config.outputChannels.countNumberOfSetBits();
+    m_ui->spinBox_NumOutputs->setValue( numOutputChans / 2 );
 }
 
 
@@ -93,7 +93,6 @@ void JackOutputsDialog::updateTableWidget()
 
     const int numOutputs = config.outputChannels.countNumberOfSetBits();
 
-    // Set up table widget
     m_ui->tableWidget->setRowCount( numOutputs / 2 );
     m_ui->tableWidget->setColumnCount( m_numSampleBuffers );
 
@@ -120,24 +119,31 @@ void JackOutputsDialog::updateTableWidget()
 //==================================================================================================
 // Private Slots:
 
-void JackOutputsDialog::on_tableWidget_itemClicked( QTableWidgetItem* item )
+void JackOutputsDialog::on_tableWidget_itemClicked( QTableWidgetItem* const item )
 {
-    QList<int> outputChans;
-
-    if ( m_numSampleChans == 1 )
+    if ( item->checkState() == Qt::Checked )
     {
-        outputChans << item->row();
+        const int sampleNum = item->column();
+        const int outputPairNum = item->row();
+
+        emit outputPairChanged( sampleNum, outputPairNum );
+
+        // Only one output pair can be selected for each sample so uncheck all other items in this column
+        const int selectedCol = item->column();
+        const int selectedRow = item->row();
+
+        for ( int row = 0; row < m_ui->tableWidget->rowCount(); row++ )
+        {
+            if ( row != selectedRow )
+            {
+                m_ui->tableWidget->item( row, selectedCol )->setCheckState( Qt::Unchecked );
+            }
+        }
     }
-    else // Stereo
+    else // If user clicks on an item that's already checked then make sure it stays checked
     {
-        outputChans << item->row() * 2 << ( item->row() * 2 ) + 1;
+        item->setCheckState( Qt::Checked );
     }
-
-    int sampleBufferId = item->column();
-
-    bool isChecked = item->checkState() == Qt::Checked;
-
-    qDebug() << outputChans << sampleBufferId << isChecked;
 }
 
 

@@ -2283,8 +2283,11 @@ void MainWindow::on_actionJack_Outputs_triggered()
         {
             setMaxWindowSize( dialog );
             centreWindow( dialog );
-        }
 
-        dialog->exec();
+            connect( dialog, SIGNAL( outputPairChanged(int,int) ),
+                     m_samplerAudioSource, SLOT( setOutputPair(int,int) ) );
+
+            dialog->exec();
+        }
     }
 }

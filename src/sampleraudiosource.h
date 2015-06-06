@@ -25,10 +25,13 @@
 
 #include "JuceHeader.h"
 #include "samplebuffer.h"
+#include <QObject>
 
 
-class SamplerAudioSource : public AudioSource
+class SamplerAudioSource : public QObject, public AudioSource
 {
+    Q_OBJECT
+
 public:
     SamplerAudioSource();
     ~SamplerAudioSource();
@@ -68,6 +71,9 @@ public:
     void releaseResources() override;
     void getNextAudioBlock( const AudioSourceChannelInfo& info ) override;
     void getNextAudioBlock( const AudioSourceChannelInfo& info, MidiBuffer& midiBuffer );
+
+public slots:
+    void setOutputPair( int sampleNum, int outputPairNum );
 
 private:
     bool addNewSample( SharedSampleBuffer sampleBuffer, qreal sampleRate );

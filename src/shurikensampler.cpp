@@ -69,7 +69,8 @@ ShurikenSamplerSound::ShurikenSamplerSound( const SharedSampleBuffer sampleBuffe
     m_tempStartFrame( m_originalStartFrame ),
     m_tempEndFrame( m_originalEndFrame ),
     m_isTempSampleRangeSet( false ),
-    m_isOneShotSet( true )
+    m_isOneShotSet( true ),
+    m_outputPairNum( 0 )
 {
 }
 
@@ -97,6 +98,22 @@ void ShurikenSamplerSound::setRelease( qreal value )
     else if ( value < 0.0 ) { value = 0.0; }
 
     m_releaseValue = value;
+}
+
+
+
+void ShurikenSamplerSound::setOutputPairNum( int outputPairNum )
+{
+    if ( outputPairNum < 0 )
+    {
+        outputPairNum = 0;
+    }
+    else if ( outputPairNum > (OutputChannels::MAX / 2) - 1 )
+    {
+        outputPairNum = (OutputChannels::MAX / 2) - 1;
+    }
+
+    m_outputPairNum = outputPairNum;
 }
 
 
@@ -263,11 +280,14 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
          static_cast<ShurikenSamplerSound*>( getCurrentlyPlayingSound().get() ) )
     {
         const float* const inL = playingSound->m_sampleBuffer->getReadPointer( 0 );
-        const float* const inR = playingSound->m_sampleBuffer->getNumChannels() > 1
-                                    ? playingSound->m_sampleBuffer->getReadPointer( 1 ) : nullptr;
+        const float* const inR = playingSound->m_sampleBuffer->getNumChannels() > 1 ?
+                                 playingSound->m_sampleBuffer->getReadPointer( 1 ) : nullptr;
 
-        float* outL = outputBuffer.getWritePointer( 0, startFrame );
-        float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer( 1, startFrame ) : nullptr;
+        const int outputPairNum = playingSound->m_outputPairNum;
+
+        float* outL = outputBuffer.getWritePointer( outputPairNum * 2, startFrame );
+        float* outR = outputBuffer.getNumChannels() > 1 ?
+                      outputBuffer.getWritePointer( outputPairNum * 2 + 1, startFrame ) : nullptr;
 
         const int totalnumFrames = playingSound->m_sampleBuffer->getNumFrames();
 

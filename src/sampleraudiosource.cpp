@@ -30,6 +30,7 @@
 // Public:
 
 SamplerAudioSource::SamplerAudioSource() :
+    QObject(),
     AudioSource(),
     m_fileSampleRate( 0.0 ),
     m_playbackSampleRate( 0.0 ),
@@ -348,6 +349,23 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info, 
 
     // Tell the sampler to process the MIDI events and generate its output
     m_sampler.renderNextBlock( *info.buffer, midiBuffer, 0, info.numSamples );
+}
+
+
+
+//==================================================================================================
+// Public Slots:
+
+void SamplerAudioSource::setOutputPair( const int sampleNum, const int outputPairNum )
+{
+    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
+
+    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
+
+    if ( samplerSound != NULL )
+    {
+        samplerSound->setOutputPairNum( outputPairNum );
+    }
 }
 
 
