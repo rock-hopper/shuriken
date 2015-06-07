@@ -41,7 +41,7 @@ class JackOutputsDialog : public QDialog
 public:
     JackOutputsDialog( int numSampleBuffers,
                        int numSampleChans,
-                       QList<int> audioOutputPairNos,         // Index = sample number, value = output pair
+                       QList<int> sampleOutputPairs,        // Index = sample number, value = output pair
                        AudioDeviceManager& deviceManager,
                        QWidget* parent = NULL );
 
@@ -58,7 +58,7 @@ private:
 
     Ui::JackOutputsDialog* m_ui;
 
-    QList<int> m_audioOutputPairNos;
+    QList<int> m_sampleOutputPairs;
 
     AudioDeviceManager& m_deviceManager;
 

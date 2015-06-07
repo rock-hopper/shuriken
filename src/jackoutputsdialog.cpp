@@ -32,14 +32,14 @@
 
 JackOutputsDialog::JackOutputsDialog( const int numSampleBuffers,
                                       const int numSampleChans,
-                                      QList<int> audioOutputPairNos,
+                                      QList<int> sampleOutputPairs,
                                       AudioDeviceManager& deviceManager,
                                       QWidget* parent ) :
     QDialog( parent ),
     m_numSampleBuffers( numSampleBuffers ),
     m_numSampleChans( numSampleChans ),
     m_ui( new Ui::JackOutputsDialog ),
-    m_audioOutputPairNos( audioOutputPairNos ),
+    m_sampleOutputPairs( sampleOutputPairs ),
     m_deviceManager( deviceManager )
 {
     Q_ASSERT( m_numSampleBuffers > 0 );
@@ -95,21 +95,29 @@ void JackOutputsDialog::changeEvent( QEvent* event )
 
 void JackOutputsDialog::updateTableWidget( const int numOutputPairs )
 {
+    // Set number of rows and columns
     m_ui->tableWidget->setRowCount( numOutputPairs );
     m_ui->tableWidget->setColumnCount( m_numSampleBuffers );
 
+    // Set row headers: "Out L + R", "Out 2 L + R", etc...
     QStringList verticalHeaders;
 
     for ( int row = 0; row < m_ui->tableWidget->rowCount(); row++ )
     {
         verticalHeaders << tr("Out") + (row > 0 ? " " + QString::number(row + 1) : "") + " L + R";
+    }
 
-        for ( int column = 0; column < m_ui->tableWidget->columnCount(); column++ )
+    m_ui->tableWidget->setVerticalHeaderLabels( verticalHeaders );
+
+    // Populate the table with check box items
+    for ( int column = 0; column < m_ui->tableWidget->columnCount(); column++ )
+    {
+        for ( int row = 0; row < m_ui->tableWidget->rowCount(); row++ )
         {
             QTableWidgetItem* newItem = new QTableWidgetItem();
             newItem->setFlags( Qt::ItemIsUserCheckable | Qt::ItemIsEnabled );
 
-            if ( m_audioOutputPairNos.at( column ) == row )
+            if ( m_sampleOutputPairs.at( column ) == row )
             {
                 newItem->setCheckState( Qt::Checked );
             }
@@ -121,8 +129,6 @@ void JackOutputsDialog::updateTableWidget( const int numOutputPairs )
             m_ui->tableWidget->setItem( row, column, newItem );
         }
     }
-
-    m_ui->tableWidget->setVerticalHeaderLabels( verticalHeaders );
 }
 
 
@@ -137,6 +143,7 @@ void JackOutputsDialog::on_tableWidget_itemClicked( QTableWidgetItem* const item
         const int sampleNum = item->column();
         const int outputPairNum = item->row();
 
+        m_sampleOutputPairs.replace( sampleNum, outputPairNum );
         emit outputPairChanged( sampleNum, outputPairNum );
 
         // Only one output pair can be selected per audio slice so uncheck all other items in this column
@@ -161,11 +168,13 @@ void JackOutputsDialog::on_tableWidget_itemClicked( QTableWidgetItem* const item
 
 void JackOutputsDialog::on_spinBox_NumOutputs_valueChanged( const int numOutputPairs )
 {
+    // Get current number of outputs
     AudioDeviceManager::AudioDeviceSetup config;
     m_deviceManager.getAudioDeviceSetup( config );
 
     const int currentNumOutputChans = config.outputChannels.countNumberOfSetBits();
 
+    // Set new number of outputs
     if ( currentNumOutputChans != numOutputPairs * 2 )
     {
         config.outputChannels.clear();
@@ -180,8 +189,24 @@ void JackOutputsDialog::on_spinBox_NumOutputs_valueChanged( const int numOutputP
         }
     }
 
+    // Update the table widget
     if ( m_ui->tableWidget->rowCount() != numOutputPairs )
     {
+        // Make sure the output number for each sample doesn't exceed the new number of outputs
+        if ( numOutputPairs < m_ui->tableWidget->rowCount() )
+        {
+            const int defaultOutputPair = 0;
+
+            for ( int sampleNum = 0; sampleNum < m_sampleOutputPairs.size(); sampleNum++ )
+            {
+                if ( m_sampleOutputPairs.at( sampleNum ) >= numOutputPairs )
+                {
+                    m_sampleOutputPairs.replace( sampleNum, defaultOutputPair );
+                    emit outputPairChanged( sampleNum, defaultOutputPair );
+                }
+            }
+        }
+
         updateTableWidget( numOutputPairs );
     }
 }

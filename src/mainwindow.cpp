@@ -2276,21 +2276,24 @@ void MainWindow::on_actionJack_Outputs_triggered()
 {
     if ( ! m_sampleBufferList.isEmpty() && ! m_sampleHeader.isNull() )
     {
-        QList<int> audioOutputPairNos;
+        QList<int> sampleOutputPairs;
 
         for ( int i = 0; i < m_sampleBufferList.size(); i++ )
         {
-            audioOutputPairNos << m_samplerAudioSource->getOutputPairNum( i );
+            sampleOutputPairs << m_samplerAudioSource->getOutputPairNum( i );
         }
 
         ScopedPointer<JackOutputsDialog> dialog( new JackOutputsDialog( m_sampleBufferList.size(),
                                                                         m_sampleHeader->numChans,
-                                                                        audioOutputPairNos,
+                                                                        sampleOutputPairs,
                                                                         m_deviceManager ) );
         if ( dialog != NULL )
         {
             setMaxWindowSize( dialog );
             centreWindow( dialog );
+
+            connect( dialog, SIGNAL( outputPairChanged(int,int) ),
+                     this, SLOT( stopPlayback() ) );
 
             connect( dialog, SIGNAL( outputPairChanged(int,int) ),
                      m_samplerAudioSource, SLOT( setOutputPair(int,int) ) );
