@@ -40,7 +40,6 @@ class JackOutputsDialog : public QDialog
 
 public:
     JackOutputsDialog( int numSampleBuffers,
-                       int numSampleChans,
                        QList<int> sampleOutputPairs,        // Index = sample number, value = output pair
                        AudioDeviceManager& deviceManager,
                        QWidget* parent = NULL );
@@ -54,7 +53,6 @@ private:
     void updateTableWidget( int numOutputPairs );
 
     const int m_numSampleBuffers;
-    const int m_numSampleChans;
 
     Ui::JackOutputsDialog* m_ui;
 
@@ -64,6 +62,7 @@ private:
 
 signals:
     void outputPairChanged( int sampleNum, int outputPairNum );
+    void numOutputsChanged( int newNumOutputChans );
 
 private slots:
     void on_spinBox_NumOutputs_valueChanged( int numOutputPairs );

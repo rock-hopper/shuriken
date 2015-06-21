@@ -292,11 +292,15 @@ void MainWindow::setUpSampler()
 
     if ( m_optionsDialog->isRealtimeModeEnabled() ) // Real-time time stretch mode
     {
-        const int numChans = m_sampleHeader->numChans;
+        // Get the current number of output channels
+        AudioDeviceManager::AudioDeviceSetup config;
+        m_deviceManager.getAudioDeviceSetup( config );
+        const int numOutputChans = config.outputChannels.countNumberOfSetBits();
+
         const RubberBandStretcher::Options options = m_optionsDialog->getStretcherOptions();
         const bool isJackSyncEnabled = m_optionsDialog->isJackSyncEnabled();
 
-        m_rubberbandAudioSource = new RubberbandAudioSource( m_samplerAudioSource, numChans, options, isJackSyncEnabled );
+        m_rubberbandAudioSource = new RubberbandAudioSource( m_samplerAudioSource, numOutputChans, options, isJackSyncEnabled );
         m_audioSourcePlayer.setSource( m_rubberbandAudioSource );
 
         connect( m_optionsDialog, SIGNAL( transientsOptionChanged(RubberBandStretcher::Options) ),
@@ -2284,13 +2288,18 @@ void MainWindow::on_actionJack_Outputs_triggered()
         }
 
         ScopedPointer<JackOutputsDialog> dialog( new JackOutputsDialog( m_sampleBufferList.size(),
-                                                                        m_sampleHeader->numChans,
                                                                         sampleOutputPairs,
                                                                         m_deviceManager ) );
         if ( dialog != NULL )
         {
             setMaxWindowSize( dialog );
             centreWindow( dialog );
+
+            if ( m_rubberbandAudioSource != NULL ) // Real-time time stretch mode
+            {
+                connect( dialog, SIGNAL( numOutputsChanged(int) ),
+                         this, SLOT( recreateSampler() ) );
+            }
 
             connect( dialog, SIGNAL( outputPairChanged(int,int) ),
                      this, SLOT( stopPlayback() ) );

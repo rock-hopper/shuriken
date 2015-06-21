@@ -31,19 +31,16 @@
 // Public:
 
 JackOutputsDialog::JackOutputsDialog( const int numSampleBuffers,
-                                      const int numSampleChans,
                                       QList<int> sampleOutputPairs,
                                       AudioDeviceManager& deviceManager,
                                       QWidget* parent ) :
     QDialog( parent ),
     m_numSampleBuffers( numSampleBuffers ),
-    m_numSampleChans( numSampleChans ),
     m_ui( new Ui::JackOutputsDialog ),
     m_sampleOutputPairs( sampleOutputPairs ),
     m_deviceManager( deviceManager )
 {
     Q_ASSERT( m_numSampleBuffers > 0 );
-    Q_ASSERT( m_numSampleChans > 0 );
 
     m_ui->setupUi( this );
 
@@ -183,7 +180,11 @@ void JackOutputsDialog::on_spinBox_NumOutputs_valueChanged( const int numOutputP
 
         String error = m_deviceManager.setAudioDeviceSetup( config, true );
 
-        if ( error.isNotEmpty() )
+        if ( error.isEmpty() )
+        {
+            emit numOutputsChanged( numOutputPairs * 2 );
+        }
+        else
         {
             MessageBoxes::showWarningDialog( tr("Error while trying to set output channels!"), error.toRawUTF8() );
         }

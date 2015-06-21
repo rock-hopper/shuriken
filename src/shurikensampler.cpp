@@ -283,11 +283,11 @@ void ShurikenSamplerVoice::renderNextBlock( AudioSampleBuffer& outputBuffer, int
         const float* const inR = playingSound->m_sampleBuffer->getNumChannels() > 1 ?
                                  playingSound->m_sampleBuffer->getReadPointer( 1 ) : nullptr;
 
-        const int outputPairNum = playingSound->m_outputPairNum;
+        const int startChanNum = playingSound->m_outputPairNum * 2;
 
-        float* outL = outputBuffer.getWritePointer( outputPairNum * 2, startFrame );
+        float* outL = outputBuffer.getWritePointer( startChanNum, startFrame );
         float* outR = outputBuffer.getNumChannels() > 1 ?
-                      outputBuffer.getWritePointer( outputPairNum * 2 + 1, startFrame ) : nullptr;
+                      outputBuffer.getWritePointer( startChanNum + 1, startFrame ) : nullptr;
 
         const int totalnumFrames = playingSound->m_sampleBuffer->getNumFrames();
 
