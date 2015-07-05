@@ -66,7 +66,7 @@ signals:
 
 private slots:
     void on_spinBox_NumOutputs_valueChanged( int numOutputPairs );
-    void on_tableWidget_itemClicked( QTableWidgetItem* item );
+    void buttonClicked();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( JackOutputsDialog );

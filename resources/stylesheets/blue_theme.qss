@@ -548,3 +548,26 @@ QStatusBar {
     width: 16px;
     height: 16px;
 }*/
+
+
+/* Table */
+
+QTableWidget {
+    gridline-color: lightgrey;
+    background-color: white;
+}
+
+QTableWidget QToolButton {
+    background-color: white;
+}
+
+QTableWidget QToolButton:hover {
+    border-image: url(:/resources/images/toolbutton_hover.png) 5;
+    border-width: 5;
+}
+
+QTableWidget QToolButton:pressed, 
+QTableWidget QToolButton:checked {
+    border-image: url(:/resources/images/toolbutton_pressed.png) 5;
+    border-width: 5;
+}

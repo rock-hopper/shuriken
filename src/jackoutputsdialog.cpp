@@ -25,6 +25,8 @@
 #include <QtDebug>
 #include "globals.h"
 #include "messageboxes.h"
+#include <QToolButton>
+#include <QButtonGroup>
 
 
 //==================================================================================================
@@ -106,26 +108,34 @@ void JackOutputsDialog::updateTableWidget( const int numOutputPairs )
 
     m_ui->tableWidget->setVerticalHeaderLabels( verticalHeaders );
 
-    // Populate the table with check box items
+    // Populate the table with checkable buttons
     for ( int column = 0; column < m_ui->tableWidget->columnCount(); column++ )
     {
+        QButtonGroup* group = new QButtonGroup( this );
+
         for ( int row = 0; row < m_ui->tableWidget->rowCount(); row++ )
         {
-            QTableWidgetItem* newItem = new QTableWidgetItem();
-            newItem->setFlags( Qt::ItemIsUserCheckable | Qt::ItemIsEnabled );
+            QToolButton* button = new QToolButton();
+            button->setCheckable( true );
+            button->setAutoRaise( true );
+            button->setProperty( "column", column );
+            button->setProperty( "row", row );
 
-            if ( m_sampleOutputPairs.at( column ) == row )
-            {
-                newItem->setCheckState( Qt::Checked );
-            }
-            else
-            {
-                newItem->setCheckState( Qt::Unchecked );
-            }
+            connect( button, SIGNAL( clicked() ), this, SLOT( buttonClicked() ) );
 
-            m_ui->tableWidget->setItem( row, column, newItem );
+            group->addButton( button );
+
+            m_ui->tableWidget->setCellWidget( row, column, button );
         }
+
+        const int row = m_sampleOutputPairs.at( column );
+
+        QToolButton* button = static_cast<QToolButton*>( m_ui->tableWidget->cellWidget( row, column ) );
+
+        button->setChecked( true );
     }
+
+    m_ui->tableWidget->resizeColumnsToContents();
 }
 
 
@@ -133,32 +143,15 @@ void JackOutputsDialog::updateTableWidget( const int numOutputPairs )
 //==================================================================================================
 // Private Slots:
 
-void JackOutputsDialog::on_tableWidget_itemClicked( QTableWidgetItem* const item )
+void JackOutputsDialog::buttonClicked()
 {
-    if ( item->checkState() == Qt::Checked )
-    {
-        const int sampleNum = item->column();
-        const int outputPairNum = item->row();
+    QToolButton* button = static_cast<QToolButton*>( QObject::sender() );
 
-        m_sampleOutputPairs.replace( sampleNum, outputPairNum );
-        emit outputPairChanged( sampleNum, outputPairNum );
+    const int sampleNum = button->property( "column" ).toInt();
+    const int outputPairNum = button->property( "row" ).toInt();
 
-        // Only one output pair can be selected per audio slice so uncheck all other items in this column
-        const int selectedCol = item->column();
-        const int selectedRow = item->row();
-
-        for ( int row = 0; row < m_ui->tableWidget->rowCount(); row++ )
-        {
-            if ( row != selectedRow )
-            {
-                m_ui->tableWidget->item( row, selectedCol )->setCheckState( Qt::Unchecked );
-            }
-        }
-    }
-    else // If user clicks on an item that's already checked then make sure it stays checked
-    {
-        item->setCheckState( Qt::Checked );
-    }
+    m_sampleOutputPairs.replace( sampleNum, outputPairNum );
+    emit outputPairChanged( sampleNum, outputPairNum );
 }
 
 
@@ -190,7 +183,6 @@ void JackOutputsDialog::on_spinBox_NumOutputs_valueChanged( const int numOutputP
         }
     }
 
-    // Update the table widget
     if ( m_ui->tableWidget->rowCount() != numOutputPairs )
     {
         // Make sure the output number for each sample doesn't exceed the new number of outputs
@@ -208,6 +200,7 @@ void JackOutputsDialog::on_spinBox_NumOutputs_valueChanged( const int numOutputP
             }
         }
 
+        // Update the table widget
         updateTableWidget( numOutputPairs );
     }
 }
