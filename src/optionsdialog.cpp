@@ -255,7 +255,7 @@ void OptionsDialog::changeEvent( QEvent* event )
 
 void OptionsDialog::showEvent( QShowEvent* event )
 {
-    // If the dialog is not being maximised, i.e. it has not previoulsy been minimised...
+    // If the dialog has not previoulsy been minimised...
     if ( ! event->spontaneous() )
     {
         // Get current audio settings and store them so that any changes
@@ -849,8 +849,7 @@ void OptionsDialog::on_comboBox_AudioDevice_activated( const QString deviceName 
     // Update audio settings
     if ( outputDeviceName != config.outputDeviceName )
     {
-        QByteArray charArray = getNoDeviceString().toLocal8Bit();
-        if ( outputDeviceName != charArray.data() )
+        if ( outputDeviceName != getNoDeviceString().toLocal8Bit().data() )
         {
             config.outputDeviceName = outputDeviceName;
         }
@@ -859,7 +858,10 @@ void OptionsDialog::on_comboBox_AudioDevice_activated( const QString deviceName 
             config.outputDeviceName = String::empty;
         }
 
-        config.useDefaultOutputChannels = true;
+        if ( ! isJackAudioEnabled() )
+        {
+            config.useDefaultOutputChannels = true;
+        }
         error = m_deviceManager.setAudioDeviceSetup( config, true );
 
         // If this is a JACK audio device then also enable JACK MIDI if required
