@@ -561,13 +561,13 @@ QTableWidget QToolButton {
     background-color: white;
 }
 
-QTableWidget QToolButton:hover {
-    border-image: url(:/resources/images/toolbutton_hover.png) 5;
+/*QTableWidget QToolButton:hover {
+    border-image: url(:/resources/images/table_button_hover.png) 5;
     border-width: 5;
-}
+}*/
 
 QTableWidget QToolButton:pressed, 
 QTableWidget QToolButton:checked {
-    border-image: url(:/resources/images/toolbutton_pressed.png) 5;
+    border-image: url(:/resources/images/table_button.png) 5;
     border-width: 5;
 }

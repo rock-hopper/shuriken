@@ -70,5 +70,6 @@
         <file>resources/images/gain_ramp.png</file>
         <file>resources/images/configure.png</file>
         <file>resources/images/mixer-line.png</file>
+        <file>resources/images/table_button.png</file>
     </qresource>
 </RCC>
