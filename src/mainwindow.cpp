@@ -664,6 +664,8 @@ void MainWindow::disableUI()
     m_ui->actionSelect_None->setEnabled( false );
     m_ui->actionAdd_Slice_Point->setEnabled( false );
     m_ui->actionAdd_Slice_Point->setVisible( true );
+    m_ui->actionCopy->setEnabled( false );
+    m_ui->actionPaste->setEnabled( false );
     m_ui->actionDelete->setEnabled( false );
     m_ui->actionReverse->setEnabled( false );
     m_ui->actionZoom_Original->setEnabled( false );
@@ -813,6 +815,34 @@ void MainWindow::resetSamples()
         m_samplerAudioSource->setSamples( m_sampleBufferList, m_sampleHeader->sampleRate );
 
         m_samplerAudioSource->setEnvelopeSettings( envelopes );
+    }
+}
+
+
+
+void MainWindow::copySelectedSamplesToClipboard()
+{
+    m_copiedSampleBuffers.clear();
+
+    QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
+
+    const int numChans = m_sampleHeader->numChans;
+    const int startFrame = 0;
+
+    foreach ( int orderPos, orderPositions )
+    {
+        SharedSampleBuffer origSampleBuffer = m_sampleBufferList.at( orderPos );
+
+        const int numFrames = origSampleBuffer->getNumFrames();
+
+        SharedSampleBuffer copiedSampleBuffer( new SampleBuffer( numChans, numFrames ) );
+
+        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+        {
+            copiedSampleBuffer->copyFrom( chanNum, startFrame, *origSampleBuffer.data(), chanNum, startFrame, numFrames );
+        }
+
+        m_copiedSampleBuffers << copiedSampleBuffer;
     }
 }
 
@@ -1095,6 +1125,7 @@ void MainWindow::enableEditActions()
     // Enable/disable other edit actions
     if ( ! orderPositions.isEmpty() )
     {
+        m_ui->actionCopy->setEnabled( true );
         m_ui->actionApply_Gain->setEnabled( true );
         m_ui->actionApply_Gain_Ramp->setEnabled( true );
         m_ui->actionNormalise->setEnabled( true );
@@ -1102,6 +1133,7 @@ void MainWindow::enableEditActions()
     }
     else
     {
+        m_ui->actionCopy->setEnabled( false );
         m_ui->actionApply_Gain->setEnabled( false );
         m_ui->actionApply_Gain_Ramp->setEnabled( false );
         m_ui->actionNormalise->setEnabled( false );
@@ -1418,6 +1450,38 @@ void MainWindow::on_actionSelect_All_triggered()
 void MainWindow::on_actionSelect_None_triggered()
 {
     m_graphicsScene->selectNone();
+}
+
+
+
+void MainWindow::on_actionCopy_triggered()
+{
+    copySelectedSamplesToClipboard();
+
+    m_ui->actionPaste->setEnabled( true );
+}
+
+
+
+void MainWindow::on_actionPaste_triggered()
+{
+    if ( m_copiedSampleBuffers.size() > 0 )
+    {
+        QList<int> selectedOrderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
+
+        int orderPosToInsertAt = m_sampleBufferList.size();
+
+        if ( selectedOrderPositions.size() > 0 )
+        {
+            orderPosToInsertAt = selectedOrderPositions.last() + 1;
+        }
+
+        QUndoCommand* command = new PasteWaveformItemCommand( m_copiedSampleBuffers,
+                                                              orderPosToInsertAt,
+                                                              m_graphicsScene,
+                                                              this );
+        m_undoStack.push( command );
+    }
 }
 
 

@@ -71,5 +71,7 @@
         <file>resources/images/configure.png</file>
         <file>resources/images/mixer-line.png</file>
         <file>resources/images/table_button.png</file>
+        <file>resources/images/edit-copy.png</file>
+        <file>resources/images/edit-paste.png</file>
     </qresource>
 </RCC>

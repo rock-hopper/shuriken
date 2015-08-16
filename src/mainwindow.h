@@ -52,6 +52,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    friend class PasteWaveformItemCommand;
     friend class DeleteWaveformItemCommand;
     friend class MoveWaveformItemCommand;
     friend class SliceCommand;
@@ -108,6 +109,8 @@ private:
     // Pass sample buffers to the sampler audio source, preserving current envelope settings
     void resetSamples();
 
+    void copySelectedSamplesToClipboard();
+
     Ui::MainWindow* m_ui; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
     WaveGraphicsScene* m_graphicsScene;
     QActionGroup* m_interactionGroup;
@@ -140,6 +143,8 @@ private:
 
     ScopedPointer<NsmListenerThread> m_nsmThread;
 
+    QList<SharedSampleBuffer> m_copiedSampleBuffers;
+
 private:
     // Make sure window isn't larger than desktop
     static void setMaxWindowSize( QWidget* window );
@@ -149,6 +154,8 @@ private:
 
 private slots:
     // Automatically connected...
+    void on_actionPaste_triggered();
+    void on_actionCopy_triggered();
     void on_actionJack_Outputs_triggered();
     void on_checkBox_OneShot_toggled( bool isChecked );
     void on_dial_Release_valueChanged( int value );

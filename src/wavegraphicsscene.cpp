@@ -98,8 +98,7 @@ void WaveGraphicsScene::setInteractionMode( const InteractionMode mode )
 
 
 SharedWaveformItem WaveGraphicsScene::createWaveform( const SharedSampleBuffer sampleBuffer,
-                                                      const SharedSampleHeader sampleHeader,
-                                                      const bool shouldBeAddedToScene )
+                                                      const SharedSampleHeader sampleHeader )
 {
     Q_ASSERT( sampleBuffer->getNumFrames() > 0 );
 
@@ -111,14 +110,11 @@ SharedWaveformItem WaveGraphicsScene::createWaveform( const SharedSampleBuffer s
 
     connectWaveform( waveformItem );
 
-    if ( shouldBeAddedToScene )
-    {
-        QList<SharedWaveformItem> waveformList;
+    QList<SharedWaveformItem> waveformList;
 
-        waveformList.append( waveformItem );
+    waveformList.append( waveformItem );
 
-        insertWaveforms( waveformList );
-    }
+    insertWaveforms( waveformList );
 
     return waveformItem;
 }
@@ -127,13 +123,13 @@ SharedWaveformItem WaveGraphicsScene::createWaveform( const SharedSampleBuffer s
 
 QList<SharedWaveformItem> WaveGraphicsScene::createWaveforms( const QList<SharedSampleBuffer> sampleBufferList,
                                                               const SharedSampleHeader sampleHeader,
-                                                              const bool shouldBeAddedToScene )
+                                                              const int orderPosToInsertAt )
 {
     m_sampleHeader = sampleHeader;
 
     const qreal sliceWidth = 1.0;   // This will get overridden in insertWaveforms()
 
-    int orderPos = 0;
+    int orderPos = orderPosToInsertAt;
 
     QList<SharedWaveformItem> waveformList;
 
@@ -148,10 +144,7 @@ QList<SharedWaveformItem> WaveGraphicsScene::createWaveforms( const QList<Shared
         orderPos++;
     }
 
-    if ( shouldBeAddedToScene )
-    {
-        insertWaveforms( waveformList );
-    }
+    insertWaveforms( waveformList );
 
     return waveformList;
 }

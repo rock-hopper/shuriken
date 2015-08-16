@@ -972,6 +972,9 @@
     <addaction name="separator"/>
     <addaction name="actionSelect_All"/>
     <addaction name="actionSelect_None"/>
+    <addaction name="separator"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
     <addaction name="actionDelete"/>
     <addaction name="separator"/>
     <addaction name="actionAdd_Slice_Point"/>
@@ -1017,6 +1020,8 @@
    <addaction name="actionApply_Gain"/>
    <addaction name="actionApply_Gain_Ramp"/>
    <addaction name="separator"/>
+   <addaction name="actionCopy"/>
+   <addaction name="actionPaste"/>
    <addaction name="actionDelete"/>
    <addaction name="separator"/>
    <addaction name="actionSelect_Move"/>
@@ -1457,6 +1462,36 @@
    </property>
    <property name="text">
     <string>Jack Outputs</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/edit-copy.png</normaloff>:/resources/images/edit-copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/edit-paste.png</normaloff>:/resources/images/edit-paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
  </widget>

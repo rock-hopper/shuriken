@@ -827,6 +827,79 @@ void DeleteWaveformItemCommand::redo()
 
 //==================================================================================================
 
+PasteWaveformItemCommand::PasteWaveformItemCommand( const QList<SharedSampleBuffer> copiedSampleBuffers,
+                                                    const int orderPosToInsertAt,
+                                                    WaveGraphicsScene* const graphicsScene,
+                                                    MainWindow* const mainWindow,
+                                                    QUndoCommand* parent ) :
+    QUndoCommand( parent ),
+    m_copiedSampleBuffers( copiedSampleBuffers ),
+    m_orderPosToInsertAt( orderPosToInsertAt ),
+    m_graphicsScene( graphicsScene ),
+    m_mainWindow( mainWindow )
+{
+    setText( "Paste Waveform" );
+}
+
+
+
+void PasteWaveformItemCommand::undo()
+{
+    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+    m_mainWindow->stopPlayback();
+
+    const int numSamplesToRemove = m_copiedSampleBuffers.size();
+
+    QList<int> orderPositions;
+
+    for ( int i = 0; i < numSamplesToRemove; i++ )
+    {
+        m_mainWindow->m_sampleBufferList.removeAt( m_orderPosToInsertAt );
+
+        orderPositions << m_orderPosToInsertAt + i;
+    }
+
+    m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
+                                                    m_mainWindow->m_sampleHeader->sampleRate );
+
+    m_graphicsScene->removeWaveforms( orderPositions );
+
+    QApplication::restoreOverrideCursor();
+}
+
+
+
+void PasteWaveformItemCommand::redo()
+{
+    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+    m_mainWindow->stopPlayback();
+
+    for ( int i = 0; i < m_copiedSampleBuffers.size(); i++ )
+    {
+        m_mainWindow->m_sampleBufferList.insert( m_orderPosToInsertAt + i, m_copiedSampleBuffers.at( i ) );
+    }
+
+    m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
+                                                    m_mainWindow->m_sampleHeader->sampleRate );
+
+    QList<SharedWaveformItem> copiedWaveforms = m_graphicsScene->createWaveforms( m_copiedSampleBuffers,
+                                                                                  m_mainWindow->m_sampleHeader,
+                                                                                  m_orderPosToInsertAt);
+
+    foreach ( SharedWaveformItem item, copiedWaveforms )
+    {
+        m_mainWindow->connectWaveformToMainWindow( item );
+    }
+
+    QApplication::restoreOverrideCursor();
+}
+
+
+
+//==================================================================================================
+
 ApplyGainCommand::ApplyGainCommand( const float gain,
                                     const int waveformItemOrderPos,
                                     WaveGraphicsScene* const graphicsScene,

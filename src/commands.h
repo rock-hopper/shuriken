@@ -295,6 +295,27 @@ private:
 
 
 
+class PasteWaveformItemCommand : public QUndoCommand
+{
+public:
+    PasteWaveformItemCommand( QList<SharedSampleBuffer> copiedSampleBuffers,
+                              int orderPosToInsertAt,
+                              WaveGraphicsScene* graphicsScene,
+                              MainWindow* mainWindow,
+                              QUndoCommand* parent = NULL );
+
+    void undo();
+    void redo();
+
+private:
+    const QList<SharedSampleBuffer> m_copiedSampleBuffers;
+    const int m_orderPosToInsertAt;
+    WaveGraphicsScene* const m_graphicsScene;
+    MainWindow* const m_mainWindow;
+};
+
+
+
 class ApplyGainCommand : public QUndoCommand
 {
 public:
