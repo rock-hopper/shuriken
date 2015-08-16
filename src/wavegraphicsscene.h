@@ -49,21 +49,15 @@ public:
     InteractionMode getInteractionMode() const              { return m_interactionMode; }
     void setInteractionMode( InteractionMode mode );
 
-    // Creates a new waveform item and adds it to the scene. If 'width' is not specified by the caller
-    // then the waveform's width will be the same as the scene width
+    // Creates a new waveform item and optionally adds it to the scene
     SharedWaveformItem createWaveform( SharedSampleBuffer sampleBuffer,
                                        SharedSampleHeader sampleHeader,
-                                       qreal scenePosX = 0.0,
-                                       int orderPos = 0,
-                                       qreal width = 0.0 );
+                                       bool shouldBeAddedToScene = true );
 
-    // Creates new waveform items and adds them to the scene. If 'width' is not specified by the caller
-    // then the combined widths of all waveforms will be the same as the scene width
+    // Creates new waveform items and optionally adds them to the scene
     QList<SharedWaveformItem> createWaveforms( QList<SharedSampleBuffer> sampleBufferList,
                                                SharedSampleHeader sampleHeader,
-                                               qreal startScenePosX = 0.0,
-                                               int startOrderPos = 0,
-                                               qreal totalWidth = 0.0 );
+                                               bool shouldBeAddedToScene = true );
 
     void moveWaveforms( QList<int> oldOrderPositions, int numPlacesMoved );
 

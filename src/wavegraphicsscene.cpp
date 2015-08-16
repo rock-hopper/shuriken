@@ -99,30 +99,26 @@ void WaveGraphicsScene::setInteractionMode( const InteractionMode mode )
 
 SharedWaveformItem WaveGraphicsScene::createWaveform( const SharedSampleBuffer sampleBuffer,
                                                       const SharedSampleHeader sampleHeader,
-                                                      const qreal scenePosX,
-                                                      const int orderPos,
-                                                      qreal width )
+                                                      const bool shouldBeAddedToScene )
 {
     Q_ASSERT( sampleBuffer->getNumFrames() > 0 );
 
     m_sampleHeader = sampleHeader;
 
-    if ( width <= 0.0 )
-    {
-        width = this->width();
-    }
+    const int orderPos = 0;
 
-    SharedWaveformItem waveformItem( new WaveformItem( sampleBuffer, orderPos, width, height() - BpmRuler::HEIGHT ) );
-    waveformItem->setPos( scenePosX, BpmRuler::HEIGHT );
-
-    m_waveformItemList.insert( orderPos, waveformItem );
+    SharedWaveformItem waveformItem( new WaveformItem( sampleBuffer, orderPos, width(), height() - BpmRuler::HEIGHT ) );
 
     connectWaveform( waveformItem );
 
-    addItem( waveformItem.data() );
-    update();
+    if ( shouldBeAddedToScene )
+    {
+        QList<SharedWaveformItem> waveformList;
 
-    setInteractionMode( m_interactionMode );
+        waveformList.append( waveformItem );
+
+        insertWaveforms( waveformList );
+    }
 
     return waveformItem;
 }
@@ -131,46 +127,33 @@ SharedWaveformItem WaveGraphicsScene::createWaveform( const SharedSampleBuffer s
 
 QList<SharedWaveformItem> WaveGraphicsScene::createWaveforms( const QList<SharedSampleBuffer> sampleBufferList,
                                                               const SharedSampleHeader sampleHeader,
-                                                              const qreal startScenePosX,
-                                                              const int startOrderPos,
-                                                              qreal totalWidth )
+                                                              const bool shouldBeAddedToScene )
 {
     m_sampleHeader = sampleHeader;
 
-    const int totalNumFrames = SampleUtils::getTotalNumFrames( sampleBufferList );
+    const qreal sliceWidth = 1.0;   // This will get overridden in insertWaveforms()
 
-    if ( totalWidth <= 0.0 )
-    {
-        totalWidth = width();
-    }
+    int orderPos = 0;
 
-    qreal scenePosX = startScenePosX;
-    int orderPos = startOrderPos;
-
-    QList<SharedWaveformItem> newWaveformItems;
+    QList<SharedWaveformItem> waveformList;
 
     foreach ( SharedSampleBuffer sampleBuffer, sampleBufferList )
     {
-        const qreal sliceWidth = sampleBuffer->getNumFrames() * ( totalWidth / totalNumFrames );
-
         SharedWaveformItem waveformItem( new WaveformItem( sampleBuffer, orderPos, sliceWidth, height() - BpmRuler::HEIGHT ) );
-        waveformItem->setPos( scenePosX, BpmRuler::HEIGHT );
 
-        m_waveformItemList.insert( orderPos, waveformItem );
-        newWaveformItems << waveformItem;
+        waveformList << waveformItem;
 
         connectWaveform( waveformItem );
 
-        addItem( waveformItem.data() );
-        update();
-
-        scenePosX += sliceWidth;
         orderPos++;
     }
 
-    setInteractionMode( m_interactionMode );
+    if ( shouldBeAddedToScene )
+    {
+        insertWaveforms( waveformList );
+    }
 
-    return newWaveformItems;
+    return waveformList;
 }
 
 
