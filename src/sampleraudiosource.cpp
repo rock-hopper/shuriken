@@ -126,34 +126,6 @@ void SamplerAudioSource::setLooping( const bool isLoopingDesired )
 
 
 
-void SamplerAudioSource::setAttack( const int sampleNum, const qreal value )
-{
-    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
-
-    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
-
-    if ( samplerSound != NULL )
-    {
-        samplerSound->setAttack( value );
-    }
-}
-
-
-
-void SamplerAudioSource::setRelease( const int sampleNum, const qreal value )
-{
-    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
-
-    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
-
-    if ( samplerSound != NULL )
-    {
-        samplerSound->setRelease( value );
-    }
-}
-
-
-
 qreal SamplerAudioSource::getAttack( const int sampleNum ) const
 {
     qreal value = 0.0;
@@ -168,6 +140,20 @@ qreal SamplerAudioSource::getAttack( const int sampleNum ) const
     }
 
     return value;
+}
+
+
+
+void SamplerAudioSource::setAttack( const int sampleNum, const qreal value )
+{
+    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
+
+    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
+
+    if ( samplerSound != NULL )
+    {
+        samplerSound->setAttack( value );
+    }
 }
 
 
@@ -190,7 +176,7 @@ qreal SamplerAudioSource::getRelease( const int sampleNum ) const
 
 
 
-void SamplerAudioSource::setOneShot( const int sampleNum, const bool set )
+void SamplerAudioSource::setRelease( const int sampleNum, const qreal value )
 {
     SynthesiserSound* sound = m_sampler.getSound( sampleNum );
 
@@ -198,7 +184,7 @@ void SamplerAudioSource::setOneShot( const int sampleNum, const bool set )
 
     if ( samplerSound != NULL )
     {
-        samplerSound->setOneShot( set );
+        samplerSound->setRelease( value );
     }
 }
 
@@ -218,6 +204,20 @@ bool SamplerAudioSource::isOneShotSet( const int sampleNum ) const
     }
 
     return isEnabled;
+}
+
+
+
+void SamplerAudioSource::setOneShot( const int sampleNum, const bool set )
+{
+    SynthesiserSound* sound = m_sampler.getSound( sampleNum );
+
+    ShurikenSamplerSound* const samplerSound = static_cast<ShurikenSamplerSound*>( sound );
+
+    if ( samplerSound != NULL )
+    {
+        samplerSound->setOneShot( set );
+    }
 }
 
 

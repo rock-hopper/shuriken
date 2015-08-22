@@ -43,14 +43,14 @@ public:
     void stop();
     void setLooping( bool isLoopingDesired );
 
+    qreal getAttack( int sampleNum ) const;
     void setAttack( int sampleNum, qreal value );   // Value should be 0.00 - 1.00
+
+    qreal getRelease( int sampleNum ) const;
     void setRelease( int sampleNum, qreal value );  // Value should be 0.00 - 1.00
 
-    qreal getAttack( int sampleNum ) const;
-    qreal getRelease( int sampleNum ) const;
-
-    void setOneShot( int sampleNum, bool set );
     bool isOneShotSet( int sampleNum ) const;
+    void setOneShot( int sampleNum, bool set );
 
     struct EnvelopeSettings
     {

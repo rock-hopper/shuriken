@@ -822,9 +822,10 @@ void MainWindow::resetSamples()
 
 void MainWindow::copySelectedSamplesToClipboard()
 {
-    m_copiedSampleBuffers.clear();
+    const QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
 
-    QList<int> orderPositions = m_graphicsScene->getSelectedWaveformsOrderPositions();
+    // Copy sample buffers
+    m_copiedSampleBuffers.clear();
 
     const int numChans = m_sampleHeader->numChans;
     const int startFrame = 0;
@@ -843,6 +844,35 @@ void MainWindow::copySelectedSamplesToClipboard()
         }
 
         m_copiedSampleBuffers << copiedSampleBuffer;
+    }
+
+    // Copy envelopes
+    m_copiedEnvelopes.attackValues.clear();
+    m_copiedEnvelopes.releaseValues.clear();
+    m_copiedEnvelopes.oneShotSettings.clear();
+
+    SamplerAudioSource::EnvelopeSettings envelopes;
+
+    m_samplerAudioSource->getEnvelopeSettings( envelopes );
+
+    foreach ( int orderPos, orderPositions )
+    {
+        m_copiedEnvelopes.attackValues << envelopes.attackValues.at( orderPos );
+        m_copiedEnvelopes.releaseValues << envelopes.releaseValues.at( orderPos );
+        m_copiedEnvelopes.oneShotSettings << envelopes.oneShotSettings.at( orderPos );
+    }
+
+    // If real-time time streching is enabled then also copy time stretch ratios
+    if ( m_rubberbandAudioSource != NULL )
+    {
+        m_copiedSampleNoteTimeRatios.clear();
+
+        const int startMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
+
+        foreach ( int orderPos, orderPositions )
+        {
+            m_copiedSampleNoteTimeRatios << m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + orderPos );
+        }
     }
 }
 
