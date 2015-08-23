@@ -1163,11 +1163,14 @@ void MainWindow::enableEditActions()
     // Enable/disable delete action
     m_ui->actionDelete->setEnabled( false );
 
-    if ( ! slicePoint.isNull() || ! orderPositions.isEmpty() )
+    if ( ! m_ui->actionSelective_Time_Stretch->isChecked() )
     {
-        if ( orderPositions.size() < m_graphicsScene->getNumWaveforms() )
+        if ( ! slicePoint.isNull() || ! orderPositions.isEmpty() )
         {
-            m_ui->actionDelete->setEnabled( true );
+            if ( orderPositions.size() < m_graphicsScene->getNumWaveforms() )
+            {
+                m_ui->actionDelete->setEnabled( true );
+            }
         }
     }
 
