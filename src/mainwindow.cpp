@@ -735,10 +735,16 @@ void MainWindow::closeProject()
     m_sampleBufferList.clear();
     tearDownSampler();
 
+    disconnect( m_graphicsScene, SIGNAL( selectionChanged() ),
+                this, SLOT( enableEditActions() ) );
+
     m_graphicsScene->clearAll();
     on_actionZoom_Original_triggered();
     disableUI();
     m_ui->statusBar->clearMessage();
+
+    connect( m_graphicsScene, SIGNAL( selectionChanged() ),
+             this, SLOT( enableEditActions() ) );
 
     m_undoStack.clear();
 
