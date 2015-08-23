@@ -828,12 +828,16 @@ void DeleteWaveformItemCommand::redo()
 //==================================================================================================
 
 PasteWaveformItemCommand::PasteWaveformItemCommand( const QList<SharedSampleBuffer> copiedSampleBuffers,
+                                                    const SamplerAudioSource::EnvelopeSettings copiedEnvelopes,
+                                                    const QList<qreal> copiedNoteTimeRatios,
                                                     const int orderPosToInsertAt,
                                                     WaveGraphicsScene* const graphicsScene,
                                                     MainWindow* const mainWindow,
                                                     QUndoCommand* parent ) :
     QUndoCommand( parent ),
     m_copiedSampleBuffers( copiedSampleBuffers ),
+    m_copiedEnvelopes( copiedEnvelopes ),
+    m_copiedNoteTimeRatios( copiedNoteTimeRatios ),
     m_orderPosToInsertAt( orderPosToInsertAt ),
     m_graphicsScene( graphicsScene ),
     m_mainWindow( mainWindow )
@@ -849,19 +853,62 @@ void PasteWaveformItemCommand::undo()
 
     m_mainWindow->stopPlayback();
 
-    const int numSamplesToRemove = m_copiedSampleBuffers.size();
+    const int numItemsToRemove = m_copiedSampleBuffers.size();
 
-    QList<int> orderPositions;
+    // If real-time time stretch mode is enabled then update per-note time stretch ratios
+    if ( m_mainWindow->m_rubberbandAudioSource != NULL )
+    {
+        const int startMidiNote = m_mainWindow->m_samplerAudioSource->getLowestAssignedMidiNote();
 
-    for ( int i = 0; i < numSamplesToRemove; i++ )
+        for ( int i = m_orderPosToInsertAt + numItemsToRemove; i < m_mainWindow->m_sampleBufferList.size(); i++ )
+        {
+            const int midiNote = startMidiNote + i;
+
+            const qreal noteTimeRatio = m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( midiNote );
+
+            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( midiNote - numItemsToRemove, noteTimeRatio );
+        }
+
+        const int firstMidiNoteToClear = startMidiNote + m_mainWindow->m_sampleBufferList.size() - numItemsToRemove;
+
+        for ( int i = 0; i < numItemsToRemove; i++ )
+        {
+            const int midiNote = firstMidiNoteToClear + i;
+
+            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( midiNote, 1.0 );
+        }
+    }
+
+    // Get envelopes
+    SamplerAudioSource::EnvelopeSettings envelopes;
+    m_mainWindow->m_samplerAudioSource->getEnvelopeSettings( envelopes );
+
+    // Remove copied sample buffers
+    for ( int i = 0; i < numItemsToRemove; i++ )
     {
         m_mainWindow->m_sampleBufferList.removeAt( m_orderPosToInsertAt );
-
-        orderPositions << m_orderPosToInsertAt + i;
     }
 
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                     m_mainWindow->m_sampleHeader->sampleRate );
+
+    // Remove copied envelopes
+    for ( int i = 0; i < numItemsToRemove; i++ )
+    {
+        envelopes.attackValues.removeAt( m_orderPosToInsertAt );
+        envelopes.releaseValues.removeAt( m_orderPosToInsertAt );
+        envelopes.oneShotSettings.removeAt( m_orderPosToInsertAt );
+    }
+
+    m_mainWindow->m_samplerAudioSource->setEnvelopeSettings( envelopes );
+
+    // Remove copied waveforms
+    QList<int> orderPositions;
+
+    for ( int i = 0; i < numItemsToRemove; i++ )
+    {
+        orderPositions << m_orderPosToInsertAt + i;
+    }
 
     m_graphicsScene->removeWaveforms( orderPositions );
 
@@ -876,7 +923,36 @@ void PasteWaveformItemCommand::redo()
 
     m_mainWindow->stopPlayback();
 
-    for ( int i = 0; i < m_copiedSampleBuffers.size(); i++ )
+    const int numCopiedItems = m_copiedSampleBuffers.size();
+
+    // If real-time time stretch mode is enabled then update per-note time stretch ratios
+    if ( m_mainWindow->m_rubberbandAudioSource != NULL )
+    {
+        const int startMidiNote = m_mainWindow->m_samplerAudioSource->getLowestAssignedMidiNote();
+
+        for ( int i = m_mainWindow->m_sampleBufferList.size() - 1; i >= m_orderPosToInsertAt; --i )
+        {
+            const int midiNote = startMidiNote + i;
+
+            const qreal noteTimeRatio = m_mainWindow->m_rubberbandAudioSource->getNoteTimeRatio( midiNote );
+
+            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( midiNote + numCopiedItems, noteTimeRatio );
+        }
+
+        for ( int i = 0; i < numCopiedItems; i++ )
+        {
+            const int midiNote = startMidiNote + m_orderPosToInsertAt + i;
+
+            m_mainWindow->m_rubberbandAudioSource->setNoteTimeRatio( midiNote, m_copiedNoteTimeRatios.at( i ) );
+        }
+    }
+
+    // Get envelopes
+    SamplerAudioSource::EnvelopeSettings envelopes;
+    m_mainWindow->m_samplerAudioSource->getEnvelopeSettings( envelopes );
+
+    // Insert sample buffers
+    for ( int i = 0; i < numCopiedItems; i++ )
     {
         m_mainWindow->m_sampleBufferList.insert( m_orderPosToInsertAt + i, m_copiedSampleBuffers.at( i ) );
     }
@@ -884,13 +960,36 @@ void PasteWaveformItemCommand::redo()
     m_mainWindow->m_samplerAudioSource->setSamples( m_mainWindow->m_sampleBufferList,
                                                     m_mainWindow->m_sampleHeader->sampleRate );
 
+    // Set envelopes
+    for ( int i = 0; i < numCopiedItems; i++ )
+    {
+        envelopes.attackValues.insert( m_orderPosToInsertAt + i, m_copiedEnvelopes.attackValues.at( i ) );
+        envelopes.releaseValues.insert( m_orderPosToInsertAt + i, m_copiedEnvelopes.releaseValues.at( i ) );
+        envelopes.oneShotSettings.insert( m_orderPosToInsertAt + i, m_copiedEnvelopes.oneShotSettings.at( i ) );
+    }
+
+    m_mainWindow->m_samplerAudioSource->setEnvelopeSettings( envelopes );
+
+    // Create waveforms
     QList<SharedWaveformItem> copiedWaveforms = m_graphicsScene->createWaveforms( m_copiedSampleBuffers,
                                                                                   m_mainWindow->m_sampleHeader,
                                                                                   m_orderPosToInsertAt);
-
     foreach ( SharedWaveformItem item, copiedWaveforms )
     {
         m_mainWindow->connectWaveformToMainWindow( item );
+    }
+
+    // If real-time time stretch mode is enabled then stretch the new waveforms according to per-note time stretch ratios
+    if ( m_mainWindow->m_rubberbandAudioSource != NULL )
+    {
+        QList<int> orderPositions;
+
+        for ( int i = 0; i < numCopiedItems; i++ )
+        {
+            orderPositions << m_orderPosToInsertAt + i;
+        }
+
+        m_graphicsScene->stretchWaveforms( orderPositions, m_copiedNoteTimeRatios );
     }
 
     QApplication::restoreOverrideCursor();

@@ -862,16 +862,23 @@ void MainWindow::copySelectedSamplesToClipboard()
         m_copiedEnvelopes.oneShotSettings << envelopes.oneShotSettings.at( orderPos );
     }
 
-    // If real-time time streching is enabled then also copy time stretch ratios
+    // If real-time time streching is enabled then also copy per-note time stretch ratios
+    m_copiedNoteTimeRatios.clear();
+
     if ( m_rubberbandAudioSource != NULL )
     {
-        m_copiedSampleNoteTimeRatios.clear();
-
         const int startMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
 
         foreach ( int orderPos, orderPositions )
         {
-            m_copiedSampleNoteTimeRatios << m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + orderPos );
+            m_copiedNoteTimeRatios << m_rubberbandAudioSource->getNoteTimeRatio( startMidiNote + orderPos );
+        }
+    }
+    else
+    {
+        for ( int i = 0; i < orderPositions.size(); i++ )
+        {
+            m_copiedNoteTimeRatios << 1.0;
         }
     }
 }
@@ -1507,6 +1514,8 @@ void MainWindow::on_actionPaste_triggered()
         }
 
         QUndoCommand* command = new PasteWaveformItemCommand( m_copiedSampleBuffers,
+                                                              m_copiedEnvelopes,
+                                                              m_copiedNoteTimeRatios,
                                                               orderPosToInsertAt,
                                                               m_graphicsScene,
                                                               this );

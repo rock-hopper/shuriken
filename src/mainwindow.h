@@ -146,7 +146,7 @@ private:
     // Internal "clipboard"
     QList<SharedSampleBuffer> m_copiedSampleBuffers;
     SamplerAudioSource::EnvelopeSettings m_copiedEnvelopes;
-    QList<int> m_copiedSampleNoteTimeRatios;
+    QList<qreal> m_copiedNoteTimeRatios;
 
 private:
     // Make sure window isn't larger than desktop

@@ -299,6 +299,8 @@ class PasteWaveformItemCommand : public QUndoCommand
 {
 public:
     PasteWaveformItemCommand( QList<SharedSampleBuffer> copiedSampleBuffers,
+                              SamplerAudioSource::EnvelopeSettings copiedEnvelopes,
+                              QList<qreal> copiedNoteTimeRatios,
                               int orderPosToInsertAt,
                               WaveGraphicsScene* graphicsScene,
                               MainWindow* mainWindow,
@@ -309,6 +311,8 @@ public:
 
 private:
     const QList<SharedSampleBuffer> m_copiedSampleBuffers;
+    const SamplerAudioSource::EnvelopeSettings m_copiedEnvelopes;
+    const QList<qreal> m_copiedNoteTimeRatios;
     const int m_orderPosToInsertAt;
     WaveGraphicsScene* const m_graphicsScene;
     MainWindow* const m_mainWindow;
