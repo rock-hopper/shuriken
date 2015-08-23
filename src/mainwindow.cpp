@@ -2175,7 +2175,8 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
         QUndoCommand* parentCommand = new QUndoCommand();
         parentCommand->setText( tr("Enable Selective Time Stretching") );
 
-        new EnableSelectiveTSCommand( m_optionsDialog,
+        new EnableSelectiveTSCommand( this,
+                                      m_optionsDialog,
                                       m_graphicsScene,
                                       m_ui->pushButton_Slice,
                                       m_ui->actionAdd_Slice_Point,
@@ -2183,6 +2184,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
                                       m_ui->actionMulti_Select,
                                       m_ui->actionAudition,
                                       m_ui->actionSelective_Time_Stretch,
+                                      m_ui->actionPaste,
                                       m_sampleBufferList,
                                       parentCommand );
 
@@ -2215,7 +2217,8 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
             new DeleteSlicePointItemCommand( slicePoint, m_graphicsScene, m_ui->comboBox_SnapValues, parentCommand );
         }
 
-        new DisableSelectiveTSCommand( m_optionsDialog,
+        new DisableSelectiveTSCommand( this,
+                                       m_optionsDialog,
                                        m_graphicsScene,
                                        m_ui->pushButton_Slice,
                                        m_ui->actionAdd_Slice_Point,
@@ -2223,6 +2226,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
                                        m_ui->actionMulti_Select,
                                        m_ui->actionAudition,
                                        m_ui->actionSelective_Time_Stretch,
+                                       m_ui->actionPaste,
                                        m_sampleBufferList,
                                        parentCommand );
 

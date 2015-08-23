@@ -52,6 +52,8 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    friend class EnableSelectiveTSCommand;
+    friend class DisableSelectiveTSCommand;
     friend class PasteWaveformItemCommand;
     friend class DeleteWaveformItemCommand;
     friend class MoveWaveformItemCommand;

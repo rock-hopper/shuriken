@@ -410,7 +410,8 @@ void UnsliceCommand::redo()
 
 //==================================================================================================
 
-EnableSelectiveTSCommand::EnableSelectiveTSCommand( OptionsDialog* const optionsDialog,
+EnableSelectiveTSCommand::EnableSelectiveTSCommand( MainWindow* const mainWindow,
+                                                    OptionsDialog* const optionsDialog,
                                                     WaveGraphicsScene* const graphicsScene,
                                                     QPushButton* const sliceButton,
                                                     QAction* const addSlicePointAction,
@@ -418,9 +419,11 @@ EnableSelectiveTSCommand::EnableSelectiveTSCommand( OptionsDialog* const options
                                                     QAction* const multiSelectItemsAction,
                                                     QAction* const auditionItemsAction,
                                                     QAction* const selectiveTimeStretchAction,
+                                                    QAction* const pasteAction,
                                                     const QList<SharedSampleBuffer> sampleBufferList,
                                                     QUndoCommand* parent ) :
     QUndoCommand( parent ),
+    m_mainWindow( mainWindow ),
     m_optionsDialog( optionsDialog ),
     m_graphicsScene( graphicsScene ),
     m_sliceButton( sliceButton ),
@@ -429,6 +432,7 @@ EnableSelectiveTSCommand::EnableSelectiveTSCommand( OptionsDialog* const options
     m_multiSelectItemsAction( multiSelectItemsAction ),
     m_auditionItemsAction( auditionItemsAction ),
     m_selectiveTimeStretchAction( selectiveTimeStretchAction ),
+    m_pasteAction( pasteAction ),
     m_sampleBufferList( sampleBufferList )
 {
     setText( "Enable Selective Time Stretching" );
@@ -450,6 +454,11 @@ void EnableSelectiveTSCommand::undo()
 
     m_selectiveTimeStretchAction->setChecked( false );
     m_optionsDialog->enableOfflineRealtimeButtons();
+
+    if ( ! m_mainWindow->m_copiedSampleBuffers.isEmpty() )
+    {
+        m_pasteAction->setEnabled( true );
+    }
 }
 
 
@@ -464,13 +473,15 @@ void EnableSelectiveTSCommand::redo()
     m_addSlicePointAction->setEnabled( false );
     m_sliceButton->setEnabled( false );
     m_selectiveTimeStretchAction->setChecked( true );
+    m_pasteAction->setEnabled( false );
 }
 
 
 
 //==================================================================================================
 
-DisableSelectiveTSCommand::DisableSelectiveTSCommand( OptionsDialog* const optionsDialog,
+DisableSelectiveTSCommand::DisableSelectiveTSCommand( MainWindow* const mainWindow,
+                                                      OptionsDialog* const optionsDialog,
                                                       WaveGraphicsScene* const graphicsScene,
                                                       QPushButton* const sliceButton,
                                                       QAction* const addSlicePointAction,
@@ -478,9 +489,11 @@ DisableSelectiveTSCommand::DisableSelectiveTSCommand( OptionsDialog* const optio
                                                       QAction* const multiSelectItemsAction,
                                                       QAction* const auditionItemsAction,
                                                       QAction* const selectiveTimeStretchAction,
+                                                      QAction* const pasteAction,
                                                       const QList<SharedSampleBuffer> sampleBufferList,
                                                       QUndoCommand* parent ) :
     QUndoCommand( parent ),
+    m_mainWindow( mainWindow ),
     m_optionsDialog( optionsDialog ),
     m_graphicsScene( graphicsScene ),
     m_sliceButton( sliceButton ),
@@ -489,6 +502,7 @@ DisableSelectiveTSCommand::DisableSelectiveTSCommand( OptionsDialog* const optio
     m_multiSelectItemsAction( multiSelectItemsAction ),
     m_auditionItemsAction( auditionItemsAction ),
     m_selectiveTimeStretchAction( selectiveTimeStretchAction ),
+    m_pasteAction( pasteAction ),
     m_sampleBufferList( sampleBufferList )
 {
     setText( "Disable Selective Time Stretching" );
@@ -506,6 +520,7 @@ void DisableSelectiveTSCommand::undo()
     m_addSlicePointAction->setEnabled( false );
     m_sliceButton->setEnabled( false );
     m_selectiveTimeStretchAction->setChecked( true );
+    m_pasteAction->setEnabled( false );
 }
 
 
@@ -524,6 +539,11 @@ void DisableSelectiveTSCommand::redo()
 
     m_selectiveTimeStretchAction->setChecked( false );
     m_optionsDialog->enableOfflineRealtimeButtons();
+
+    if ( ! m_mainWindow->m_copiedSampleBuffers.isEmpty() )
+    {
+        m_pasteAction->setEnabled( true );
+    }
 }
 
 

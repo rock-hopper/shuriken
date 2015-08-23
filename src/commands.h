@@ -177,7 +177,8 @@ private:
 class EnableSelectiveTSCommand : public QUndoCommand
 {
 public:
-    EnableSelectiveTSCommand( OptionsDialog* optionsDialog,
+    EnableSelectiveTSCommand( MainWindow* mainWindow,
+                              OptionsDialog* optionsDialog,
                               WaveGraphicsScene* graphicsScene,
                               QPushButton* sliceButton,
                               QAction* addSlicePointAction,
@@ -185,6 +186,7 @@ public:
                               QAction* multiSelectItemsAction,
                               QAction* auditionItemsAction,
                               QAction* selectiveTimeStretchAction,
+                              QAction* pasteAction,
                               const QList<SharedSampleBuffer> sampleBufferList,
                               QUndoCommand* parent = NULL );
 
@@ -192,6 +194,7 @@ public:
     void redo();
 
 private:
+    MainWindow* const m_mainWindow;
     OptionsDialog* const m_optionsDialog;
     WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
@@ -200,7 +203,9 @@ private:
     QAction* const m_multiSelectItemsAction;
     QAction* const m_auditionItemsAction;
     QAction* const m_selectiveTimeStretchAction;
+    QAction* const m_pasteAction;
     const QList<SharedSampleBuffer> m_sampleBufferList;
+
 };
 
 
@@ -208,7 +213,8 @@ private:
 class DisableSelectiveTSCommand : public QUndoCommand
 {
 public:
-    DisableSelectiveTSCommand( OptionsDialog* optionsDialog,
+    DisableSelectiveTSCommand( MainWindow* mainWindow,
+                               OptionsDialog* optionsDialog,
                                WaveGraphicsScene* graphicsScene,
                                QPushButton* sliceButton,
                                QAction* addSlicePointAction,
@@ -216,6 +222,7 @@ public:
                                QAction* multiSelectItemsAction,
                                QAction* auditionItemsAction,
                                QAction* selectiveTimeStretchAction,
+                               QAction* pasteAction,
                                const QList<SharedSampleBuffer> sampleBufferList,
                                QUndoCommand* parent = NULL );
 
@@ -223,6 +230,7 @@ public:
     void redo();
 
 private:
+    MainWindow* const m_mainWindow;
     OptionsDialog* const m_optionsDialog;
     WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
@@ -231,6 +239,7 @@ private:
     QAction* const m_multiSelectItemsAction;
     QAction* const m_auditionItemsAction;
     QAction* const m_selectiveTimeStretchAction;
+    QAction* const m_pasteAction;
     const QList<SharedSampleBuffer> m_sampleBufferList;
 };
 
