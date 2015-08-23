@@ -177,7 +177,9 @@ void MainWindow::keyPressEvent( QKeyEvent* event )
             break;
         case Qt::Key_Return:
             if ( ! event->isAutoRepeat() && m_ui->pushButton_Slice->isEnabled() )
+            {
                 on_pushButton_Slice_clicked( ! m_ui->pushButton_Slice->isChecked() );
+            }
             break;
         case Qt::Key_Z:
             m_graphicsScene->selectNextWaveform();
@@ -186,7 +188,7 @@ void MainWindow::keyPressEvent( QKeyEvent* event )
             m_graphicsScene->selectPreviousWaveform();
             break;
         case Qt::Key_A:
-            if ( m_graphicsScene->getSelectedWaveforms().size() == 1 )
+            if ( ! event->isAutoRepeat() && m_graphicsScene->getSelectedWaveforms().size() == 1 )
             {
                 playSample( m_graphicsScene->getSelectedWaveforms().first(), QPointF() );
             }
