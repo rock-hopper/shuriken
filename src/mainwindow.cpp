@@ -176,7 +176,8 @@ void MainWindow::keyPressEvent( QKeyEvent* event )
             if ( ! event->isAutoRepeat() ) on_pushButton_PlayStop_clicked();
             break;
         case Qt::Key_Return:
-            if ( ! event->isAutoRepeat() ) on_pushButton_Slice_clicked( ! m_ui->pushButton_Slice->isChecked() );
+            if ( ! event->isAutoRepeat() && m_ui->pushButton_Slice->isEnabled() )
+                on_pushButton_Slice_clicked( ! m_ui->pushButton_Slice->isChecked() );
             break;
         case Qt::Key_Z:
             m_graphicsScene->selectNextWaveform();
