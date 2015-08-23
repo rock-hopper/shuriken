@@ -725,6 +725,12 @@ void MainWindow::getDetectionSettings( AudioAnalyser::DetectionSettings& setting
 
 void MainWindow::closeProject()
 {
+    m_copiedSampleBuffers.clear();
+    m_copiedEnvelopes.attackValues.clear();
+    m_copiedEnvelopes.releaseValues.clear();
+    m_copiedEnvelopes.oneShotSettings.clear();
+    m_copiedNoteTimeRatios.clear();
+
     m_sampleHeader.clear();
     m_sampleBufferList.clear();
     tearDownSampler();
