@@ -788,15 +788,12 @@ void OptionsDialog::on_comboBox_AudioBackend_activated( const int index )
 
     if ( error.isEmpty() )
     {
-        if ( isJackAudioEnabled() )
-        {
-            // Set the default number of JACK outputs
-            config.outputChannels.clear();
-            config.outputChannels.setRange( 0, OutputChannels::MIN, true);
-            config.useDefaultOutputChannels = false;
+        // Set the default number of outputs
+        config.outputChannels.clear();
+        config.outputChannels.setRange( 0, OutputChannels::MIN, true);
+        config.useDefaultOutputChannels = false;
 
-            error = m_deviceManager.setAudioDeviceSetup( config, true );
-        }
+        error = m_deviceManager.setAudioDeviceSetup( config, true );
     }
 
     // If this is a JACK audio device then also enable JACK MIDI if required
