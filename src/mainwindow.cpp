@@ -32,6 +32,7 @@
 #include "applygainrampdialog.h"
 #include "aboutdialog.h"
 #include "messageboxes.h"
+#include "sampleutils.h"
 #include <rubberband/RubberBandStretcher.h>
 #include <QtDebug>
 

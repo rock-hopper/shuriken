@@ -99,18 +99,4 @@ typedef QSharedPointer<SampleRange> SharedSampleRange;
 typedef ScopedPointer<SampleRange> ScopedSampleRange;
 
 
-
-class SampleUtils
-{
-public:
-    static SharedSampleBuffer joinSampleBuffers( QList<SharedSampleBuffer> sampleBufferList );
-
-    // Slice points with a value greater than or equal to the sample buffer's no. of frames are ignored
-    static QList<SharedSampleBuffer> splitSampleBuffer( SharedSampleBuffer sampleBuffer,
-                                                        QList<int> slicePointFrameNums );
-
-    static int getTotalNumFrames( QList<SharedSampleBuffer> sampleBufferList );
-};
-
-
 #endif // SAMPLEBUFFER_H

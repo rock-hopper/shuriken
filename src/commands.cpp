@@ -26,6 +26,7 @@
 #include <QtDebug>
 #include "messageboxes.h"
 #include "offlinetimestretcher.h"
+#include "sampleutils.h"
 
 
 AddSlicePointItemCommand::AddSlicePointItemCommand( const int frameNum,
