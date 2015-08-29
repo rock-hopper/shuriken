@@ -36,6 +36,10 @@ public:
     static QList<SharedSampleBuffer> splitSampleBuffer( SharedSampleBuffer sampleBuffer, QList<int> slicePointFrameNums );
 
     static int getTotalNumFrames( QList<SharedSampleBuffer> sampleBufferList );
+
+    static int getPrevZeroCrossing( SharedSampleBuffer sampleBuffer, int startFrameNum );
+
+    static int getNextZeroCrossing( SharedSampleBuffer sampleBuffer, int startFrameNum );
 };
 
 

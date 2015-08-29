@@ -104,7 +104,7 @@ QList<SharedSampleBuffer> SampleUtils::splitSampleBuffer( const SharedSampleBuff
 
 
 
-int SampleUtils::getTotalNumFrames( QList<SharedSampleBuffer> sampleBufferList )
+int SampleUtils::getTotalNumFrames( const QList<SharedSampleBuffer> sampleBufferList )
 {
     int numFrames = 0;
 
@@ -114,4 +114,104 @@ int SampleUtils::getTotalNumFrames( QList<SharedSampleBuffer> sampleBufferList )
     }
 
     return numFrames;
+}
+
+
+
+int SampleUtils::getPrevZeroCrossing( const SharedSampleBuffer sampleBuffer, const int startFrameNum )
+{
+    int zeroCrossingFrameNum = 0;
+
+    const int numFrames = sampleBuffer->getNumFrames();
+
+    if ( startFrameNum >= 0 && startFrameNum < numFrames )
+    {
+        const int numChans = sampleBuffer->getNumChannels();
+
+        for ( int chanNum = 0; chanNum < numChans; ++chanNum )
+        {
+            int frameNum = startFrameNum;
+
+            // If the value of the start sample is positive then find the previous negative sample
+            if ( sampleBuffer->getSample( chanNum, startFrameNum ) > 0.0f )
+            {
+                while ( frameNum > 0 && sampleBuffer->getSample( chanNum, frameNum ) > 0.0f )
+                    --frameNum;
+            }
+            // If the value of the start sample is negative then find the previous positive sample
+            else if ( sampleBuffer->getSample( chanNum, startFrameNum ) < 0.0f )
+            {
+                while ( frameNum > 0 && sampleBuffer->getSample( chanNum, frameNum ) < 0.0f )
+                    --frameNum;
+            }
+
+            // Determine the smallest of the two sample values at the zero-crossing
+            if ( frameNum + 1 < numFrames )
+            {
+                const float leftAbsSampleValue = qAbs( sampleBuffer->getSample(chanNum, frameNum) );
+                const float rightAbsSampleValue = qAbs( sampleBuffer->getSample(chanNum, frameNum + 1) );
+
+                if ( rightAbsSampleValue < leftAbsSampleValue )
+                    ++frameNum;
+            }
+
+            // Determine whether the zero-crossing on this channel is closest to the start frame
+            if ( frameNum > zeroCrossingFrameNum )
+            {
+                zeroCrossingFrameNum = frameNum;
+            }
+        }
+    }
+
+    return zeroCrossingFrameNum;
+}
+
+
+
+int SampleUtils::getNextZeroCrossing( const SharedSampleBuffer sampleBuffer, const int startFrameNum )
+{
+    int zeroCrossingFrameNum = sampleBuffer->getNumFrames() - 1;
+
+    const int numFrames = sampleBuffer->getNumFrames();
+
+    if ( startFrameNum >= 0 && startFrameNum < numFrames )
+    {
+        const int numChans = sampleBuffer->getNumChannels();
+
+        for ( int chanNum = 0; chanNum < numChans; ++chanNum )
+        {
+            int frameNum = startFrameNum;
+
+            // If the value of the start sample is positive then find the next negative sample
+            if ( sampleBuffer->getSample( chanNum, startFrameNum ) > 0.0f )
+            {
+                while ( frameNum < numFrames - 1 && sampleBuffer->getSample( chanNum, frameNum ) > 0.0f )
+                    ++frameNum;
+            }
+            // If the value of the start sample is negative then find the next positive sample
+            else if ( sampleBuffer->getSample( chanNum, startFrameNum ) < 0.0f )
+            {
+                while ( frameNum < numFrames - 1 && sampleBuffer->getSample( chanNum, frameNum ) < 0.0f )
+                    ++frameNum;
+            }
+
+            // Determine the smallest of the two sample values at the zero-crossing
+            if ( frameNum - 1 >= 0 )
+            {
+                const float leftAbsSampleValue = qAbs( sampleBuffer->getSample(chanNum, frameNum - 1) );
+                const float rightAbsSampleValue = qAbs( sampleBuffer->getSample(chanNum, frameNum) );
+
+                if ( leftAbsSampleValue < rightAbsSampleValue )
+                    --frameNum;
+            }
+
+            // Determine whether the zero-crossing on this channel is closest to the start frame
+            if ( frameNum < zeroCrossingFrameNum )
+            {
+                zeroCrossingFrameNum = frameNum;
+            }
+        }
+    }
+
+    return zeroCrossingFrameNum;
 }
