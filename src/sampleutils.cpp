@@ -215,3 +215,20 @@ int SampleUtils::getNextZeroCrossing( const SharedSampleBuffer sampleBuffer, con
 
     return zeroCrossingFrameNum;
 }
+
+
+
+int SampleUtils::getClosestZeroCrossing( const SharedSampleBuffer sampleBuffer, const int startFrameNum )
+{
+    const int prevZeroCrossing = getPrevZeroCrossing( sampleBuffer, startFrameNum );
+    const int nextZeroCrossing = getNextZeroCrossing( sampleBuffer, startFrameNum );
+
+    if ( startFrameNum - prevZeroCrossing < nextZeroCrossing - startFrameNum )
+    {
+        return prevZeroCrossing;
+    }
+    else
+    {
+        return nextZeroCrossing;
+    }
+}

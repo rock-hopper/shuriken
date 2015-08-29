@@ -40,6 +40,8 @@ public:
     static int getPrevZeroCrossing( SharedSampleBuffer sampleBuffer, int startFrameNum );
 
     static int getNextZeroCrossing( SharedSampleBuffer sampleBuffer, int startFrameNum );
+
+    static int getClosestZeroCrossing( SharedSampleBuffer sampleBuffer, int startFrameNum );
 };
 
 
