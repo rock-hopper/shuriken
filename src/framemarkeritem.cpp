@@ -157,7 +157,10 @@ void FrameMarkerItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 
     QGraphicsItem::mousePressEvent( event );
 
-    m_scenePosX_beforeMove = pos().x();
+    if ( event->button() == Qt::LeftButton )
+    {
+        m_scenePosX_beforeMove = pos().x();
+    }
 }
 
 
@@ -166,8 +169,11 @@ void FrameMarkerItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
     QGraphicsItem::mouseReleaseEvent( event );
 
-    if ( m_scenePosX_beforeMove != pos().x() )
+    if ( event->button() == Qt::LeftButton )
     {
-        emit scenePosChanged( this );
+        if ( m_scenePosX_beforeMove != pos().x() )
+        {
+            emit scenePosChanged( this );
+        }
     }
 }

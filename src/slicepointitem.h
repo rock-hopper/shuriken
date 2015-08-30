@@ -56,10 +56,15 @@ protected:
     void mousePressEvent( QGraphicsSceneMouseEvent* event );
     void mouseReleaseEvent( QGraphicsSceneMouseEvent* event );
 
+    void contextMenuEvent( QGraphicsSceneContextMenuEvent* event );
+
 private:
+    // Calculate how far this slice point can be moved to the left and the right
+    void calcMinMaxScenePosX();
+
     const bool m_canBeMovedPastOtherSlicePoints;
     bool m_isSnapEnabled;
-    bool m_isMousePressed;
+    bool m_isLeftMousePressed;
     qreal m_minDistFromOtherItems;
     qreal m_minScenePosX;
     qreal m_maxScenePosX;

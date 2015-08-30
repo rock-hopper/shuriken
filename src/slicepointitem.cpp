@@ -23,7 +23,8 @@
 #include "slicepointitem.h"
 #include "wavegraphicsscene.h"
 #include <QBrush>
-//#include <QDebug>
+#include <QMenu>
+#include <QtDebug>
 
 
 //==================================================================================================
@@ -40,7 +41,7 @@ SlicePointItem::SlicePointItem( const qreal height,
                      parent ),
     m_canBeMovedPastOtherSlicePoints( canBeMovedPastOtherSlicePoints ),
     m_isSnapEnabled( false ),
-    m_isMousePressed( false ),
+    m_isLeftMousePressed( false ),
     m_minDistFromOtherItems( minDistFromOtherSlicePoints )
 {
 }
@@ -87,7 +88,8 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
             }
         }
 
-        if ( ! m_canBeMovedPastOtherSlicePoints && m_isMousePressed ) // Prevent slice point from being moved past other slice points
+        // If required, prevent slice point from being moved past other slice points
+        if ( ! m_canBeMovedPastOtherSlicePoints && m_isLeftMousePressed )
         {
             if ( newPos.x() < m_minScenePosX )
             {
@@ -111,10 +113,72 @@ void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
     FrameMarkerItem::mousePressEvent( event );
 
+    if ( event->button() == Qt::LeftButton )
+    {
+        calcMinMaxScenePosX();
+        m_isLeftMousePressed = true;
+    }
+}
+
+
+
+void SlicePointItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
+{
+    FrameMarkerItem::mouseReleaseEvent( event );
+
+    if ( event->button() == Qt::LeftButton )
+    {
+        // Reset colour of BPM ruler marks
+        WaveGraphicsScene* const scene = static_cast<WaveGraphicsScene*>( this->scene() );
+
+        foreach ( SharedGraphicsItem item, scene->getBpmRulerMarks() )
+        {
+            setRulerMarkColour( item.data(), Qt::white );
+        }
+
+        m_isLeftMousePressed = false;
+    }
+}
+
+
+
+void SlicePointItem::contextMenuEvent( QGraphicsSceneContextMenuEvent* event )
+{
+    QMenu menu;
+    QAction* nextAction = menu.addAction( tr("Move to next zero-crossing") );
+    QAction* prevAction = menu.addAction( tr("Move to previous zero-crossing") );
+    QAction* selectedAction = menu.exec(event->screenPos());
+
+    if ( selectedAction == nextAction )
+    {
+        //
+    }
+    else if ( selectedAction == prevAction )
+    {
+        //
+    }
+
+    // Prevent wonky behaviour
+    foreach ( QGraphicsItem* item, scene()->items() )
+    {
+        if ( item->type() == SlicePointItem::Type )
+        {
+            item->ungrabMouse();
+            item->setSelected( false );
+        }
+    }
+}
+
+
+
+//==================================================================================================
+// Private:
+
+void SlicePointItem::calcMinMaxScenePosX()
+{
     qreal minX = scene()->sceneRect().left();
     qreal maxX = scene()->sceneRect().right() - 1;
 
-    // Calculate how far this slice point can be moved to the left and the right
     foreach ( QGraphicsItem* item, scene()->items() )
     {
         if ( item != this && item->type() == SlicePointItem::Type )
@@ -137,25 +201,6 @@ void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 
     m_minScenePosX = minX + m_minDistFromOtherItems;
     m_maxScenePosX = maxX - m_minDistFromOtherItems;
-
-    m_isMousePressed = true;
-}
-
-
-
-void SlicePointItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
-{
-    FrameMarkerItem::mouseReleaseEvent( event );
-
-    // Reset colour of BPM ruler marks
-    WaveGraphicsScene* const scene = static_cast<WaveGraphicsScene*>( this->scene() );
-
-    foreach ( SharedGraphicsItem item, scene->getBpmRulerMarks() )
-    {
-        setRulerMarkColour( item.data(), Qt::white );
-    }
-
-    m_isMousePressed = false;
 }
 
 
