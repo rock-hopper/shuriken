@@ -118,8 +118,7 @@ public:
     SliceCommand( MainWindow* mainWindow,
                   WaveGraphicsScene* graphicsScene,
                   QPushButton* sliceButton,
-                  QPushButton* findOnsetsButton,
-                  QPushButton* findBeatsButton,
+                  QPushButton* findButton,
                   QAction* addSlicePointAction,
                   QAction* selectMoveItemsAction,
                   QAction* auditionItemsAction,
@@ -133,8 +132,7 @@ private:
     MainWindow* const m_mainWindow;
     WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
-    QPushButton* const m_findOnsetsButton;
-    QPushButton* const m_findBeatsButton;
+    QPushButton* const m_findButton;
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
     QAction* const m_auditionItemsAction;
@@ -149,8 +147,7 @@ public:
     UnsliceCommand( MainWindow* mainWindow,
                     WaveGraphicsScene* graphicsScene,
                     QPushButton* sliceButton,
-                    QPushButton* findOnsetsButton,
-                    QPushButton* findBeatsButton,
+                    QPushButton* findButton,
                     QAction* addSlicePointAction,
                     QAction* selectMoveItemsAction,
                     QAction* auditionItemsAction,
@@ -164,8 +161,7 @@ private:
     MainWindow* const m_mainWindow;
     WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
-    QPushButton* const m_findOnsetsButton;
-    QPushButton* const m_findBeatsButton;
+    QPushButton* const m_findButton;
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
     QAction* const m_auditionItemsAction;
@@ -279,8 +275,7 @@ public:
                                WaveGraphicsScene* graphicsScene,
                                MainWindow* mainWindow,
                                QPushButton* sliceButton,
-                               QPushButton* findOnsetsButton,
-                               QPushButton* findBeatsButton,
+                               QPushButton* findButton,
                                QAction* addSlicePointAction,
                                QUndoCommand* parent = NULL );
 
@@ -292,8 +287,7 @@ private:
     WaveGraphicsScene* const m_graphicsScene;
     MainWindow* const m_mainWindow;
     QPushButton* const m_sliceButton;
-    QPushButton* const m_findOnsetsButton;
-    QPushButton* const m_findBeatsButton;
+    QPushButton* const m_findButton;
     QAction* const m_addSlicePointAction;
 
     QList<SharedSampleBuffer> m_removedSampleBuffers;

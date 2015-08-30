@@ -307,8 +307,7 @@ void MainWindow::openProject( const QString filePath )
 
                 enableUI();
                 m_ui->actionAdd_Slice_Point->setEnabled( false );
-                m_ui->pushButton_FindBeats->setEnabled( false );
-                m_ui->pushButton_FindOnsets->setEnabled( false );
+                m_ui->pushButton_Find->setEnabled( false );
                 m_ui->pushButton_Slice->setEnabled( true );
                 m_ui->pushButton_Slice->setChecked( true );
 

@@ -187,9 +187,8 @@ private slots:
     void on_doubleSpinBox_NewBPM_valueChanged( double newBPM );
     void on_doubleSpinBox_OriginalBPM_valueChanged( double originalBPM );
     void on_pushButton_CalcBPM_clicked();
-    void on_pushButton_FindBeats_clicked();
+    void on_pushButton_Find_clicked();
     void on_horizontalSlider_Threshold_valueChanged( int value );
-    void on_pushButton_FindOnsets_clicked();
     void on_pushButton_Slice_clicked( bool isChecked );
     void on_actionNormalise_triggered();
     void on_actionApply_Gain_Ramp_triggered();

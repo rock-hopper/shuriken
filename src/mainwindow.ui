@@ -678,7 +678,44 @@
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
-                   <width>40</width>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_10">
+                 <property name="text">
+                  <string>Find:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="comboBox_Find">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_Find">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string>Find</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_20">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
                    <height>20</height>
                   </size>
                  </property>
@@ -736,6 +773,12 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>60</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="focusPolicy">
                   <enum>Qt::NoFocus</enum>
                  </property>
@@ -754,28 +797,29 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_FindOnsets">
-                 <property name="enabled">
-                  <bool>false</bool>
+                <spacer name="horizontalSpacer_21">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
                  </property>
-                 <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
                  </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_11">
                  <property name="text">
-                  <string>Find Onsets</string>
+                  <string>Zero-X:</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_FindBeats">
+                <widget class="QComboBox" name="comboBox_ZeroCrossings">
                  <property name="enabled">
                   <bool>false</bool>
-                 </property>
-                 <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
-                 </property>
-                 <property name="text">
-                  <string>Find Beats</string>
                  </property>
                 </widget>
                </item>
@@ -786,7 +830,7 @@
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
-                   <width>40</width>
+                   <width>20</width>
                    <height>20</height>
                   </size>
                  </property>

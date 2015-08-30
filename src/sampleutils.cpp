@@ -21,6 +21,7 @@
 */
 
 #include "sampleutils.h"
+//#include <QtDebug>
 
 
 SharedSampleBuffer SampleUtils::joinSampleBuffers( const QList<SharedSampleBuffer> sampleBufferList )

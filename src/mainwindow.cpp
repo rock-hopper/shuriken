@@ -371,6 +371,7 @@ void MainWindow::setupUI()
         m_ui->actionSave_As->setToolTip( tr( "Export Project" ) );
     }
 
+
     // Set up interaction mode buttons to work like radio buttons
     m_interactionGroup = new QActionGroup( this );
     m_interactionGroup->addAction( m_ui->actionSelect_Move );
@@ -379,90 +380,116 @@ void MainWindow::setupUI()
 
 
     // Populate "Detection Method" combo box
-    QStringList detectMethodTextList, detectMethodDataList;
-
-    detectMethodTextList << "Broadband Energy" << "High Frequency Content" << "Complex Domain"
-            << "Phase Based" << "Spectral Difference" << "Kullback-Liebler"
-            << "Modified Kullback-Liebler" << "Spectral Flux";
-
-    detectMethodDataList << "energy" << "hfc" << "complex" << "phase" << "specdiff"
-            << "kl" << "mkl" << "specflux";
-
-    for ( int i = 0; i < detectMethodTextList.size(); i++ )
     {
-        m_ui->comboBox_DetectMethod->addItem( detectMethodTextList[ i ], detectMethodDataList[ i ] );
-    }
+        QStringList textList, dataList;
 
+        textList << "Broadband Energy" << "High Frequency Content" << "Complex Domain"
+                 << "Phase Based" << "Spectral Difference" << "Kullback-Liebler"
+                 << "Modified Kullback-Liebler" << "Spectral Flux";
+
+        dataList << "energy" << "hfc" << "complex" << "phase" << "specdiff"
+                 << "kl" << "mkl" << "specflux";
+
+        for ( int i = 0; i < textList.size(); i++ )
+        {
+            m_ui->comboBox_DetectMethod->addItem( textList[ i ], dataList[ i ] );
+        }
+    }
 
     // Populate "Window Size" combo box
-    QStringList windowSizeTextList;
-    QList<int> windowSizeDataList;
-
-    windowSizeTextList << "128" << "256" << "512" << "1024" << "2048" << "4096" << "8192";
-    windowSizeDataList << 128 << 256 << 512 << 1024 << 2048 << 4096 << 8192;
-
-    for ( int i = 0; i < windowSizeTextList.size(); i++ )
     {
-        m_ui->comboBox_WindowSize->addItem( windowSizeTextList[ i ], windowSizeDataList[ i ] );
-    }
-    m_ui->comboBox_WindowSize->setCurrentIndex( 3 ); // "1024"
+        QStringList textList;
+        QList<int> dataList;
 
+        textList << "128" << "256" << "512" << "1024" << "2048" << "4096" << "8192";
+        dataList << 128 << 256 << 512 << 1024 << 2048 << 4096 << 8192;
+
+        for ( int i = 0; i < textList.size(); i++ )
+        {
+            m_ui->comboBox_WindowSize->addItem( textList[ i ], dataList[ i ] );
+        }
+        m_ui->comboBox_WindowSize->setCurrentIndex( 3 ); // "1024"
+    }
 
     // Populate "Hop Size" combo box
-    QStringList hopSizeTextList;
-    QList<qreal> hopSizeDataList;
-
-    hopSizeTextList << "50%" << "25%" << "12.5%" << "6.25%";
-    hopSizeDataList << 50.0 << 25.0 << 12.5 << 6.25;
-
-    for ( int i = 0; i < hopSizeTextList.size(); i++ )
     {
-        m_ui->comboBox_HopSize->addItem( hopSizeTextList[ i ], hopSizeDataList[ i ] );
-    }
-    m_ui->comboBox_HopSize->setCurrentIndex( 0 ); // "50%"
+        QStringList textList;
+        QList<qreal> dataList;
 
+        textList << "50%" << "25%" << "12.5%" << "6.25%";
+        dataList << 50.0 << 25.0 << 12.5 << 6.25;
+
+        for ( int i = 0; i < textList.size(); i++ )
+        {
+            m_ui->comboBox_HopSize->addItem( textList[ i ], dataList[ i ] );
+        }
+        m_ui->comboBox_HopSize->setCurrentIndex( 0 ); // "50%"
+    }
 
     // Populate "Snap Values" combo box
-    QStringList snapValuesTextList;
-    QList<int> snapValuesDataList;
-
-    snapValuesDataList << 64 << 32 << 28 << 24 << 20 << 16 << 14 << 12 << 10 << 8 << 7 << 6 << 5 << 4 << 3 << 2 << 1 << 0;
-
-    for ( int i = 0; i < snapValuesDataList.size() - 2; i++ )
     {
-        snapValuesTextList << tr("Beats") + " / " + QString::number( snapValuesDataList.at( i ) );
+        QStringList textList;
+        QList<int> dataList;
+
+        dataList << 64 << 32 << 28 << 24 << 20 << 16 << 14 << 12 << 10 << 8 << 7 << 6 << 5 << 4 << 3 << 2 << 1 << 0;
+
+        for ( int i = 0; i < dataList.size() - 2; i++ )
+        {
+            textList << tr("Beats") + " / " + QString::number( dataList.at( i ) );
+        }
+
+        textList << tr( "Beats" );
+        textList << tr( "Off" );
+
+        for ( int i = 0; i < textList.size(); i++ )
+        {
+            m_ui->comboBox_SnapValues->addItem( textList[ i ], dataList[ i ] );
+        }
+
+        m_ui->comboBox_SnapValues->setCurrentIndex( textList.size() - 1 );
     }
-    snapValuesTextList << tr( "Beats" );
-    snapValuesTextList << tr( "Off" );
-
-    for ( int i = 0; i < snapValuesTextList.size(); i++ )
-    {
-        m_ui->comboBox_SnapValues->addItem( snapValuesTextList[ i ], snapValuesDataList[ i ] );
-    }
-
-    m_ui->comboBox_SnapValues->setCurrentIndex( snapValuesTextList.size() - 1 );
-
 
     // Populate "Time Signature" combo boxes
-    QStringList timeSigNumeratorTextList;
-    QStringList timeSigDenominatorTextList;
+    {
+        QStringList numeratorTextList;
+        QStringList denominatorTextList;
 
-    timeSigNumeratorTextList << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12" << "13" << "14" << "15" << "16";
-    timeSigDenominatorTextList << "1" << "2" << "4" << "8" << "16";
+        numeratorTextList << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12" << "13" << "14" << "15" << "16";
+        denominatorTextList << "1" << "2" << "4" << "8" << "16";
 
-    m_ui->comboBox_TimeSigNumerator->addItems( timeSigNumeratorTextList );
-    m_ui->comboBox_TimeSigDenominator->addItems( timeSigDenominatorTextList );
+        m_ui->comboBox_TimeSigNumerator->addItems( numeratorTextList );
+        m_ui->comboBox_TimeSigDenominator->addItems( denominatorTextList );
 
-    m_ui->comboBox_TimeSigNumerator->setCurrentIndex( 3 );   // 4
-    m_ui->comboBox_TimeSigDenominator->setCurrentIndex( 2 ); // 4
-
+        m_ui->comboBox_TimeSigNumerator->setCurrentIndex( 3 );   // 4
+        m_ui->comboBox_TimeSigDenominator->setCurrentIndex( 2 ); // 4
+    }
 
     // Populate "Units" combo box
-    QStringList unitsTextList;
+    {
+        QStringList textList;
 
-    unitsTextList << "Bars" << "Beats";
+        textList << tr( "Bars" ) << tr( "Beats" );
 
-    m_ui->comboBox_Units->addItems( unitsTextList );
+        m_ui->comboBox_Units->addItems( textList );
+    }
+
+    // Populate "Find" combo box
+    {
+        QStringList textList;
+
+        textList << tr( "Onsets" ) << tr( "Beats" );
+
+        m_ui->comboBox_Find->addItems( textList );
+    }
+
+    // Populate "ZeroCrossings" combo box
+    {
+        QStringList textList;
+
+        textList << tr( "Ignore" ) << tr( "Closest" ) << tr( "Next" ) << tr( "Previous" );
+
+        m_ui->comboBox_ZeroCrossings->addItems( textList );
+    }
 
 
     // Hide widgets / menu items
@@ -591,10 +618,11 @@ void MainWindow::enableUI()
     m_ui->comboBox_DetectMethod->setEnabled( true );
     m_ui->comboBox_WindowSize->setEnabled( true );
     m_ui->comboBox_HopSize->setEnabled( true );
+    m_ui->comboBox_ZeroCrossings->setEnabled( true );
     m_ui->lineEdit_Threshold->setEnabled( true );
     m_ui->horizontalSlider_Threshold->setEnabled( true );
-    m_ui->pushButton_FindOnsets->setEnabled( true );
-    m_ui->pushButton_FindBeats->setEnabled( true );
+    m_ui->comboBox_Find->setEnabled( true );
+    m_ui->pushButton_Find->setEnabled( true );
     m_ui->comboBox_TimeSigNumerator->setEnabled( true );
     m_ui->comboBox_TimeSigDenominator->setEnabled( true );
     m_ui->spinBox_Length->setEnabled( true );
@@ -644,10 +672,11 @@ void MainWindow::disableUI()
     m_ui->comboBox_DetectMethod->setEnabled( false );
     m_ui->comboBox_WindowSize->setEnabled( false );
     m_ui->comboBox_HopSize->setEnabled( false );
+    m_ui->comboBox_ZeroCrossings->setEnabled( false );
     m_ui->lineEdit_Threshold->setEnabled( false );
     m_ui->horizontalSlider_Threshold->setEnabled( false );
-    m_ui->pushButton_FindOnsets->setEnabled( false );
-    m_ui->pushButton_FindBeats->setEnabled( false );
+    m_ui->comboBox_Find->setEnabled( false );
+    m_ui->pushButton_Find->setEnabled( false );
     m_ui->comboBox_SnapValues->setEnabled( false );
     m_ui->comboBox_TimeSigNumerator->setEnabled( false );
     m_ui->comboBox_TimeSigDenominator->setEnabled( false );
@@ -1573,8 +1602,7 @@ void MainWindow::on_actionDelete_triggered()
                                                                    m_graphicsScene,
                                                                    this,
                                                                    m_ui->pushButton_Slice,
-                                                                   m_ui->pushButton_FindOnsets,
-                                                                   m_ui->pushButton_FindBeats,
+                                                                   m_ui->pushButton_Find,
                                                                    m_ui->actionAdd_Slice_Point );
             m_undoStack.push( command );
         }
@@ -1836,8 +1864,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
         new SliceCommand( this,
                           m_graphicsScene,
                           m_ui->pushButton_Slice,
-                          m_ui->pushButton_FindOnsets,
-                          m_ui->pushButton_FindBeats,
+                          m_ui->pushButton_Find,
                           m_ui->actionAdd_Slice_Point,
                           m_ui->actionSelect_Move,
                           m_ui->actionAudition,
@@ -1890,8 +1917,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
         new UnsliceCommand( this,
                             m_graphicsScene,
                             m_ui->pushButton_Slice,
-                            m_ui->pushButton_FindOnsets,
-                            m_ui->pushButton_FindBeats,
+                            m_ui->pushButton_Find,
                             m_ui->actionAdd_Slice_Point,
                             m_ui->actionSelect_Move,
                             m_ui->actionAudition,
@@ -1911,64 +1937,82 @@ void MainWindow::on_horizontalSlider_Threshold_valueChanged( const int value )
 
 
 
-void MainWindow::on_pushButton_FindOnsets_clicked()
+void MainWindow::on_pushButton_Find_clicked()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
     QUndoCommand* parentCommand = new QUndoCommand();
-    parentCommand->setText( tr("Find Onsets") );
 
-    // Remove current slice points if present
+    // Set command text
+    if ( m_ui->comboBox_Find->currentText() == tr( "Onsets" ) )
     {
-        const QList<SharedSlicePointItem> slicePointItemList = m_graphicsScene->getSlicePointList();
-
-        foreach ( SharedSlicePointItem item, slicePointItemList )
-        {
-            new DeleteSlicePointItemCommand( item, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
-        }
+        parentCommand->setText( tr("Find Onsets") );
+    }
+    else
+    {
+        parentCommand->setText( tr("Find Beats") );
     }
 
-    // Add new slice points
-    {
-        AudioAnalyser::DetectionSettings settings;
-        getDetectionSettings( settings );
-
-        const QList<int> slicePointFrameNumList = AudioAnalyser::findOnsetFrameNums( m_sampleBufferList.first(), settings );
-
-        foreach ( int frameNum, slicePointFrameNumList )
-        {
-            new AddSlicePointItemCommand( frameNum, true, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
-        }
-    }
-
-    m_undoStack.push( parentCommand );
-
-    QApplication::restoreOverrideCursor();
-}
-
-
-
-void MainWindow::on_pushButton_FindBeats_clicked()
-{
-    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
-
-    AudioAnalyser::DetectionSettings settings;
-    getDetectionSettings( settings );
-
-    // Get list of frame numbers for slice points to be added
-    const QList<int> slicePointFrameNumList = AudioAnalyser::findBeatFrameNums( m_sampleBufferList.first(), settings );
-
-    // Get list of slice point items to be removed
+    // Remove current slice point items if present
     const QList<SharedSlicePointItem> slicePointItemList = m_graphicsScene->getSlicePointList();
-
-    QUndoCommand* parentCommand = new QUndoCommand();
-    parentCommand->setText( tr("Find Beats") );
 
     foreach ( SharedSlicePointItem item, slicePointItemList )
     {
         new DeleteSlicePointItemCommand( item, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
     }
 
+    // Get detection settings
+    AudioAnalyser::DetectionSettings settings;
+    getDetectionSettings( settings );
+
+    // Find slice points
+    QList<int> slicePointFrameNumList;
+
+    if ( m_ui->comboBox_Find->currentText() == tr( "Onsets" ) )
+    {
+        slicePointFrameNumList = AudioAnalyser::findOnsetFrameNums( m_sampleBufferList.first(), settings );
+    }
+    else
+    {
+        slicePointFrameNumList = AudioAnalyser::findBeatFrameNums( m_sampleBufferList.first(), settings );
+    }
+
+    // Adjust slice points according to zero-crossing settings
+    if ( m_ui->comboBox_ZeroCrossings->currentText() == tr( "Closest" ) )
+    {
+        for ( int i = 0; i < slicePointFrameNumList.size(); i++ )
+        {
+            int frameNum = slicePointFrameNumList.at( i );
+
+            frameNum = SampleUtils::getClosestZeroCrossing( m_sampleBufferList.first(), frameNum );
+
+            slicePointFrameNumList.replace( i, frameNum );
+        }
+    }
+    else if ( m_ui->comboBox_ZeroCrossings->currentText() == tr( "Next" ) )
+    {
+        for ( int i = 0; i < slicePointFrameNumList.size(); i++ )
+        {
+            int frameNum = slicePointFrameNumList.at( i );
+
+            frameNum = SampleUtils::getNextZeroCrossing( m_sampleBufferList.first(), frameNum );
+
+            slicePointFrameNumList.replace( i, frameNum );
+        }
+    }
+    else if ( m_ui->comboBox_ZeroCrossings->currentText() == tr( "Previous" ) )
+    {
+        for ( int i = 0; i < slicePointFrameNumList.size(); i++ )
+        {
+            int frameNum = slicePointFrameNumList.at( i );
+
+            frameNum = SampleUtils::getPrevZeroCrossing( m_sampleBufferList.first(), frameNum );
+
+            slicePointFrameNumList.replace( i, frameNum );
+        }
+    }
+
+    // Add new slice point items
     foreach ( int frameNum, slicePointFrameNumList )
     {
         new AddSlicePointItemCommand( frameNum, true, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );

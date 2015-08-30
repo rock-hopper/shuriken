@@ -218,8 +218,7 @@ void DeleteSlicePointItemCommand::redo()
 SliceCommand::SliceCommand( MainWindow* const mainWindow,
                             WaveGraphicsScene* const graphicsScene,
                             QPushButton* const sliceButton,
-                            QPushButton* const findOnsetsButton,
-                            QPushButton* const findBeatsButton,
+                            QPushButton* const findButton,
                             QAction* const addSlicePointAction,
                             QAction* const selectMoveItemsAction,
                             QAction* const auditionItemsAction,
@@ -229,8 +228,7 @@ SliceCommand::SliceCommand( MainWindow* const mainWindow,
     m_mainWindow( mainWindow ),
     m_graphicsScene( graphicsScene ),
     m_sliceButton( sliceButton ),
-    m_findOnsetsButton( findOnsetsButton ),
-    m_findBeatsButton( findBeatsButton ),
+    m_findButton( findButton ),
     m_addSlicePointAction( addSlicePointAction ),
     m_selectMoveItemsAction( selectMoveItemsAction ),
     m_auditionItemsAction( auditionItemsAction ),
@@ -262,8 +260,7 @@ void SliceCommand::undo()
     m_mainWindow->connectWaveformToMainWindow( item );
 
     m_sliceButton->setChecked( false );
-    m_findOnsetsButton->setEnabled( true );
-    m_findBeatsButton->setEnabled( true );
+    m_findButton->setEnabled( true );
     m_addSlicePointAction->setEnabled( true );
     m_selectiveTimeStretchAction->setEnabled( false );
     m_auditionItemsAction->trigger();
@@ -295,8 +292,7 @@ void SliceCommand::redo()
     }
 
     m_sliceButton->setChecked( true );
-    m_findOnsetsButton->setEnabled( false );
-    m_findBeatsButton->setEnabled( false );
+    m_findButton->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
 
     if ( m_mainWindow->m_rubberbandAudioSource != NULL )
@@ -316,8 +312,7 @@ void SliceCommand::redo()
 UnsliceCommand::UnsliceCommand( MainWindow* const mainWindow,
                                 WaveGraphicsScene* const graphicsScene,
                                 QPushButton* const sliceButton,
-                                QPushButton* const findOnsetsButton,
-                                QPushButton* const findBeatsButton,
+                                QPushButton* const findButton,
                                 QAction* const addSlicePointAction,
                                 QAction* const selectMoveItemsAction,
                                 QAction* const auditionItemsAction,
@@ -327,8 +322,7 @@ UnsliceCommand::UnsliceCommand( MainWindow* const mainWindow,
     m_mainWindow( mainWindow ),
     m_graphicsScene( graphicsScene ),
     m_sliceButton( sliceButton ),
-    m_findOnsetsButton( findOnsetsButton ),
-    m_findBeatsButton( findBeatsButton ),
+    m_findButton( findButton ),
     m_addSlicePointAction( addSlicePointAction ),
     m_selectMoveItemsAction( selectMoveItemsAction ),
     m_auditionItemsAction( auditionItemsAction ),
@@ -361,8 +355,7 @@ void UnsliceCommand::undo()
     }
 
     m_sliceButton->setChecked( true );
-    m_findOnsetsButton->setEnabled( false );
-    m_findBeatsButton->setEnabled( false );
+    m_findButton->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
 
     if ( m_mainWindow->m_rubberbandAudioSource != NULL )
@@ -398,8 +391,7 @@ void UnsliceCommand::redo()
     m_mainWindow->connectWaveformToMainWindow( item );
 
     m_sliceButton->setChecked( false );
-    m_findOnsetsButton->setEnabled( true );
-    m_findBeatsButton->setEnabled( true );
+    m_findButton->setEnabled( true );
     m_addSlicePointAction->setEnabled( true );
     m_selectiveTimeStretchAction->setEnabled( false );
     m_auditionItemsAction->trigger();
@@ -694,8 +686,7 @@ DeleteWaveformItemCommand::DeleteWaveformItemCommand( const QList<int> orderPosi
                                                       WaveGraphicsScene* const graphicsScene,
                                                       MainWindow* const mainWindow,
                                                       QPushButton* const sliceButton,
-                                                      QPushButton* const findOnsetsButton,
-                                                      QPushButton* const findBeatsButton,
+                                                      QPushButton* const findButton,
                                                       QAction* const addSlicePointAction,
                                                       QUndoCommand* parent ) :
     QUndoCommand( parent ),
@@ -703,8 +694,7 @@ DeleteWaveformItemCommand::DeleteWaveformItemCommand( const QList<int> orderPosi
     m_graphicsScene( graphicsScene ),
     m_mainWindow( mainWindow ),
     m_sliceButton( sliceButton ),
-    m_findOnsetsButton( findOnsetsButton ),
-    m_findBeatsButton( findBeatsButton ),
+    m_findButton( findButton ),
     m_addSlicePointAction( addSlicePointAction )
 {
     setText( "Delete Waveform Item" );
@@ -761,8 +751,7 @@ void DeleteWaveformItemCommand::undo()
 
     m_sliceButton->setEnabled( true );
     m_sliceButton->setChecked( true );
-    m_findOnsetsButton->setEnabled( false );
-    m_findBeatsButton->setEnabled( false );
+    m_findButton->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
 }
 
@@ -838,8 +827,7 @@ void DeleteWaveformItemCommand::redo()
     {
         m_sliceButton->setEnabled( false );
         m_sliceButton->setChecked( false );
-        m_findOnsetsButton->setEnabled( true );
-        m_findBeatsButton->setEnabled( true );
+        m_findButton->setEnabled( true );
         m_addSlicePointAction->setEnabled( true );
     }
 }
