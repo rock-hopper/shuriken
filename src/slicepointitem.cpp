@@ -159,11 +159,16 @@ void SlicePointItem::contextMenuEvent( QGraphicsSceneContextMenuEvent* event )
     }
 
     // Prevent wonky behaviour
+
+    while ( QGraphicsItem* item = scene()->mouseGrabberItem() )
+    {
+        item->ungrabMouse();
+    }
+
     foreach ( QGraphicsItem* item, scene()->items() )
     {
         if ( item->type() == SlicePointItem::Type )
         {
-            item->ungrabMouse();
             item->setSelected( false );
         }
     }
