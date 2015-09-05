@@ -37,6 +37,7 @@ audio and MIDI behind the scenes.</p>
 <li><p><a href="#Stretch_Options">Stretch Options</a></p></li>
 <li><p><a href="#JACK_Sync">JACK Sync</a></p></li>
 </ul>
+<li><p><a href="#JACK_Outputs">JACK Outputs</a></p></li>
 <li><p><a href="#Export_Options">Export Options</a></p></li>
 <li><p><a href="#Session_Management">Session Management</a></p></li>
 <li><p><a href="#Hints__Tips">Hints &amp; Tips</a></p></li>
@@ -113,22 +114,29 @@ following file formats:</p>
 <h1><a name="Slice_n_Dice"></a>Slice 'n' Dice</h1>
 
 <p>Once an audio file has been imported, its waveform is displayed in the
-main window.&nbsp; Clicking on &#8220;Find Onsets&#8221; will place a slice point
-at the start of every drum hit or note.&nbsp; Clicking &#8220;Find Beats&#8221;
-will insert a slice point at the beginning of every beat of the
-bar.&nbsp; To add additional slice points, hover the mouse over the
+main window.&nbsp; Selecting &#8220;Onsets&#8221; and clicking &#8220;Find&#8221; will place a slice point
+at the start of every drum hit or note.&nbsp; Selecting &#8220;Beats&#8221; and clicking &#8220;Find&#8221; 
+will insert a slice point at the beginning of every beat of the bar.</p>
+
+<p>When searching for onsets or beats, you have the option to automatically adjust the position of each slice 
+point by moving it to the closest, next, or previous zero-crossing.&nbsp; These options can be selected from the 
+&#8220;Zero-X&#8221; drop-down list.&nbsp; The default setting is to ignore zero-crossings.</p>
+
+<p>To add additional slice points, hover the mouse over the
 waveform and press the Insert key on the keyboard.&nbsp; To delete a
-slice point, select it and press Delete.&nbsp; Though aubio does a good
-job of detecting onsets, you'll still probably want to adjust the
+slice point, select it and press Delete.</p> 
+
+<p>Though aubio does a good job of detecting onsets, you'll still probably want to adjust the
 position of the slice points manually before clicking &#8220;Slice&#8221;.&nbsp;
-Clicking on the waveform between slice points will allow you to
+Right-clicking on a slice point will reveal a context menu which allows you to move the slice point 
+to the next or previous zero-crossing.&nbsp; Clicking on the waveform between slice points will allow you to
 audition each section of audio before slicing.</p>
 
 <p>Once the waveform has been sliced, each audio slice is automatically
 assigned to a separate MIDI key starting from middle C (C4) and
 ascending chromatically.&nbsp; You can drag an audio slice left or
 right to assign it to a different key.&nbsp; Slices can be reordered
-and joined together by toggling the &#8220;Slice&#8221; button.&nbsp; To select
+then joined together by toggling the &#8220;Slice&#8221; button.&nbsp; To select
 multiple slices, click &#8220;Multi Select&#8221; on the toolbar then drag the mouse over
 the waveform.</p>
 <p><br></p>
@@ -363,6 +371,14 @@ sequencer is actually sending tempo change information via JACK (e.g.
 in Ardour 3 click the &#8220;external positional sync&#8221; button to change its
 text from &#8220;Internal&#8221; to &#8220;JACK&#8221;).&nbsp; &#8220;Original BPM&#8221; has to be fairly
 accurate for this to work well, so you may need to adjust it manually.</p>
+<p><br></p>
+
+
+<h1><a name="JACK_Outputs"></a>JACK Outputs</h1>
+
+<p>The JACK Outputs dialogue becomes available when &#8220;JACK&#8221; is selected as the audio back-end.&nbsp; The 
+dialogue displays a grid which allows you to route any audio slice to any of Shuriken's outputs.&nbsp; The 
+number of outputs can be increased up to a maximum of 16 stereo outputs.</p>
 <p><br></p>
 
 
