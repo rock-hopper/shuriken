@@ -22,6 +22,7 @@
 
 #include "slicepointitem.h"
 #include "wavegraphicsscene.h"
+#include "sampleutils.h"
 #include <QBrush>
 #include <QMenu>
 #include <QGraphicsScene>
@@ -258,33 +259,56 @@ void SlicePointItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 
 void SlicePointItem::contextMenuEvent( QGraphicsSceneContextMenuEvent* event )
 {
-    QMenu menu;
-    QAction* nextAction = menu.addAction( tr("Move to next zero-crossing") );
-    QAction* prevAction = menu.addAction( tr("Move to previous zero-crossing") );
-    QAction* selectedAction = menu.exec(event->screenPos());
-
-    if ( selectedAction == nextAction )
+    if ( m_canBeMovedPastOtherSlicePoints )
     {
-        //setPos( 0.0, 0.0 );
-    }
-    else if ( selectedAction == prevAction )
-    {
-        //setPos( 100.0, 0.0 );
-    }
+        QMenu menu;
+        QAction* nextAction = menu.addAction( tr("Move to next zero-crossing") );
+        QAction* prevAction = menu.addAction( tr("Move to previous zero-crossing") );
 
-    // Prevent wonky behaviour
+        QAction* selectedAction = menu.exec(event->screenPos());
 
-    while ( QGraphicsItem* item = scene()->mouseGrabberItem() )
-    {
-        item->ungrabMouse();
-    }
+        WaveGraphicsScene* const waveScene = static_cast<WaveGraphicsScene*>( scene() );
 
-    foreach ( QGraphicsItem* item, scene()->items() )
-    {
-        if ( item->type() == SlicePointItem::Type )
+        const SharedSampleBuffer sampleBuffer = waveScene->getWaveformAt( 0 )->getSampleBuffer();
+
+        const int oldFrameNum = getFrameNum();
+
+        if ( selectedAction == nextAction )
+        {
+            const int newFrameNum = SampleUtils::getNextZeroCrossing( sampleBuffer, oldFrameNum + 1 );
+            setFrameNum( newFrameNum );
+
+            const qreal newScenePosX = waveScene->getScenePosX( newFrameNum );
+            setPos( newScenePosX, 0.0 );
+
+            emit scenePosChanged( this, oldFrameNum );
+        }
+        else if ( selectedAction == prevAction )
+        {
+            const int newFrameNum = SampleUtils::getPrevZeroCrossing( sampleBuffer, oldFrameNum - 1 );
+            setFrameNum( newFrameNum );
+
+            const qreal newScenePosX = waveScene->getScenePosX( newFrameNum );
+            setPos( newScenePosX, 0.0 );
+
+            emit scenePosChanged( this, oldFrameNum );
+        }
+
+        // Prevent wonky behaviour
+
+        while ( QGraphicsItem* item = scene()->mouseGrabberItem() )
+        {
+            item->ungrabMouse();
+        }
+
+        foreach ( SharedSlicePointItem item, waveScene->getSlicePointList() )
         {
             item->setSelected( false );
         }
+    }
+    else
+    {
+        event->ignore();
     }
 }
 
