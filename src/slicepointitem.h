@@ -93,7 +93,7 @@ private:
     static void setRulerMarkColour( QGraphicsItem* item, QColor colour );
 
 signals:
-    void scenePosChanged( SlicePointItem* item );
+    void scenePosChanged( SlicePointItem* item, int oldFrameNum );
 
 private:
     JUCE_LEAK_DETECTOR( SlicePointItem );

@@ -215,7 +215,7 @@ void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 
     if ( event->button() == Qt::LeftButton )
     {
-        m_scenePosX_beforeMove = pos().x();
+        m_scenePosX_beforeMove = scenePos().x();
 
         calcMinMaxScenePosX();
 
@@ -231,14 +231,20 @@ void SlicePointItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 
     if ( event->button() == Qt::LeftButton )
     {
-        if ( m_scenePosX_beforeMove != pos().x() )
+        WaveGraphicsScene* const scene = static_cast<WaveGraphicsScene*>( this->scene() );
+
+        // If slice point has been moved then set new frame number
+        if ( m_scenePosX_beforeMove != scenePos().x() )
         {
-            emit scenePosChanged( this );
+            const int oldFrameNum = getFrameNum();
+            const int newFrameNum = scene->getFrameNum( scenePos().x() );
+
+            setFrameNum( newFrameNum );
+
+            emit scenePosChanged( this, oldFrameNum );
         }
 
         // Reset colour of BPM ruler marks
-        WaveGraphicsScene* const scene = static_cast<WaveGraphicsScene*>( this->scene() );
-
         foreach ( SharedGraphicsItem item, scene->getBpmRulerMarks() )
         {
             setRulerMarkColour( item.data(), Qt::white );
@@ -259,11 +265,11 @@ void SlicePointItem::contextMenuEvent( QGraphicsSceneContextMenuEvent* event )
 
     if ( selectedAction == nextAction )
     {
-        //
+        //setPos( 0.0, 0.0 );
     }
     else if ( selectedAction == prevAction )
     {
-        //
+        //setPos( 100.0, 0.0 );
     }
 
     // Prevent wonky behaviour

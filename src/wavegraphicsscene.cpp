@@ -411,8 +411,8 @@ SharedSlicePointItem WaveGraphicsScene::createSlicePoint( const int frameNum, co
     matrix.scale( 1.0 / currentScaleFactor, 1.0 ); // slice point handle is set to correct width even if view is scaled
     item->setTransform( matrix );
 
-    QObject::connect( item, SIGNAL( scenePosChanged(SlicePointItem*) ),
-                      this, SLOT( updateSlicePointFrameNum(SlicePointItem*) ) );
+    QObject::connect( item, SIGNAL( scenePosChanged(SlicePointItem*,int) ),
+                      this, SLOT( updateSlicePointOrdering(SlicePointItem*,int) ) );
 
     addItem( item );
     update();
@@ -1035,13 +1035,8 @@ void WaveGraphicsScene::slideWaveformItemIntoPlace( const int orderPos )
 
 
 
-void WaveGraphicsScene::updateSlicePointFrameNum( SlicePointItem* const movedItem )
+void WaveGraphicsScene::updateSlicePointOrdering( SlicePointItem* const movedItem, const int oldFrameNum )
 {
-    const int oldFrameNum = movedItem->getFrameNum();
-    const int newFrameNum = getFrameNum( movedItem->pos().x() );
-
-    movedItem->setFrameNum( newFrameNum );
-
     qSort( m_slicePointItemList.begin(), m_slicePointItemList.end(), SlicePointItem::isLessThanFrameNum );
 
     SharedSlicePointItem sharedSlicePoint;
