@@ -177,7 +177,7 @@ private slots:
     void reorderWaveformItems( QList<int> oldOrderPositions, int numPlacesMoved );
 
     void slideWaveformItemIntoPlace( int orderPos );
-    void updateSlicePointFrameNum( FrameMarkerItem* movedItem );
+    void updateSlicePointFrameNum( SlicePointItem* movedItem );
     void removePlayhead();
 
 private:

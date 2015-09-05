@@ -24,6 +24,8 @@
 #include "wavegraphicsscene.h"
 #include <QBrush>
 #include <QMenu>
+#include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 #include <QtDebug>
 
 
@@ -34,16 +36,80 @@ SlicePointItem::SlicePointItem( const qreal height,
                                 const bool canBeMovedPastOtherSlicePoints,
                                 const qreal minDistFromOtherSlicePoints,
                                 QGraphicsItem* parent ) :
-    FrameMarkerItem( canBeMovedPastOtherSlicePoints ? QColor( Qt::red ) : QColor( 95, 207, 0, 255 ),
-                     QColor( 255, 192, 0, 255 ),
-                     height,
-                     HANDLE_TOP_BOTTOM,
-                     parent ),
+    QObject(),
+    QGraphicsPolygonItem( parent ),
+    m_selectedBrush( QColor( 255, 192, 0, 255 ) ),
     m_canBeMovedPastOtherSlicePoints( canBeMovedPastOtherSlicePoints ),
     m_isSnapEnabled( false ),
     m_isLeftMousePressed( false ),
-    m_minDistFromOtherItems( minDistFromOtherSlicePoints )
+    m_frameNum( 0 ),
+    m_scenePosX_beforeMove( 0.0 ),
+    m_minDistFromOtherItems( minDistFromOtherSlicePoints ),
+    m_minScenePosX( 0.0 ),
+    m_maxScenePosX( 1.0 )
 {
+    if ( canBeMovedPastOtherSlicePoints )
+    {
+        setBrush( QColor( Qt::red ) );
+    }
+    else
+    {
+        setBrush( QColor( 95, 207, 0, 255 ) ); // Green
+    }
+
+    setHeight( height );
+
+    setZValue( ZValues::SLICE_POINT );
+    setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges );
+}
+
+
+
+void SlicePointItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget )
+{
+    Q_UNUSED( widget );
+
+    painter->setPen( pen() );
+
+    if ( option->state & QStyle::State_Selected )
+    {
+        painter->setBrush( m_selectedBrush );
+    }
+    else
+    {
+        painter->setBrush( brush() );
+    }
+
+    painter->drawPolygon( polygon(), fillRule() );
+}
+
+
+
+void SlicePointItem::setHeight( qreal height )
+{
+    QPolygonF polygon;
+
+    --height;
+    const qreal handleWidth = 16.0;
+    const qreal handleHeight = 16.0;
+
+    polygon << QPointF( -handleWidth * 0.5, 0.0 ) << QPointF( handleWidth * 0.5, 0.0 ) << QPointF( 0.0, handleHeight )
+            << QPointF( 0.0, height - handleHeight )
+            << QPointF( -handleWidth * 0.5, height ) << QPointF( handleWidth * 0.5, height ) << QPointF( 0.0, height - handleHeight )
+            << QPointF( 0.0, handleHeight );
+
+    setPolygon( polygon );
+}
+
+
+
+void SlicePointItem::setPos( const qreal x, const qreal y )
+{
+#if QT_VERSION >= 0x040700  // Qt 4.7
+    QGraphicsItem::setPos( QPointF(x, y+1) );
+#else
+    QGraphicsItem::setPos( QPointF(x, y) );
+#endif
 }
 
 
@@ -67,7 +133,8 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
     {
         QPointF newPos = value.toPointF();
 
-        if ( m_isSnapEnabled ) // Snap slice point to BPM ruler marks
+        // Snap slice point to BPM ruler marks
+        if ( m_isSnapEnabled )
         {
             WaveGraphicsScene* scene = static_cast<WaveGraphicsScene*>( this->scene() );
 
@@ -101,21 +168,57 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
             }
         }
 
-        return FrameMarkerItem::itemChange( change, newPos );
+        // Keep item within bounds of scene rect
+        const QRectF sceneRect = scene()->sceneRect();
+
+        if ( newPos.x() < sceneRect.left() || newPos.x() > sceneRect.right() - 1 )
+        {
+            newPos.setX
+            (
+                qMin( sceneRect.right() - 1, qMax( newPos.x(), sceneRect.left() ) )
+            );
+        }
+
+#if QT_VERSION >= 0x040700  // Qt 4.7
+        newPos.setY( BpmRuler::HEIGHT + 1 );
+#else
+        newPos.setY( BpmRuler::HEIGHT );
+#endif
+
+        return newPos;
     }
 
-    return FrameMarkerItem::itemChange( change, value );
+
+    // If this item is selected then raise it above other slice point items
+    if ( change == ItemSelectedHasChanged )
+    {
+        if ( isSelected() )
+            setZValue( ZValues::SELECTED_SLICE_POINT );
+        else
+            setZValue( ZValues::SLICE_POINT );
+    }
+
+
+    return QGraphicsItem::itemChange( change, value );
 }
 
 
 
 void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
-    FrameMarkerItem::mousePressEvent( event );
+    // Always unset the Ctrl-key modifier to prevent multiple slice point items from being selected
+
+    const Qt::KeyboardModifiers modifiers = event->modifiers() & ~Qt::ControlModifier;
+    event->setModifiers( modifiers );
+
+    QGraphicsItem::mousePressEvent( event );
 
     if ( event->button() == Qt::LeftButton )
     {
+        m_scenePosX_beforeMove = pos().x();
+
         calcMinMaxScenePosX();
+
         m_isLeftMousePressed = true;
     }
 }
@@ -124,10 +227,15 @@ void SlicePointItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 
 void SlicePointItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
-    FrameMarkerItem::mouseReleaseEvent( event );
+    QGraphicsItem::mouseReleaseEvent( event );
 
     if ( event->button() == Qt::LeftButton )
     {
+        if ( m_scenePosX_beforeMove != pos().x() )
+        {
+            emit scenePosChanged( this );
+        }
+
         // Reset colour of BPM ruler marks
         WaveGraphicsScene* const scene = static_cast<WaveGraphicsScene*>( this->scene() );
 

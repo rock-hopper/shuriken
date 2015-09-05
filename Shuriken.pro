@@ -168,7 +168,6 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/exportdialog.cpp \
     src/messageboxes.cpp \
     src/textfilehandler.cpp \
-    src/framemarkeritem.cpp \
     src/akaifilehandler.cpp \
     src/midifilehandler.cpp \
     src/mainwindowfilehandling.cpp \
@@ -387,7 +386,6 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/exportdialog.h \
     src/messageboxes.h \
     src/textfilehandler.h \
-    src/framemarkeritem.h \
     src/akaifilehandler.h \
     src/midifilehandler.h \
     src/confirmbpmdialog.h \

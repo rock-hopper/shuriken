@@ -52,9 +52,8 @@ namespace OutputChannels
 namespace UserTypes
 {
     const int WAVEFORM       = QGraphicsItem::UserType + 1;
-    const int FRAME_MARKER   = QGraphicsItem::UserType + 2;
-    const int SLICE_POINT    = QGraphicsItem::UserType + 3;
-    const int LOOP_MARKER    = QGraphicsItem::UserType + 4;
+    const int SLICE_POINT    = QGraphicsItem::UserType + 2;
+    const int LOOP_MARKER    = QGraphicsItem::UserType + 3;
 }
 
 
@@ -62,12 +61,11 @@ namespace ZValues
 {
     const int WAVEFORM               = 0;
     const int SELECTED_WAVEFORM      = 1;
-    const int FRAME_MARKER           = 2;
-    const int SELECTED_FRAME_MARKER  = 3;
-    const int LOOP_MARKER            = 4;
-    const int PLAYHEAD               = 5;
-    const int BPM_RULER              = 6;
-    const int BPM_RULER_TEXT         = 7;
+    const int SLICE_POINT            = 2;
+    const int SELECTED_SLICE_POINT   = 3;
+    const int PLAYHEAD               = 4;
+    const int BPM_RULER              = 5;
+    const int BPM_RULER_TEXT         = 6;
 }
 
 
