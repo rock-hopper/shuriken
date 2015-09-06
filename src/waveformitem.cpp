@@ -22,7 +22,7 @@
 
 #include "waveformitem.h"
 #include "wavegraphicsscene.h"
-#include <QDebug>
+#include <QtDebug>
 
 
 //==================================================================================================
@@ -67,59 +67,11 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
 
     const int numChans = m_sampleBuffer->getNumChannels();
 
-    int firstVisibleBin = 0;
-    int lastVisibleBin = 0;
-    int numVisibleBins = 0;
-
-    qreal distanceBetweenFrames = 0.0;
-    int firstVisibleFrame = 0;
-    int lastVisibleFrame = 0;
-    int numVisibleFrames = 0;
-
     // If scale factor has changed since the last redraw then reset sample bins and establish new detail level
     if ( m_globalScaleFactor != painter->worldTransform().m11() )
     {
         m_globalScaleFactor = painter->worldTransform().m11(); // m11() returns the current horizontal scale factor
         resetSampleBins();
-    }
-
-    if ( m_detailLevel != VERY_HIGH )
-    {
-        // Reduce no. of samples to draw by finding the min/max values in each consecutive sample "bin"
-        firstVisibleBin = qMax( (int) floor( option->exposedRect.left() * m_globalScaleFactor ), 0 );
-        lastVisibleBin = qMin( (int) ceil( option->exposedRect.right() * m_globalScaleFactor ), m_numBins - 1 );
-
-        if ( m_firstCalculatedBin == NOT_SET || m_lastCalculatedBin == NOT_SET )
-        {
-            findMinMaxSamples( firstVisibleBin, lastVisibleBin );
-            m_firstCalculatedBin = firstVisibleBin;
-            m_lastCalculatedBin = lastVisibleBin;
-        }
-
-        if ( firstVisibleBin < m_firstCalculatedBin )
-        {
-            findMinMaxSamples( firstVisibleBin, m_firstCalculatedBin - 1 );
-            m_firstCalculatedBin = firstVisibleBin;
-        }
-
-        if ( lastVisibleBin > m_lastCalculatedBin )
-        {
-            findMinMaxSamples( m_lastCalculatedBin + 1, lastVisibleBin );
-            m_lastCalculatedBin = lastVisibleBin;
-        }
-
-        numVisibleBins = lastVisibleBin - firstVisibleBin + 1;
-    }
-    else // mDetailLevel == VERY_HIGH
-    {
-        distanceBetweenFrames = rect().width() / m_sampleBuffer->getNumFrames();
-
-        firstVisibleFrame = (int) floor( option->exposedRect.left() / distanceBetweenFrames );
-
-        lastVisibleFrame = qMin( (int) ceil( option->exposedRect.right() / distanceBetweenFrames ),
-                                 m_sampleBuffer->getNumFrames() - 1 );
-
-        numVisibleFrames = lastVisibleFrame - firstVisibleFrame + 1;
     }
 
     // Draw rect background
@@ -146,66 +98,13 @@ void WaveformItem::paint( QPainter* painter, const QStyleOptionGraphicsItem* opt
     painter->translate( 0.0, 1.0 );
     painter->setPen( m_wavePen );
 
-    const qreal lineWidth = 1.0 / m_globalScaleFactor;
-    const qreal leftEdge = option->exposedRect.left();
-
-    float min;
-    float max;
-
-    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+    if ( m_detailLevel != VERY_HIGH )
     {
-        if ( m_detailLevel == LOW )
-        {
-#if QT_VERSION < 0x040700  // Qt 4.6 or less
-            painter->setRenderHint( QPainter::Antialiasing, false );
-#endif
-            for ( int binCount = 0; binCount < numVisibleBins; binCount++ )
-            {
-                min = (*m_minSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
-                max = (*m_maxSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
-
-                painter->drawLine
-                (
-                    QPointF( leftEdge + (binCount * lineWidth), -min ),
-                    QPointF( leftEdge + (binCount * lineWidth), -max )
-                );
-            }
-        }
-        else if ( m_detailLevel == HIGH )
-        {
-#if QT_VERSION < 0x040700  // Qt 4.6 or less
-            painter->setRenderHint( QPainter::Antialiasing, true );
-#endif
-            QPointF points[ numVisibleBins * 2 ];
-
-            for ( int binCount = 0; binCount < numVisibleBins; binCount++ )
-            {
-                min = (*m_minSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
-                max = (*m_maxSampleValues[ chanNum ])[ firstVisibleBin + binCount ];
-
-                points[ binCount * 2 ]       = QPointF( leftEdge + (binCount * lineWidth), -min );
-                points[ (binCount * 2) + 1 ] = QPointF( leftEdge + (binCount * lineWidth), -max );
-            }
-            painter->drawPolyline( points, numVisibleBins * 2 );
-        }
-        else // mDetailLevel == VERY_HIGH
-        {
-#if QT_VERSION < 0x040700  // Qt 4.6 or less
-            painter->setRenderHint( QPainter::Antialiasing, true );
-#endif
-            QPointF points[ numVisibleFrames ];
-            const float* sampleData = m_sampleBuffer->getReadPointer( chanNum, firstVisibleFrame );
-
-            for ( int frameCount = 0; frameCount < numVisibleFrames; frameCount++ )
-            {
-                points[ frameCount ] = QPointF( leftEdge + (frameCount * distanceBetweenFrames),
-                                                -(*sampleData) );
-                sampleData++;
-            }
-            painter->drawPolyline( points, numVisibleFrames );
-        }
-
-        painter->translate( 0.0, numChans );
+        drawWaveformFromSampleBins( painter, option->exposedRect.left(), option->exposedRect.right() );
+    }
+    else
+    {
+        drawWaveformFromSamples( painter, option->exposedRect.left(), option->exposedRect.right() );
     }
 
     painter->restore();
@@ -526,5 +425,123 @@ void WaveformItem::findMinMaxSamples( const int startBin, const int endBin )
             m_minSampleValues[ chanNum ]->set( binNum, range.getStart() );
             m_maxSampleValues[ chanNum ]->set( binNum, range.getEnd() );
         }
+    }
+}
+
+
+
+void WaveformItem::drawWaveformFromSampleBins( QPainter* painter, qreal exposedRectLeft, qreal exposedRectRight )
+{
+    // Reduce no. of samples to draw by finding the min/max values in each consecutive sample "bin"
+    const int firstVisibleBin = qMax( (int) floor( exposedRectLeft * m_globalScaleFactor ), 0 );
+    const int lastVisibleBin = qMin( (int) ceil( exposedRectRight * m_globalScaleFactor ), m_numBins - 1 );
+
+    if ( m_firstCalculatedBin == NOT_SET || m_lastCalculatedBin == NOT_SET )
+    {
+        findMinMaxSamples( firstVisibleBin, lastVisibleBin );
+        m_firstCalculatedBin = firstVisibleBin;
+        m_lastCalculatedBin = lastVisibleBin;
+    }
+
+    if ( firstVisibleBin < m_firstCalculatedBin )
+    {
+        findMinMaxSamples( firstVisibleBin, m_firstCalculatedBin - 1 );
+        m_firstCalculatedBin = firstVisibleBin;
+    }
+
+    if ( lastVisibleBin > m_lastCalculatedBin )
+    {
+        findMinMaxSamples( m_lastCalculatedBin + 1, lastVisibleBin );
+        m_lastCalculatedBin = lastVisibleBin;
+    }
+
+    const int numVisibleBins = lastVisibleBin - firstVisibleBin + 1;
+
+    const qreal reciprocalScaleFactor = 1.0 / m_globalScaleFactor;
+
+    const int numChans = m_sampleBuffer->getNumChannels();
+
+    if ( m_detailLevel == LOW )
+    {
+#if QT_VERSION < 0x040700  // Qt 4.6 or less
+        painter->setRenderHint( QPainter::Antialiasing, false );
+#endif
+
+        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+        {
+            for ( int count = 0; count < numVisibleBins; count++ )
+            {
+                const float min = (*m_minSampleValues[ chanNum ])[ firstVisibleBin + count ];
+                const float max = (*m_maxSampleValues[ chanNum ])[ firstVisibleBin + count ];
+
+                painter->drawLine
+                (
+                    QPointF( (firstVisibleBin + count) * reciprocalScaleFactor, -min ),
+                    QPointF( (firstVisibleBin + count) * reciprocalScaleFactor, -max )
+                );
+            }
+
+            painter->translate( 0.0, numChans );
+        }
+    }
+    else if ( m_detailLevel == HIGH )
+    {
+#if QT_VERSION < 0x040700  // Qt 4.6 or less
+        painter->setRenderHint( QPainter::Antialiasing, true );
+#endif
+
+        for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+        {
+            QPointF points[ numVisibleBins * 2 ];
+
+            for ( int count = 0; count < numVisibleBins; count++ )
+            {
+                const float min = (*m_minSampleValues[ chanNum ])[ firstVisibleBin + count ];
+                const float max = (*m_maxSampleValues[ chanNum ])[ firstVisibleBin + count ];
+
+                points[ count * 2 ]       = QPointF( (firstVisibleBin + count) * reciprocalScaleFactor, -min );
+                points[ (count * 2) + 1 ] = QPointF( (firstVisibleBin + count) * reciprocalScaleFactor, -max );
+            }
+
+            painter->drawPolyline( points, numVisibleBins * 2 );
+            painter->translate( 0.0, numChans );
+        }
+    }
+}
+
+
+
+void WaveformItem::drawWaveformFromSamples( QPainter* const painter, const qreal exposedRectLeft, const qreal exposedRectRight )
+{
+    const qreal distanceBetweenFrames = rect().width() / m_sampleBuffer->getNumFrames();
+
+    const int firstVisibleFrame = (int) floor( exposedRectLeft / distanceBetweenFrames );
+
+    const int lastVisibleFrame = qMin( (int) ceil( exposedRectRight / distanceBetweenFrames ),
+                                       m_sampleBuffer->getNumFrames() - 1 );
+
+    const int numVisibleFrames = lastVisibleFrame - firstVisibleFrame + 1;
+
+    const int numChans = m_sampleBuffer->getNumChannels();
+
+#if QT_VERSION < 0x040700  // Qt 4.6 or less
+    painter->setRenderHint( QPainter::Antialiasing, true );
+#endif
+
+    for ( int chanNum = 0; chanNum < numChans; chanNum++ )
+    {
+        QPointF points[ numVisibleFrames ];
+
+        const float* sampleData = m_sampleBuffer->getReadPointer( chanNum, firstVisibleFrame );
+
+        for ( int count = 0; count < numVisibleFrames; count++ )
+        {
+            points[ count ] = QPointF( (firstVisibleFrame + count) * distanceBetweenFrames,
+                                       -(*sampleData) );
+            sampleData++;
+        }
+
+        painter->drawPolyline( points, numVisibleFrames );
+        painter->translate( 0.0, numChans );
     }
 }

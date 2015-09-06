@@ -82,6 +82,9 @@ private:
     // Both 'startBin' and 'endBin' are inclusive
     void findMinMaxSamples( int startBin, int endBin );
 
+    void drawWaveformFromSampleBins( QPainter* painter, qreal exposedRectLeft, qreal exposedRectRight );
+    void drawWaveformFromSamples( QPainter* painter, qreal exposedRectLeft, qreal exposedRectRight );
+
     enum DetailLevel { LOW, HIGH, VERY_HIGH };
     DetailLevel m_detailLevel;
 
