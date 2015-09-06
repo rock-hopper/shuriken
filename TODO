@@ -6,31 +6,23 @@ Qt5 compatibility
 
 Option to stream samples from disc
 
-Export Akai .snd files
-
-Copy and paste audio slices
+Export Akai MPC .snd files and S1000/S2000/S3000 files
 
 Display MIDI note mappings
 
-Pitch-shifting
-
-Zero-crossing detection
+Pitch-shifting for individual audio slices
 
 DC offset removal
-
-Amplitude envelope / fade in/out
 
 
 Dialogs
 -------
 User interface dialog
 
-Audio outputs dialog
-
-Envelope ADSR dialog
-
 
 UI Improvements
 ---------------
 Fix gaps in waveform when zoomed in at low detail level
+
+Improve accuracy of waveform / slice point drawing routines
 
