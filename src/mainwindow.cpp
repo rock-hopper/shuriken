@@ -57,7 +57,7 @@ MainWindow::MainWindow( QWidget* parent ) :
         m_currentProjectFilePath = QApplication::arguments().at( 1 );
     }
 
-    // Check if non session manager is running
+    // Check if Non Session Manager is running
     const char* nsmUrl = getenv( "NSM_URL" );
 
     if ( nsmUrl != NULL && m_currentProjectFilePath.isEmpty() )
@@ -67,15 +67,16 @@ MainWindow::MainWindow( QWidget* parent ) :
         // Set JACK client name
         Jack::g_clientId = m_nsmThread->getJackClientId();
 
-        // Create save dir and store path for later
+        // Create save directory and store its path for later use
         const QString savePath = m_nsmThread->getSavePath();
         const QString fileName = QString("project") + FILE_EXTENSION;
 
         QDir().mkpath( savePath );
         m_currentProjectFilePath = QDir( savePath ).absoluteFilePath( fileName );
 
-        // Connect save signal to slot and start thread
-        connect( m_nsmThread, SIGNAL(save()), this, SLOT(on_actionSave_Project_triggered()) );
+        connect( m_nsmThread, SIGNAL(save()),
+                 this, SLOT(on_actionSave_Project_triggered()) );
+
         m_nsmThread->start();
     }
 
