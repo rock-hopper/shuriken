@@ -24,10 +24,11 @@
 #include "ui_optionsdialog.h"
 #include "globals.h"
 #include "messageboxes.h"
+#include "textfilehandler.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QProcessEnvironment>
-#include <QDebug>
+#include <QtDebug>
 
 
 //==================================================================================================
@@ -293,22 +294,13 @@ void OptionsDialog::setTempDirPath()
     // Set default temp dir
     QString tempDirPath = QDir::tempPath();
 
-    // Try to load paths config file
-    ScopedPointer<XmlElement> docElement;
-    docElement = XmlDocument::parse( File( PATHS_CONFIG_FILE_PATH ) );
+    TextFileHandler::PathsConfig config;
 
-    if ( docElement != NULL )
+    TextFileHandler::readPathsConfigFile( config );
+
+    if ( ! config.tempDirPath.isEmpty() )
     {
-        if ( docElement->hasTagName( "paths" ) )
-        {
-            forEachXmlChildElement( *docElement, elem )
-            {
-                if ( elem->hasTagName( "temp_dir" ) )
-                {
-                    tempDirPath = elem->getStringAttribute( "path" ).toRawUTF8();
-                }
-            }
-        }
+        tempDirPath = config.tempDirPath;
     }
 
     // Set up validator
@@ -671,17 +663,13 @@ void OptionsDialog::saveConfig()
     }
 
     // Save paths config
-    XmlElement docElement( "paths" );
+    TextFileHandler::PathsConfig config;
 
-    const QString tempDir = m_ui->lineEdit_TempDir->text();
+    TextFileHandler::readPathsConfigFile( config );
 
-    XmlElement* tempDirElem = new XmlElement( "temp_dir" );
-    tempDirElem->setAttribute( "path", tempDir.toLocal8Bit().data() );
-    docElement.addChildElement( tempDirElem );
+    config.tempDirPath = m_ui->lineEdit_TempDir->text();
 
-    File pathsConfigFile( PATHS_CONFIG_FILE_PATH );
-    pathsConfigFile.create();
-    docElement.writeToFile( pathsConfigFile, String::empty );
+    TextFileHandler::createPathsConfigFile( config );
 }
 
 

@@ -74,6 +74,20 @@ public:
 
     static bool readProjectXmlFile( QString filePath, ProjectSettings& settings );
 
+
+
+    struct PathsConfig
+    {
+        QString tempDirPath;
+        QStringList recentProjectPaths;
+    };
+
+    static bool createPathsConfigFile( const PathsConfig& config );
+
+    static bool readPathsConfigFile( PathsConfig& config );
+
+
+
     static bool createH2DrumkitXmlFile( QString dirPath, QString kitName, QStringList audioFileNames,
                                         const SamplerAudioSource::EnvelopeSettings& envelopes );
 

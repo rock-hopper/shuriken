@@ -228,6 +228,57 @@ bool TextFileHandler::readProjectXmlFile( const QString filePath, ProjectSetting
 
 
 
+bool TextFileHandler::createPathsConfigFile( const PathsConfig& config )
+{
+    XmlElement docElement( "paths" );
+
+    if ( ! config.tempDirPath.isEmpty() )
+    {
+        XmlElement* element = new XmlElement( "temp_dir" );
+        element->setAttribute( "path", config.tempDirPath.toLocal8Bit().data() );
+        docElement.addChildElement( element );
+    }
+
+    foreach ( QString path, config.recentProjectPaths )
+    {
+        XmlElement* element = new XmlElement( "recent_project" );
+        element->setAttribute( "path", path.toLocal8Bit().data() );
+        docElement.addChildElement( element );
+    }
+
+    File pathsConfigFile( PATHS_CONFIG_FILE_PATH );
+    pathsConfigFile.create();
+    docElement.writeToFile( pathsConfigFile, String::empty );
+}
+
+
+
+bool TextFileHandler::readPathsConfigFile( PathsConfig& config )
+{
+    ScopedPointer<XmlElement> docElement;
+    docElement = XmlDocument::parse( File( PATHS_CONFIG_FILE_PATH ) );
+
+    if ( docElement != NULL )
+    {
+        if ( docElement->hasTagName( "paths" ) )
+        {
+            forEachXmlChildElement( *docElement, elem )
+            {
+                if ( elem->hasTagName( "temp_dir" ) )
+                {
+                    config.tempDirPath = elem->getStringAttribute( "path" ).toRawUTF8();
+                }
+                else if ( elem->hasTagName( "recent_project" ) )
+                {
+                    config.recentProjectPaths << elem->getStringAttribute( "path" ).toRawUTF8();
+                }
+            }
+        }
+    }
+}
+
+
+
 bool TextFileHandler::createH2DrumkitXmlFile( const QString dirPath, const QString kitName,
                                               const QStringList audioFileNames,
                                               const SamplerAudioSource::EnvelopeSettings& envelopes )

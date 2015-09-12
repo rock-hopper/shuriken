@@ -891,61 +891,19 @@ void MainWindow::exportAsDialog()
 
 void MainWindow::addPathToRecentProjects( QString filePath )
 {
-    QString tempDirPath;
-    QStringList recentProjectPaths;
+    TextFileHandler::PathsConfig config;
 
-    // Try to load paths config file
-    {
-        ScopedPointer<XmlElement> docElement;
-        docElement = XmlDocument::parse( File( PATHS_CONFIG_FILE_PATH ) );
-
-        if ( docElement != NULL )
-        {
-            if ( docElement->hasTagName( "paths" ) )
-            {
-                forEachXmlChildElement( *docElement, elem )
-                {
-                    if ( elem->hasTagName( "temp_dir" ) )
-                    {
-                        tempDirPath = elem->getStringAttribute( "path" ).toRawUTF8();
-                    }
-                    else if ( elem->hasTagName( "recent_project" ) )
-                    {
-                        recentProjectPaths << elem->getStringAttribute( "path" ).toRawUTF8();
-                    }
-                }
-            }
-        }
-    }
+    TextFileHandler::readPathsConfigFile( config );
 
     // If this path is already in the recent projects list then remove it
-    recentProjectPaths.removeOne( filePath );
+    config.recentProjectPaths.removeOne( filePath );
 
-    recentProjectPaths.prepend( filePath );
+    config.recentProjectPaths.prepend( filePath );
 
-    while ( recentProjectPaths.size() > RecentProjects::MAX )
+    while ( config.recentProjectPaths.size() > RecentProjects::MAX )
     {
-        recentProjectPaths.removeLast();
+        config.recentProjectPaths.removeLast();
     }
 
-    // Save paths config file
-    XmlElement docElement( "paths" );
-
-    if ( ! tempDirPath.isEmpty() )
-    {
-        XmlElement* element = new XmlElement( "temp_dir" );
-        element->setAttribute( "path", tempDirPath.toLocal8Bit().data() );
-        docElement.addChildElement( element );
-    }
-
-    foreach ( QString path, recentProjectPaths )
-    {
-        XmlElement* element = new XmlElement( "recent_project" );
-        element->setAttribute( "path", path.toLocal8Bit().data() );
-        docElement.addChildElement( element );
-    }
-
-    File pathsConfigFile( PATHS_CONFIG_FILE_PATH );
-    pathsConfigFile.create();
-    docElement.writeToFile( pathsConfigFile, String::empty );
+    TextFileHandler::createPathsConfigFile( config );
 }
