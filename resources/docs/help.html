@@ -40,7 +40,7 @@ audio and MIDI behind the scenes.</p>
 <li><p><a href="#JACK_Outputs">JACK Outputs</a></p></li>
 <li><p><a href="#Export_Options">Export Options</a></p></li>
 <li><p><a href="#Session_Management">Session Management</a></p></li>
-<li><p><a href="#Hints__Tips">Hints &amp; Tips</a></p></li>
+<li><p><a href="#Keyboard_Shortcuts">Keyboard Shortcuts</a></p></li>
 </ul>
 <p><br></p>
 
@@ -187,8 +187,11 @@ then does the appropriate maths to calculate the BPM once the &#8220;Calc&#8221;
 
 <p>The Rubber Band library takes care of time stretching duties within
 Shuriken and provides two modes of operation: offline and real-time.&nbsp; To switch between 
-offline and real-time mode, click &#8220;Stretch Options&#8221;
-then toggle the appropriate radio button.</p>
+offline and real-time mode, open the options dialogue and click the appropriate radio button 
+under the &#8220;Time Stretch&#8221; tab.</p>
+
+<p>Hint: if you find that JACK's DSP load is too high when time stretching in
+real-time mode, try setting &#8220;Window Size&#8221; to &#8220;Short&#8221;.</p>
 
 <br>
 
@@ -416,23 +419,118 @@ in the Options dialogue otherwise Shuriken will terminate when you try to save t
 <p><br></p>
 
 
-<h1><a name="Hints__Tips"></a>Hints &amp; Tips</h1>
+<h1><a name="Keyboard_Shortcuts"></a>Keyboard Shortcuts</h1>
 
-<p>The waveform may be zoomed in and out using the mouse wheel.&nbsp; Alternatively, 
-zooming may be controlled using the keyboard shortcuts Ctrl++ and 
-Ctrl+- (on a UK keyboard you'll need to use the + key on
-the keypad if you want to avoid pressing Ctrl+Shift++).&nbsp;
-Ctrl+0 zooms the waveform out to its original size.</p>
+<p>
+<table>
+    <tr>
+        <td>Add slice point</td>
+        <td>Insert</td>
+    </tr>
+    <tr>
+        <td>Delete slice point</td>
+        <td>Delete</td>
+    </tr>
+    <tr>
+        <td>Move slice point to next zero-crossing</td>
+        <td>N</td>
+    </tr>
+    <tr>
+        <td>Move slice point to previous zero-crossing &nbsp;</td>
+        <td>P</td>
+    </tr>
+    <tr>
+        <td>Slice waveform</td>
+        <td>Return</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>Reverse audio</td>
+        <td>R</td>
+    </tr>
+    <tr>
+        <td>Apply gain</td>
+        <td>G</td>
+    </tr>
+    <tr>
+        <td>Apply gain ramp</td>
+        <td>Shift + G</td>
+    </tr>
+    <tr>
+        <td>Delete audio slice</td>
+        <td>Delete</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>Select next audio slice</td>
+        <td>Z</td>
+    </tr>
+    <tr>
+        <td>Play selected audio slice</td>
+        <td>A</td>
+    </tr>
+    <tr>
+        <td>Select previous audio slice</td>
+        <td>Q</td>
+    </tr>
+    <tr>
+        <td>Play all audio slices in sequence</td>
+        <td>Spacebar</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>Select/move</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>Multi select</td>
+        <td>2</td>
+    </tr>
+    <tr>
+        <td>Audition</td>
+        <td>3</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>Scroll waveform left</td>
+        <td>left cursor key</td>
+    </tr>
+    <tr>
+        <td>Scroll waveform right	</td>
+        <td>right cursor key</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>Zoom in</td>
+        <td>Ctrl + +   (see note below for UK keyboard layouts)</td>
+    </tr>
+    <tr>
+        <td>Zoom out</td>
+        <td>Ctrl + -</td>
+    </tr>
+    <tr>
+        <td>Zoom original</td>
+        <td>Ctrl + 0</td>
+    </tr>
+</table>
+</p>
 
-<p>When zoomed in, the waveform may be scrolled with the left and right cursor keys.</p>
-
-<p>The function of the mouse pointer within the waveform display can be
-changed with the keyboard shortcuts 1, 2, and 3 to switch between &#8220;Select/Move&#8221;,
-&#8220;Multi Select&#8221;, and &#8220;Audition&#8221; respectively.</p>
-
-<p>If you find that JACK's DSP load is too high when time stretching in
-real-time mode, try setting &#8220;Window Size&#8221; to &#8220;Short&#8221; in the time
-stretch options dialogue.</p>
+<p>Note: on a UK keyboard you'll need to use the + key on the keypad if you want to avoid pressing Ctrl + Shift + +</p>
 <p><br></p>
 
 
