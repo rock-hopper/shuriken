@@ -194,6 +194,24 @@ void MainWindow::keyPressEvent( QKeyEvent* event )
                 playSample( m_graphicsScene->getSelectedWaveforms().first(), QPointF() );
             }
             break;
+        case Qt::Key_N:
+            if ( ! event->isAutoRepeat() )
+            {
+                SharedSlicePointItem slicePoint = m_graphicsScene->getSelectedSlicePoint();
+
+                if ( ! slicePoint.isNull() )
+                    slicePoint->moveToNextZeroCrossing();
+            }
+            break;
+        case Qt::Key_P:
+            if ( ! event->isAutoRepeat() )
+            {
+                SharedSlicePointItem slicePoint = m_graphicsScene->getSelectedSlicePoint();
+
+                if ( ! slicePoint.isNull() )
+                    slicePoint->moveToPrevZeroCrossing();
+            }
+            break;
         default:
             QMainWindow::keyPressEvent( event );
             break;

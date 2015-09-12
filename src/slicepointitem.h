@@ -52,6 +52,9 @@ public:
     void setHeight( qreal height );
     void setPos( qreal x, qreal y );
 
+    void moveToNextZeroCrossing();
+    void moveToPrevZeroCrossing();
+
     int getFrameNum() const                             { return m_frameNum; }
     void setFrameNum( int frameNum )                    { m_frameNum = frameNum; }
 

@@ -115,6 +115,44 @@ void SlicePointItem::setPos( const qreal x, const qreal y )
 
 
 
+void SlicePointItem::moveToNextZeroCrossing()
+{
+    WaveGraphicsScene* const waveScene = static_cast<WaveGraphicsScene*>( scene() );
+
+    const SharedSampleBuffer sampleBuffer = waveScene->getWaveformAt( 0 )->getSampleBuffer();
+
+    const int oldFrameNum = getFrameNum();
+
+    const int newFrameNum = SampleUtils::getNextZeroCrossing( sampleBuffer, oldFrameNum + 1 );
+    setFrameNum( newFrameNum );
+
+    const qreal newScenePosX = waveScene->getScenePosX( newFrameNum );
+    setPos( newScenePosX, 0.0 );
+
+    emit scenePosChanged( this, oldFrameNum );
+}
+
+
+
+void SlicePointItem::moveToPrevZeroCrossing()
+{
+    WaveGraphicsScene* const waveScene = static_cast<WaveGraphicsScene*>( scene() );
+
+    const SharedSampleBuffer sampleBuffer = waveScene->getWaveformAt( 0 )->getSampleBuffer();
+
+    const int oldFrameNum = getFrameNum();
+
+    const int newFrameNum = SampleUtils::getPrevZeroCrossing( sampleBuffer, oldFrameNum - 1 );
+    setFrameNum( newFrameNum );
+
+    const qreal newScenePosX = waveScene->getScenePosX( newFrameNum );
+    setPos( newScenePosX, 0.0 );
+
+    emit scenePosChanged( this, oldFrameNum );
+}
+
+
+
 //==================================================================================================
 // Public Static:
 
@@ -278,31 +316,13 @@ void SlicePointItem::contextMenuEvent( QGraphicsSceneContextMenuEvent* event )
 
         QAction* selectedAction = menu.exec(event->screenPos());
 
-        WaveGraphicsScene* const waveScene = static_cast<WaveGraphicsScene*>( scene() );
-
-        const SharedSampleBuffer sampleBuffer = waveScene->getWaveformAt( 0 )->getSampleBuffer();
-
-        const int oldFrameNum = getFrameNum();
-
         if ( selectedAction == nextAction )
         {
-            const int newFrameNum = SampleUtils::getNextZeroCrossing( sampleBuffer, oldFrameNum + 1 );
-            setFrameNum( newFrameNum );
-
-            const qreal newScenePosX = waveScene->getScenePosX( newFrameNum );
-            setPos( newScenePosX, 0.0 );
-
-            emit scenePosChanged( this, oldFrameNum );
+            moveToNextZeroCrossing();
         }
         else if ( selectedAction == prevAction )
         {
-            const int newFrameNum = SampleUtils::getPrevZeroCrossing( sampleBuffer, oldFrameNum - 1 );
-            setFrameNum( newFrameNum );
-
-            const qreal newScenePosX = waveScene->getScenePosX( newFrameNum );
-            setPos( newScenePosX, 0.0 );
-
-            emit scenePosChanged( this, oldFrameNum );
+            moveToPrevZeroCrossing();
         }
 
         // Prevent wonky behaviour
@@ -311,6 +331,8 @@ void SlicePointItem::contextMenuEvent( QGraphicsSceneContextMenuEvent* event )
         {
             item->ungrabMouse();
         }
+
+        WaveGraphicsScene* const waveScene = static_cast<WaveGraphicsScene*>( scene() );
 
         foreach ( SharedSlicePointItem item, waveScene->getSlicePointList() )
         {

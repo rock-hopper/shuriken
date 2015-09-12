@@ -1354,9 +1354,6 @@
    <property name="text">
     <string>Normalise</string>
    </property>
-   <property name="shortcut">
-    <string>N</string>
-   </property>
   </action>
   <action name="actionZoom_In">
    <property name="enabled">
