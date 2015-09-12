@@ -658,9 +658,9 @@ void MainWindow::disableUI()
 {
     m_ui->pushButton_PlayStop->setEnabled( false );
     m_ui->pushButton_Loop->setEnabled( false );
-    m_ui->doubleSpinBox_OriginalBPM->setValue( 0.0 );
+    m_ui->doubleSpinBox_OriginalBPM->setValue( 120.0 );
     m_ui->doubleSpinBox_OriginalBPM->setEnabled( false );
-    m_ui->doubleSpinBox_NewBPM->setValue( 0.0 );
+    m_ui->doubleSpinBox_NewBPM->setValue( 120.0 );
     m_ui->doubleSpinBox_NewBPM->setEnabled( false );
     m_ui->pushButton_CalcBPM->setEnabled( false );
     m_ui->pushButton_Apply->setEnabled( false );
@@ -1074,12 +1074,7 @@ void MainWindow::playSample( const WaveformItem* waveformItem, const QPointF mou
 
     if ( m_rubberbandAudioSource != NULL && m_ui->checkBox_TimeStretch->isChecked() )
     {
-        qreal globalStretchRatio = 1.0;
-
-        if ( m_ui->doubleSpinBox_OriginalBPM->value() > 0.0 && m_ui->doubleSpinBox_NewBPM->value() > 0.0 )
-        {
-            globalStretchRatio = m_ui->doubleSpinBox_OriginalBPM->value() / m_ui->doubleSpinBox_NewBPM->value();
-        }
+        const qreal globalStretchRatio = m_ui->doubleSpinBox_OriginalBPM->value() / m_ui->doubleSpinBox_NewBPM->value();
 
         const int startMidiNote = m_samplerAudioSource->getLowestAssignedMidiNote();
 
@@ -1844,11 +1839,13 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
     const int index = m_ui->comboBox_SnapValues->currentIndex();
     const int divisionsPerBeat = m_ui->comboBox_SnapValues->itemData( index ).toInt();
 
-    m_graphicsScene->setBpmRulerMarks( bpm, numerator, divisionsPerBeat  );
+    m_graphicsScene->setBpmRulerMarks( m_ui->doubleSpinBox_OriginalBPM->value(),
+                                       numerator,
+                                       divisionsPerBeat  );
 
-    if ( m_rubberbandAudioSource != NULL && bpm > 0.0 )
+    if ( m_rubberbandAudioSource != NULL )
     {
-        m_rubberbandAudioSource->setOriginalBPM( bpm );
+        m_rubberbandAudioSource->setOriginalBPM( m_ui->doubleSpinBox_OriginalBPM->value() );
     }
 }
 
@@ -2034,7 +2031,7 @@ void MainWindow::on_doubleSpinBox_OriginalBPM_valueChanged( const double origina
     {
         m_rubberbandAudioSource->setOriginalBPM( originalBPM );
 
-        if ( ! m_optionsDialog->isJackSyncEnabled() && newBPM > 0.0 && originalBPM > 0.0 )
+        if ( ! m_optionsDialog->isJackSyncEnabled() )
         {
             const qreal timeRatio = originalBPM / newBPM;
 
@@ -2061,14 +2058,11 @@ void MainWindow::on_doubleSpinBox_NewBPM_valueChanged( const double newBPM )
 
     if ( isTimeStretchEnabled && m_rubberbandAudioSource != NULL )
     {
-        if ( newBPM > 0.0 && originalBPM > 0.0 )
-        {
-            const qreal timeRatio = originalBPM / newBPM;
+        const qreal timeRatio = originalBPM / newBPM;
 
-            m_rubberbandAudioSource->setGlobalTimeRatio( timeRatio );
+        m_rubberbandAudioSource->setGlobalTimeRatio( timeRatio );
 
-            m_graphicsScene->updatePlayheadSpeed( timeRatio );
-        }
+        m_graphicsScene->updatePlayheadSpeed( timeRatio );
     }
 }
 
@@ -2087,8 +2081,7 @@ void MainWindow::on_checkBox_TimeStretch_toggled( const bool isChecked )
 
         if ( isTimeStretchEnabled )
         {
-            if ( newBPM > 0.0 && originalBPM > 0.0 )
-                timeRatio = originalBPM / newBPM;
+            timeRatio = originalBPM / newBPM;
             isPitchCorrectionEnabled = m_ui->checkBox_PitchCorrection->isChecked();
         }
 
@@ -2125,10 +2118,7 @@ void MainWindow::on_pushButton_PlayStop_clicked()
         
         m_ui->pushButton_PlayStop->setIcon( QIcon( ":/resources/images/media-playback-stop.png" ) );
 
-        if ( m_rubberbandAudioSource != NULL &&
-             m_ui->checkBox_TimeStretch->isChecked() &&
-             m_ui->doubleSpinBox_OriginalBPM->value() > 0.0 &&
-             m_ui->doubleSpinBox_NewBPM->value() > 0.0 )
+        if ( m_rubberbandAudioSource != NULL && m_ui->checkBox_TimeStretch->isChecked() )
         {
             qreal stretchRatio = m_ui->doubleSpinBox_OriginalBPM->value() / m_ui->doubleSpinBox_NewBPM->value();
             m_graphicsScene->startPlayhead( m_ui->pushButton_Loop->isChecked(), stretchRatio );
@@ -2180,31 +2170,25 @@ void MainWindow::on_actionZoom_Original_triggered()
 
 void MainWindow::on_pushButton_Apply_clicked()
 {
-    const qreal originalBPM = m_ui->doubleSpinBox_OriginalBPM->value();
-    const qreal newBPM = m_ui->doubleSpinBox_NewBPM->value();
+    const QString tempDirPath = m_optionsDialog->getTempDirPath();
 
-    if ( newBPM > 0.0 && originalBPM > 0.0 )
+    if ( ! tempDirPath.isEmpty() )
     {
-        const QString tempDirPath = m_optionsDialog->getTempDirPath();
+        const QString fileBaseName = QString::number( m_undoStack.index() );
 
-        if ( ! tempDirPath.isEmpty() )
-        {
-            const QString fileBaseName = QString::number( m_undoStack.index() );
-
-            QUndoCommand* command = new GlobalTimeStretchCommand( this,
-                                                                  m_graphicsScene,
-                                                                  m_ui->doubleSpinBox_OriginalBPM,
-                                                                  m_ui->doubleSpinBox_NewBPM,
-                                                                  m_ui->checkBox_PitchCorrection,
-                                                                  tempDirPath,
-                                                                  fileBaseName );
-            m_undoStack.push( command );
-        }
-        else
-        {
-            MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
-                                             tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
-        }
+        QUndoCommand* command = new GlobalTimeStretchCommand( this,
+                                                              m_graphicsScene,
+                                                              m_ui->doubleSpinBox_OriginalBPM,
+                                                              m_ui->doubleSpinBox_NewBPM,
+                                                              m_ui->checkBox_PitchCorrection,
+                                                              tempDirPath,
+                                                              fileBaseName );
+        m_undoStack.push( command );
+    }
+    else
+    {
+        MessageBoxes::showWarningDialog( tr("Temp dir invalid!"),
+                                         tr("This operation needs to save temporary files, please change \"Temp Dir\" in options") );
     }
 }
 

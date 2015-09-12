@@ -65,8 +65,14 @@
          <property name="enabled">
           <bool>false</bool>
          </property>
+         <property name="minimum">
+          <double>10.000000000000000</double>
+         </property>
          <property name="maximum">
-          <double>999.990000000000009</double>
+          <double>300.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>120.000000000000000</double>
          </property>
         </widget>
        </item>
@@ -365,8 +371,14 @@
                <property name="enabled">
                 <bool>false</bool>
                </property>
+               <property name="minimum">
+                <double>10.000000000000000</double>
+               </property>
                <property name="maximum">
-                <double>999.990000000000009</double>
+                <double>300.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>120.000000000000000</double>
                </property>
               </widget>
              </item>
