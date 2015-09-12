@@ -105,6 +105,8 @@ private:
     void importAudioFileDialog();
     void exportAsDialog();
 
+    void addPathToRecentProjects( QString filePath );
+
     bool isSelectiveTimeStretchInUse() const;
     QUndoCommand* createRenderCommand( QUndoCommand* parent = NULL );
 

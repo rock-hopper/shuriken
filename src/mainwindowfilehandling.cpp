@@ -33,7 +33,7 @@
 #include "akaifilehandler.h"
 #include "midifilehandler.h"
 #include "confirmbpmdialog.h"
-//#include <QDebug>
+//#include <QtDebug>
 
 
 //==================================================================================================
@@ -168,6 +168,7 @@ void MainWindow::saveProject( const QString filePath, const bool isNsmSessionExp
         else
         {
             m_currentProjectFilePath = filePath;
+            addPathToRecentProjects( filePath );
         }
 
         if ( ! isNsmSessionExport )
@@ -377,6 +378,7 @@ void MainWindow::openProject( const QString filePath )
             if ( m_nsmThread == NULL )
             {
                 m_currentProjectFilePath = filePath;
+                addPathToRecentProjects( filePath );
             }
 
             m_ui->statusBar->showMessage( tr("Project: ") + projectName );
@@ -883,4 +885,67 @@ void MainWindow::exportAsDialog()
 
     // Checks complete, now do export
     exportAs( tempDirPath, outputDirPath, samplesDirPath, fileName, exportType, sndFileFormat, outputSampleRate, numSamplesToExport );
+}
+
+
+
+void MainWindow::addPathToRecentProjects( QString filePath )
+{
+    QString tempDirPath;
+    QStringList recentProjectPaths;
+
+    // Try to load paths config file
+    {
+        ScopedPointer<XmlElement> docElement;
+        docElement = XmlDocument::parse( File( PATHS_CONFIG_FILE_PATH ) );
+
+        if ( docElement != NULL )
+        {
+            if ( docElement->hasTagName( "paths" ) )
+            {
+                forEachXmlChildElement( *docElement, elem )
+                {
+                    if ( elem->hasTagName( "temp_dir" ) )
+                    {
+                        tempDirPath = elem->getStringAttribute( "path" ).toRawUTF8();
+                    }
+                    else if ( elem->hasTagName( "recent_project" ) )
+                    {
+                        recentProjectPaths << elem->getStringAttribute( "path" ).toRawUTF8();
+                    }
+                }
+            }
+        }
+    }
+
+    // If this path is already in the recent projects list then remove it
+    recentProjectPaths.removeOne( filePath );
+
+    recentProjectPaths.prepend( filePath );
+
+    while ( recentProjectPaths.size() > RecentProjects::MAX )
+    {
+        recentProjectPaths.removeLast();
+    }
+
+    // Save paths config file
+    XmlElement docElement( "paths" );
+
+    if ( ! tempDirPath.isEmpty() )
+    {
+        XmlElement* element = new XmlElement( "temp_dir" );
+        element->setAttribute( "path", tempDirPath.toLocal8Bit().data() );
+        docElement.addChildElement( element );
+    }
+
+    foreach ( QString path, recentProjectPaths )
+    {
+        XmlElement* element = new XmlElement( "recent_project" );
+        element->setAttribute( "path", path.toLocal8Bit().data() );
+        docElement.addChildElement( element );
+    }
+
+    File pathsConfigFile( PATHS_CONFIG_FILE_PATH );
+    pathsConfigFile.create();
+    docElement.writeToFile( pathsConfigFile, String::empty );
 }

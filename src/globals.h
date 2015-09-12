@@ -35,6 +35,12 @@
 #define FILE_EXTENSION              ".shuriken"
 
 
+namespace RecentProjects
+{
+    const int MAX = 5;
+}
+
+
 namespace InputChannels
 {
     const int MIN = 0;
