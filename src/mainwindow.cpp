@@ -195,7 +195,6 @@ void MainWindow::keyPressEvent( QKeyEvent* event )
             }
             break;
         case Qt::Key_N:
-            if ( ! event->isAutoRepeat() )
             {
                 SharedSlicePointItem slicePoint = m_graphicsScene->getSelectedSlicePoint();
 
@@ -204,7 +203,6 @@ void MainWindow::keyPressEvent( QKeyEvent* event )
             }
             break;
         case Qt::Key_P:
-            if ( ! event->isAutoRepeat() )
             {
                 SharedSlicePointItem slicePoint = m_graphicsScene->getSelectedSlicePoint();
 
