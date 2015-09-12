@@ -122,7 +122,7 @@ void MainWindow::saveProject( const QString filePath, const bool isNsmSessionExp
         else
         {
             settings.originalBpm = m_appliedBPM > 0.0 ? m_appliedBPM : m_ui->doubleSpinBox_OriginalBPM->value();
-            settings.newBpm = m_appliedBPM;
+            settings.newBpm = settings.originalBpm;
             settings.appliedBpm = m_appliedBPM;
         }
 
