@@ -131,6 +131,7 @@ public:
 
     qreal getScenePosX( int frameNum ) const;
     int getFrameNum( qreal scenePosX ) const;
+    qreal getNearestFramePosX( qreal scenePosX ) const;
 
     void resizeWaveformItems( qreal scaleFactorX );
     void resizeSlicePointItems( qreal scaleFactorX );

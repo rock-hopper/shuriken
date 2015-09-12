@@ -805,6 +805,27 @@ int WaveGraphicsScene::getFrameNum( qreal scenePosX ) const
 
 
 
+qreal WaveGraphicsScene::getNearestFramePosX( qreal scenePosX ) const
+{
+    const int numFrames = getTotalNumFrames( m_waveformItemList );
+
+    const qreal distanceBetweenFrames = width() / numFrames;
+
+    const int frameNum = roundToIntAccurate( scenePosX / distanceBetweenFrames );
+
+    qreal posX = frameNum * distanceBetweenFrames;
+
+    if ( posX < 0.0)
+        posX = 0.0;
+
+    if ( posX >= width() )
+        posX = width() - 1;
+
+    return posX;
+}
+
+
+
 void WaveGraphicsScene::resizeWaveformItems( const qreal scaleFactorX )
 {
     foreach ( SharedWaveformItem item, m_waveformItemList )

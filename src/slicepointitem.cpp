@@ -132,14 +132,14 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
 {
     if ( change == ItemPositionChange && scene() != NULL )
     {
+        WaveGraphicsScene* waveScene = static_cast<WaveGraphicsScene*>( scene() );
+
         QPointF newPos = value.toPointF();
 
         // Snap slice point to BPM ruler marks
         if ( m_isSnapEnabled )
         {
-            WaveGraphicsScene* scene = static_cast<WaveGraphicsScene*>( this->scene() );
-
-            foreach ( SharedGraphicsItem item, scene->getBpmRulerMarks() )
+            foreach ( SharedGraphicsItem item, waveScene->getBpmRulerMarks() )
             {
                 const qreal itemPosX = item->scenePos().x();
 
@@ -155,6 +155,11 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
                 }
             }
         }
+
+
+        // Snap slice point to the nearest frame scene position
+        newPos.setX( waveScene->getNearestFramePosX( newPos.x() ) );
+
 
         // If required, prevent slice point from being moved past other slice points
         if ( ! m_canBeMovedPastOtherSlicePoints && m_isLeftMousePressed )
