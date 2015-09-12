@@ -381,6 +381,8 @@ void WaveformItem::resetSampleBins()
     {
         m_detailLevel = VERY_HIGH;
 
+        emit sampleDetailLevelReached();
+
         if ( m_binSize <= DETAIL_LEVEL_MAX_CUTOFF )
         {
             emit maxDetailLevelReached();
@@ -395,6 +397,8 @@ void WaveformItem::resetSampleBins()
             m_minSampleValues[ chanNum ]->resize( m_numBins );
             m_maxSampleValues[ chanNum ]->resize( m_numBins );
         }
+
+        emit sampleBinDetailLevelReached();
     }
     else
     {
@@ -405,6 +409,8 @@ void WaveformItem::resetSampleBins()
             m_minSampleValues[ chanNum ]->resize( m_numBins );
             m_maxSampleValues[ chanNum ]->resize( m_numBins );
         }
+
+        emit sampleBinDetailLevelReached();
     }
 }
 

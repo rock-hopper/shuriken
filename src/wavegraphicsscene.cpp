@@ -31,7 +31,8 @@
 
 WaveGraphicsScene::WaveGraphicsScene( const qreal x, const qreal y, const qreal width, const qreal height, QObject* parent ) :
     QGraphicsScene( x, y, width, height, parent ),
-    m_interactionMode( AUDITION_ITEMS )
+    m_interactionMode( AUDITION_ITEMS ),
+    m_isSceneAtSampleDetailLevel( false )
 {
     createBpmRuler();
 
@@ -926,14 +927,20 @@ WaveGraphicsView* WaveGraphicsScene::getView() const
 
 void WaveGraphicsScene::connectWaveform( const SharedWaveformItem item )
 {
-    QObject::connect( item.data(), SIGNAL( orderPosIsChanging(QList<int>,int) ),
-                      this, SLOT( reorderWaveformItems(QList<int>,int) ) );
+    connect( item.data(), SIGNAL( orderPosIsChanging(QList<int>,int) ),
+             this, SLOT( reorderWaveformItems(QList<int>,int) ) );
 
-    QObject::connect( item.data(), SIGNAL( finishedMoving(int) ),
-                      this, SLOT( slideWaveformItemIntoPlace(int) ) );
+    connect( item.data(), SIGNAL( finishedMoving(int) ),
+             this, SLOT( slideWaveformItemIntoPlace(int) ) );
 
-    QObject::connect( item.data(), SIGNAL( maxDetailLevelReached() ),
-                      getView(), SLOT( relayMaxDetailLevelReached() ) );
+    connect( item.data(), SIGNAL( maxDetailLevelReached() ),
+             getView(), SLOT( relayMaxDetailLevelReached() ) );
+
+    connect( item.data(), SIGNAL( sampleBinDetailLevelReached() ),
+             this, SLOT( setSceneDetailLevelToSampleBins() ) );
+
+    connect( item.data(), SIGNAL( sampleDetailLevelReached() ),
+             this, SLOT( setSceneDetailLevelToSamples() ) );
 }
 
 
@@ -1098,4 +1105,18 @@ void WaveGraphicsScene::removePlayhead()
 {
     removeItem( m_playhead );
     update();
+}
+
+
+
+void WaveGraphicsScene::setSceneDetailLevelToSamples()
+{
+    m_isSceneAtSampleDetailLevel = true;
+}
+
+
+
+void WaveGraphicsScene::setSceneDetailLevelToSampleBins()
+{
+    m_isSceneAtSampleDetailLevel = false;
 }

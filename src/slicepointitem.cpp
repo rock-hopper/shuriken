@@ -136,6 +136,7 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
 
         QPointF newPos = value.toPointF();
 
+
         // Snap slice point to BPM ruler marks
         if ( m_isSnapEnabled )
         {
@@ -157,8 +158,11 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
         }
 
 
-        // Snap slice point to the nearest frame scene position
-        newPos.setX( waveScene->getNearestFramePosX( newPos.x() ) );
+        // Snap slice point to the nearest audio frame scene position
+        if ( waveScene->isSceneAtSampleDetailLevel() )
+        {
+            newPos.setX( waveScene->getNearestFramePosX( newPos.x() ) );
+        }
 
 
         // If required, prevent slice point from being moved past other slice points
@@ -174,6 +178,7 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
             }
         }
 
+
         // Keep item within bounds of scene rect
         const QRectF sceneRect = scene()->sceneRect();
 
@@ -184,6 +189,7 @@ QVariant SlicePointItem::itemChange( GraphicsItemChange change, const QVariant& 
                 qMin( sceneRect.right() - 1, qMax( newPos.x(), sceneRect.left() ) )
             );
         }
+
 
 #if QT_VERSION >= 0x040700  // Qt 4.7
         newPos.setY( BpmRuler::HEIGHT + 1 );

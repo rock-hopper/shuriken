@@ -130,6 +130,8 @@ signals:
 
     void clicked( const WaveformItem* waveformItem, QPointF mouseScenePos );
 
+    void sampleBinDetailLevelReached();
+    void sampleDetailLevelReached();
     void maxDetailLevelReached();
 
 private:

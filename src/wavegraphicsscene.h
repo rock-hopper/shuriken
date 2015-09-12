@@ -133,6 +133,8 @@ public:
     int getFrameNum( qreal scenePosX ) const;
     qreal getNearestFramePosX( qreal scenePosX ) const;
 
+    bool isSceneAtSampleDetailLevel() const                 { return m_isSceneAtSampleDetailLevel; }
+
     void resizeWaveformItems( qreal scaleFactorX );
     void resizeSlicePointItems( qreal scaleFactorX );
     void resizePlayhead();
@@ -161,6 +163,8 @@ private:
     ScopedPointer<QTimeLine> m_timer;
     ScopedPointer<QGraphicsItemAnimation> m_animation;
 
+    bool m_isSceneAtSampleDetailLevel;
+
 private:
     static int getTotalNumFrames( QList<SharedWaveformItem> waveformItemList );
 
@@ -180,6 +184,9 @@ private slots:
     void slideWaveformItemIntoPlace( int orderPos );
     void updateSlicePointOrdering( SlicePointItem* movedItem, int oldFrameNum );
     void removePlayhead();
+
+    void setSceneDetailLevelToSamples();
+    void setSceneDetailLevelToSampleBins();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( WaveGraphicsScene );
