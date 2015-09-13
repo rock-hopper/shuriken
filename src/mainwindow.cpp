@@ -33,6 +33,7 @@
 #include "aboutdialog.h"
 #include "messageboxes.h"
 #include "sampleutils.h"
+#include "textfilehandler.h"
 #include <rubberband/RubberBandStretcher.h>
 #include <QtDebug>
 
@@ -386,6 +387,38 @@ void MainWindow::setupUI()
         m_ui->actionOpen_Project->setToolTip( tr( "Import Project" ) );
         m_ui->actionSave_As->setText( tr( "Export Project" ) );
         m_ui->actionSave_As->setToolTip( tr( "Export Project" ) );
+    }
+    else
+    {
+        for ( int i = 0; i < RecentProjects::MAX; i++ )
+        {
+            QAction* action = new QAction( this );
+            action->setVisible( false );
+
+            connect( action, SIGNAL( triggered() ),
+                     this, SLOT( openRecentProject() ) );
+
+            m_recentProjectsActions << action;
+        }
+
+        m_ui->menuRecent_Projects->addActions( m_recentProjectsActions );
+
+        TextFileHandler::PathsConfig config;
+        TextFileHandler::readPathsConfigFile( config );
+
+        if ( ! config.recentProjectPaths.isEmpty() )
+        {
+            m_ui->menuRecent_Projects->setEnabled( true );
+
+            for ( int i = 0; i < config.recentProjectPaths.size(); i++ )
+            {
+                QString text = QFileInfo( config.recentProjectPaths.at( i ) ).fileName();
+
+                m_recentProjectsActions.at( i )->setText( text );
+                m_recentProjectsActions.at( i )->setData( config.recentProjectPaths.at( i ) );
+                m_recentProjectsActions.at( i )->setVisible( true );
+            }
+        }
     }
 
 
@@ -1350,6 +1383,18 @@ void MainWindow::enableJackOutputsAction( const bool isJackAudioEnabled )
     else
     {
         m_ui->actionJack_Outputs->setEnabled( false );
+    }
+}
+
+
+
+void MainWindow::openRecentProject()
+{
+    QAction* action = qobject_cast<QAction*>( sender() );
+
+    if ( action != NULL )
+    {
+        openProject( action->data().toString() );
     }
 }
 

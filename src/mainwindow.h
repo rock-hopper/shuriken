@@ -115,11 +115,15 @@ private:
 
     void copySelectedSamplesToClipboard();
 
+
     Ui::MainWindow* m_ui; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
-    WaveGraphicsScene* m_graphicsScene;
+
     QActionGroup* m_interactionGroup;
+    QList<QAction*> m_recentProjectsActions;
 
     enum LengthUnits { UNITS_BARS, UNITS_BEATS };
+
+    WaveGraphicsScene* m_graphicsScene;
 
     OptionsDialog* m_optionsDialog;
     ScopedPointer<HelpForm> m_helpForm;
@@ -245,6 +249,8 @@ private slots:
     void notifyNsmOfUnsavedChanges( bool isClean );
 
     void enableJackOutputsAction( bool isJackAudioEnabled );
+
+    void openRecentProject();
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( MainWindow );

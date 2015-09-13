@@ -1003,10 +1003,20 @@
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="menuRecent_Projects">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="title">
+      <string>Recent Projects</string>
+     </property>
+    </widget>
     <addaction name="actionOpen_Project"/>
     <addaction name="actionSave_Project"/>
     <addaction name="actionSave_As"/>
     <addaction name="actionClose_Project"/>
+    <addaction name="separator"/>
+    <addaction name="menuRecent_Projects"/>
     <addaction name="separator"/>
     <addaction name="actionImport_Audio_File"/>
     <addaction name="actionExport_As"/>

@@ -906,4 +906,15 @@ void MainWindow::addPathToRecentProjects( QString filePath )
     }
 
     TextFileHandler::createPathsConfigFile( config );
+
+    m_ui->menuRecent_Projects->setEnabled( true );
+
+    for ( int i = 0; i < config.recentProjectPaths.size(); i++ )
+    {
+        QString text = QFileInfo( config.recentProjectPaths.at( i ) ).fileName();
+
+        m_recentProjectsActions.at( i )->setText( text );
+        m_recentProjectsActions.at( i )->setData( config.recentProjectPaths.at( i ) );
+        m_recentProjectsActions.at( i )->setVisible( true );
+    }
 }
