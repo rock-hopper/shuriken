@@ -24,5 +24,3 @@ UI Improvements
 ---------------
 Fix gaps in waveform when zoomed in at low detail level
 
-Improve accuracy of waveform / slice point drawing routines
-
