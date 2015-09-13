@@ -134,27 +134,9 @@ strong {
 }
 
 img {
-  position: relative;
-  margin: 0 auto;
-  max-width: 739px;
-  padding: 5px;
-  margin: 10px 0 0 0;
-  border: 1px solid #ebebeb;
-
-
-  box-shadow: 0 0 10px rgba(0,0,0,.5);
-  -webkit-box-shadow: 0 0 10px rgba(0,0,0,.5);
-  -moz-box-shadow: 0 0 10px rgba(0,0,0,.5);
-  -o-box-shadow: 0 0 10px rgba(0,0,0,.5);
-  -ms-box-shadow: 0 0 10px rgba(0,0,0,.5);
-}
-
-p img {
-  display: inline;
-  margin: 0;
+  margin: 0px 0px 0px -100px ;
+  max-width: 840px;
   padding: 0;
-  vertical-align: middle;
-  text-align: center;
   border: none;
 }
 
