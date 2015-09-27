@@ -248,7 +248,8 @@ bool TextFileHandler::createPathsConfigFile( const PathsConfig& config )
 
     File pathsConfigFile( PATHS_CONFIG_FILE_PATH );
     pathsConfigFile.create();
-    docElement.writeToFile( pathsConfigFile, String::empty );
+
+    return docElement.writeToFile( pathsConfigFile, String::empty );
 }
 
 
@@ -257,6 +258,8 @@ bool TextFileHandler::readPathsConfigFile( PathsConfig& config )
 {
     ScopedPointer<XmlElement> docElement;
     docElement = XmlDocument::parse( File( PATHS_CONFIG_FILE_PATH ) );
+
+    bool isSuccessful = false;
 
     if ( docElement != NULL )
     {
@@ -273,8 +276,12 @@ bool TextFileHandler::readPathsConfigFile( PathsConfig& config )
                     config.recentProjectPaths << elem->getStringAttribute( "path" ).toRawUTF8();
                 }
             }
+
+            isSuccessful = true;
         }
     }
+
+    return isSuccessful;
 }
 
 
