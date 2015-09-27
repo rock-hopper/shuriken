@@ -24,7 +24,6 @@
 #define NSMLISTENERTHREAD_H
 
 #include <QThread>
-#include <QMutex>
 #include "nonlib/nsm.h"
 #include "JuceHeader.h"
 
@@ -54,8 +53,6 @@ private:
 
     bool m_isOpenComplete;
 
-    QMutex m_mutex;
-
 private:
     static int openCallback( const char* savePath,
                              const char* displayName,
@@ -77,3 +74,4 @@ private:
 
 
 #endif // NSMLISTENERTHREAD_H
+

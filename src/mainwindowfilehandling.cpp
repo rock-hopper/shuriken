@@ -374,7 +374,7 @@ void MainWindow::openProject( const QString filePath )
             // Clean up temp dir
             File( projTempDir.absolutePath().toLocal8Bit().data() ).deleteRecursively();
 
-            // Store file path for later use unless under nsm management
+            // Store file path for later use unless under NSM management
             if ( m_nsmThread == NULL )
             {
                 m_currentProjectFilePath = filePath;

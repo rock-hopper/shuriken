@@ -23,7 +23,7 @@
 #include "signallistener.h"
 #include <unistd.h>
 #include <sys/socket.h>
-#include <QDebug>
+#include <QtDebug>
 
 
 int SignalListener::sigusr1SocketID[ 2 ];
@@ -84,7 +84,7 @@ void SignalListener::sigtermCallback( int /* sigNum */ )
 
 void SignalListener::handleSigUsr1()
 {
-    qDebug() << "handleSigUsr1";
+    //qDebug() << "SignalListener::handleSigUsr1";
 
     m_sigusr1Notifier->setEnabled( false );
     char c;
@@ -102,7 +102,7 @@ void SignalListener::handleSigUsr1()
 
 void SignalListener::handleSigTerm()
 {
-    qDebug() << "handleSigTerm";
+    //qDebug() << "SignalListener::handleSigTerm";
 
     m_sigtermNotifier->setEnabled( false );
     char c;
@@ -111,7 +111,7 @@ void SignalListener::handleSigTerm()
     m_isAppQuitting = true;
     emit quit();
 
-    qDebug() << "quit signal sent";
+    //qDebug() << "SignalListener::handleSigTerm, quit signal sent";
 
     m_sigtermNotifier->setEnabled( true );
 }

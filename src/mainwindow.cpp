@@ -75,8 +75,9 @@ MainWindow::MainWindow( QWidget* parent ) :
         QDir().mkpath( savePath );
         m_currentProjectFilePath = QDir( savePath ).absoluteFilePath( fileName );
 
-        connect( m_nsmThread, SIGNAL(save()),
-                 this, SLOT(on_actionSave_Project_triggered()) );
+        connect( m_nsmThread, SIGNAL( save() ),
+                 this, SLOT( on_actionSave_Project_triggered() ),
+                 Qt::BlockingQueuedConnection );
 
         m_nsmThread->start();
     }
@@ -1535,8 +1536,9 @@ void MainWindow::on_actionExport_As_triggered()
 
 void MainWindow::on_actionQuit_triggered()
 {
-    // Check for unsaved changes before continuing
-    if ( m_undoStack.isClean() )
+    // Check for unsaved changes before quitting
+
+    if ( m_undoStack.isClean() || m_nsmThread != NULL )
     {
         QCoreApplication::quit();
     }

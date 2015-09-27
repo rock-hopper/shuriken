@@ -77,8 +77,6 @@ void NsmListenerThread::sendMessage( const Message message )
 {
     if ( m_nsmClient != NULL )
     {
-        m_mutex.lock();
-
         switch ( message )
         {
         case MSG_IS_CLEAN:
@@ -90,8 +88,6 @@ void NsmListenerThread::sendMessage( const Message message )
         default:
             break;
         }
-
-        m_mutex.unlock();
     }
 }
 
@@ -107,7 +103,7 @@ void NsmListenerThread::run()
     if ( m_nsmClient != NULL )
     {
         connect( &timer, SIGNAL(timeout()), this, SLOT(checkForMessages()), Qt::DirectConnection );
-        timer.start( 10 );
+        timer.start( 100 );
     }
 
     exec();
@@ -156,8 +152,9 @@ int NsmListenerThread::saveCallback( char** outMessage, void* userData )
 
 void NsmListenerThread::checkForMessages()
 {
-    m_mutex.lock();
+    //qDebug() << "NsmListenerThread::checkForMessages, current thread ID:" << QThread::currentThreadId();
+
     nsm_check_nowait( m_nsmClient );
-    m_mutex.unlock();
 }
+
 

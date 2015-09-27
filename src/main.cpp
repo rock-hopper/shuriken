@@ -30,11 +30,11 @@
 #include <QTextStream>
 
 
-void messageHandler( QtMsgType type, const char* message )
+void messageHandler( QtMsgType messageType, const char* message )
 {
     QString text;
 
-    switch ( type )
+    switch ( messageType )
     {
     case QtDebugMsg:
         text = QString( "Debug: %1" ).arg( message );
@@ -47,7 +47,7 @@ void messageHandler( QtMsgType type, const char* message )
         break;
     case QtFatalMsg:
         text = QString( "Fatal: %1" ).arg( message );
-        abort();
+        break;
     }
 
     QFile outFile( "/dev/shm/debuglog.txt" );
@@ -56,6 +56,11 @@ void messageHandler( QtMsgType type, const char* message )
     {
         QTextStream textStream( &outFile );
         textStream << text << endl;
+    }
+
+    if ( messageType == QtFatalMsg )
+    {
+        abort();
     }
 }
 
