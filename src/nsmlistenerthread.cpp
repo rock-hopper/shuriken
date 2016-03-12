@@ -45,7 +45,7 @@ NsmListenerThread::NsmListenerThread() :
         {
             m_isOpenComplete = false;
 
-            nsm_send_announce( m_nsmClient, APPLICATION_NAME, ":dirty:", QApplication::argv()[ 0 ] );
+            nsm_send_announce( m_nsmClient, APPLICATION_NAME, ":dirty:", QApplication::arguments().at( 0 ).toLocal8Bit() );
 
             while ( m_isOpenComplete == false )
             {

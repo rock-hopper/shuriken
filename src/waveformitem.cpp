@@ -44,8 +44,12 @@ WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer,
     setFlags( ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges | ItemUsesExtendedStyleOption );
 
     setBackgroundGradient();
+
     m_wavePen  = QPen( QColor(23, 23, 135, 191) );
+    m_wavePen.setCosmetic( true );
+
     m_centreLinePen = QPen( QColor(127, 127, 127, 191) );
+    m_centreLinePen.setCosmetic( true );
 
     // Don't draw rect border
     setPen( Qt::NoPen );
