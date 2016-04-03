@@ -1,8 +1,8 @@
 /*
   ==============================================================================
 
-   This file contains code which forms part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   This file contains code from the JUCE library.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -21,11 +21,11 @@
 
   ==============================================================================
 
-  All modifications and additions to the original code by Andrew M Taylor <a.m.taylor303@gmail.com>, 2014
+  All modifications to the original code by Andrew M Taylor <a.m.taylor303@gmail.com>, 2014, 2016
 
-  All modifications and additions to the original code are released into the public domain.
-  Please read UNLICENSE for more details, or refer to <http://unlicense.org/>
-
+  To the extent possible under law, Andrew M Taylor has waived all copyright
+  and related or neighboring rights to the code modifications in this file.
+  <https://creativecommons.org/publicdomain/zero/1.0/>
 */
 
 #ifndef LINUX_MIDI_H
@@ -98,14 +98,14 @@ private:
             if (snd_midi_event_new (maxEventSize, &midiParser) >= 0)
             {
                 const int numPfds = snd_seq_poll_descriptors_count (seqHandle, POLLIN);
-                HeapBlock<pollfd> pfd (numPfds);
-                snd_seq_poll_descriptors (seqHandle, pfd, numPfds, POLLIN);
+                HeapBlock<pollfd> pfd ((size_t) numPfds);
+                snd_seq_poll_descriptors (seqHandle, pfd, (unsigned int) numPfds, POLLIN);
 
-                HeapBlock <uint8> buffer (maxEventSize);
+                HeapBlock<uint8> buffer (maxEventSize);
 
                 while (! threadShouldExit())
                 {
-                    if (poll (pfd, numPfds, 100) > 0) // there was a "500" here which is a bit long when we exit the program and have to wait for a timeout on this poll call
+                    if (poll (pfd, (nfds_t) numPfds, 100) > 0) // there was a "500" here which is a bit long when we exit the program and have to wait for a timeout on this poll call
                     {
                         if (threadShouldExit())
                             break;
@@ -119,14 +119,14 @@ private:
                             if (snd_seq_event_input (seqHandle, &inputEvent) >= 0)
                             {
                                 // xxx what about SYSEXes that are too big for the buffer?
-                                const int numBytes = snd_midi_event_decode (midiParser, buffer,
-                                                                            maxEventSize, inputEvent);
+                                const long numBytes = snd_midi_event_decode (midiParser, buffer,
+                                                                             maxEventSize, inputEvent);
 
                                 snd_midi_event_reset_decode (midiParser);
 
                                 if (numBytes > 0)
                                 {
-                                    const MidiMessage message ((const uint8*) buffer, numBytes,
+                                    const MidiMessage message ((const uint8*) buffer, (int) numBytes,
                                                                Time::getMillisecondCounter() * 0.001);
 
                                     client.handleIncomingMidiMessage (message, inputEvent->dest.port);

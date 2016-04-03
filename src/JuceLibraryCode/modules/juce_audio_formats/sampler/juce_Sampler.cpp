@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -93,7 +93,7 @@ void SamplerVoice::startNote (const int midiNoteNumber,
                               SynthesiserSound* s,
                               const int /*currentPitchWheelPosition*/)
 {
-    if (const SamplerSound* const sound = dynamic_cast <const SamplerSound*> (s))
+    if (const SamplerSound* const sound = dynamic_cast<const SamplerSound*> (s))
     {
         pitchRatio = pow (2.0, (midiNoteNumber - sound->midiRootNote) / 12.0)
                         * sound->sourceSampleRate / getSampleRate();
@@ -119,7 +119,7 @@ void SamplerVoice::startNote (const int midiNoteNumber,
         if (sound->releaseSamples > 0)
             releaseDelta = (float) (-pitchRatio / sound->releaseSamples);
         else
-            releaseDelta = 0.0f;
+            releaseDelta = -1.0f;
     }
     else
     {
@@ -152,7 +152,7 @@ void SamplerVoice::controllerMoved (const int /*controllerNumber*/,
 //==============================================================================
 void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples)
 {
-    if (const SamplerSound* const playingSound = static_cast <SamplerSound*> (getCurrentlyPlayingSound().get()))
+    if (const SamplerSound* const playingSound = static_cast<SamplerSound*> (getCurrentlyPlayingSound().get()))
     {
         const float* const inL = playingSound->data->getReadPointer (0);
         const float* const inR = playingSound->data->getNumChannels() > 1

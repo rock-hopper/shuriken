@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -21,11 +21,11 @@
 
   ==============================================================================
 
-  All modifications to this file by Andrew M Taylor <a.m.taylor303@gmail.com>, 2014
+  All modifications to the original code by Andrew M Taylor <a.m.taylor303@gmail.com>, 2014, 2016
 
-  All modifications to the original file are released into the public domain.
-  Please read UNLICENSE for more details, or refer to <http://unlicense.org/>
-
+  To the extent possible under law, Andrew M Taylor has waived all copyright
+  and related or neighboring rights to the code modifications in this file.
+  <https://creativecommons.org/publicdomain/zero/1.0/>
 */
 
 #if JUCE_ALSA
@@ -440,7 +440,7 @@ public:
           maxEventSize (16 * 1024)
     {
         jassert (port.isValid() && midiOutput != nullptr);
-        snd_midi_event_new (maxEventSize, &midiParser);
+        snd_midi_event_new ((size_t) maxEventSize, &midiParser);
     }
 
     ~MidiOutputDevice()
@@ -449,13 +449,13 @@ public:
         port.deletePort();
     }
 
-    void sendMessageNow (const MidiMessage& message)
+    bool sendMessageNow (const MidiMessage& message)
     {
         if (message.getRawDataSize() > maxEventSize)
         {
             maxEventSize = message.getRawDataSize();
             snd_midi_event_free (midiParser);
-            snd_midi_event_new (maxEventSize, &midiParser);
+            snd_midi_event_new ((size_t) maxEventSize, &midiParser);
         }
 
         snd_seq_event_t event;
@@ -465,12 +465,16 @@ public:
         const uint8* data = message.getRawData();
 
         snd_seq_t* seqHandle = (dynamic_cast<AlsaMidiClient*> (port.client.getObject()))->getSeqHandle();
-
+        bool success = true;
+	
         while (numBytes > 0)
         {
             const long numSent = snd_midi_event_encode (midiParser, data, numBytes, &event);
             if (numSent <= 0)
+            {
+                success = numSent == 0;
                 break;
+            }
 
             numBytes -= numSent;
             data += numSent;
@@ -479,11 +483,15 @@ public:
             snd_seq_ev_set_subs (&event);
             snd_seq_ev_set_direct (&event);
 
-            snd_seq_event_output (seqHandle, &event);
+            if (snd_seq_event_output_direct (seqHandle, &event) < 0)
+            {
+                success = false;
+                break;
+            }
         }
 
-        snd_seq_drain_output (seqHandle);
         snd_midi_event_reset_encode (midiParser);
+        return success;
     }
 
 private:
@@ -492,7 +500,7 @@ private:
     snd_midi_event_t* midiParser;
     int maxEventSize;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDevice);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDevice)
 };
 
 //} // namespace
@@ -518,7 +526,7 @@ MidiOutput* MidiOutput::openDevice (int deviceIndex)
 
     if (port.isValid())
     {
-        newDevice = new MidiOutput();
+        newDevice = new MidiOutput (devices [deviceIndex]);
         newDevice->internal = new MidiOutputDevice (newDevice, port);
     }
 
@@ -533,7 +541,7 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 
     if (port.isValid())
     {
-        newDevice = new MidiOutput();
+        newDevice = new MidiOutput (deviceName);
         newDevice->internal = new MidiOutputDevice (newDevice, port);
     }
 

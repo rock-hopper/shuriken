@@ -4,9 +4,9 @@
 
   All modifications to jpo's code by Andrew M Taylor <a.m.taylor303@gmail.com>, 2014
 
-  This is free and unencumbered software released into the public domain.
-  Please read UNLICENSE for more details, or refer to <http://unlicense.org/>
-
+  To the extent possible under law, Andrew M Taylor has waived all copyright
+  and related or neighboring rights to the code in this file.
+  <https://creativecommons.org/publicdomain/zero/1.0/>
 */
 
 #include <dlfcn.h>

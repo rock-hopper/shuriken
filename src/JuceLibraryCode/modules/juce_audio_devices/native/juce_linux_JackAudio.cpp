@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2013 - Raw Material Software Ltd.
+   Copyright (c) 2015 - ROLI Ltd.
 
    Permission is granted to use this software under the terms of either:
    a) the GPL v2 (or any later version)
@@ -21,14 +21,14 @@
 
   ==============================================================================
 
-  This file contains code originally written by "jpo"
+  This file also contains code originally written by "jpo"
   <http://www.juce.com/comment/296820#comment-296820>
 
-  Additional modifications to this file by Andrew M Taylor <a.m.taylor303@gmail.com>
+  Additional code modifications by Andrew M Taylor <a.m.taylor303@gmail.com>, 2014, 2015
 
-  All modifications to the original file are released into the public domain.
-  Please read UNLICENSE for more details, or refer to <http://unlicense.org/>
-
+  To the extent possible under law, Andrew M Taylor has waived all copyright
+  and related or neighboring rights to the code modifications in this file.
+  <https://creativecommons.org/publicdomain/zero/1.0/>
 */
 
 //==============================================================================
