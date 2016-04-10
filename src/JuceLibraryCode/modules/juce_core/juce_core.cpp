@@ -39,10 +39,12 @@
 #define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 
+#include "../../AppConfig.h"
 #include "juce_core.h"
 
 #include <locale>
 #include <cctype>
+#include <cstdarg>
 
 #if ! JUCE_ANDROID
  #include <sys/timeb.h>
@@ -117,7 +119,7 @@
 
 //==============================================================================
 #ifndef    JUCE_STANDALONE_APPLICATION
- JUCE_COMPILER_WARNING ("Please re-save your Introjucer project with the latest Introjucer version to avoid this warning")
+ JUCE_COMPILER_WARNING ("Please re-save your project with the latest Projucer version to avoid this warning")
  #define   JUCE_STANDALONE_APPLICATION 0
 #endif
 

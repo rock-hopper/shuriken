@@ -31,6 +31,7 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
+#include "../../AppConfig.h"
 #include "juce_audio_basics.h"
 
 #if JUCE_MINGW && ! defined (__SSE2__)
@@ -65,6 +66,13 @@
 
 #if __ARM_NEON__ && ! (JUCE_USE_VDSP_FRAMEWORK || defined (JUCE_USE_ARM_NEON))
  #define JUCE_USE_ARM_NEON 1
+#endif
+
+#if TARGET_IPHONE_SIMULATOR
+ #ifdef JUCE_USE_ARM_NEON
+  #undef JUCE_USE_ARM_NEON
+ #endif
+ #define JUCE_USE_ARM_NEON 0
 #endif
 
 #if JUCE_USE_ARM_NEON

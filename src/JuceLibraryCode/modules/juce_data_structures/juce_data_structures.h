@@ -22,6 +22,30 @@
   ==============================================================================
 */
 
+/*******************************************************************************
+ The block below describes the properties of this module, and is read by
+ the Projucer to automatically generate project code that uses it.
+ For details about the syntax and how to create or use a module, see the
+ JUCE Module Format.txt file.
+
+
+ BEGIN_JUCE_MODULE_DECLARATION
+
+  ID:               juce_data_structures
+  vendor:           juce
+  version:          4.2.0
+  name:             JUCE data model helper classes
+  description:      Classes for undo/redo management, and smart data structures.
+  website:          http://www.juce.com/juce
+  license:          GPL/Commercial
+
+  dependencies:     juce_events
+
+ END_JUCE_MODULE_DECLARATION
+
+*******************************************************************************/
+
+
 #ifndef JUCE_DATA_STRUCTURES_H_INCLUDED
 #define JUCE_DATA_STRUCTURES_H_INCLUDED
 

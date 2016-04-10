@@ -37,6 +37,7 @@
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 #define JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW 1
 
+#include "../../AppConfig.h"
 #include "juce_audio_devices.h"
 
 //==============================================================================

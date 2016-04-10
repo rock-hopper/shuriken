@@ -32,6 +32,10 @@
  #define   JUCE_STANDALONE_APPLICATION 1
 #endif
 
+#ifndef  JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
+ #define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1
+#endif
+
 //==============================================================================
 // juce_audio_devices flags:
 

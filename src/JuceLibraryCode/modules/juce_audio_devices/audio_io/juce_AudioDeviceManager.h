@@ -405,10 +405,10 @@ public:
     void playTestSound();
 
     /** Plays a sound from a file. */
-    void playSound (const File& file);
+    //void playSound (const File& file);
 
     /** Convenient method to play sound from a JUCE resource. */
-    void playSound (const void* resourceData, size_t resourceSize);
+    //void playSound (const void* resourceData, size_t resourceSize);
 
     /** Plays the sound from an audio format reader.
 
