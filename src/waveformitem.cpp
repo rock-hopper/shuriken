@@ -45,7 +45,7 @@ WaveformItem::WaveformItem( const SharedSampleBuffer sampleBuffer,
 
     setBackgroundGradient();
 
-    m_wavePen  = QPen( QColor(23, 23, 135, 191) );
+    m_wavePen = QPen( QColor(23, 23, 135, 191) );
     m_wavePen.setCosmetic( true );
 
     m_centreLinePen = QPen( QColor(127, 127, 127, 191) );

@@ -38,7 +38,9 @@ WaveGraphicsScene::WaveGraphicsScene( const qreal x, const qreal y, const qreal 
 
     // Set up playhead
     m_playhead = new QGraphicsLineItem( 0.0, 0.0, 0.0, height - BpmRuler::HEIGHT );
-    m_playhead->setPen( QColor( Qt::red ) );
+    QPen pen = QPen( Qt::red );
+    pen.setCosmetic( true );
+    m_playhead->setPen( pen );
     m_playhead->setZValue( ZValues::PLAYHEAD );
 
     m_timer = new QTimeLine();
