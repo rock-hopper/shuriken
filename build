@@ -47,6 +47,7 @@ declare -ri NUM_ARGS=$#
 
 # Globals
 declare isShurikenWanted=true
+declare isQt4Wanted=false
 declare isDebugWanted=false
 declare isCleanWanted=false
 
@@ -122,10 +123,10 @@ function showUsage()
 {
     cat << EOF
 
-Usage:  build
-        build sndlib
-        build debug
-        build clean
+Usage:  build [ -d, --debug ] [ --qt4 ]
+        build -s, --sndlib
+        build -c, --clean
+        build -h, --help
 
 EOF
 }
@@ -155,16 +156,20 @@ function checkDependencies()
                          rubberband
                          samplerate
                          sndfile >= 1.0.20
-                         uuid >= 2.17.0
                          x11' --print-errors
 
     errorCode=$?
 
-    if [ ! -e "/usr/bin/qmake-qt4" ]; then
+    if $isQt4Wanted && [ ! -e "/usr/bin/qmake-qt4" ]; then
         echo "qmake-qt4 not found"
         errorCode=1
     fi
 
+    if ! $isQt4Wanted && [ ! -e "/usr/bin/qmake" ]; then
+        echo "qmake not found"
+        errorCode=1
+    fi
+    
     if [ ! -e "/usr/bin/automake" ]; then
         echo "automake not found"
         errorCode=1
@@ -210,7 +215,14 @@ function makeShuriken()
         configOptions="CONFIG+=debug"
     fi
 
-    qmake-qt4 ./Shuriken.pro -r -spec linux-g++$arch $configOptions
+    if $isQt4Wanted; then
+        echo "qmake-qt4 ./Shuriken.pro -r -spec linux-g++$arch $configOptions"
+        qmake-qt4 ./Shuriken.pro -r -spec linux-g++$arch $configOptions
+    else
+        echo "qmake ./Shuriken.pro -r -spec linux-g++$arch $configOptions"
+        qmake ./Shuriken.pro -r -spec linux-g++$arch $configOptions
+    fi
+    
     make -w
 }
 
@@ -219,19 +231,17 @@ function processArgs()
 {
     declare -i i=0
 
-    if (( NUM_ARGS > 0 )); then
-        while (( i < NUM_ARGS )); do
-            case ${ARGS[$i]} in
-                sndlib )            isShurikenWanted=false;;
-                debug )             isDebugWanted=true;;
-                clean )             isCleanWanted=true;;
-                -h )                showUsage; exit 0;;
-                --help )            showUsage; exit 0;;
-                * )                 echo -e "\nInvalid arg: \"${ARGS[$i]}\""; showUsage; exit 1;;
-            esac
-            (( i++ ))
-        done
-    fi
+    while (( i < NUM_ARGS )); do
+        case ${ARGS[$i]} in
+            -s | --sndlib )     isShurikenWanted=false;;
+                 --qt4 )        isQt4Wanted=true;;
+            -d | --debug )      isDebugWanted=true;;
+            -c | --clean )      isCleanWanted=true;;
+            -h | --help )       showUsage; exit 0;;
+            * )                 echo -e "\nInvalid arg: \"${ARGS[$i]}\""; showUsage; exit 1;;
+        esac
+        (( i++ ))
+    done
 }
 
 
@@ -256,7 +266,7 @@ else
     if [ $? -eq 0 ]; then
         echo "OK"
     else
-        setTextStyle $BOLD_LIGHT_RED;
+        setTextStyle $BOLD_LIGHT_RED
         echo -e "\nOne or more packages needed to build Shuriken couldn't be found."
         echo -e "\nWould you like to continue anyway?"
         setTextStyle $DEFAULT_TEXT
