@@ -1,7 +1,7 @@
 Shuriken Beat Slicer
 ====================
 
-Shuriken is an open source beat slicer which harnesses the power of aubio's onset detection algorithms and Rubber Band's time stretching capabilities. A simple Qt4 interface makes it easy to slice up drum loops, assign individual drum hits to MIDI keys, and change the tempo of loops in real-time. The JUCE library takes care of handling audio and MIDI behind the scenes.
+Shuriken is an open source beat slicer which harnesses the power of aubio's onset detection algorithms and Rubber Band's time stretching capabilities. A simple Qt interface makes it easy to slice up drum loops, assign individual drum hits to MIDI keys, and change the tempo of loops in real-time. The JUCE library takes care of handling audio and MIDI behind the scenes.
 
 Main features:
 
@@ -26,17 +26,20 @@ Main features:
 
 Shuriken can either be built using Qt Creator or the supplied build script. To use the build script, simply open a terminal in Shuriken's root directory and enter:
 
-    ./build (or optionally ./build debug)
+    ./build
 
 If working with Qt Creator, use the build script to compile the static sndlib library first:
 
-    ./build sndlib
+    ./build --sndlib
 
-To clean the project:
+The build script also provides some other options:
 
-    ./build clean
+    ./build --qt4 (configure with qmake-qt4 and compile against Qt4 libraries)
+    ./build --debug
+    ./build --clean
+    ./build --help
 
-You must have qmake-qt4, and the aubio (>=0.4.1) and rubberband (>=1.3) dev files installed on your system.
+You must have either qmake or qmake-qt4 installed as well as the aubio (>=0.4.1) and rubberband (>=1.3) dev files.
 ___
 
 As noted above, Shuriken requires the latest incarnation of the aubio library which I've packaged for Ubuntu Precise and Trusty, and AVLinux 6:
