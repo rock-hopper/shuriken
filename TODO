@@ -2,8 +2,6 @@ TODO
 
 Add Features
 ------------
-Qt5 compatibility
-
 Option to stream samples from disc
 
 Export Akai MPC .snd files and S1000/S2000/S3000 files
@@ -13,6 +11,10 @@ Display MIDI note mappings
 Pitch-shifting for individual audio slices
 
 DC offset removal
+
+Mono/poly mode
+
+Record into Shuriken
 
 
 Dialogs
