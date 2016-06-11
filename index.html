@@ -3,16 +3,15 @@
 
   <head>
     <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Shuriken : Shuriken Beat Slicer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Shuriken is an open-source beat slicer for Linux">
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <title>Shuriken</title>
+    <title>Shuriken Beat Slicer</title>
   </head>
 
   <body>
-
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
         <header class="inner">
@@ -22,29 +21,28 @@
           <h1 id="project_title">Shuriken</h1>
           <h2 id="project_tagline">Shuriken Beat Slicer</h2>
 
-            <section id="downloads">
-              <a class="deb_download_link" href="https://github.com/rock-hopper/shuriken/releases/latest">Download the latest release</a>
-            </section>
+          <div id="downloads">
+            <a class="deb_download_link" href="https://github.com/rock-hopper/shuriken/releases/latest">Download the latest release</a>
+          </div>
         </header>
     </div>
 
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-
+      <div class="inner main_content">
         <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
           <input type="hidden" name="cmd" value="_s-xclick">
           <input type="hidden" name="hosted_button_id" value="ZJXX2TPMWD2WW">
-          <input type="image" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal – The safer, easier way to pay online.">
-          <img alt="" border="0" src="https://www.paypalobjects.com/en_GB/i/scr/pixel.gif" width="1" height="1">
+          <input type="image" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif" name="submit" alt="PayPal – The safer, easier way to pay online.">
+          <img alt="" src="https://www.paypalobjects.com/en_GB/i/scr/pixel.gif" width="1" height="1">
         </form>
+      </div>
 
-        <p><img src="images/shuriken.png"></p>
-
+      <img src="images/shuriken.png" alt="Screenshot of Shuriken Beat Slicer" />
+      
+      <div class="inner main_content">
         <p><strong>Shuriken</strong> is an open source beat slicer for Linux which harnesses the power of aubio's onset detection algorithms and Rubber Band's time stretching capabilities. A simple Qt interface makes it easy to slice up drum loops, assign individual drum hits to MIDI keys, and change the tempo of loops in real-time. The JUCE library takes care of handling audio and MIDI behind the scenes.</p>
-
         <p><strong>Main features:</strong></p>
-
         <ul>
         <li>onset and beat-of-the-bar detection (via aubio)</li>
         <li>calculate BPM</li>
@@ -52,21 +50,19 @@
         <li>zero-crossing detection</li>
         <li>slice and un-slice waveform</li>
         <li>each audio slice automatically assigned to its own MIDI key</li>
-        <li>move, delete, and copy & paste audio slices</li>
+        <li>move, delete, and copy &amp; paste audio slices</li>
         <li>apply gain, gain ramp, normalise, and reverse</li>
         <li>amplitude envelope generator with controls for attack, release, and one-shot</li>
         <li>set the number of JACK outputs and route any audio slice to any output</li>
         <li>time stretching in offline or real-time mode (via rubberband)</li>
         <li>time stretch individual audio slices and quantise your beats</li>
-        <li>NSM session management support</li>
-        <li>LADISH L1 session management support</li>
+        <li>NSM and LADISH L1 session management support</li>
         <li>ALSA and JACK MIDI</li>
         <li>import a wide range of audio file formats (via libsndfile and the built-in sndlib library)</li>
         <li>export audio slices in WAV, AIFF, AU, FLAC, or Ogg format, with options for encoding and sample rate</li>
-        <li>export Hydrogen Drumkit, SFZ, Akai .pgm, or MIDI file</li>
+        <li>export Hydrogen Drumkit, SFZ, Akai .pgm (MPC 500/1000/2500), or MIDI file</li>
         </ul>
-
-      </section>
+      </div>
     </div>
 
     <!-- FOOTER  -->
@@ -76,6 +72,5 @@
         <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
-
   </body>
 </html>
