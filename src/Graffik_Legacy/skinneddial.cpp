@@ -189,14 +189,16 @@ void SkinnedDial::paintEvent(QPaintEvent *pe) {
 
     if( curVal != m_cacheVal || cacheHit == false ) {
 
-       rotNeedle = *m_cacheNeedle;
+        rotNeedle = *m_cacheNeedle;
 
-       if( curVal < 0 ) {
-            float pct = (float) abs(curVal) / (float) abs(this->minimum());
-            rotNeedle = _rotatePix(&rotNeedle, m_maxDeg * pct, false);
+        const float midPoint = (this->maximum() - this->minimum()) * 0.5;
+
+        if( curVal < midPoint ) {
+            float pct = curVal / midPoint;
+            rotNeedle = _rotatePix(&rotNeedle, m_maxDeg - (m_maxDeg * pct), false);
         }
-       else if( curVal > 0 ) {
-            float pct =(float)  abs(curVal) / (float) abs(this->maximum());
+        else if( curVal > midPoint ) {
+            float pct = (curVal - midPoint) / midPoint ;
             rotNeedle = _rotatePix(&rotNeedle, m_maxDeg * pct, true);
         }
 
