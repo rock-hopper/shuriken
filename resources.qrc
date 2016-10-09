@@ -73,5 +73,7 @@
         <file>resources/images/table_button.png</file>
         <file>resources/images/edit-copy.png</file>
         <file>resources/images/edit-paste.png</file>
+        <file>resources/images/dial-background.png</file>
+        <file>resources/images/dial-needle.png</file>
     </qresource>
 </RCC>

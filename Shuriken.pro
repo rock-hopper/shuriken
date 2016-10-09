@@ -193,7 +193,9 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/wavegraphicsscene.cpp \
     src/nsmlistenerthread.cpp \
     src/jackoutputsdialog.cpp \
-    src/sampleutils.cpp
+    src/sampleutils.cpp \
+    src/Graffik_Legacy/basiceventfilter.cpp \
+    src/Graffik_Legacy/skinneddial.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -431,7 +433,9 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/nonlib/nsm.h \
     src/nsmlistenerthread.h \
     src/jackoutputsdialog.h \
-    src/sampleutils.h
+    src/sampleutils.h \
+    src/Graffik_Legacy/basiceventfilter.h \
+    src/Graffik_Legacy/skinneddial.h
 FORMS += src/mainwindow.ui \
     src/optionsdialog.ui \
     src/helpform.ui \
