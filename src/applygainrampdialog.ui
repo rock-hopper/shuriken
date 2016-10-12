@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>275</width>
+    <width>304</width>
     <height>148</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QDial" name="dial_StartGain">
+      <widget class="SkinnedDial" name="dial_StartGain">
        <property name="maximum">
         <number>110</number>
        </property>
@@ -27,7 +27,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QDial" name="dial_EndGain">
+      <widget class="SkinnedDial" name="dial_EndGain">
        <property name="maximum">
         <number>110</number>
        </property>
@@ -99,15 +99,14 @@
     </widget>
    </item>
   </layout>
-  <zorder>buttonBox</zorder>
-  <zorder>dial_StartGain</zorder>
-  <zorder>dial_EndGain</zorder>
-  <zorder>doubleSpinBox_StartGain</zorder>
-  <zorder>doubleSpinBox_EndGain</zorder>
-  <zorder>label</zorder>
-  <zorder>label_2</zorder>
-  <zorder>dial_StartGain</zorder>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SkinnedDial</class>
+   <extends>QDial</extends>
+   <header>src/Graffik_Legacy/skinneddial.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

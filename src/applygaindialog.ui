@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QDial" name="dial_Gain">
+    <widget class="SkinnedDial" name="dial_Gain">
      <property name="maximum">
       <number>110</number>
      </property>
@@ -63,6 +63,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SkinnedDial</class>
+   <extends>QDial</extends>
+   <header>src/Graffik_Legacy/skinneddial.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
