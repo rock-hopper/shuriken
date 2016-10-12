@@ -75,5 +75,7 @@
         <file>resources/images/edit-paste.png</file>
         <file>resources/images/dial-background.png</file>
         <file>resources/images/dial-needle.png</file>
+        <file>resources/images/mixer-midi.png</file>
+        <file>resources/images/note.png</file>
     </qresource>
 </RCC>

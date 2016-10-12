@@ -1165,6 +1165,7 @@
    <addaction name="separator"/>
    <addaction name="actionSelective_Time_Stretch"/>
    <addaction name="separator"/>
+   <addaction name="actionMonophonic"/>
    <addaction name="actionJack_Outputs"/>
    <addaction name="separator"/>
    <addaction name="actionHelp"/>
@@ -1624,6 +1625,24 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionMonophonic">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/resources/images/note.png</normaloff>:/resources/images/note.png</iconset>
+   </property>
+   <property name="text">
+    <string>Monophonic</string>
+   </property>
+   <property name="shortcut">
+    <string>M</string>
    </property>
   </action>
  </widget>

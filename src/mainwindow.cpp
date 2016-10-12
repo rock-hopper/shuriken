@@ -304,7 +304,7 @@ void MainWindow::initialiseAudio()
 
 void MainWindow::setUpSampler()
 {
-    m_samplerAudioSource = new SamplerAudioSource( true );
+    m_samplerAudioSource = new SamplerAudioSource( m_ui->actionMonophonic->isChecked() );
 
     if ( ! m_sampleBufferList.isEmpty() && ! m_sampleHeader.isNull() )
     {
@@ -590,6 +590,9 @@ void MainWindow::setupUI()
     connect( &m_undoStack, SIGNAL( redoTextChanged(QString) ),
              this, SLOT( updateRedoText(QString) ) );
 
+    connect (m_ui->actionMonophonic, SIGNAL( triggered() ),
+             this, SLOT( recreateSampler() ) );
+
     if ( m_nsmThread != NULL )
     {
         connect( &m_undoStack, SIGNAL( cleanChanged(bool) ),
@@ -693,6 +696,7 @@ void MainWindow::enableUI()
     m_ui->actionSelect_Move->setEnabled( true );
     m_ui->actionMulti_Select->setEnabled( true );
     m_ui->actionAudition->setEnabled( true );
+    m_ui->actionMonophonic->setEnabled( true );
     if ( m_optionsDialog->isJackAudioEnabled() )
     {
         m_ui->actionJack_Outputs->setEnabled( true );
@@ -758,6 +762,7 @@ void MainWindow::disableUI()
     m_ui->actionSelect_Move->setEnabled( false );
     m_ui->actionMulti_Select->setEnabled( false );
     m_ui->actionAudition->setEnabled( false );
+    m_ui->actionMonophonic->setEnabled( false );
     m_ui->actionJack_Outputs->setEnabled( false );
 
     if ( m_ui->actionSelective_Time_Stretch->isChecked() )
