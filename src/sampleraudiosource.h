@@ -1,7 +1,7 @@
 /*
   This file is part of Shuriken Beat Slicer.
 
-  Copyright (C) 2014, 2015 Andrew M Taylor <a.m.taylor303@gmail.com>
+  Copyright (C) 2014-2016 Andrew M Taylor <a.m.taylor303@gmail.com>
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -33,7 +33,7 @@ class SamplerAudioSource : public QObject, public AudioSource
     Q_OBJECT
 
 public:
-    SamplerAudioSource();
+    SamplerAudioSource( const bool isMonophonic = false );
     ~SamplerAudioSource();
 
     void setSamples( QList<SharedSampleBuffer> sampleBufferList, qreal sampleRate );
@@ -78,8 +78,10 @@ public slots:
     void setOutputPair( int sampleNum, int outputPairNum );
 
 private:
-    bool addNewSample( SharedSampleBuffer sampleBuffer, qreal sampleRate );
+    bool addNewSoundToSampler( SharedSampleBuffer sampleBuffer, qreal sampleRate );
     void clearSamples();
+
+    const bool m_isMonophonic;
 
     QList<SharedSampleBuffer> m_sampleBufferList;
     SharedSampleRange m_tempSampleRange;
@@ -95,7 +97,7 @@ private:
     int m_nextFreeNote;
     volatile int m_lowestAssignedNote;
 
-    volatile bool m_isPlaySeqEnabled;
+    volatile bool m_isPlaying;
     volatile bool m_isLoopingEnabled;
     volatile int m_seqStartNote;
     volatile int m_noteCounter;

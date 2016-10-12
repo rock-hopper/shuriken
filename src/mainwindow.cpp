@@ -1,7 +1,7 @@
 /*
   This file is part of Shuriken Beat Slicer.
 
-  Copyright (C) 2014, 2015 Andrew M Taylor <a.m.taylor303@gmail.com>
+  Copyright (C) 2014-2016 Andrew M Taylor <a.m.taylor303@gmail.com>
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -304,7 +304,7 @@ void MainWindow::initialiseAudio()
 
 void MainWindow::setUpSampler()
 {
-    m_samplerAudioSource = new SamplerAudioSource();
+    m_samplerAudioSource = new SamplerAudioSource( true );
 
     if ( ! m_sampleBufferList.isEmpty() && ! m_sampleHeader.isNull() )
     {
@@ -1188,8 +1188,8 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
             m_ui->actionSelective_Time_Stretch->setEnabled( true );
         }
 
-        QObject::connect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
-                          this, SLOT( recreateSampler() ) );
+        connect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
+                 this, SLOT( recreateSampler() ) );
     }
     else // Offline mode
     {
@@ -1198,8 +1198,8 @@ void MainWindow::enableRealtimeControls( const bool isEnabled )
 
         m_ui->actionSelective_Time_Stretch->setEnabled( false );
 
-        QObject::disconnect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
-                             this, SLOT( recreateSampler() ) );
+        disconnect( m_optionsDialog, SIGNAL( windowOptionChanged() ),
+                    this, SLOT( recreateSampler() ) );
 
         if ( isSelectiveTimeStretchInUse() )
         {

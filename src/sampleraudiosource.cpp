@@ -1,7 +1,7 @@
 /*
   This file is part of Shuriken Beat Slicer.
 
-  Copyright (C) 2014, 2015 Andrew M Taylor <a.m.taylor303@gmail.com>
+  Copyright (C) 2014-2016 Andrew M Taylor <a.m.taylor303@gmail.com>
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -29,14 +29,15 @@
 //==================================================================================================
 // Public:
 
-SamplerAudioSource::SamplerAudioSource() :
+SamplerAudioSource::SamplerAudioSource( const bool isMonophonic ) :
     QObject(),
     AudioSource(),
+    m_isMonophonic( isMonophonic ),
     m_fileSampleRate( 0.0 ),
     m_playbackSampleRate( 0.0 ),
     m_nextFreeNote( Midi::MIDDLE_C ),
     m_lowestAssignedNote( Midi::MIDDLE_C ),
-    m_isPlaySeqEnabled( false ),
+    m_isPlaying( false ),
     m_isLoopingEnabled( false ),
     m_noteCounter( 0 ),
     m_frameCounter( 0 )
@@ -66,11 +67,18 @@ void SamplerAudioSource::setSamples( const QList<SharedSampleBuffer> sampleBuffe
 
     m_lowestAssignedNote = m_nextFreeNote;
 
-    int i = 0;
-    while (  i < sampleBufferList.size() && i < Midi::MAX_POLYPHONY )
+    if ( m_isMonophonic )
     {
-        addNewSample( sampleBufferList.at( i ), sampleRate );
-        i++;
+        m_sampler.addVoice( new ShurikenSamplerVoice() );
+    }
+
+    for ( int i = 0;  i < sampleBufferList.size() && i < Midi::MAX_POLYPHONY; i++ )
+    {
+        if ( ! m_isMonophonic )
+        {
+            m_sampler.addVoice( new ShurikenSamplerVoice() );
+        }
+        addNewSoundToSampler( sampleBufferList.at( i ), sampleRate );
     }
 }
 
@@ -78,7 +86,7 @@ void SamplerAudioSource::setSamples( const QList<SharedSampleBuffer> sampleBuffe
 
 void SamplerAudioSource::playSample( const int sampleNum, const SharedSampleRange sampleRange )
 {
-    if ( m_isPlaySeqEnabled )
+    if ( m_isPlaying )
     {
         stop();
     }
@@ -87,14 +95,14 @@ void SamplerAudioSource::playSample( const int sampleNum, const SharedSampleRang
     m_noteCounter = 0;
     m_noteCounterEnd = 1;
     m_frameCounter = 0;
-    m_isPlaySeqEnabled = true;
+    m_isPlaying = true;
 }
 
 
 
 void SamplerAudioSource::playAll()
 {
-    if ( m_isPlaySeqEnabled )
+    if ( m_isPlaying )
     {
         stop();
     }
@@ -102,7 +110,7 @@ void SamplerAudioSource::playAll()
     m_noteCounter = 0;
     m_noteCounterEnd = m_sampleBufferList.size();
     m_frameCounter = 0;
-    m_isPlaySeqEnabled = true;
+    m_isPlaying = true;
 }
 
 
@@ -112,7 +120,7 @@ void SamplerAudioSource::stop()
     const int midiChannel = 1;
     const bool allowTailOff = false;
 
-    m_isPlaySeqEnabled = false;
+    m_isPlaying = false;
     m_sampler.allNotesOff( midiChannel, allowTailOff );
     m_tempSampleRange.clear();
 }
@@ -303,7 +311,7 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info, 
 
 
     // If requested, play all samples in sequence by adding appropriate MIDI messages to the buffer
-    if ( m_isPlaySeqEnabled )
+    if ( m_isPlaying )
     {
         // End of note
         if ( m_frameCounter > 0 && m_frameCounter <= info.numSamples )
@@ -318,13 +326,13 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info, 
                 }
                 else
                 {
-                    m_isPlaySeqEnabled = false;  // End of sequence reached
+                    m_isPlaying = false;  // End of sequence reached
                     m_tempSampleRange.clear();
                 }
             }
         }
 
-        if ( m_isPlaySeqEnabled )
+        if ( m_isPlaying )
         {
             // Start of note
             if ( m_frameCounter < info.numSamples )
@@ -391,14 +399,12 @@ void SamplerAudioSource::setOutputPair( const int sampleNum, const int outputPai
 //==================================================================================================
 // Private:
 
-bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer, const qreal sampleRate )
+bool SamplerAudioSource::addNewSoundToSampler( const SharedSampleBuffer sampleBuffer, const qreal sampleRate )
 {
     bool isSampleAssignedToKey = false;
 
     if ( m_nextFreeNote < Midi::MAX_POLYPHONY )
     {
-        m_sampler.addVoice( new ShurikenSamplerVoice() );
-
         BigInteger noteNum;
         noteNum.clear();
         noteNum.setBit( m_nextFreeNote );
@@ -419,7 +425,7 @@ bool SamplerAudioSource::addNewSample( const SharedSampleBuffer sampleBuffer, co
 
 void SamplerAudioSource::clearSamples()
 {
-    m_isPlaySeqEnabled = false;
+    m_isPlaying = false;
     m_sampler.clearVoices();
     m_sampler.clearSounds();
     m_sampleBufferList.clear();
