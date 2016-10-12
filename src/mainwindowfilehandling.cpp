@@ -148,6 +148,8 @@ void MainWindow::saveProject( const QString filePath, const bool isNsmSessionExp
 
         settings.slicePointFrameNums = m_graphicsScene->getSlicePointFrameNums();
 
+        settings.isMonophonyEnabled = m_ui->actionMonophonic->isChecked();
+
         TextFileHandler::createProjectXmlFile( xmlFilePath, settings );
 
         Zipper::compress( projTempDir.absolutePath(), zipFilePath );
@@ -174,6 +176,7 @@ void MainWindow::saveProject( const QString filePath, const bool isNsmSessionExp
         if ( ! isNsmSessionExport )
         {
             m_undoStack.setClean();
+            m_ui->actionSave_Project->setEnabled( false );
         }
 
         QApplication::restoreOverrideCursor();
@@ -315,6 +318,8 @@ void MainWindow::openProject( const QString filePath )
             }
 
             m_appliedBPM = settings.appliedBpm;
+
+            m_ui->actionMonophonic->setChecked( settings.isMonophonyEnabled );
 
             m_optionsDialog->setStretcherOptions( settings.options );
 

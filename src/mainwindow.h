@@ -207,8 +207,6 @@ private slots:
     void on_actionReverse_triggered();
     void on_actionDelete_triggered();
     void on_actionAdd_Slice_Point_triggered();
-    void on_actionRedo_triggered();
-    void on_actionUndo_triggered();
     void on_actionQuit_triggered();
     void on_actionExport_As_triggered();
     void on_actionImport_Audio_File_triggered();

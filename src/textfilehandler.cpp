@@ -111,6 +111,10 @@ bool TextFileHandler::createProjectXmlFile( const QString filePath, const Projec
         docElement.addChildElement( envelopeElement );
     }
 
+    XmlElement* monophonyElement = new XmlElement( "monophonic" );
+    monophonyElement->setAttribute( "checked", settings.isMonophonyEnabled );
+    docElement.addChildElement( monophonyElement );
+
     File file( filePath.toLocal8Bit().data() );
 
     return docElement.writeToFile( file, String::empty );
@@ -206,6 +210,10 @@ bool TextFileHandler::readProjectXmlFile( const QString filePath, ProjectSetting
                 else if ( elem->hasTagName( "units" ) )
                 {
                     settings.units = elem->getIntAttribute( "value" );
+                }
+                else if ( elem->hasTagName( "monophonic" ) )
+                {
+                    settings.isMonophonyEnabled = elem->getBoolAttribute( "checked" );
                 }
             }
 

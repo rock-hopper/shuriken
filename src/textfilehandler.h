@@ -44,7 +44,12 @@ public:
             isTimeStretchChecked( false ),
             isPitchCorrectionChecked( false ),
             isJackSyncChecked( false ),
-            options( 0 )
+            options( 0 ),
+            timeSigNumerator( 0 ),
+            timeSigDenominator( 0 ),
+            length( 0 ),
+            units( 0 ),
+            isMonophonyEnabled( false )
         {
         }
 
@@ -68,6 +73,7 @@ public:
         QList<qreal> attackValues;
         QList<qreal> releaseValues;
         QList<bool> oneShotSettings;
+        bool isMonophonyEnabled;
     };
 
     static bool createProjectXmlFile( QString filePath, const ProjectSettings& settings );

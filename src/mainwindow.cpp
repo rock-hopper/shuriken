@@ -593,6 +593,9 @@ void MainWindow::setupUI()
     connect (m_ui->actionMonophonic, SIGNAL( triggered() ),
              this, SLOT( recreateSampler() ) );
 
+    connect (m_ui->actionMonophonic, SIGNAL( triggered() ),
+             this, SLOT( enableSaveAction() ) );
+
     if ( m_nsmThread != NULL )
     {
         connect( &m_undoStack, SIGNAL( cleanChanged(bool) ),
@@ -1574,20 +1577,6 @@ void MainWindow::on_actionQuit_triggered()
 
 //====================
 // "Edit" menu:
-
-void MainWindow::on_actionUndo_triggered()
-{
-
-}
-
-
-
-void MainWindow::on_actionRedo_triggered()
-{
-
-}
-
-
 
 void MainWindow::on_actionSelect_All_triggered()
 {
