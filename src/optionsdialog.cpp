@@ -256,7 +256,7 @@ void OptionsDialog::changeEvent( QEvent* event )
 
 void OptionsDialog::showEvent( QShowEvent* event )
 {
-    // If the dialog has not previoulsy been minimised...
+    // If the dialog has not previoulsy been opened and minimised...
     if ( ! event->spontaneous() )
     {
         // Get current audio settings and store them so that any changes
@@ -729,7 +729,7 @@ void OptionsDialog::reject()
     tearDownMidiInputTestSynth();
 
     m_ui->comboBox_AudioBackend->setCurrentIndex( m_originalBackendIndex );
-    on_comboBox_AudioBackend_activated( m_originalBackendIndex ); // This will update all the other widgets
+    on_comboBox_AudioBackend_activated( m_originalBackendIndex );
 
     m_deviceManager.setAudioDeviceSetup( m_originalConfig, true );
 
