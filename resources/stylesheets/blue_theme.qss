@@ -452,6 +452,11 @@ QSlider::handle:horizontal:pressed {
 
 /* List view */
 
+QListView {
+    /*background-color: white;*/
+    color: black;
+}
+
 QListView::item:hover {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                       stop: 0 whitesmoke, stop: 1 lightgrey);
@@ -579,4 +584,12 @@ SkinnedDial {
     qproperty-backgroundImage: url(:/resources/images/dial-background.png);
     qproperty-needleImage: url(:/resources/images/dial-needle.png);
     qproperty-maxAngle: 140;
+}
+
+
+/* Tree View */
+
+QTreeView {
+    background-color: white;
+    color: black;
 }
