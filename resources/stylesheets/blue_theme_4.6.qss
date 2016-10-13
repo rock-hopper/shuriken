@@ -1,7 +1,7 @@
 /*
   This file is part of Shuriken Beat Slicer.
 
-  Copyright (C) 2015 Andrew M Taylor <a.m.taylor303@gmail.com>
+  Copyright (C) 2015-2016 Andrew M Taylor <a.m.taylor303@gmail.com>
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -451,6 +451,11 @@ QSlider::handle:horizontal:pressed {
 
 /* List view */
 
+QListView {
+    /*background-color: white;*/
+    color: black;
+}
+
 QListView::item:hover {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                       stop: 0 whitesmoke, stop: 1 lightgrey);
@@ -570,4 +575,21 @@ QTableWidget QToolButton:pressed,
 QTableWidget QToolButton:checked {
     border-image: url(:/resources/images/table_button.png) 5;
     border-width: 5;
+}
+
+
+/* QDial */
+
+SkinnedDial {
+    qproperty-backgroundImage: url(:/resources/images/dial-background.png);
+    qproperty-needleImage: url(:/resources/images/dial-needle.png);
+    qproperty-maxAngle: 140;
+}
+
+
+/* Tree View */
+
+QTreeView {
+    background-color: white;
+    color: black;
 }
