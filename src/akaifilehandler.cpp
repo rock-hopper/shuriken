@@ -55,6 +55,7 @@ bool AkaiFileHandler::writePgmFileMPC1000( QStringList sampleNames,
                                            const QString fileBaseName,
                                            const QString outputDirPath,
                                            const QString tempDirPath,
+                                           const bool isMonophonyEnabled,
                                            const SamplerAudioSource::EnvelopeSettings& envelopes,
                                            const bool isOverwriteEnabled )
 {
@@ -84,14 +85,14 @@ bool AkaiFileHandler::writePgmFileMPC1000( QStringList sampleNames,
             {
                 QByteArray sampleName = sampleNames.at( padNum ).toLatin1().leftJustified( MPC1000_PGM::SAMPLE_NAME_SIZE, PADDING, true );
 
-                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE );
+                const int pos = MPC1000_PGM::HEADER_SIZE + ( padNum * MPC1000_PGM::PAD_DATA_SIZE );
 
                 pgmData.replace( pos, MPC1000_PGM::SAMPLE_NAME_SIZE, sampleName );
             }
 
             // Add sample volume level
             {
-                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::LEVEL_OFFSET;
+                const int pos = MPC1000_PGM::HEADER_SIZE + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::LEVEL_OFFSET;
 
                 QByteArray level;
                 level += quint8( 100 );
@@ -101,7 +102,7 @@ bool AkaiFileHandler::writePgmFileMPC1000( QStringList sampleNames,
 
             // Add play mode
             {
-                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::PLAY_MODE_OFFSET;
+                const int pos = MPC1000_PGM::HEADER_SIZE + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::PLAY_MODE_OFFSET;
 
                 QByteArray playMode;
                 playMode += envelopes.oneShotSettings.at( padNum ) ? (char) 0x0     // 0 - One shot is set
@@ -110,9 +111,20 @@ bool AkaiFileHandler::writePgmFileMPC1000( QStringList sampleNames,
                 pgmData.replace( pos, 1, playMode );
             }
 
+            // Add voice overlap
+            {
+                const int pos = MPC1000_PGM::HEADER_SIZE + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::VOICE_OVERLAP_OFFSET;
+
+                QByteArray voiceOverlap;
+                voiceOverlap += isMonophonyEnabled ? quint8( 1 )    // 1 - Monophonic
+                                                   : (char) 0x0;    // 0 - Polyphonic
+
+                pgmData.replace( pos, 1, voiceOverlap );
+            }
+
             // Add attack
             {
-                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::ATTACK_OFFSET;
+                const int pos = MPC1000_PGM::HEADER_SIZE + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::ATTACK_OFFSET;
 
                 QByteArray attack;
                 attack += quint8( envelopes.attackValues.at( padNum ) * 100 );
@@ -122,7 +134,7 @@ bool AkaiFileHandler::writePgmFileMPC1000( QStringList sampleNames,
 
             // Add decay
             {
-                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::DECAY_OFFSET;
+                const int pos = MPC1000_PGM::HEADER_SIZE + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::DECAY_OFFSET;
 
                 QByteArray decay;
                 decay += quint8( envelopes.releaseValues.at( padNum ) * 100 );
@@ -132,7 +144,7 @@ bool AkaiFileHandler::writePgmFileMPC1000( QStringList sampleNames,
 
             // Add decay mode
             {
-                const int pos = MPC1000_PGM::PAD_DATA_START + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::DECAY_MODE_OFFSET;
+                const int pos = MPC1000_PGM::HEADER_SIZE + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::DECAY_MODE_OFFSET;
 
                 QByteArray decayMode;
                 decayMode += (char) 0x0;
@@ -200,6 +212,7 @@ bool AkaiFileHandler::writePgmFileMPC500( QStringList sampleNames,
                                           const QString fileBaseName,
                                           const QString outputDirPath,
                                           const QString tempDirPath,
+                                          const bool isMonophonyEnabled,
                                           const SamplerAudioSource::EnvelopeSettings& envelopes,
                                           const bool isOverwriteEnabled )
 {
@@ -208,7 +221,7 @@ bool AkaiFileHandler::writePgmFileMPC500( QStringList sampleNames,
         sampleNames.removeLast();
     }
 
-    return writePgmFileMPC1000( sampleNames, fileBaseName, outputDirPath, tempDirPath, envelopes, isOverwriteEnabled );
+    return writePgmFileMPC1000( sampleNames, fileBaseName, outputDirPath, tempDirPath, isMonophonyEnabled, envelopes, isOverwriteEnabled );
 }
 
 

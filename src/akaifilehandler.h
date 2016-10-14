@@ -45,6 +45,7 @@ public:
                                      QString fileBaseName,
                                      QString outputDirPath,
                                      QString tempDirPath,
+                                     bool isMonophonyEnabled,
                                      const SamplerAudioSource::EnvelopeSettings& envelopes,
                                      bool isOverwriteEnabled = true );
 
@@ -52,6 +53,7 @@ public:
                                     QString fileBaseName,
                                     QString outputDirPath,
                                     QString tempDirPath,
+                                    bool isMonophonyEnabled,
                                     const SamplerAudioSource::EnvelopeSettings& envelopes,
                                     bool isOverwriteEnabled = true );
 
@@ -78,11 +80,12 @@ private:
     {
         static const int FILE_SIZE              = 0x2A04;
 
-        static const int PAD_DATA_START         = 0x18;
+        static const int HEADER_SIZE            = 0x18;
         static const int PAD_DATA_SIZE          = 0xA4;
         static const int SAMPLE_NAME_SIZE       = 16;
         static const int LEVEL_OFFSET           = 0x11;
         static const int PLAY_MODE_OFFSET       = 0x16;
+        static const int VOICE_OVERLAP_OFFSET   = 0x62;
         static const int ATTACK_OFFSET          = 0x66;
         static const int DECAY_OFFSET           = 0x67;
         static const int DECAY_MODE_OFFSET      = 0x68;
