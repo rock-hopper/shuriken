@@ -45,8 +45,8 @@ public:
                                      QString fileBaseName,
                                      QString outputDirPath,
                                      QString tempDirPath,
-                                     bool isMonophonyEnabled,
-                                     bool isMuteGroupEnabled,
+                                     bool isVoiceOverlapMono,
+                                     int muteGroup,
                                      const SamplerAudioSource::EnvelopeSettings& envelopes,
                                      bool isOverwriteEnabled = true );
 
@@ -54,8 +54,8 @@ public:
                                     QString fileBaseName,
                                     QString outputDirPath,
                                     QString tempDirPath,
-                                    bool isMonophonyEnabled,
-                                    bool isMuteGroupEnabled,
+                                    bool isVoiceOverlapMono,
+                                    int muteGroup,
                                     const SamplerAudioSource::EnvelopeSettings& envelopes,
                                     bool isOverwriteEnabled = true );
 

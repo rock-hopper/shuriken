@@ -519,16 +519,16 @@ void MainWindow::exportAs( const QString tempDirPath,
 
         const int modelID = m_exportDialog->getAkaiModelID();
 
-        const bool isMonophonyEnabled = m_exportDialog->isMonophonyEnabled();
-        const bool isMuteGroupEnabled = m_exportDialog->isMuteGroupEnabled();
+        const bool isVoiceOverlapMono = m_exportDialog->isVoiceOverlapMono();
+        const int muteGroup = m_exportDialog->getMuteGroup();
 
         switch ( modelID )
         {
         case AkaiModelID::MPC1000_ID:
-            AkaiFileHandler::writePgmFileMPC1000( audioFileNames, fileName, samplesDirPath, tempDirPath, isMonophonyEnabled, isMuteGroupEnabled, envelopes );
+            AkaiFileHandler::writePgmFileMPC1000( audioFileNames, fileName, samplesDirPath, tempDirPath, isVoiceOverlapMono, muteGroup, envelopes );
             break;
         case AkaiModelID::MPC500_ID:
-            AkaiFileHandler::writePgmFileMPC500( audioFileNames, fileName, samplesDirPath, tempDirPath, isMonophonyEnabled, isMuteGroupEnabled, envelopes );
+            AkaiFileHandler::writePgmFileMPC500( audioFileNames, fileName, samplesDirPath, tempDirPath, isVoiceOverlapMono, muteGroup, envelopes );
             break;
         default:
             break;

@@ -69,9 +69,8 @@ public:
     int getSndFileFormat() const;
     int getSampleRate() const;
     int getAkaiModelID() const;
-
-    bool isMonophonyEnabled() const;
-    bool isMuteGroupEnabled() const;
+    bool isVoiceOverlapMono() const;
+    int getMuteGroup() const;
 
 protected:
     void changeEvent( QEvent* event );

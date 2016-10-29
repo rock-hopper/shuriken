@@ -60,38 +60,61 @@ ExportDialog::ExportDialog( QWidget* parent ) :
     // Populate combo boxes
     m_ui->radioButton_AudioFiles->click();
 
-
-    QStringList akaiModelTextList;
-    QList<int> akaiModelDataList;
-
-    akaiModelTextList << "MPC 1000/2500" << "MPC 500";
-    akaiModelDataList << AkaiModelID::MPC1000_ID << AkaiModelID::MPC500_ID;
-
-    for ( int i = 0; i < akaiModelTextList.size(); i++ )
+    // Populate "Akai Model" combo box
     {
-        m_ui->comboBox_Model->addItem( akaiModelTextList[ i ], akaiModelDataList[ i ] );
+        QStringList textList;
+        QList<int> dataList;
+
+        textList << "MPC 1000/2500" << "MPC 500";
+        dataList << AkaiModelID::MPC1000_ID << AkaiModelID::MPC500_ID;
+
+        for ( int i = 0; i < textList.size(); i++ )
+        {
+            m_ui->comboBox_Model->addItem( textList[ i ], dataList[ i ] );
+        }
     }
 
     m_ui->label_Model->setVisible( false );
     m_ui->comboBox_Model->setVisible( false );
 
-
-    QStringList sampleRateTextList;
-    QList<int> sampleRateDataList;
-
-    sampleRateTextList << "Keep Same" << "8,000 Hz" << "11,025 Hz" << "16,000 Hz"<< "22,050 Hz" << "32,000 Hz" << "44,100 Hz" << "48,000 Hz" << "88,200 Hz" << "96,000 Hz" << "192,000 Hz";
-    sampleRateDataList << SAMPLE_RATE_KEEP_SAME << 8000 << 11025 << 16000 << 22050 << 32000 << 44100 << 48000 << 88200 << 96000 << 192000;
-
-    for ( int i = 0; i < sampleRateTextList.size(); i++ )
+    // Populate "Sample Rate" combo box
     {
-        m_ui->comboBox_SampleRate->addItem( sampleRateTextList[ i ], sampleRateDataList[ i ] );
+        QStringList textList;
+        QList<int> dataList;
+
+        textList << "Keep Same" << "8,000 Hz" << "11,025 Hz" << "16,000 Hz"<< "22,050 Hz" << "32,000 Hz" << "44,100 Hz" << "48,000 Hz" << "88,200 Hz" << "96,000 Hz" << "192,000 Hz";
+        dataList << SAMPLE_RATE_KEEP_SAME << 8000 << 11025 << 16000 << 22050 << 32000 << 44100 << 48000 << 88200 << 96000 << 192000;
+
+        for ( int i = 0; i < textList.size(); i++ )
+        {
+            m_ui->comboBox_SampleRate->addItem( textList[ i ], dataList[ i ] );
+        }
     }
 
+    // Populate "MIDI File" combo box
+    {
+        QStringList textList;
+        textList << "Don't Export" << "Export" << "Export Only";
 
-    QStringList midiFileTextList;
-    midiFileTextList << "Don't Export" << "Export" << "Export Only";
+        m_ui->comboBox_MidiFile->addItems( textList );
+    }
 
-    m_ui->comboBox_MidiFile->addItems( midiFileTextList );
+    // Populate "Mute Group" combo box
+    {
+        QStringList textList;
+        QList<int> dataList;
+
+        textList << "Off" << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12" << "13" << "14" << "15" << "16"
+                 << "17" << "18" << "19" << "20" << "21" << "22" << "23" << "24" << "25" << "26" << "27" << "28" << "29" << "30" << "31" << "32";
+        dataList << 0 << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 11 << 12 << 13 << 14 << 15 << 16
+                 << 17 << 18 << 19 << 20 << 21 << 22 << 23 << 24 << 25 << 26 << 27 << 28 << 29 << 30 << 31 << 32;
+
+        for ( int i = 0; i < textList.size(); i++ )
+        {
+            m_ui->comboBox_MuteGroup->addItem( textList[ i ], dataList[ i ] );
+        }
+        m_ui->comboBox_MuteGroup->setCurrentIndex( 1 ); // Mute group 1
+    }
 }
 
 
@@ -245,16 +268,16 @@ int ExportDialog::getAkaiModelID() const
 
 
 
-bool ExportDialog::isMonophonyEnabled() const
+bool ExportDialog::isVoiceOverlapMono() const
 {
-    m_ui->checkBox_Monophonic->isChecked();
+    return m_ui->radioButton_Mono->isChecked();
 }
 
 
 
-bool ExportDialog::isMuteGroupEnabled() const
+int ExportDialog::getMuteGroup() const
 {
-    m_ui->checkBox_MuteGroup->isChecked();
+    return m_ui->comboBox_MuteGroup->currentIndex();
 }
 
 
@@ -510,8 +533,11 @@ void ExportDialog::on_radioButton_AudioFiles_clicked()
 
     enableMidiFileTypeRadioButtons();
 
-    m_ui->checkBox_Monophonic->setVisible( false );
-    m_ui->checkBox_MuteGroup->setVisible( false );
+    m_ui->label_VoiceOverlap->setVisible( false );
+    m_ui->label_MuteGroup->setVisible( false );
+    m_ui->radioButton_Mono->setVisible( false );
+    m_ui->radioButton_Poly->setVisible( false );
+    m_ui->comboBox_MuteGroup->setVisible( false );
 }
 
 
@@ -546,8 +572,11 @@ void ExportDialog::on_radioButton_H2Drumkit_clicked()
 
     enableMidiFileTypeRadioButtons();
 
-    m_ui->checkBox_Monophonic->setVisible( false );
-    m_ui->checkBox_MuteGroup->setVisible( false );
+    m_ui->label_VoiceOverlap->setVisible( false );
+    m_ui->label_MuteGroup->setVisible( false );
+    m_ui->radioButton_Mono->setVisible( false );
+    m_ui->radioButton_Poly->setVisible( false );
+    m_ui->comboBox_MuteGroup->setVisible( false );
 }
 
 
@@ -582,8 +611,11 @@ void ExportDialog::on_radioButton_SFZ_clicked()
 
     enableMidiFileTypeRadioButtons();
 
-    m_ui->checkBox_Monophonic->setVisible( false );
-    m_ui->checkBox_MuteGroup->setVisible( false );
+    m_ui->label_VoiceOverlap->setVisible( false );
+    m_ui->label_MuteGroup->setVisible( false );
+    m_ui->radioButton_Mono->setVisible( false );
+    m_ui->radioButton_Poly->setVisible( false );
+    m_ui->comboBox_MuteGroup->setVisible( false );
 }
 
 
@@ -622,8 +654,11 @@ void ExportDialog::on_radioButton_Akai_clicked()
 
     m_ui->radioButton_MidiType1->setChecked( true );
 
-    m_ui->checkBox_Monophonic->setVisible( true );
-    m_ui->checkBox_MuteGroup->setVisible( true );
+    m_ui->label_VoiceOverlap->setVisible( true );
+    m_ui->label_MuteGroup->setVisible( true );
+    m_ui->radioButton_Mono->setVisible( true );
+    m_ui->radioButton_Poly->setVisible( true );
+    m_ui->comboBox_MuteGroup->setVisible( true );
 }
 
 
