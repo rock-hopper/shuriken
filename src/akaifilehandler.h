@@ -46,6 +46,7 @@ public:
                                      QString outputDirPath,
                                      QString tempDirPath,
                                      bool isMonophonyEnabled,
+                                     bool isMuteGroupEnabled,
                                      const SamplerAudioSource::EnvelopeSettings& envelopes,
                                      bool isOverwriteEnabled = true );
 
@@ -54,6 +55,7 @@ public:
                                     QString outputDirPath,
                                     QString tempDirPath,
                                     bool isMonophonyEnabled,
+                                    bool isMuteGroupEnabled,
                                     const SamplerAudioSource::EnvelopeSettings& envelopes,
                                     bool isOverwriteEnabled = true );
 
@@ -86,6 +88,7 @@ private:
         static const int LEVEL_OFFSET           = 0x11;
         static const int PLAY_MODE_OFFSET       = 0x16;
         static const int VOICE_OVERLAP_OFFSET   = 0x62;
+        static const int MUTE_GROUP_OFFSET      = 0x63;
         static const int ATTACK_OFFSET          = 0x66;
         static const int DECAY_OFFSET           = 0x67;
         static const int DECAY_MODE_OFFSET      = 0x68;

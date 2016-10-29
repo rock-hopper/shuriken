@@ -56,6 +56,7 @@ bool AkaiFileHandler::writePgmFileMPC1000( QStringList sampleNames,
                                            const QString outputDirPath,
                                            const QString tempDirPath,
                                            const bool isMonophonyEnabled,
+                                           const bool isMuteGroupEnabled,
                                            const SamplerAudioSource::EnvelopeSettings& envelopes,
                                            const bool isOverwriteEnabled )
 {
@@ -120,6 +121,17 @@ bool AkaiFileHandler::writePgmFileMPC1000( QStringList sampleNames,
                                                    : (char) 0x0;    // 0 - Polyphonic
 
                 pgmData.replace( pos, 1, voiceOverlap );
+            }
+
+            // Add mute group
+            {
+                const int pos = MPC1000_PGM::HEADER_SIZE + ( padNum * MPC1000_PGM::PAD_DATA_SIZE ) + MPC1000_PGM::MUTE_GROUP_OFFSET;
+
+                QByteArray muteGroup;
+                muteGroup += isMuteGroupEnabled ? quint8( 1 )    // 1 - Mute group 1
+                                                : (char) 0x0;    // 0 - Mute group off
+
+                pgmData.replace( pos, 1, muteGroup );
             }
 
             // Add attack
@@ -213,6 +225,7 @@ bool AkaiFileHandler::writePgmFileMPC500( QStringList sampleNames,
                                           const QString outputDirPath,
                                           const QString tempDirPath,
                                           const bool isMonophonyEnabled,
+                                          const bool isMuteGroupEnabled,
                                           const SamplerAudioSource::EnvelopeSettings& envelopes,
                                           const bool isOverwriteEnabled )
 {
@@ -221,7 +234,7 @@ bool AkaiFileHandler::writePgmFileMPC500( QStringList sampleNames,
         sampleNames.removeLast();
     }
 
-    return writePgmFileMPC1000( sampleNames, fileBaseName, outputDirPath, tempDirPath, isMonophonyEnabled, envelopes, isOverwriteEnabled );
+    return writePgmFileMPC1000( sampleNames, fileBaseName, outputDirPath, tempDirPath, isMonophonyEnabled, isMuteGroupEnabled, envelopes, isOverwriteEnabled );
 }
 
 
