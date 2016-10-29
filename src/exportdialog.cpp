@@ -245,6 +245,20 @@ int ExportDialog::getAkaiModelID() const
 
 
 
+bool ExportDialog::isMonophonyEnabled() const
+{
+    m_ui->checkBox_Monophonic->isChecked();
+}
+
+
+
+bool ExportDialog::isMuteGroupEnabled() const
+{
+    m_ui->checkBox_MuteGroup->isChecked();
+}
+
+
+
 //==================================================================================================
 // Protected:
 
@@ -495,6 +509,9 @@ void ExportDialog::on_radioButton_AudioFiles_clicked()
     m_ui->comboBox_SampleRate->setCurrentIndex( index );
 
     enableMidiFileTypeRadioButtons();
+
+    m_ui->checkBox_Monophonic->setVisible( false );
+    m_ui->checkBox_MuteGroup->setVisible( false );
 }
 
 
@@ -528,6 +545,9 @@ void ExportDialog::on_radioButton_H2Drumkit_clicked()
     m_ui->comboBox_SampleRate->setCurrentIndex( index );
 
     enableMidiFileTypeRadioButtons();
+
+    m_ui->checkBox_Monophonic->setVisible( false );
+    m_ui->checkBox_MuteGroup->setVisible( false );
 }
 
 
@@ -561,6 +581,9 @@ void ExportDialog::on_radioButton_SFZ_clicked()
     m_ui->comboBox_SampleRate->setCurrentIndex( index );
 
     enableMidiFileTypeRadioButtons();
+
+    m_ui->checkBox_Monophonic->setVisible( false );
+    m_ui->checkBox_MuteGroup->setVisible( false );
 }
 
 
@@ -598,6 +621,9 @@ void ExportDialog::on_radioButton_Akai_clicked()
     disableMidiFileTypeRadioButtons();
 
     m_ui->radioButton_MidiType1->setChecked( true );
+
+    m_ui->checkBox_Monophonic->setVisible( true );
+    m_ui->checkBox_MuteGroup->setVisible( true );
 }
 
 

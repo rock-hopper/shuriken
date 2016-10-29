@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>496</width>
-    <height>396</height>
+    <height>491</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -62,6 +62,9 @@
        </property>
       </widget>
      </item>
+     <item row="11" column="1" colspan="2">
+      <widget class="QComboBox" name="comboBox_Format"/>
+     </item>
      <item row="11" column="0">
       <widget class="QLabel" name="label_Format">
        <property name="text">
@@ -72,8 +75,8 @@
        </property>
       </widget>
      </item>
-     <item row="11" column="1" colspan="2">
-      <widget class="QComboBox" name="comboBox_Format"/>
+     <item row="12" column="1" colspan="2">
+      <widget class="QComboBox" name="comboBox_Encoding"/>
      </item>
      <item row="12" column="0">
       <widget class="QLabel" name="label_Encoding">
@@ -85,8 +88,15 @@
        </property>
       </widget>
      </item>
-     <item row="12" column="1" colspan="2">
-      <widget class="QComboBox" name="comboBox_Encoding"/>
+     <item row="3" column="2">
+      <widget class="QRadioButton" name="radioButton_H2Drumkit">
+       <property name="text">
+        <string>H2 Drumkit</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup_Export</string>
+       </attribute>
+      </widget>
      </item>
      <item row="3" column="0">
       <widget class="QLabel" name="label_Export">
@@ -107,19 +117,15 @@
         <bool>true</bool>
        </property>
        <attribute name="buttonGroup">
-        <string>buttonGroup_Export</string>
+        <string notr="true">buttonGroup_Export</string>
        </attribute>
       </widget>
      </item>
-     <item row="3" column="2">
-      <widget class="QRadioButton" name="radioButton_H2Drumkit">
-       <property name="text">
-        <string>H2 Drumkit</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string>buttonGroup_Export</string>
-       </attribute>
-      </widget>
+     <item row="4" column="1" colspan="2">
+      <widget class="QComboBox" name="comboBox_MidiFile"/>
+     </item>
+     <item row="10" column="1" colspan="2">
+      <widget class="QComboBox" name="comboBox_Model"/>
      </item>
      <item row="3" column="3">
       <widget class="QRadioButton" name="radioButton_SFZ">
@@ -127,12 +133,12 @@
         <string>SFZ</string>
        </property>
        <attribute name="buttonGroup">
-        <string>buttonGroup_Export</string>
+        <string notr="true">buttonGroup_Export</string>
        </attribute>
       </widget>
      </item>
-     <item row="10" column="1" colspan="2">
-      <widget class="QComboBox" name="comboBox_Model"/>
+     <item row="13" column="1" colspan="2">
+      <widget class="QComboBox" name="comboBox_SampleRate"/>
      </item>
      <item row="3" column="4">
       <widget class="QRadioButton" name="radioButton_Akai">
@@ -140,12 +146,16 @@
         <string>Akai</string>
        </property>
        <attribute name="buttonGroup">
-        <string>buttonGroup_Export</string>
+        <string notr="true">buttonGroup_Export</string>
        </attribute>
       </widget>
      </item>
-     <item row="13" column="1" colspan="2">
-      <widget class="QComboBox" name="comboBox_SampleRate"/>
+     <item row="8" column="1" colspan="2">
+      <widget class="QCheckBox" name="checkBox_Overwrite">
+       <property name="text">
+        <string>overwrite existing files</string>
+       </property>
+      </widget>
      </item>
      <item row="13" column="0">
       <widget class="QLabel" name="label_SampleRate">
@@ -167,11 +177,14 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="1" colspan="2">
-      <widget class="QCheckBox" name="checkBox_Overwrite">
+     <item row="7" column="1">
+      <widget class="QRadioButton" name="radioButton_Prefix">
        <property name="text">
-        <string>overwrite existing files</string>
+        <string>Prefix</string>
        </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup_Numbering</string>
+       </attribute>
       </widget>
      </item>
      <item row="8" column="0">
@@ -193,37 +206,17 @@
         <bool>true</bool>
        </property>
        <attribute name="buttonGroup">
-        <string>buttonGroup_Numbering</string>
+        <string notr="true">buttonGroup_Numbering</string>
        </attribute>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QRadioButton" name="radioButton_Prefix">
-       <property name="text">
-        <string>Prefix</string>
-       </property>
-       <attribute name="buttonGroup">
-        <string>buttonGroup_Numbering</string>
-       </attribute>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="label_Numbering">
-       <property name="text">
-        <string>Numbering:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
       </widget>
      </item>
      <item row="6" column="1" colspan="2">
       <widget class="QLineEdit" name="lineEdit_FileName"/>
      </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_FileName">
+     <item row="7" column="0">
+      <widget class="QLabel" name="label_Numbering">
        <property name="text">
-        <string>File Name(s):</string>
+        <string>Numbering:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -244,6 +237,16 @@
        </property>
       </widget>
      </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_FileName">
+       <property name="text">
+        <string>File Name(s):</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
      <item row="9" column="0" colspan="5">
       <widget class="Line" name="line_3">
        <property name="orientation">
@@ -251,8 +254,18 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="1" colspan="2">
-      <widget class="QComboBox" name="comboBox_MidiFile"/>
+     <item row="4" column="3">
+      <widget class="QRadioButton" name="radioButton_MidiType0">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Type 0</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup_Midi</string>
+       </attribute>
+      </widget>
      </item>
      <item row="4" column="0">
       <widget class="QLabel" name="label_MidiFile">
@@ -276,21 +289,28 @@
         <bool>true</bool>
        </property>
        <attribute name="buttonGroup">
-        <string>buttonGroup_Midi</string>
+        <string notr="true">buttonGroup_Midi</string>
        </attribute>
       </widget>
      </item>
-     <item row="4" column="3">
-      <widget class="QRadioButton" name="radioButton_MidiType0">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
+     <item row="14" column="1">
+      <widget class="QCheckBox" name="checkBox_Monophonic">
        <property name="text">
-        <string>Type 0</string>
+        <string>Monophonic</string>
        </property>
-       <attribute name="buttonGroup">
-        <string>buttonGroup_Midi</string>
-       </attribute>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="14" column="2">
+      <widget class="QCheckBox" name="checkBox_MuteGroup">
+       <property name="text">
+        <string>Mute Group</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
     </layout>
@@ -343,8 +363,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup_Midi"/>
-  <buttongroup name="buttonGroup_Numbering"/>
   <buttongroup name="buttonGroup_Export"/>
+  <buttongroup name="buttonGroup_Numbering"/>
+  <buttongroup name="buttonGroup_Midi"/>
  </buttongroups>
 </ui>

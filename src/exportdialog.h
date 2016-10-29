@@ -70,6 +70,9 @@ public:
     int getSampleRate() const;
     int getAkaiModelID() const;
 
+    bool isMonophonyEnabled() const;
+    bool isMuteGroupEnabled() const;
+
 protected:
     void changeEvent( QEvent* event );
     void showEvent( QShowEvent* event );

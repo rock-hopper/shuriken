@@ -513,21 +513,22 @@ void MainWindow::exportAs( const QString tempDirPath,
     // Export Akai PGM
     else if ( isSuccessful && isExportTypeAkaiPgm )
     {
-        const bool isMonophonyEnabled = m_ui->actionMonophonic->isChecked();
-
         SamplerAudioSource::EnvelopeSettings envelopes;
 
         m_samplerAudioSource->getEnvelopeSettings( envelopes );
 
         const int modelID = m_exportDialog->getAkaiModelID();
 
+        const bool isMonophonyEnabled = m_exportDialog->isMonophonyEnabled();
+        const bool isMuteGroupEnabled = m_exportDialog->isMuteGroupEnabled();
+
         switch ( modelID )
         {
         case AkaiModelID::MPC1000_ID:
-            AkaiFileHandler::writePgmFileMPC1000( audioFileNames, fileName, samplesDirPath, tempDirPath, isMonophonyEnabled, envelopes );
+            AkaiFileHandler::writePgmFileMPC1000( audioFileNames, fileName, samplesDirPath, tempDirPath, isMonophonyEnabled, isMuteGroupEnabled, envelopes );
             break;
         case AkaiModelID::MPC500_ID:
-            AkaiFileHandler::writePgmFileMPC500( audioFileNames, fileName, samplesDirPath, tempDirPath, isMonophonyEnabled, envelopes );
+            AkaiFileHandler::writePgmFileMPC500( audioFileNames, fileName, samplesDirPath, tempDirPath, isMonophonyEnabled, isMuteGroupEnabled, envelopes );
             break;
         default:
             break;
