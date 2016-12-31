@@ -39,7 +39,6 @@
 #define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 
-#include "../../AppConfig.h"
 #include "juce_core.h"
 
 #include <locale>
@@ -83,6 +82,7 @@
  #endif
 
  #if JUCE_LINUX
+  #include <stdio.h>
   #include <langinfo.h>
   #include <ifaddrs.h>
   #include <sys/resource.h>

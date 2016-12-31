@@ -218,7 +218,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
 
             case invokedExecutableFile:
                 if (juce_argv != nullptr && juce_argc > 0)
-                    return File (CharPointer_UTF8 (juce_argv[0]));
+                    return File::getCurrentWorkingDirectory().getChildFile (CharPointer_UTF8 (juce_argv[0]));
                 // deliberate fall-through...
 
             case currentExecutableFile:
@@ -229,13 +229,13 @@ File File::getSpecialLocation (const SpecialLocationType type)
                 const File exe (juce_getExecutableFile());
                 const File parent (exe.getParentDirectory());
 
-              #if JUCE_IOS
+               #if JUCE_IOS
                 return parent;
-              #else
+               #else
                 return parent.getFullPathName().endsWithIgnoreCase ("Contents/MacOS")
                         ? parent.getParentDirectory().getParentDirectory()
                         : exe;
-              #endif
+               #endif
             }
 
             case hostApplicationPath:
@@ -414,8 +414,10 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
         NSWorkspace* workspace = [NSWorkspace sharedWorkspace];
 
         if (parameters.isEmpty())
-            return [workspace openFile: juceStringToNS (fileName)]
-                || [workspace openURL: filenameAsURL];
+            // NB: the length check here is because of strange failures involving long filenames,
+            // probably due to filesystem name length limitations..
+            return (fileName.length() < 1024 && [workspace openFile: juceStringToNS (fileName)])
+                    || [workspace openURL: filenameAsURL];
 
         const File file (fileName);
 

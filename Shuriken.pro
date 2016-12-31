@@ -8,6 +8,7 @@ QT += opengl
 TARGET = shuriken
 TEMPLATE = app
 SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
+    src/JuceLibraryCode/modules/juce_audio_basics/buffers/juce_AudioChannelSet.cpp \
     src/JuceLibraryCode/modules/juce_audio_basics/buffers/juce_FloatVectorOperations.cpp \
     src/JuceLibraryCode/modules/juce_audio_basics/buffers/juce_AudioDataConverters.cpp \
     src/JuceLibraryCode/modules/juce_audio_basics/effects/juce_LagrangeInterpolator.cpp \
@@ -38,7 +39,6 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/JuceLibraryCode/modules/juce_audio_basics/sources/juce_BufferingAudioSource.cpp \
     src/JuceLibraryCode/modules/juce_audio_basics/synthesisers/juce_Synthesiser.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/juce_audio_devices.cpp \
-    src/JuceLibraryCode/modules/juce_audio_devices/audio_cd/juce_AudioCDReader.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/audio_io/juce_AudioIODevice.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/audio_io/juce_AudioDeviceManager.cpp \
@@ -47,14 +47,11 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_win32_WASAPI.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_win32_Midi.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_win32_DirectSound.cpp \
-    src/JuceLibraryCode/modules/juce_audio_devices/native/juce_win32_AudioCDReader.cpp \
-    src/JuceLibraryCode/modules/juce_audio_devices/native/juce_win32_AudioCDBurner.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_win32_ASIO.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_mac_CoreMidi.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_mac_CoreAudio.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_linux_Midi.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_linux_JackAudio.cpp \
-    src/JuceLibraryCode/modules/juce_audio_devices/native/juce_linux_AudioCDReader.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_linux_ALSA.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_ios_Audio.cpp \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_android_OpenSL.cpp \
@@ -143,6 +140,7 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/JuceLibraryCode/modules/juce_data_structures/app_properties/juce_PropertiesFile.cpp \
     src/JuceLibraryCode/modules/juce_data_structures/app_properties/juce_ApplicationProperties.cpp \
     src/JuceLibraryCode/modules/juce_data_structures/undomanager/juce_UndoManager.cpp \
+    src/JuceLibraryCode/modules/juce_data_structures/values/juce_CachedValue.cpp \
     src/JuceLibraryCode/modules/juce_data_structures/values/juce_ValueTree.cpp \
     src/JuceLibraryCode/modules/juce_data_structures/values/juce_ValueTreeSynchroniser.cpp \
     src/JuceLibraryCode/modules/juce_data_structures/values/juce_Value.cpp \
@@ -161,7 +159,6 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/JuceLibraryCode/modules/juce_events/native/juce_android_Messaging.cpp \
     src/JuceLibraryCode/modules/juce_events/timers/juce_Timer.cpp \
     src/JuceLibraryCode/modules/juce_events/timers/juce_MultiTimer.cpp \
-    src/JuceLibraryCode/modules/juce_audio_devices/native/relay_libjack.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/wavegraphicsview.cpp \
@@ -199,6 +196,7 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
+    src/JuceLibraryCode/modules/juce_audio_basics/buffers/juce_AudioChannelSet.cpp \
     src/JuceLibraryCode/modules/juce_audio_basics/buffers/juce_AudioDataConverters.h \
     src/JuceLibraryCode/modules/juce_audio_basics/buffers/juce_FloatVectorOperations.h \
     src/JuceLibraryCode/modules/juce_audio_basics/buffers/juce_AudioSampleBuffer.h \
@@ -235,8 +233,6 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/juce_audio_basics/sources/juce_AudioSource.h \
     src/JuceLibraryCode/modules/juce_audio_basics/synthesisers/juce_Synthesiser.h \
     src/JuceLibraryCode/modules/juce_audio_devices/juce_audio_devices.h \
-    src/JuceLibraryCode/modules/juce_audio_devices/audio_cd/juce_AudioCDReader.h \
-    src/JuceLibraryCode/modules/juce_audio_devices/audio_cd/juce_AudioCDBurner.h \
     src/JuceLibraryCode/modules/juce_audio_devices/audio_io/juce_SystemAudioVolume.h \
     src/JuceLibraryCode/modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.h \
     src/JuceLibraryCode/modules/juce_audio_devices/audio_io/juce_AudioIODevice.h \
@@ -245,7 +241,6 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.h \
     src/JuceLibraryCode/modules/juce_audio_devices/midi_io/juce_MidiInput.h \
     src/JuceLibraryCode/modules/juce_audio_devices/native/juce_MidiDataConcatenator.h \
-    src/JuceLibraryCode/modules/juce_audio_devices/native/linux_midi.h \
     src/JuceLibraryCode/modules/juce_audio_devices/sources/juce_AudioTransportSource.h \
     src/JuceLibraryCode/modules/juce_audio_devices/sources/juce_AudioSourcePlayer.h \
     src/JuceLibraryCode/modules/juce_core/juce_core.h \
@@ -377,6 +372,7 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/juce_data_structures/app_properties/juce_ApplicationProperties.h \
     src/JuceLibraryCode/modules/juce_data_structures/undomanager/juce_UndoManager.h \
     src/JuceLibraryCode/modules/juce_data_structures/undomanager/juce_UndoableAction.h \
+    src/JuceLibraryCode/modules/juce_data_structures/values/juce_CachedValue.h \
     src/JuceLibraryCode/modules/juce_data_structures/values/juce_ValueTree.h \
     src/JuceLibraryCode/modules/juce_data_structures/values/juce_ValueTreeSynchroniser.h \
     src/JuceLibraryCode/modules/juce_data_structures/values/juce_Value.h \

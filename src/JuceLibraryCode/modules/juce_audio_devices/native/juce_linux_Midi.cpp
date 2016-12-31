@@ -20,12 +20,6 @@
    available: visit www.juce.com for more information.
 
   ==============================================================================
-
-  All modifications to the original code by Andrew M Taylor <a.m.taylor303@gmail.com>, 2014, 2016
-
-  To the extent possible under law, Andrew M Taylor has waived all copyright
-  and related or neighboring rights to the code modifications in this file.
-  <https://creativecommons.org/publicdomain/zero/1.0/>
 */
 
 #if JUCE_ALSA
@@ -39,229 +33,238 @@
  #define JUCE_ALSA_MIDI_OUTPUT_NAME "Juce Midi Output"
 #endif
 
-#include "linux_midi.h"
+//==============================================================================
+namespace
+{
+
+class AlsaPortAndCallback;
 
 //==============================================================================
-//namespace
-//{
-
-//==============================================================================
-
-AlsaMidiClient::AlsaMidiClient (bool forInput) : LinuxMidiClient (forInput), handle (nullptr)
-{
-    snd_seq_open (&handle, "default", forInput ? SND_SEQ_OPEN_INPUT
-                                                   : SND_SEQ_OPEN_OUTPUT, 0);
-}
-
-AlsaMidiClient::~AlsaMidiClient()
-{
-    if (handle != nullptr)
-    {
-        snd_seq_close (handle);
-        handle = nullptr;
-    }
-
-    jassert (activeCallbacks.size() == 0);
-
-    if (inputThread)
-    {
-        inputThread->stopThread (3000);
-        inputThread = nullptr;
-    }
-}
-
-void AlsaMidiClient::setName (const String& name)
-{
-    snd_seq_set_client_name (handle, name.toUTF8());
-}
-
-void AlsaMidiClient::registerCallback (MidiPortAndCallback* cb)
-{
-    if (cb != nullptr)
-    {
-        {
-            const ScopedLock sl (callbackLock);
-            activeCallbacks.add (cb);
-
-            if (inputThread == nullptr)
-                inputThread = new MidiInputThread (*this);
-        }
-
-        inputThread->startThread();
-    }
-}
-
-void AlsaMidiClient::unregisterCallback (MidiPortAndCallback* cb)
-{
-    const ScopedLock sl (callbackLock);
-
-    jassert (activeCallbacks.contains (cb));
-    activeCallbacks.removeAllInstancesOf (cb);
-
-    if (activeCallbacks.size() == 0 && inputThread->isThreadRunning())
-        inputThread->signalThreadShouldExit();
-}
-
-snd_seq_t* AlsaMidiClient::getSeqHandle() const noexcept     { return handle; }
-
-
-static AlsaMidiClient::Ptr globalAlsaSequencerIn()
-{
-    static AlsaMidiClient::Ptr global (new AlsaMidiClient (true));
-    return global;
-}
-
-static AlsaMidiClient::Ptr globalAlsaSequencerOut ()
-{
-    static AlsaMidiClient::Ptr global (new AlsaMidiClient (false));
-    return global;
-}
-
-static AlsaMidiClient::Ptr globalAlsaSequencer(bool input)
-{
-    return input ? globalAlsaSequencerIn()
-                 : globalAlsaSequencerOut();
-}
-
-
-
-//==============================================================================
-
-JackMidiClient::JackMidiClient (bool forInput) : LinuxMidiClient (forInput)
-{
-}
-
-JackMidiClient::~JackMidiClient()
-{
-    jassert (activeCallback == nullptr);
-}
-
-void JackMidiClient::registerCallback (MidiPortAndCallback* cb)
-{
-    if (cb != nullptr)
-    {
-        activeCallback = cb;
-        g_jackMidiClient = this;
-    }
-}
-
-void JackMidiClient::unregisterCallback (MidiPortAndCallback* cb)
-{
-    jassert (activeCallback == cb);
-    activeCallback = nullptr;
-
-    g_jackMidiClient = nullptr;
-}
-
-
-static JackMidiClient::Ptr globalJackSequencerIn()
-{
-    static JackMidiClient::Ptr global (new JackMidiClient (true));
-    return global;
-}
-
-static JackMidiClient::Ptr globalJackSequencerOut ()
-{
-    static JackMidiClient::Ptr global (new JackMidiClient (false));
-    return global;
-}
-
-static JackMidiClient::Ptr globalJackSequencer(bool input)
-{
-    return input ? globalJackSequencerIn()
-                 : globalJackSequencerOut();
-}
-
-
-
-//==============================================================================
-// represents an input or output port of the supplied LinuxMidiClient
-class LinuxMidiPort
+class AlsaClient : public ReferenceCountedObject
 {
 public:
-    enum MidiPortType { ALSA_MIDI_PORT, JACK_MIDI_PORT };
+    typedef ReferenceCountedObjectPtr<AlsaClient> Ptr;
 
-    LinuxMidiPort() noexcept  : portId (-1)  {}
-    LinuxMidiPort (const LinuxMidiClient::Ptr& c, int port) noexcept  : client (c), portId (port) {}
-
-    void createAlsaPort (const LinuxMidiClient::Ptr& c, const String& name, bool forInput)
+    static Ptr getInstance (bool forInput)
     {
-        portType = ALSA_MIDI_PORT;
+        AlsaClient*& instance = (forInput ? inInstance : outInstance);
+        if (instance == nullptr)
+            instance = new AlsaClient (forInput);
+
+        return instance;
+    }
+
+    bool isInput() const noexcept    { return input; }
+
+    void registerCallback (AlsaPortAndCallback* cb)
+    {
+        if (cb != nullptr)
+        {
+            {
+                const ScopedLock sl (callbackLock);
+                activeCallbacks.add (cb);
+
+                if (inputThread == nullptr)
+                    inputThread = new MidiInputThread (*this);
+            }
+
+            inputThread->startThread();
+        }
+    }
+
+    void unregisterCallback (AlsaPortAndCallback* cb)
+    {
+        const ScopedLock sl (callbackLock);
+
+        jassert (activeCallbacks.contains (cb));
+        activeCallbacks.removeAllInstancesOf (cb);
+
+        if (activeCallbacks.size() == 0 && inputThread->isThreadRunning())
+            inputThread->signalThreadShouldExit();
+    }
+
+    void handleIncomingMidiMessage (snd_seq_event*, const MidiMessage&);
+    void handlePartialSysexMessage (snd_seq_event*, const uint8*, int, double);
+
+    snd_seq_t* get() const noexcept     { return handle; }
+
+private:
+    bool input;
+    snd_seq_t* handle;
+
+    Array<AlsaPortAndCallback*> activeCallbacks;
+    CriticalSection callbackLock;
+
+    static AlsaClient* inInstance;
+    static AlsaClient* outInstance;
+
+    //==============================================================================
+    friend class ReferenceCountedObjectPtr<AlsaClient>;
+    friend struct ContainerDeletePolicy<AlsaClient>;
+
+    AlsaClient (bool forInput)
+        : input (forInput), handle (nullptr)
+    {
+        AlsaClient*& instance = (input ? inInstance : outInstance);
+        jassert (instance == nullptr);
+
+        instance = this;
+
+        snd_seq_open (&handle, "default", forInput ? SND_SEQ_OPEN_INPUT
+                      : SND_SEQ_OPEN_OUTPUT, 0);
+
+        snd_seq_set_client_name (handle, forInput ? JUCE_ALSA_MIDI_INPUT_NAME
+                                 : JUCE_ALSA_MIDI_OUTPUT_NAME);
+    }
+
+    ~AlsaClient()
+    {
+        AlsaClient*& instance = (input ? inInstance : outInstance);
+        jassert (instance != nullptr);
+
+        instance = nullptr;
+
+        if (handle != nullptr)
+        {
+            snd_seq_close (handle);
+            handle = nullptr;
+        }
+
+        jassert (activeCallbacks.size() == 0);
+
+        if (inputThread)
+        {
+            inputThread->stopThread (3000);
+            inputThread = nullptr;
+        }
+    }
+
+    //==============================================================================
+    class MidiInputThread   : public Thread
+    {
+    public:
+        MidiInputThread (AlsaClient& c)
+            : Thread ("Juce MIDI Input"), client (c), concatenator (2048)
+        {
+            jassert (client.input && client.get() != nullptr);
+        }
+
+        void run() override
+        {
+            const int maxEventSize = 16 * 1024;
+            snd_midi_event_t* midiParser;
+            snd_seq_t* seqHandle = client.get();
+
+            if (snd_midi_event_new (maxEventSize, &midiParser) >= 0)
+            {
+                const int numPfds = snd_seq_poll_descriptors_count (seqHandle, POLLIN);
+                HeapBlock<pollfd> pfd ((size_t) numPfds);
+                snd_seq_poll_descriptors (seqHandle, pfd, (unsigned int) numPfds, POLLIN);
+
+                HeapBlock<uint8> buffer (maxEventSize);
+
+                while (! threadShouldExit())
+                {
+                    if (poll (pfd, (nfds_t) numPfds, 100) > 0) // there was a "500" here which is a bit long when we exit the program and have to wait for a timeout on this poll call
+                    {
+                        if (threadShouldExit())
+                            break;
+
+                        snd_seq_nonblock (seqHandle, 1);
+
+                        do
+                        {
+                            snd_seq_event_t* inputEvent = nullptr;
+
+                            if (snd_seq_event_input (seqHandle, &inputEvent) >= 0)
+                            {
+                                // xxx what about SYSEXes that are too big for the buffer?
+                                const long numBytes = snd_midi_event_decode (midiParser, buffer,
+                                                                            maxEventSize, inputEvent);
+
+                                snd_midi_event_reset_decode (midiParser);
+
+                                concatenator.pushMidiData (buffer, (int) numBytes,
+                                                           Time::getMillisecondCounter() * 0.001,
+                                                           inputEvent, client);
+
+                                snd_seq_free_event (inputEvent);
+                            }
+                        }
+                        while (snd_seq_event_input_pending (seqHandle, 0) > 0);
+                    }
+                }
+
+                snd_midi_event_free (midiParser);
+            }
+        };
+
+    private:
+        AlsaClient& client;
+        MidiDataConcatenator concatenator;
+    };
+
+    ScopedPointer<MidiInputThread> inputThread;
+};
+
+AlsaClient* AlsaClient::inInstance  = nullptr;
+AlsaClient* AlsaClient::outInstance = nullptr;
+
+//==============================================================================
+// represents an input or output port of the supplied AlsaClient
+class AlsaPort
+{
+public:
+    AlsaPort() noexcept  : portId (-1)  {}
+    AlsaPort (const AlsaClient::Ptr& c, int port) noexcept  : client (c), portId (port) {}
+
+    void createPort (const AlsaClient::Ptr& c, const String& name, bool forInput)
+    {
         client = c;
 
-        if (snd_seq_t* handle = (dynamic_cast<AlsaMidiClient*> (client.getObject()))->getSeqHandle())
+        if (snd_seq_t* handle = client->get())
             portId = snd_seq_create_simple_port (handle, name.toUTF8(),
                                                  forInput ? (SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE)
                                                           : (SND_SEQ_PORT_CAP_READ  | SND_SEQ_PORT_CAP_SUBS_READ),
                                                  SND_SEQ_PORT_TYPE_MIDI_GENERIC);
     }
 
-    void createJackPort (const LinuxMidiClient::Ptr& c)
-    {
-        portType = JACK_MIDI_PORT;
-        client = c;
-    }
-
     void deletePort()
     {
         if (isValid())
         {
-            if (portType == ALSA_MIDI_PORT)
-            {
-                snd_seq_delete_simple_port ((dynamic_cast<AlsaMidiClient*> (client.getObject()))->getSeqHandle(), portId);
-                portId = -1;
-            }
+            snd_seq_delete_simple_port (client->get(), portId);
+            portId = -1;
         }
     }
 
     void connectWith (int sourceClient, int sourcePort)
     {
-        if (portType == ALSA_MIDI_PORT)
-        {
-            if (client->isInput())
-                snd_seq_connect_from ((dynamic_cast<AlsaMidiClient*> (client.getObject()))->getSeqHandle(), portId, sourceClient, sourcePort);
-            else
-                snd_seq_connect_to ((dynamic_cast<AlsaMidiClient*> (client.getObject()))->getSeqHandle(), portId, sourceClient, sourcePort);
-        }
+        if (client->isInput())
+            snd_seq_connect_from (client->get(), portId, sourceClient, sourcePort);
+        else
+            snd_seq_connect_to (client->get(), portId, sourceClient, sourcePort);
     }
 
     bool isValid() const noexcept
     {
-        if (portType == ALSA_MIDI_PORT)
-        {
-            return client != nullptr && (dynamic_cast<AlsaMidiClient*> (client.getObject()))->getSeqHandle() != nullptr && portId >= 0;
-        }
-        else // (portType == JACK_MIDI_PORT)
-        {
-            return client != nullptr;
-        }
+        return client != nullptr && client->get() != nullptr && portId >= 0;
     }
 
-    MidiPortType getType()
-    {
-        return portType;
-    }
-
-
-    LinuxMidiClient::Ptr client;
+    AlsaClient::Ptr client;
     int portId;
-
-private:
-    MidiPortType portType;
 };
 
-
-
 //==============================================================================
-class MidiPortAndCallback
+class AlsaPortAndCallback
 {
 public:
-    MidiPortAndCallback (LinuxMidiPort p, MidiInput* in, MidiInputCallback* cb)
+    AlsaPortAndCallback (AlsaPort p, MidiInput* in, MidiInputCallback* cb)
         : port (p), midiInput (in), callback (cb), callbackEnabled (false)
     {
     }
 
-    ~MidiPortAndCallback()
+    ~AlsaPortAndCallback()
     {
         enableCallback (false);
         port.deletePort();
@@ -274,13 +277,9 @@ public:
             callbackEnabled = enable;
 
             if (enable)
-            {
                 port.client->registerCallback (this);
-            }
             else
-            {
                 port.client->unregisterCallback (this);
-            }
         }
     }
 
@@ -289,45 +288,46 @@ public:
         callback->handleIncomingMidiMessage (midiInput, message);
     }
 
+    void handlePartialSysexMessage (const uint8* messageData, int numBytesSoFar, double timeStamp)
+    {
+        callback->handlePartialSysexMessage (midiInput, messageData, numBytesSoFar, timeStamp);
+    }
+
 private:
-    LinuxMidiPort port;
+    AlsaPort port;
     MidiInput* midiInput;
     MidiInputCallback* callback;
     bool callbackEnabled;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiPortAndCallback)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlsaPortAndCallback)
 };
 
-
-
-void AlsaMidiClient::handleIncomingMidiMessage (const MidiMessage& message, int port)
+void AlsaClient::handleIncomingMidiMessage (snd_seq_event_t* event, const MidiMessage& message)
 {
     const ScopedLock sl (callbackLock);
 
-    if (MidiPortAndCallback* const cb = activeCallbacks[port])
+    if (AlsaPortAndCallback* const cb = activeCallbacks[event->dest.port])
         cb->handleIncomingMidiMessage (message);
 }
 
-
-
-void JackMidiClient::handleIncomingMidiMessage (const MidiMessage& message, int /*port*/)
+void AlsaClient::handlePartialSysexMessage (snd_seq_event* event, const uint8* messageData, int numBytesSoFar, double timeStamp)
 {
-    if (activeCallback != nullptr)
-        activeCallback->handleIncomingMidiMessage (message);
+    const ScopedLock sl (callbackLock);
+
+    if (AlsaPortAndCallback* const cb = activeCallbacks[event->dest.port])
+        cb->handlePartialSysexMessage (messageData, numBytesSoFar, timeStamp);
 }
 
-
-
 //==============================================================================
-static LinuxMidiPort iterateMidiClient (const LinuxMidiClient::Ptr& seq,
+static AlsaPort iterateMidiClient (const AlsaClient::Ptr& seq,
                                    snd_seq_client_info_t* clientInfo,
                                    const bool forInput,
                                    StringArray& deviceNamesFound,
                                    const int deviceIndexToOpen)
 {
-    LinuxMidiPort port;
+    AlsaPort port;
 
-    snd_seq_t* seqHandle = (dynamic_cast<AlsaMidiClient*> (seq.getObject()))->getSeqHandle();
+    snd_seq_t* seqHandle = seq->get();
     snd_seq_port_info_t* portInfo = nullptr;
 
     if (snd_seq_port_info_malloc (&portInfo) == 0)
@@ -344,29 +344,24 @@ static LinuxMidiPort iterateMidiClient (const LinuxMidiClient::Ptr& seq,
                 && (snd_seq_port_info_get_capability (portInfo) & (forInput ? SND_SEQ_PORT_CAP_READ
                                                                             : SND_SEQ_PORT_CAP_WRITE)) != 0)
             {
-                const String deviceName = snd_seq_client_info_get_name (clientInfo);
-                deviceNamesFound.add (deviceName);
+                const String clientName = snd_seq_client_info_get_name (clientInfo);
+                const String portName = snd_seq_port_info_get_name(portInfo);
+
+                if (clientName == portName)
+                  deviceNamesFound.add (clientName);
+                else
+                  deviceNamesFound.add (clientName + ": " + portName);
 
                 if (deviceNamesFound.size() == deviceIndexToOpen + 1)
                 {
-                    if (deviceName == "jackmidi" || deviceName == "a2jmidid")
+                    const int sourcePort   = snd_seq_port_info_get_port (portInfo);
+
+                    if (sourcePort != -1)
                     {
-                        const LinuxMidiClient::Ptr client (globalJackSequencer (forInput));
-                        port.createJackPort (client);
-                    }
-                    else
-                    {
-                        const int sourcePort   = snd_seq_port_info_get_port (portInfo);
                         const int sourceClient = snd_seq_client_info_get_client (clientInfo);
 
-                        if (sourcePort != -1)
-                        {
-                            const String name (forInput ? JUCE_ALSA_MIDI_INPUT_NAME
-                                                        : JUCE_ALSA_MIDI_OUTPUT_NAME);
-                            (dynamic_cast<AlsaMidiClient*> (seq.getObject()))->setName (APPLICATION_NAME);
-                            port.createAlsaPort (seq, name, forInput);
-                            port.connectWith (sourceClient, sourcePort);
-                        }
+                        port.createPort (seq, portName, forInput);
+                        port.connectWith (sourceClient, sourcePort);
                     }
                 }
             }
@@ -378,14 +373,14 @@ static LinuxMidiPort iterateMidiClient (const LinuxMidiClient::Ptr& seq,
     return port;
 }
 
-static LinuxMidiPort iterateMidiDevices (const bool forInput,
+static AlsaPort iterateMidiDevices (const bool forInput,
                                     StringArray& deviceNamesFound,
                                     const int deviceIndexToOpen)
 {
-    LinuxMidiPort port;
-    const LinuxMidiClient::Ptr client (globalAlsaSequencer (forInput));
+    AlsaPort port;
+    const AlsaClient::Ptr client (AlsaClient::getInstance (forInput));
 
-    if (snd_seq_t* const seqHandle = (dynamic_cast<AlsaMidiClient*> (client.getObject()))->getSeqHandle())
+    if (snd_seq_t* const seqHandle = client->get())
     {
         snd_seq_system_info_t* systemInfo = nullptr;
         snd_seq_client_info_t* clientInfo = nullptr;
@@ -415,27 +410,12 @@ static LinuxMidiPort iterateMidiDevices (const bool forInput,
     return port;
 }
 
-LinuxMidiPort createMidiDevice (const bool forInput, const String& deviceNameToOpen)
-{
-    LinuxMidiPort port;
-    LinuxMidiClient::Ptr client (new AlsaMidiClient (forInput));
-
-    if ((dynamic_cast<AlsaMidiClient*> (client.getObject()))->getSeqHandle())
-    {
-        (dynamic_cast<AlsaMidiClient*> (client.getObject()))->setName (deviceNameToOpen + (forInput ? " Input" : " Output"));
-        port.createAlsaPort (client, forInput ? "in" : "out", forInput);
-    }
-
-    return port;
-}
-
-
 
 //==============================================================================
 class MidiOutputDevice
 {
 public:
-    MidiOutputDevice (MidiOutput* const output, const LinuxMidiPort& p)
+    MidiOutputDevice (MidiOutput* const output, const AlsaPort& p)
         : midiOutput (output), port (p),
           maxEventSize (16 * 1024)
     {
@@ -464,12 +444,13 @@ public:
         long numBytes = (long) message.getRawDataSize();
         const uint8* data = message.getRawData();
 
-        snd_seq_t* seqHandle = (dynamic_cast<AlsaMidiClient*> (port.client.getObject()))->getSeqHandle();
+        snd_seq_t* seqHandle = port.client->get();
         bool success = true;
-	
+
         while (numBytes > 0)
         {
             const long numSent = snd_midi_event_encode (midiParser, data, numBytes, &event);
+
             if (numSent <= 0)
             {
                 success = numSent == 0;
@@ -479,7 +460,7 @@ public:
             numBytes -= numSent;
             data += numSent;
 
-            snd_seq_ev_set_source (&event, 0);
+            snd_seq_ev_set_source (&event, port.portId);
             snd_seq_ev_set_subs (&event);
             snd_seq_ev_set_direct (&event);
 
@@ -496,14 +477,14 @@ public:
 
 private:
     MidiOutput* const midiOutput;
-    LinuxMidiPort port;
+    AlsaPort port;
     snd_midi_event_t* midiParser;
     int maxEventSize;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDevice)
 };
 
-//} // namespace
+} // namespace
 
 StringArray MidiOutput::getDevices()
 {
@@ -522,7 +503,7 @@ MidiOutput* MidiOutput::openDevice (int deviceIndex)
     MidiOutput* newDevice = nullptr;
 
     StringArray devices;
-    LinuxMidiPort port (iterateMidiDevices (false, devices, deviceIndex));
+    AlsaPort port (iterateMidiDevices (false, devices, deviceIndex));
 
     if (port.isValid())
     {
@@ -536,8 +517,11 @@ MidiOutput* MidiOutput::openDevice (int deviceIndex)
 MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 {
     MidiOutput* newDevice = nullptr;
+    AlsaPort port;
 
-    LinuxMidiPort port (createMidiDevice (false, deviceName));
+    const AlsaClient::Ptr client (AlsaClient::getInstance (false));
+
+    port.createPort (client, deviceName, false);
 
     if (port.isValid())
     {
@@ -560,9 +544,6 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
     static_cast<MidiOutputDevice*> (internal)->sendMessageNow (message);
 }
 
-
-
-
 //==============================================================================
 MidiInput::MidiInput (const String& nm)
     : name (nm), internal (nullptr)
@@ -572,17 +553,17 @@ MidiInput::MidiInput (const String& nm)
 MidiInput::~MidiInput()
 {
     stop();
-    delete static_cast<MidiPortAndCallback*> (internal);
+    delete static_cast<AlsaPortAndCallback*> (internal);
 }
 
 void MidiInput::start()
 {
-    static_cast<MidiPortAndCallback*> (internal)->enableCallback (true);
+    static_cast<AlsaPortAndCallback*> (internal)->enableCallback (true);
 }
 
 void MidiInput::stop()
 {
-    static_cast<MidiPortAndCallback*> (internal)->enableCallback (false);
+    static_cast<AlsaPortAndCallback*> (internal)->enableCallback (false);
 }
 
 int MidiInput::getDefaultDeviceIndex()
@@ -602,12 +583,12 @@ MidiInput* MidiInput::openDevice (int deviceIndex, MidiInputCallback* callback)
     MidiInput* newDevice = nullptr;
 
     StringArray devices;
-    LinuxMidiPort port (iterateMidiDevices (true, devices, deviceIndex));
+    AlsaPort port (iterateMidiDevices (true, devices, deviceIndex));
 
     if (port.isValid())
     {
         newDevice = new MidiInput (devices [deviceIndex]);
-        newDevice->internal = new MidiPortAndCallback (port, newDevice, callback);
+        newDevice->internal = new AlsaPortAndCallback (port, newDevice, callback);
     }
 
     return newDevice;
@@ -616,13 +597,16 @@ MidiInput* MidiInput::openDevice (int deviceIndex, MidiInputCallback* callback)
 MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallback* callback)
 {
     MidiInput* newDevice = nullptr;
+    AlsaPort port;
 
-    LinuxMidiPort port (createMidiDevice (true, deviceName));
+    const AlsaClient::Ptr client (AlsaClient::getInstance (true));
+
+    port.createPort (client, deviceName, true);
 
     if (port.isValid())
     {
         newDevice = new MidiInput (deviceName);
-        newDevice->internal = new MidiPortAndCallback (port, newDevice, callback);
+        newDevice->internal = new AlsaPortAndCallback (port, newDevice, callback);
     }
 
     return newDevice;

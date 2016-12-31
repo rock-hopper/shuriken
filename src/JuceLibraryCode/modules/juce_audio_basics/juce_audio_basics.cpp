@@ -31,7 +31,6 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-#include "../../AppConfig.h"
 #include "juce_audio_basics.h"
 
 #if JUCE_MINGW && ! defined (__SSE2__)
@@ -84,6 +83,7 @@ namespace juce
 
 #include "buffers/juce_AudioDataConverters.cpp"
 #include "buffers/juce_FloatVectorOperations.cpp"
+#include "buffers/juce_AudioChannelSet.cpp"
 #include "effects/juce_IIRFilter.cpp"
 #include "effects/juce_LagrangeInterpolator.cpp"
 #include "effects/juce_CatmullRomInterpolator.cpp"
