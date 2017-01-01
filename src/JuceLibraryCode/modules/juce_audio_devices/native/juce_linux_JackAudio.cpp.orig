@@ -25,14 +25,6 @@
 //==============================================================================
 static void* juce_libjackHandle = nullptr;
 
-static void __attribute__((constructor)) tryload_libjack()
-{
-    if (getenv("SKIP_LIBJACK") == 0)
-    {
-        juce_libjackHandle = dlopen ("libjack.so.0", RTLD_LAZY);
-    }
-}
-
 static void* juce_loadJackFunction (const char* const name)
 {
     if (juce_libjackHandle == nullptr)
@@ -57,13 +49,6 @@ static void* juce_loadJackFunction (const char* const name)
       if (fn != nullptr) (*fn) arguments;                                         \
   }
 
-jack_transport_state_t jack_transport_query(const jack_client_t *client, jack_position_t *pos)
-{
-    typedef jack_transport_state_t (*jack_transport_query_ptr_t)(const jack_client_t *client, jack_position_t *pos);
-    static jack_transport_query_ptr_t fn = (jack_transport_query_ptr_t) juce_loadJackFunction ("jack_transport_query");
-    return (fn != nullptr) ? (*fn)(client, pos) : JackTransportStopped;
-}
-
 //==============================================================================
 JUCE_DECL_JACK_FUNCTION (jack_client_t*, jack_client_open, (const char* client_name, jack_options_t options, jack_status_t* status, ...), (client_name, options, status));
 JUCE_DECL_JACK_FUNCTION (int, jack_client_close, (jack_client_t *client), (client));
@@ -75,7 +60,6 @@ JUCE_DECL_VOID_JACK_FUNCTION (jack_on_shutdown, (jack_client_t* client, void (*f
 JUCE_DECL_JACK_FUNCTION (void* , jack_port_get_buffer, (jack_port_t* port, jack_nframes_t nframes), (port, nframes));
 JUCE_DECL_JACK_FUNCTION (jack_nframes_t, jack_port_get_total_latency, (jack_client_t* client, jack_port_t* port), (client, port));
 JUCE_DECL_JACK_FUNCTION (jack_port_t* , jack_port_register, (jack_client_t* client, const char* port_name, const char* port_type, unsigned long flags, unsigned long buffer_size), (client, port_name, port_type, flags, buffer_size));
-JUCE_DECL_JACK_FUNCTION (int, jack_port_unregister, (jack_client_t *client, jack_port_t *port), (client, port));
 JUCE_DECL_VOID_JACK_FUNCTION (jack_set_error_function, (void (*func)(const char*)), (func));
 JUCE_DECL_JACK_FUNCTION (int, jack_set_process_callback, (jack_client_t* client, JackProcessCallback process_callback, void* arg), (client, process_callback, arg));
 JUCE_DECL_JACK_FUNCTION (const char**, jack_get_ports, (jack_client_t* client, const char* port_name_pattern, const char* type_name_pattern, unsigned long flags), (client, port_name_pattern, type_name_pattern, flags));
@@ -85,8 +69,6 @@ JUCE_DECL_JACK_FUNCTION (void*, jack_set_port_connect_callback, (jack_client_t* 
 JUCE_DECL_JACK_FUNCTION (jack_port_t* , jack_port_by_id, (jack_client_t* client, jack_port_id_t port_id), (client, port_id));
 JUCE_DECL_JACK_FUNCTION (int, jack_port_connected, (const jack_port_t* port), (port));
 JUCE_DECL_JACK_FUNCTION (int, jack_port_connected_to, (const jack_port_t* port, const char* port_name), (port, port_name));
-JUCE_DECL_JACK_FUNCTION (jack_nframes_t, jack_midi_get_event_count, (void* port_buffer), (port_buffer));
-JUCE_DECL_JACK_FUNCTION (int, jack_midi_event_get, (jack_midi_event_t *event, void *port_buffer, jack_nframes_t event_index), (event, port_buffer, event_index));
 
 #if JUCE_DEBUG
  #define JACK_LOGGING_ENABLED 1
@@ -125,28 +107,60 @@ namespace
  #define JUCE_JACK_CLIENT_NAME "JUCEJack"
 #endif
 
+struct JackPortIterator
+{
+    JackPortIterator (jack_client_t* const client, const bool forInput)
+        : ports (nullptr), index (-1)
+    {
+        if (client != nullptr)
+            ports = juce::jack_get_ports (client, nullptr, nullptr,
+                                          forInput ? JackPortIsOutput : JackPortIsInput);
+                                            // (NB: This looks like it's the wrong way round, but it is correct!)
+    }
+
+    ~JackPortIterator()
+    {
+        ::free (ports);
+    }
+
+    bool next()
+    {
+        if (ports == nullptr || ports [index + 1] == nullptr)
+            return false;
+
+        name = CharPointer_UTF8 (ports[++index]);
+        clientName = name.upToFirstOccurrenceOf (":", false, false);
+        return true;
+    }
+
+    const char** ports;
+    int index;
+    String name;
+    String clientName;
+};
+
+class JackAudioIODeviceType;
+static Array<JackAudioIODeviceType*> activeDeviceTypes;
+
 //==============================================================================
 class JackAudioIODevice   : public AudioIODevice
 {
 public:
     JackAudioIODevice (const String& deviceName,
-                       const String& jackClientName,
-                       const bool jackAutoConnectEnabled,
-                       const bool jackMidiEnabled)
+                       const String& inId,
+                       const String& outId)
         : AudioIODevice (deviceName, "JACK"),
-          clientName (jackClientName),
-          autoConnectEnabled (jackAutoConnectEnabled),
-          midiEnabled (jackMidiEnabled),
+          inputId (inId),
+          outputId (outId),
           deviceIsOpen (false),
-          client (nullptr),
           callback (nullptr),
-          midiPortIn (nullptr),
-          positionInfo (new jack_position_t)
+          totalNumberOfInputChannels (0),
+          totalNumberOfOutputChannels (0)
     {
         jassert (deviceName.isNotEmpty());
 
         jack_status_t status;
-        client = juce::jack_client_open (clientName.toUTF8(), JackNoStartServer, &status);
+        client = juce::jack_client_open (JUCE_JACK_CLIENT_NAME, JackNoStartServer, &status);
 
         if (client == nullptr)
         {
@@ -156,10 +170,30 @@ public:
         {
             juce::jack_set_error_function (errorCallback);
 
-            if (midiEnabled)
+            // open input ports
+            const StringArray inputChannels (getInputChannelNames());
+            for (int i = 0; i < inputChannels.size(); ++i)
             {
-                midiPortIn = juce::jack_port_register (client, "midi_in", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
+                String inputName;
+                inputName << "in_" << ++totalNumberOfInputChannels;
+
+                inputPorts.add (juce::jack_port_register (client, inputName.toUTF8(),
+                                                          JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0));
             }
+
+            // open output ports
+            const StringArray outputChannels (getOutputChannelNames());
+            for (int i = 0; i < outputChannels.size(); ++i)
+            {
+                String outputName;
+                outputName << "out_" << ++totalNumberOfOutputChannels;
+
+                outputPorts.add (juce::jack_port_register (client, outputName.toUTF8(),
+                                                           JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0));
+            }
+
+            inChans.calloc (totalNumberOfInputChannels + 2);
+            outChans.calloc (totalNumberOfOutputChannels + 2);
         }
     }
 
@@ -173,8 +207,19 @@ public:
         }
     }
 
-    StringArray getOutputChannelNames() override         { return outputPortNames; }
-    StringArray getInputChannelNames() override          { return inputPortNames; }
+    StringArray getChannelNames (bool forInput) const
+    {
+        StringArray names;
+
+        for (JackPortIterator i (client, forInput); i.next();)
+            if (i.clientName == getName())
+                names.add (i.name.fromFirstOccurrenceOf (":", false, false));
+
+        return names;
+    }
+
+    StringArray getOutputChannelNames() override         { return getChannelNames (false); }
+    StringArray getInputChannelNames() override          { return getChannelNames (true); }
 
     Array<double> getAvailableSampleRates() override
     {
@@ -206,61 +251,46 @@ public:
     {
         if (client == nullptr)
         {
-            lastError = "JACK server is not running";
+            lastError = "No JACK client running";
             return lastError;
         }
 
         lastError.clear();
         close();
 
-        // Register input and output ports
-        const int numInputs = inputChannels.countNumberOfSetBits();
-        const int numOutputs = outputChannels.countNumberOfSetBits();
-
-        for (int i=0; i < numInputs; ++i)
-        {
-            String portName = "in" + (i >= 2 ? "_" + String(i/2 + 1) : "") + String(i % 2 == 0 ? "_L" : "_R");
-
-            jack_port_t* input = juce::jack_port_register (client, portName.toUTF8(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
-
-            inputPorts.add (input);
-            inputPortNames.add (portName);
-        }
-
-        for (int i = 0; i < numOutputs; ++i)
-        {
-            String portName = "out" + (i >= 2 ? "_" + String(i/2 + 1) : "") + String(i % 2 == 0 ? "_L" : "_R");
-
-            jack_port_t* output = juce::jack_port_register (client, portName.toUTF8(), JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
-
-            outputPorts.add (output);
-            outputPortNames.add (portName);
-        }
-
-        inChans.calloc (numInputs);
-        outChans.calloc (numOutputs);
-
-        // Activate client
         juce::jack_set_process_callback (client, processCallback, this);
+        juce::jack_set_port_connect_callback (client, portConnectCallback, this);
         juce::jack_on_shutdown (client, shutdownCallback, this);
         juce::jack_activate (client);
+        deviceIsOpen = true;
 
-        if (autoConnectEnabled)
+        if (! inputChannels.isZero())
         {
-            const char** ports = juce::jack_get_ports (client, nullptr, nullptr, JackPortIsPhysical|JackPortIsInput);
-
-            if (ports != nullptr)
+            for (JackPortIterator i (client, true); i.next();)
             {
-                for (int i=0; i < outputPorts.size() && ports[i] != nullptr; ++i)
+                if (inputChannels [i.index] && i.clientName == getName())
                 {
-                    juce::jack_connect (client, juce::jack_port_name (outputPorts[i]), ports[i]);
+                    int error = juce::jack_connect (client, i.ports[i.index], juce::jack_port_name ((jack_port_t*) inputPorts[i.index]));
+                    if (error != 0)
+                        JUCE_JACK_LOG ("Cannot connect input port " + String (i.index) + " (" + i.name + "), error " + String (error));
                 }
-
-                ::free (ports);
             }
         }
 
-        deviceIsOpen = true;
+        if (! outputChannels.isZero())
+        {
+            for (JackPortIterator i (client, false); i.next();)
+            {
+                if (outputChannels [i.index] && i.clientName == getName())
+                {
+                    int error = juce::jack_connect (client, juce::jack_port_name ((jack_port_t*) outputPorts[i.index]), i.ports[i.index]);
+                    if (error != 0)
+                        JUCE_JACK_LOG ("Cannot connect output port " + String (i.index) + " (" + i.name + "), error " + String (error));
+                }
+            }
+        }
+
+        updateActivePorts();
 
         return lastError;
     }
@@ -273,15 +303,11 @@ public:
         {
             juce::jack_deactivate (client);
             juce::jack_set_process_callback (client, processCallback, nullptr);
+            juce::jack_set_port_connect_callback (client, portConnectCallback, nullptr);
             juce::jack_on_shutdown (client, shutdownCallback, nullptr);
         }
 
         deviceIsOpen = false;
-
-        Jack::g_currentBPM = 0.0;
-
-        inChans.free();
-        outChans.free();
     }
 
     void start (AudioIODeviceCallback* newCallback) override
@@ -313,19 +339,8 @@ public:
     int getCurrentBitDepth() override                { return 32; }
     String getLastError() override                   { return lastError; }
 
-    BigInteger getActiveOutputChannels() const override
-    {
-        BigInteger outputBits;
-        outputBits.setRange(0, outputPorts.size(), true);
-        return outputBits;
-    }
-
-    BigInteger getActiveInputChannels()  const override
-    {
-        BigInteger inputBits;
-        inputBits.setRange(0, inputPorts.size(), true);
-        return inputBits;
-    }
+    BigInteger getActiveOutputChannels() const override  { return activeOutputChannels; }
+    BigInteger getActiveInputChannels()  const override  { return activeInputChannels;  }
 
     int getOutputLatencyInSamples() override
     {
@@ -352,51 +367,35 @@ public:
 private:
     void process (const int numSamples)
     {
-        juce::jack_transport_query (client, positionInfo);
-        Jack::g_currentBPM = positionInfo->beats_per_minute;
+        int numActiveInChans = 0, numActiveOutChans = 0;
 
-        if (midiPortIn != nullptr)
+        for (int i = 0; i < totalNumberOfInputChannels; ++i)
         {
-            void* buffer = juce::jack_port_get_buffer (midiPortIn, numSamples);
-            jack_nframes_t event_count = juce::jack_midi_get_event_count (buffer);
-            jack_midi_event_t in_event;
-
-            for (jack_nframes_t i = 0; i < event_count; ++i)
-            {
-                juce::jack_midi_event_get (&in_event, buffer, i);
-
-                const MidiMessage message ((const uint8*) in_event.buffer, in_event.size, Time::getMillisecondCounterHiRes() * 0.001);
-                //handleIncomingMidiMessage (message, 0);
-            }
+            if (activeInputChannels[i])
+                if (jack_default_audio_sample_t* in
+                        = (jack_default_audio_sample_t*) juce::jack_port_get_buffer ((jack_port_t*) inputPorts.getUnchecked(i), numSamples))
+                    inChans [numActiveInChans++] = (float*) in;
         }
 
-        int numInputPorts = inputPorts.size();
-        int numOutputPorts = outputPorts.size();
-
-        for (int i = 0; i < numInputPorts; ++i)
+        for (int i = 0; i < totalNumberOfOutputChannels; ++i)
         {
-            if (jack_default_audio_sample_t* in
-                    = (jack_default_audio_sample_t*) juce::jack_port_get_buffer (inputPorts.getUnchecked(i), numSamples))
-                inChans [i] = (float*) in;
-        }
-
-        for (int i = 0; i < numOutputPorts; ++i)
-        {
-            if (jack_default_audio_sample_t* out
-                    = (jack_default_audio_sample_t*) juce::jack_port_get_buffer (outputPorts.getUnchecked(i), numSamples))
-                outChans [i] = (float*) out;
+            if (activeOutputChannels[i])
+                if (jack_default_audio_sample_t* out
+                        = (jack_default_audio_sample_t*) juce::jack_port_get_buffer ((jack_port_t*) outputPorts.getUnchecked(i), numSamples))
+                    outChans [numActiveOutChans++] = (float*) out;
         }
 
         const ScopedLock sl (callbackLock);
 
         if (callback != nullptr)
         {
-            callback->audioDeviceIOCallback (const_cast<const float**> (inChans.getData()), numInputPorts,
-                                             outChans, numOutputPorts, numSamples);
+            if ((numActiveInChans + numActiveOutChans) > 0)
+                callback->audioDeviceIOCallback (const_cast<const float**> (inChans.getData()), numActiveInChans,
+                                                 outChans, numActiveOutChans, numSamples);
         }
         else
         {
-            for (int i = 0; i < numOutputPorts; ++i)
+            for (int i = 0; i < numActiveOutChans; ++i)
                 zeromem (outChans[i], sizeof (float) * numSamples);
         }
     }
@@ -407,6 +406,41 @@ private:
             ((JackAudioIODevice*) callbackArgument)->process (nframes);
 
         return 0;
+    }
+
+    void updateActivePorts()
+    {
+        BigInteger newOutputChannels, newInputChannels;
+
+        for (int i = 0; i < outputPorts.size(); ++i)
+            if (juce::jack_port_connected ((jack_port_t*) outputPorts.getUnchecked(i)))
+                newOutputChannels.setBit (i);
+
+        for (int i = 0; i < inputPorts.size(); ++i)
+            if (juce::jack_port_connected ((jack_port_t*) inputPorts.getUnchecked(i)))
+                newInputChannels.setBit (i);
+
+        if (newOutputChannels != activeOutputChannels
+             || newInputChannels != activeInputChannels)
+        {
+            AudioIODeviceCallback* const oldCallback = callback;
+
+            stop();
+
+            activeOutputChannels = newOutputChannels;
+            activeInputChannels  = newInputChannels;
+
+            if (oldCallback != nullptr)
+                start (oldCallback);
+
+            sendDeviceChangedCallback();
+        }
+    }
+
+    static void portConnectCallback (jack_port_id_t, jack_port_id_t, int, void* arg)
+    {
+        if (JackAudioIODevice* device = static_cast<JackAudioIODevice*> (arg))
+            device->updateActivePorts();
     }
 
     static void threadInitCallback (void* /* callbackArgument */)
@@ -430,9 +464,7 @@ private:
         JUCE_JACK_LOG ("JackAudioIODevice::errorCallback " + String (msg));
     }
 
-    const String clientName;
-    const bool autoConnectEnabled;
-    const bool midiEnabled;
+    static void sendDeviceChangedCallback();
 
     bool deviceIsOpen;
     jack_client_t* client;
@@ -441,13 +473,10 @@ private:
     CriticalSection callbackLock;
 
     HeapBlock<float*> inChans, outChans;
-    Array<jack_port_t*> inputPorts, outputPorts;
-    jack_port_t* midiPortIn;
-
-    StringArray inputPortNames;
-    StringArray outputPortNames;
-
-    ScopedPointer<jack_position_t> positionInfo;
+    int totalNumberOfInputChannels;
+    int totalNumberOfOutputChannels;
+    Array<void*> inputPorts, outputPorts;
+    BigInteger activeInputChannels, activeOutputChannels;
 };
 
 
@@ -459,25 +488,63 @@ public:
         : AudioIODeviceType ("JACK"),
           hasScanned (false)
     {
-        deviceNames.add ("JACK Audio + MIDI (auto-connect outputs)");
-        deviceNames.add ("JACK Audio Only (auto-connect outputs)");
-        deviceNames.add ("JACK Audio + MIDI");
-        deviceNames.add ("JACK Audio Only");
+        activeDeviceTypes.add (this);
     }
 
     ~JackAudioIODeviceType()
     {
+        activeDeviceTypes.removeFirstMatchingValue (this);
     }
 
     void scanForDevices()
     {
         hasScanned = true;
+        inputNames.clear();
+        inputIds.clear();
+        outputNames.clear();
+        outputIds.clear();
+
+        if (juce_libjackHandle == nullptr)  juce_libjackHandle = dlopen ("libjack.so.0", RTLD_LAZY);
+        if (juce_libjackHandle == nullptr)  juce_libjackHandle = dlopen ("libjack.so",   RTLD_LAZY);
+        if (juce_libjackHandle == nullptr)  return;
+
+        jack_status_t status;
+
+        // open a dummy client
+        if (jack_client_t* const client = juce::jack_client_open ("JuceJackDummy", JackNoStartServer, &status))
+        {
+            // scan for output devices
+            for (JackPortIterator i (client, false); i.next();)
+            {
+                if (i.clientName != (JUCE_JACK_CLIENT_NAME) && ! inputNames.contains (i.clientName))
+                {
+                    inputNames.add (i.clientName);
+                    inputIds.add (i.ports [i.index]);
+                }
+            }
+
+            // scan for input devices
+            for (JackPortIterator i (client, true); i.next();)
+            {
+                if (i.clientName != (JUCE_JACK_CLIENT_NAME) && ! outputNames.contains (i.clientName))
+                {
+                    outputNames.add (i.clientName);
+                    outputIds.add (i.ports [i.index]);
+                }
+            }
+
+            juce::jack_client_close (client);
+        }
+        else
+        {
+            JUCE_JACK_LOG_STATUS (status);
+        }
     }
 
-    StringArray getDeviceNames (bool /* wantInputNames */) const
+    StringArray getDeviceNames (bool wantInputNames) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
-        return deviceNames;
+        return wantInputNames ? inputNames : outputNames;
     }
 
     int getDefaultDeviceIndex (bool /* forInput */) const
@@ -486,49 +553,54 @@ public:
         return 0;
     }
 
-    bool hasSeparateInputsAndOutputs() const    { return false; }
+    bool hasSeparateInputsAndOutputs() const    { return true; }
 
-    int getIndexOfDevice (AudioIODevice* device, bool /* asInput */) const
+    int getIndexOfDevice (AudioIODevice* device, bool asInput) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        if (device == nullptr)
-            return -1;
+        if (JackAudioIODevice* d = dynamic_cast<JackAudioIODevice*> (device))
+            return asInput ? inputIds.indexOf (d->inputId)
+                           : outputIds.indexOf (d->outputId);
 
-        return deviceNames.indexOf (device->getName());
+        return -1;
     }
 
     AudioIODevice* createDevice (const String& outputDeviceName,
-                                 const String& /* inputDeviceName */)
+                                 const String& inputDeviceName)
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        String clientName;
+        const int inputIndex = inputNames.indexOf (inputDeviceName);
+        const int outputIndex = outputNames.indexOf (outputDeviceName);
 
-        if (!Jack::g_clientId.isEmpty())
-        {
-            clientName = Jack::g_clientId.toLocal8Bit().data();
-        }
-        else
-        {
-            clientName = JUCE_JACK_CLIENT_NAME;
-        }
+        if (inputIndex >= 0 || outputIndex >= 0)
+            return new JackAudioIODevice (outputIndex >= 0 ? outputDeviceName
+                                                           : inputDeviceName,
+                                          inputIds [inputIndex],
+                                          outputIds [outputIndex]);
 
-        bool isAutoConnectEnabled = outputDeviceName.contains ("auto-connect");
-        bool isMidiEnabled = outputDeviceName.contains ("MIDI");
-
-        return new JackAudioIODevice (outputDeviceName, clientName, isAutoConnectEnabled, isMidiEnabled);
+        return nullptr;
     }
 
+    void portConnectionChange()    { callDeviceChangeListeners(); }
+
 private:
-    StringArray deviceNames;
+    StringArray inputNames, outputNames, inputIds, outputIds;
     bool hasScanned;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JackAudioIODeviceType)
 };
 
+void JackAudioIODevice::sendDeviceChangedCallback()
+{
+    for (int i = activeDeviceTypes.size(); --i >= 0;)
+        if (JackAudioIODeviceType* d = activeDeviceTypes[i])
+            d->portConnectionChange();
+}
+
 //==============================================================================
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()
 {
-    return (juce_libjackHandle != nullptr) ? new JackAudioIODeviceType() : nullptr;
+    return new JackAudioIODeviceType();
 }

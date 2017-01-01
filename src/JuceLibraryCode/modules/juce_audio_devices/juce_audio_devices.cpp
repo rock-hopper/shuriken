@@ -111,6 +111,8 @@
      Juce with low latency audio support, just set the JUCE_JACK flag to 0.
   */
   #include <jack/jack.h>
+  #include <jack/midiport.h>
+  #include <jack/transport.h>
  #endif
  #undef SIZEOF
 
