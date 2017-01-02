@@ -113,7 +113,8 @@ private:
         snd_seq_open (&handle, "default", forInput ? SND_SEQ_OPEN_INPUT
                       : SND_SEQ_OPEN_OUTPUT, 0);
 
-        snd_seq_set_client_name (handle, APPLICATION_NAME);
+        snd_seq_set_client_name (handle, forInput ? JUCE_ALSA_MIDI_INPUT_NAME
+                                 : JUCE_ALSA_MIDI_OUTPUT_NAME);
     }
 
     ~AlsaClient()
@@ -346,27 +347,21 @@ static AlsaPort iterateMidiClient (const AlsaClient::Ptr& seq,
                 const String clientName = snd_seq_client_info_get_name (clientInfo);
                 const String portName = snd_seq_port_info_get_name(portInfo);
 
-                if (clientName != "jackmidi" && clientName != "jack_midi" && clientName != "a2jmidid")
+                if (clientName == portName)
+                  deviceNamesFound.add (clientName);
+                else
+                  deviceNamesFound.add (clientName + ": " + portName);
+
+                if (deviceNamesFound.size() == deviceIndexToOpen + 1)
                 {
-                    if (clientName == portName)
-                      deviceNamesFound.add (clientName);
-                    else
-                      deviceNamesFound.add (clientName + ": " + portName);
+                    const int sourcePort   = snd_seq_port_info_get_port (portInfo);
 
-                    if (deviceNamesFound.size() == deviceIndexToOpen + 1)
+                    if (sourcePort != -1)
                     {
-                        const int sourcePort   = snd_seq_port_info_get_port (portInfo);
+                        const int sourceClient = snd_seq_client_info_get_client (clientInfo);
 
-                        if (sourcePort != -1)
-                        {
-                            const int sourceClient = snd_seq_client_info_get_client (clientInfo);
-
-                            String name (forInput ? JUCE_ALSA_MIDI_INPUT_NAME : JUCE_ALSA_MIDI_OUTPUT_NAME);
-                            name += "_" + String (deviceIndexToOpen + 1);
-
-                            port.createPort (seq, name, forInput);
-                            port.connectWith (sourceClient, sourcePort);
-                        }
+                        port.createPort (seq, portName, forInput);
+                        port.connectWith (sourceClient, sourcePort);
                     }
                 }
             }

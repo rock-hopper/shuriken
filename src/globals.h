@@ -27,7 +27,7 @@
 
 
 #define APPLICATION_NAME            "Shuriken"
-#define JUCE_JACK_CLIENT_NAME       "Shuriken"
+#define JUCE_JACK_CLIENT_NAME       APPLICATION_NAME
 #define JUCE_ALSA_MIDI_INPUT_NAME   "Midi_In"
 
 #define AUDIO_CONFIG_FILE_PATH      "~/.shuriken/audioconfig.xml"
