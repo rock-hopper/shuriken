@@ -184,7 +184,7 @@ private:
                                 snd_midi_event_reset_decode (midiParser);
 
                                 concatenator.pushMidiData (buffer, (int) numBytes,
-                                                           Time::getMillisecondCounter() * 0.001,
+                                                           Time::getMillisecondCounterHiRes() * 0.001,
                                                            inputEvent, client);
 
                                 snd_seq_free_event (inputEvent);
