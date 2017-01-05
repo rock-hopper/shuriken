@@ -784,6 +784,8 @@ void OptionsDialog::on_comboBox_AudioBackend_activated( const int index )
         {
             setUpMidiInputTestSynth();
         }
+
+        emit audioDeviceChanged();
     }
     else
     {
@@ -845,6 +847,8 @@ void OptionsDialog::on_comboBox_AudioDevice_activated( const QString deviceName 
             {
                 setUpMidiInputTestSynth();
             }
+
+            emit audioDeviceChanged();
         }
         else
         {

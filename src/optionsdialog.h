@@ -125,6 +125,7 @@ signals:
     void pitchOptionChanged( RubberBandStretcher::Options option );
     void jackSyncToggled( bool isEnabled );
     void jackAudioEnabled( bool isEnabled );
+    void audioDeviceChanged();
 
 private slots:
     void on_pushButton_ChooseTempDir_clicked();

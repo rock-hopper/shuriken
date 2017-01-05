@@ -304,57 +304,56 @@ void MainWindow::initialiseAudio()
 
 void MainWindow::setUpSampler()
 {
-    const bool isMonophonyEnabled = m_ui->actionMonophonic->isChecked();
-    const AudioIODevice* currentAudioDevice = m_deviceManager.getCurrentAudioDevice();
-
-    m_samplerAudioSource = new SamplerAudioSource( isMonophonyEnabled, currentAudioDevice );
-
     if ( ! m_sampleBufferList.isEmpty() && ! m_sampleHeader.isNull() )
     {
+        const bool isMonophonyEnabled = m_ui->actionMonophonic->isChecked();
+        const AudioIODevice* currentAudioDevice = m_deviceManager.getCurrentAudioDevice();
+
+        m_samplerAudioSource = new SamplerAudioSource( isMonophonyEnabled, currentAudioDevice );
+
         m_samplerAudioSource->setSamples( m_sampleBufferList, m_sampleHeader->sampleRate );
+
+        on_pushButton_Loop_clicked( m_ui->pushButton_Loop->isChecked() );
+
+        if ( m_optionsDialog->isRealtimeModeEnabled() ) // Real-time time stretch mode
+        {
+            // Get the current number of output channels
+            AudioDeviceManager::AudioDeviceSetup config;
+            m_deviceManager.getAudioDeviceSetup( config );
+            const int numOutputChans = config.outputChannels.countNumberOfSetBits();
+
+            const RubberBandStretcher::Options options = m_optionsDialog->getStretcherOptions();
+            const bool isJackSyncEnabled = m_optionsDialog->isJackSyncEnabled();
+
+            m_rubberbandAudioSource = new RubberbandAudioSource( m_samplerAudioSource, numOutputChans, options, isJackSyncEnabled );
+            m_audioSourcePlayer.setSource( m_rubberbandAudioSource );
+
+            connect( m_optionsDialog, SIGNAL( transientsOptionChanged(RubberBandStretcher::Options) ),
+                     m_rubberbandAudioSource, SLOT( setTransientsOption(RubberBandStretcher::Options) ) );
+
+            connect( m_optionsDialog, SIGNAL( phaseOptionChanged(RubberBandStretcher::Options) ),
+                     m_rubberbandAudioSource, SLOT( setPhaseOption(RubberBandStretcher::Options) ) );
+
+            connect( m_optionsDialog, SIGNAL( formantOptionChanged(RubberBandStretcher::Options) ),
+                     m_rubberbandAudioSource, SLOT( setFormantOption(RubberBandStretcher::Options) ) );
+
+            connect( m_optionsDialog, SIGNAL( pitchOptionChanged(RubberBandStretcher::Options) ),
+                     m_rubberbandAudioSource, SLOT( setPitchOption(RubberBandStretcher::Options) ) );
+
+            connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
+                     m_rubberbandAudioSource, SLOT( enableJackSync(bool) ) );
+
+            on_checkBox_TimeStretch_toggled( m_ui->checkBox_TimeStretch->isChecked() );
+        }
+        else // Offline time stretch mode
+        {
+            m_audioSourcePlayer.setSource( m_samplerAudioSource );
+        }
+
+        m_deviceManager.addAudioCallback( &m_audioSourcePlayer );
+        m_deviceManager.addMidiInputCallback( String::empty, m_samplerAudioSource->getMidiMessageCollector() );
     }
-
-    on_pushButton_Loop_clicked( m_ui->pushButton_Loop->isChecked() );
-
-    if ( m_optionsDialog->isRealtimeModeEnabled() ) // Real-time time stretch mode
-    {
-        // Get the current number of output channels
-        AudioDeviceManager::AudioDeviceSetup config;
-        m_deviceManager.getAudioDeviceSetup( config );
-        const int numOutputChans = config.outputChannels.countNumberOfSetBits();
-
-        const RubberBandStretcher::Options options = m_optionsDialog->getStretcherOptions();
-        const bool isJackSyncEnabled = m_optionsDialog->isJackSyncEnabled();
-
-        m_rubberbandAudioSource = new RubberbandAudioSource( m_samplerAudioSource, numOutputChans, options, isJackSyncEnabled );
-        m_audioSourcePlayer.setSource( m_rubberbandAudioSource );
-
-        connect( m_optionsDialog, SIGNAL( transientsOptionChanged(RubberBandStretcher::Options) ),
-                 m_rubberbandAudioSource, SLOT( setTransientsOption(RubberBandStretcher::Options) ) );
-
-        connect( m_optionsDialog, SIGNAL( phaseOptionChanged(RubberBandStretcher::Options) ),
-                 m_rubberbandAudioSource, SLOT( setPhaseOption(RubberBandStretcher::Options) ) );
-
-        connect( m_optionsDialog, SIGNAL( formantOptionChanged(RubberBandStretcher::Options) ),
-                 m_rubberbandAudioSource, SLOT( setFormantOption(RubberBandStretcher::Options) ) );
-
-        connect( m_optionsDialog, SIGNAL( pitchOptionChanged(RubberBandStretcher::Options) ),
-                 m_rubberbandAudioSource, SLOT( setPitchOption(RubberBandStretcher::Options) ) );
-
-        connect( m_optionsDialog, SIGNAL( jackSyncToggled(bool) ),
-                 m_rubberbandAudioSource, SLOT( enableJackSync(bool) ) );
-
-        on_checkBox_TimeStretch_toggled( m_ui->checkBox_TimeStretch->isChecked() );
-    }
-    else // Offline time stretch mode
-    {
-        m_audioSourcePlayer.setSource( m_samplerAudioSource );
-    }
-
-    m_deviceManager.addAudioCallback( &m_audioSourcePlayer );
-    m_deviceManager.addMidiInputCallback( String::empty, m_samplerAudioSource->getMidiMessageCollector() );
 }
-
 
 
 void MainWindow::tearDownSampler()
@@ -647,6 +646,9 @@ void MainWindow::setupUI()
 
         connect( m_optionsDialog, SIGNAL( jackAudioEnabled(bool) ),
                  this, SLOT( enableJackOutputsAction(bool) ) );
+
+        connect( m_optionsDialog, SIGNAL( audioDeviceChanged() ),
+                 this, SLOT( recreateSampler() ) );
 
         m_optionsDialog->disableTab( OptionsDialog::TIME_STRETCH_TAB );
     }
@@ -1240,7 +1242,10 @@ void MainWindow::recreateSampler()
     tearDownSampler();
     setUpSampler();
 
-    m_samplerAudioSource->setEnvelopeSettings( envelopes );
+    if ( m_samplerAudioSource != NULL )
+    {
+        m_samplerAudioSource->setEnvelopeSettings( envelopes );
+    }
 }
 
 
