@@ -39,3 +39,6 @@ bool AudioIODevice::showControlPanel()
                      // their hasControlPanel() method.
     return false;
 }
+
+bool AudioIODevice::canFillMidiBuffer() const                   { return false; }
+void AudioIODevice::fillMidiBuffer (MidiBuffer&) const          {}

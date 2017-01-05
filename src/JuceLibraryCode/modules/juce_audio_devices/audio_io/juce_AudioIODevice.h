@@ -295,6 +295,9 @@ public:
     */
     virtual bool setAudioPreprocessingEnabled (bool shouldBeEnabled);
 
+    virtual bool canFillMidiBuffer() const;
+    virtual void fillMidiBuffer (MidiBuffer& bufferToFill) const;
+
     //==============================================================================
 protected:
     /** Creates a device, setting its name and type member variables. */

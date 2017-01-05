@@ -512,53 +512,44 @@ void OptionsDialog::updateBufferSizeComboBox()
 
 
 
-void OptionsDialog::updateMidiInputListWidget()
+void OptionsDialog::updateMidiInputListWidget( const bool isJackMidiEnabled )
 {
     m_ui->listWidget_MidiInput->clear();
+    m_ui->listWidget_MidiInput->setEnabled( false );
 
-    const int numMidiDevices = MidiInput::getDevices().size();
+    const StringArray midiDevices = MidiInput::getDevices();
 
-    if ( numMidiDevices > 0 )
+    if ( midiDevices.size() > 0 )
     {
-        m_ui->listWidget_MidiInput->setEnabled( true );
-
-        for ( int i = 0; i < numMidiDevices; ++i )
+        for ( int i = 0; i < midiDevices.size(); ++i )
         {
-            const String midiDeviceName( MidiInput::getDevices()[ i ] );
+            const String midiDeviceName( midiDevices[ i ] );
 
-            if ( ! isJackMidiDevice( midiDeviceName ) )
+            QListWidgetItem* const listItem = new QListWidgetItem();
+
+            listItem->setText( midiDeviceName.toRawUTF8() );
+            listItem->setFlags( Qt::ItemIsUserCheckable | Qt::ItemIsEnabled );
+
+            if ( m_deviceManager.isMidiInputEnabled( midiDeviceName ) )
             {
-                QListWidgetItem* const listItem = new QListWidgetItem();
-
-                listItem->setText( midiDeviceName.toRawUTF8() );
-                listItem->setFlags( Qt::ItemIsUserCheckable | Qt::ItemIsEnabled );
-
-                if ( m_deviceManager.isMidiInputEnabled( midiDeviceName ) )
-                {
-                    listItem->setCheckState( Qt::Checked );
-                }
-                else
-                {
-                    listItem->setCheckState( Qt::Unchecked );
-                }
-
-                m_ui->listWidget_MidiInput->addItem( listItem );
+                listItem->setCheckState( Qt::Checked );
             }
             else
             {
-                if ( m_deviceManager.isMidiInputEnabled( "jackmidi" ) || m_deviceManager.isMidiInputEnabled( "a2jmidid" ) )
-                {
-                    // Prevent user from enabling ALSA MIDI inputs as they conflict with JACK MIDI inputs
-                    m_ui->listWidget_MidiInput->setEnabled( false );
-                }
+                listItem->setCheckState( Qt::Unchecked );
             }
+
+            m_ui->listWidget_MidiInput->addItem( listItem );
+        }
+
+        if ( ! isJackMidiEnabled )
+        {
+            m_ui->listWidget_MidiInput->setEnabled( true );
         }
     }
-    else
+    else // No ALSA MIDI devices found
     {
-        // No MIDI
         m_ui->listWidget_MidiInput->addItem( getNoDeviceString() );
-        m_ui->listWidget_MidiInput->setEnabled( false );
     }
 }
 
@@ -602,35 +593,13 @@ void OptionsDialog::tearDownMidiInputTestSynth()
 
 
 
-void OptionsDialog::setJackMidiInput( const String audioDeviceName )
+void OptionsDialog::disableAlsaMidiInputs()
 {
     const StringArray midiDeviceNames = MidiInput::getDevices();
 
-    if ( audioDeviceName.startsWith( "JACK" ) && audioDeviceName.contains( "MIDI" ) )
+    for ( int i = 0; i < midiDeviceNames.size(); ++i )
     {
-        // Disable ALSA MIDI inputs as they conflict with JACK MIDI inputs
-        for ( int i = 0; i < midiDeviceNames.size(); ++i )
-        {
-            if ( isJackMidiDevice( midiDeviceNames[i] ) )
-            {
-                m_deviceManager.setMidiInputEnabled( midiDeviceNames[i], true );
-            }
-            else
-            {
-                m_deviceManager.setMidiInputEnabled( midiDeviceNames[i], false );
-            }
-        }
-    }
-    else
-    {
-        // Disable JACK MIDI inputs
-        for ( int i = 0; i < midiDeviceNames.size(); ++i )
-        {
-            if ( isJackMidiDevice( midiDeviceNames[i] ) )
-            {
-                m_deviceManager.setMidiInputEnabled( midiDeviceNames[i], false );
-            }
-        }
+        m_deviceManager.setMidiInputEnabled( midiDeviceNames[i], false );
     }
 }
 
@@ -695,17 +664,6 @@ String OptionsDialog::getNameForChannelPair( const String& name1, const String& 
     }
 
     return name1.trim() + " + " + name2.substring( commonBit.length() ).trim();
-}
-
-
-
-bool OptionsDialog::isJackMidiDevice( const String midiDeviceName )
-{
-    if ( midiDeviceName == "jackmidi" || midiDeviceName == "a2jmidid" )
-    {
-        return true;
-    }
-    return false;
 }
 
 
@@ -784,15 +742,20 @@ void OptionsDialog::on_comboBox_AudioBackend_activated( const int index )
         error = m_deviceManager.setAudioDeviceSetup( config, true );
     }
 
-    // If this is a JACK audio device then also enable JACK MIDI if required
-    setJackMidiInput( config.outputDeviceName );
+    const bool isJackMidiEnabled = config.outputDeviceName.startsWith( "JACK" ) && config.outputDeviceName.contains( "MIDI" );
+
+    // If necessary, disable ALSA MIDI inputs as they conflict with JACK MIDI inputs
+    if ( isJackMidiEnabled )
+    {
+        disableAlsaMidiInputs();
+    }
 
     // When a new audio backend is selected all widgets should be updated
     updateAudioDeviceComboBox();
     updateOutputChannelComboBox();
     updateSampleRateComboBox();
     updateBufferSizeComboBox();
-    updateMidiInputListWidget();
+    updateMidiInputListWidget( isJackMidiEnabled );
 
     if ( isJackAudioEnabled() && isRealtimeModeEnabled() )
     {
@@ -849,14 +812,19 @@ void OptionsDialog::on_comboBox_AudioDevice_activated( const QString deviceName 
         }
         error = m_deviceManager.setAudioDeviceSetup( config, true );
 
-        // If this is a JACK audio device then also enable JACK MIDI if required
-        setJackMidiInput( outputDeviceName );
+        const bool isJackMidiEnabled = outputDeviceName.startsWith( "JACK" ) && outputDeviceName.contains( "MIDI" );
+
+        // If necessary, disable ALSA MIDI inputs as they conflict with JACK MIDI inputs
+        if ( isJackMidiEnabled )
+        {
+            disableAlsaMidiInputs();
+        }
 
         // When a new audio device is selected the following widgets should be updated
         updateOutputChannelComboBox();
         updateSampleRateComboBox();
         updateBufferSizeComboBox();
-        updateMidiInputListWidget();
+        updateMidiInputListWidget( isJackMidiEnabled );
     }
 
     if ( error.isNotEmpty() )

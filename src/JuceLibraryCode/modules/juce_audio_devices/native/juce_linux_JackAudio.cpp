@@ -347,6 +347,16 @@ public:
         return latency;
     }
 
+    bool canFillMidiBuffer() const override
+    {
+        return midiEnabled;
+    }
+
+    void fillMidiBuffer (MidiBuffer& bufferToFill) const override
+    {
+        bufferToFill = midiBuffer;
+    }
+
     String inputId, outputId;
 
 private:
@@ -357,16 +367,19 @@ private:
 
         if (midiPortIn != nullptr)
         {
+            midiBuffer.clear();
+
             void* buffer = juce::jack_port_get_buffer (midiPortIn, numSamples);
-            jack_nframes_t event_count = juce::jack_midi_get_event_count (buffer);
-            jack_midi_event_t in_event;
+            jack_nframes_t numEvents = juce::jack_midi_get_event_count (buffer);
+            jack_midi_event_t midiEvent;
 
-            for (jack_nframes_t i = 0; i < event_count; ++i)
+            for (jack_nframes_t i = 0; i < numEvents; ++i)
             {
-                juce::jack_midi_event_get (&in_event, buffer, i);
+                juce::jack_midi_event_get (&midiEvent, buffer, i);
 
-                const MidiMessage message ((const uint8*) in_event.buffer, in_event.size, Time::getMillisecondCounterHiRes() * 0.001);
-                //handleIncomingMidiMessage (message, 0);
+                midiBuffer.addEvent (midiEvent.buffer, midiEvent.size, midiEvent.time);
+
+                //JUCE_JACK_LOG ("JACK MIDI event!  Size: " + String(midiEvent.size) + "  Time: " + String(midiEvent.time));
             }
         }
 
@@ -448,6 +461,8 @@ private:
     StringArray outputPortNames;
 
     ScopedPointer<jack_position_t> positionInfo;
+
+    MidiBuffer midiBuffer;
 };
 
 

@@ -33,7 +33,7 @@ class SamplerAudioSource : public QObject, public AudioSource
     Q_OBJECT
 
 public:
-    SamplerAudioSource( const bool isMonophonic = false );
+    SamplerAudioSource( const bool isMonophonic = false, const AudioIODevice* audioDevice = NULL );
     ~SamplerAudioSource();
 
     void setSamples( QList<SharedSampleBuffer> sampleBufferList, qreal sampleRate );
@@ -66,7 +66,7 @@ public:
 
     int getLowestAssignedMidiNote() const           { return m_lowestAssignedNote; }
 
-    MidiMessageCollector* getMidiInputCallback()    { return &m_midiCollector; }
+    MidiMessageCollector* getMidiMessageCollector() { return &m_midiCollector; }
 
     // For JUCE use only!
     void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;
@@ -103,6 +103,8 @@ private:
     volatile int m_noteCounter;
     volatile int m_noteCounterEnd;
     volatile int m_frameCounter;
+
+    const AudioIODevice* const m_jackDevice;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( SamplerAudioSource );

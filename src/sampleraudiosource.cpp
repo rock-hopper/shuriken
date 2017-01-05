@@ -29,7 +29,7 @@
 //==================================================================================================
 // Public:
 
-SamplerAudioSource::SamplerAudioSource( const bool isMonophonic ) :
+SamplerAudioSource::SamplerAudioSource( const bool isMonophonic, const AudioIODevice* audioDevice ) :
     QObject(),
     AudioSource(),
     m_isMonophonic( isMonophonic ),
@@ -40,7 +40,8 @@ SamplerAudioSource::SamplerAudioSource( const bool isMonophonic ) :
     m_isPlaying( false ),
     m_isLoopingEnabled( false ),
     m_noteCounter( 0 ),
-    m_frameCounter( 0 )
+    m_frameCounter( 0 ),
+    m_jackDevice( audioDevice->canFillMidiBuffer() ? audioDevice : NULL )
 {
 }
 
@@ -307,7 +308,15 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info, 
 
     // Fill the MIDI buffer with incoming messages from the MIDI input
     midiBuffer.clear();
-    m_midiCollector.removeNextBlockOfMessages( midiBuffer, info.numSamples );
+
+    if ( m_jackDevice != NULL )
+    {
+        m_jackDevice->fillMidiBuffer( midiBuffer );
+    }
+    else
+    {
+        m_midiCollector.removeNextBlockOfMessages( midiBuffer, info.numSamples );
+    }
 
 
     // If requested, play all samples in sequence by adding appropriate MIDI messages to the buffer

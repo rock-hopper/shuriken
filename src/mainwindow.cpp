@@ -304,7 +304,10 @@ void MainWindow::initialiseAudio()
 
 void MainWindow::setUpSampler()
 {
-    m_samplerAudioSource = new SamplerAudioSource( m_ui->actionMonophonic->isChecked() );
+    const bool isMonophonyEnabled = m_ui->actionMonophonic->isChecked();
+    const AudioIODevice* currentAudioDevice = m_deviceManager.getCurrentAudioDevice();
+
+    m_samplerAudioSource = new SamplerAudioSource( isMonophonyEnabled, currentAudioDevice );
 
     if ( ! m_sampleBufferList.isEmpty() && ! m_sampleHeader.isNull() )
     {
@@ -349,7 +352,7 @@ void MainWindow::setUpSampler()
     }
 
     m_deviceManager.addAudioCallback( &m_audioSourcePlayer );
-    m_deviceManager.addMidiInputCallback( String::empty, m_samplerAudioSource->getMidiInputCallback() );
+    m_deviceManager.addMidiInputCallback( String::empty, m_samplerAudioSource->getMidiMessageCollector() );
 }
 
 
@@ -361,7 +364,7 @@ void MainWindow::tearDownSampler()
     m_audioSourcePlayer.setSource( NULL );
 
     m_deviceManager.removeAudioCallback( &m_audioSourcePlayer );
-    m_deviceManager.removeMidiInputCallback( String::empty, m_samplerAudioSource->getMidiInputCallback() );
+    m_deviceManager.removeMidiInputCallback( String::empty, m_samplerAudioSource->getMidiMessageCollector() );
 
     m_rubberbandAudioSource = NULL;
     m_samplerAudioSource = NULL;

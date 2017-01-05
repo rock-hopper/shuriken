@@ -84,11 +84,11 @@ private:
     void updateOutputChannelComboBox();
     void updateSampleRateComboBox();
     void updateBufferSizeComboBox();
-    void updateMidiInputListWidget();
+    void updateMidiInputListWidget( bool isJackMidiEnabled );
     void disableAllWidgets();
     void setUpMidiInputTestSynth();
     void tearDownMidiInputTestSynth();
-    void setJackMidiInput( String audioDeviceName );
+    void disableAlsaMidiInputs();
 
     void enableStretcherOptions( RubberBandStretcher::Options options );
     void disableStretcherOptions( RubberBandStretcher::Options options );
@@ -113,7 +113,6 @@ private:
 private:
     static String getNameForChannelPair( const String& name1, const String& name2 );
     static QString getNoDeviceString() { return "<< " + tr("none") + " >>"; }
-    static bool isJackMidiDevice( String midiDeviceName );
 
 signals:
     void timeStretchOptionsChanged();
