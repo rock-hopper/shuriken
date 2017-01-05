@@ -576,7 +576,7 @@ void OptionsDialog::disableAllWidgets()
 
 void OptionsDialog::setUpMidiInputTestSynth()
 {
-    m_synthAudioSource = new SynthAudioSource();
+    m_synthAudioSource = new SynthAudioSource( m_deviceManager.getCurrentAudioDevice() );
     m_audioSourcePlayer.setSource( m_synthAudioSource );
     m_deviceManager.addAudioCallback( &m_audioSourcePlayer );
     m_deviceManager.addMidiInputCallback( String::empty, &(m_synthAudioSource->m_midiCollector) );
@@ -724,6 +724,8 @@ void OptionsDialog::displayDirValidityText( const bool isValid )
 
 void OptionsDialog::on_comboBox_AudioBackend_activated( const int index )
 {
+    tearDownMidiInputTestSynth();
+
     // Set audio backend
     AudioIODeviceType* const audioBackendType = m_deviceManager.getAvailableDeviceTypes()[ index ];
     const String audioBackendName = audioBackendType->getTypeName();
@@ -776,8 +778,17 @@ void OptionsDialog::on_comboBox_AudioBackend_activated( const int index )
         emit jackAudioEnabled( false );
     }
 
-    if ( error.isNotEmpty() )
+    if ( error.isEmpty() )
     {
+        if ( m_ui->checkBox_MidiInputTestTone->isChecked() )
+        {
+            setUpMidiInputTestSynth();
+        }
+    }
+    else
+    {
+        m_ui->checkBox_MidiInputTestTone->setChecked( false );
+
         MessageBoxes::showWarningDialog( tr("Error when trying to open audio device!"), error.toRawUTF8() );
     }
 }
@@ -797,6 +808,8 @@ void OptionsDialog::on_comboBox_AudioDevice_activated( const QString deviceName 
     // Update audio settings
     if ( outputDeviceName != config.outputDeviceName )
     {
+        tearDownMidiInputTestSynth();
+
         if ( outputDeviceName != getNoDeviceString().toLocal8Bit().data() )
         {
             config.outputDeviceName = outputDeviceName;
@@ -825,11 +838,20 @@ void OptionsDialog::on_comboBox_AudioDevice_activated( const QString deviceName 
         updateSampleRateComboBox();
         updateBufferSizeComboBox();
         updateMidiInputListWidget( isJackMidiEnabled );
-    }
 
-    if ( error.isNotEmpty() )
-    {
-        MessageBoxes::showWarningDialog( tr("Error when trying to open audio device!"), error.toRawUTF8() );
+        if ( error.isEmpty() )
+        {
+            if ( m_ui->checkBox_MidiInputTestTone->isChecked() )
+            {
+                setUpMidiInputTestSynth();
+            }
+        }
+        else
+        {
+            m_ui->checkBox_MidiInputTestTone->setChecked( false );
+
+            MessageBoxes::showWarningDialog( tr("Error when trying to open audio device!"), error.toRawUTF8() );
+        }
     }
 }
 

@@ -41,7 +41,7 @@ SamplerAudioSource::SamplerAudioSource( const bool isMonophonic, const AudioIODe
     m_isLoopingEnabled( false ),
     m_noteCounter( 0 ),
     m_frameCounter( 0 ),
-    m_jackDevice( audioDevice->canFillMidiBuffer() ? audioDevice : NULL )
+    m_jackDevice( audioDevice != NULL && audioDevice->canFillMidiBuffer() ? audioDevice : NULL )
 {
 }
 
