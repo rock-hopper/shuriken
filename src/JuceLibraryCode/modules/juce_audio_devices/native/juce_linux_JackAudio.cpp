@@ -57,9 +57,9 @@ static void* juce_loadJackFunction (const char* const name)
       if (fn != nullptr) (*fn) arguments;                                         \
   }
 
-jack_transport_state_t jack_transport_query(const jack_client_t *client, jack_position_t *pos)
+jack_transport_state_t jack_transport_query(const jack_client_t* client, jack_position_t* pos)
 {
-    typedef jack_transport_state_t (*jack_transport_query_ptr_t)(const jack_client_t *client, jack_position_t *pos);
+    typedef jack_transport_state_t (*jack_transport_query_ptr_t)(const jack_client_t* client, jack_position_t* pos);
     static jack_transport_query_ptr_t fn = (jack_transport_query_ptr_t) juce_loadJackFunction ("jack_transport_query");
     return (fn != nullptr) ? (*fn)(client, pos) : JackTransportStopped;
 }
