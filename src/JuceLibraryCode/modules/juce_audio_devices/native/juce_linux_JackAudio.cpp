@@ -141,7 +141,9 @@ public:
           client (nullptr),
           callback (nullptr),
           midiPortIn (nullptr),
-          positionInfo (new jack_position_t)
+          positionInfo (new jack_position_t),
+          incomingMessageBufferSize (0),
+          messageSampleOffset (0)
     {
         jassert (deviceName.isNotEmpty());
 
@@ -352,9 +354,38 @@ public:
         return midiEnabled;
     }
 
-    void fillMidiBuffer (MidiBuffer& bufferToFill) const override
+    void fillMidiBuffer (MidiBuffer& bufferToFill, const int numSamples) override
     {
-        bufferToFill = midiBuffer;
+        //bufferToFill = incomingMessages;
+
+        JUCE_JACK_LOG ("Fill MIDI Buffer Started!  numSamples: " + String(numSamples));
+
+        incomingMessageBufferSize = numSamples;
+
+        const uint8* midiData;
+        int numBytes, samplePosition;
+        MidiBuffer tempBuffer;
+
+        MidiBuffer::Iterator iter (incomingMessages);
+
+        while (iter.getNextEvent (midiData, numBytes, samplePosition))
+        {
+            if (samplePosition < numSamples)
+            {
+                bufferToFill.addEvent (midiData, numBytes, samplePosition);
+            }
+            else
+            {
+                tempBuffer.addEvent (midiData, numBytes, samplePosition - numSamples);
+            }
+        }
+
+        messageSampleOffset -= jmin (numSamples, messageSampleOffset);
+
+        incomingMessages.clear();
+        incomingMessages = tempBuffer;
+
+        JUCE_JACK_LOG ("Fill MIDI Buffer Finished!  Message Sample Offset: " + String (messageSampleOffset));
     }
 
     String inputId, outputId;
@@ -365,9 +396,9 @@ private:
         juce::jack_transport_query (client, positionInfo);
         Jack::g_currentBPM = positionInfo->beats_per_minute;
 
-        if (midiPortIn != nullptr)
+        if (midiPortIn != nullptr && incomingMessageBufferSize > 0)
         {
-            midiBuffer.clear();
+            JUCE_JACK_LOG ("Process MIDI started!  numSamples: " + String(numSamples));
 
             void* buffer = juce::jack_port_get_buffer (midiPortIn, numSamples);
             jack_nframes_t numEvents = juce::jack_midi_get_event_count (buffer);
@@ -377,10 +408,15 @@ private:
             {
                 juce::jack_midi_event_get (&midiEvent, buffer, i);
 
-                midiBuffer.addEvent (midiEvent.buffer, midiEvent.size, midiEvent.time);
+                incomingMessages.addEvent (midiEvent.buffer, midiEvent.size, midiEvent.time + messageSampleOffset);
 
-                //JUCE_JACK_LOG ("JACK MIDI event!  Size: " + String(midiEvent.size) + "  Time: " + String(midiEvent.time));
+                JUCE_JACK_LOG ("JACK MIDI event!  Size: " + String (midiEvent.size) +
+                               "  Sample Position: " + String (midiEvent.time + messageSampleOffset));
             }
+
+            messageSampleOffset += numSamples;
+
+            JUCE_JACK_LOG ("Process MIDI Finished!  Message Sample Offset: " + String (messageSampleOffset));
         }
 
         int numInputPorts = inputPorts.size();
@@ -462,7 +498,9 @@ private:
 
     ScopedPointer<jack_position_t> positionInfo;
 
-    MidiBuffer midiBuffer;
+    MidiBuffer incomingMessages;
+    int incomingMessageBufferSize;
+    int messageSampleOffset;
 };
 
 

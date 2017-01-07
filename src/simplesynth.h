@@ -172,7 +172,7 @@ private:
 // An audio source that streams the output of the sine wave synthesiser
 struct SynthAudioSource : public AudioSource
 {
-    SynthAudioSource( const AudioIODevice* audioDevice = NULL ) :
+    SynthAudioSource( AudioIODevice* audioDevice = NULL ) :
         m_jackDevice( audioDevice != NULL && audioDevice->canFillMidiBuffer() ? audioDevice : NULL )
     {
         // Add the sine wave voice to the synth
@@ -211,7 +211,7 @@ struct SynthAudioSource : public AudioSource
 
         if ( m_jackDevice != NULL )
         {
-            m_jackDevice->fillMidiBuffer( incomingMidi );
+            m_jackDevice->fillMidiBuffer( incomingMidi, bufferToFill.numSamples );
         }
         else
         {
@@ -230,7 +230,7 @@ struct SynthAudioSource : public AudioSource
     // The synth itself!
     Synthesiser m_synth;
 
-    const AudioIODevice* const m_jackDevice;
+    AudioIODevice* const m_jackDevice;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( SynthAudioSource );

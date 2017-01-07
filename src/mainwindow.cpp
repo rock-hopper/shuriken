@@ -307,7 +307,7 @@ void MainWindow::setUpSampler()
     if ( ! m_sampleBufferList.isEmpty() && ! m_sampleHeader.isNull() )
     {
         const bool isMonophonyEnabled = m_ui->actionMonophonic->isChecked();
-        const AudioIODevice* currentAudioDevice = m_deviceManager.getCurrentAudioDevice();
+        AudioIODevice* currentAudioDevice = m_deviceManager.getCurrentAudioDevice();
 
         m_samplerAudioSource = new SamplerAudioSource( isMonophonyEnabled, currentAudioDevice );
 

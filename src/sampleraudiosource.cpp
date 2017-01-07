@@ -29,7 +29,7 @@
 //==================================================================================================
 // Public:
 
-SamplerAudioSource::SamplerAudioSource( const bool isMonophonic, const AudioIODevice* audioDevice ) :
+SamplerAudioSource::SamplerAudioSource( const bool isMonophonic, AudioIODevice* audioDevice ) :
     QObject(),
     AudioSource(),
     m_isMonophonic( isMonophonic ),
@@ -311,7 +311,7 @@ void SamplerAudioSource::getNextAudioBlock( const AudioSourceChannelInfo& info, 
 
     if ( m_jackDevice != NULL )
     {
-        m_jackDevice->fillMidiBuffer( midiBuffer );
+        m_jackDevice->fillMidiBuffer( midiBuffer, info.numSamples );
     }
     else
     {

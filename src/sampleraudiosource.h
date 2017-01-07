@@ -33,7 +33,7 @@ class SamplerAudioSource : public QObject, public AudioSource
     Q_OBJECT
 
 public:
-    SamplerAudioSource( const bool isMonophonic = false, const AudioIODevice* audioDevice = NULL );
+    SamplerAudioSource( const bool isMonophonic = false, AudioIODevice* audioDevice = NULL );
     ~SamplerAudioSource();
 
     void setSamples( QList<SharedSampleBuffer> sampleBufferList, qreal sampleRate );
@@ -104,7 +104,7 @@ private:
     volatile int m_noteCounterEnd;
     volatile int m_frameCounter;
 
-    const AudioIODevice* const m_jackDevice;
+    AudioIODevice* const m_jackDevice;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR( SamplerAudioSource );
