@@ -142,8 +142,8 @@ public:
           callback (nullptr),
           midiPortIn (nullptr),
           positionInfo (new jack_position_t),
-          incomingMessageBufferSize (0),
-          messageSampleOffset (0)
+          fillMidiBufferRequested (false),
+          midiSampleOffset (0)
     {
         jassert (deviceName.isNotEmpty());
 
@@ -356,36 +356,57 @@ public:
 
     void fillMidiBuffer (MidiBuffer& bufferToFill, const int numSamples) override
     {
-        //bufferToFill = incomingMessages;
+        fillMidiBufferRequested = true;
 
-        JUCE_JACK_LOG ("Fill MIDI Buffer Started!  numSamples: " + String(numSamples));
-
-        incomingMessageBufferSize = numSamples;
-
-        const uint8* midiData;
-        int numBytes, samplePosition;
-        MidiBuffer tempBuffer;
-
-        MidiBuffer::Iterator iter (incomingMessages);
-
-        while (iter.getNextEvent (midiData, numBytes, samplePosition))
+        if (! incomingMessages.isEmpty())
         {
-            if (samplePosition < numSamples)
+            int startSample = 0;
+
+            const uint8* midiData;
+            int numBytes, samplePosition;
+
+            MidiBuffer::Iterator iter (incomingMessages);
+
+            if (midiSampleOffset > numSamples)
             {
-                bufferToFill.addEvent (midiData, numBytes, samplePosition);
+                // if our list of events is longer than the buffer we're being
+                // asked for, scale them down to squeeze them all in..
+                const int maxBlockLengthToUse = numSamples << 5;
+
+                if (midiSampleOffset > maxBlockLengthToUse)
+                {
+                    startSample = midiSampleOffset - maxBlockLengthToUse;
+                    midiSampleOffset = maxBlockLengthToUse;
+                    iter.setNextSamplePosition (startSample);
+                }
+
+                const int scale = (numSamples << 10) / midiSampleOffset;
+
+                while (iter.getNextEvent (midiData, numBytes, samplePosition))
+                {
+                    samplePosition = ((samplePosition - startSample) * scale) >> 10;
+
+                    bufferToFill.addEvent (midiData, numBytes,
+                                           jlimit (0, numSamples - 1, samplePosition));
+                }
             }
             else
             {
-                tempBuffer.addEvent (midiData, numBytes, samplePosition - numSamples);
+                // if our event list is shorter than the number we need, put them
+                // towards the end of the buffer
+                startSample = numSamples - midiSampleOffset;
+
+                while (iter.getNextEvent (midiData, numBytes, samplePosition))
+                {
+                    bufferToFill.addEvent (midiData, numBytes,
+                                           jlimit (0, numSamples - 1, samplePosition + startSample));
+                }
             }
+
+            incomingMessages.clear();
         }
 
-        messageSampleOffset -= jmin (numSamples, messageSampleOffset);
-
-        incomingMessages.clear();
-        incomingMessages = tempBuffer;
-
-        JUCE_JACK_LOG ("Fill MIDI Buffer Finished!  Message Sample Offset: " + String (messageSampleOffset));
+        midiSampleOffset = 0;
     }
 
     String inputId, outputId;
@@ -396,10 +417,8 @@ private:
         juce::jack_transport_query (client, positionInfo);
         Jack::g_currentBPM = positionInfo->beats_per_minute;
 
-        if (midiPortIn != nullptr && incomingMessageBufferSize > 0)
+        if (midiPortIn != nullptr && fillMidiBufferRequested)
         {
-            JUCE_JACK_LOG ("Process MIDI started!  numSamples: " + String(numSamples));
-
             void* buffer = juce::jack_port_get_buffer (midiPortIn, numSamples);
             jack_nframes_t numEvents = juce::jack_midi_get_event_count (buffer);
             jack_midi_event_t midiEvent;
@@ -408,15 +427,13 @@ private:
             {
                 juce::jack_midi_event_get (&midiEvent, buffer, i);
 
-                incomingMessages.addEvent (midiEvent.buffer, midiEvent.size, midiEvent.time + messageSampleOffset);
+                incomingMessages.addEvent (midiEvent.buffer, midiEvent.size, midiEvent.time + midiSampleOffset);
 
-                JUCE_JACK_LOG ("JACK MIDI event!  Size: " + String (midiEvent.size) +
-                               "  Sample Position: " + String (midiEvent.time + messageSampleOffset));
+                //JUCE_JACK_LOG ("JACK MIDI event!  Size: " + String (midiEvent.size) +
+                //               "  Sample Position: " + String (midiEvent.time + midiSampleOffset));
             }
 
-            messageSampleOffset += numSamples;
-
-            JUCE_JACK_LOG ("Process MIDI Finished!  Message Sample Offset: " + String (messageSampleOffset));
+            midiSampleOffset += numSamples;
         }
 
         int numInputPorts = inputPorts.size();
@@ -499,8 +516,8 @@ private:
     ScopedPointer<jack_position_t> positionInfo;
 
     MidiBuffer incomingMessages;
-    int incomingMessageBufferSize;
-    int messageSampleOffset;
+    bool fillMidiBufferRequested;
+    int midiSampleOffset;
 };
 
 
