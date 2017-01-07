@@ -68,6 +68,8 @@ public:
 
     MidiMessageCollector* getMidiMessageCollector() { return &m_midiCollector; }
 
+    const AudioIODevice* getAudioDevice()           { return m_jackDevice; }
+
     // For JUCE use only!
     void prepareToPlay( int /*samplesPerBlockExpected*/, double sampleRate ) override;
     void releaseResources() override;

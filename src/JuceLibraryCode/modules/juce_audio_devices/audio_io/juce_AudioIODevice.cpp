@@ -40,5 +40,7 @@ bool AudioIODevice::showControlPanel()
     return false;
 }
 
-bool AudioIODevice::canFillMidiBuffer() const                   { return false; }
+bool AudioIODevice::canHandleMidiInput() const                  { return false; }
 void AudioIODevice::fillMidiBuffer (MidiBuffer&, int)           {}
+bool AudioIODevice::canSyncWithJackTransport() const            { return false; }
+double AudioIODevice::getJackTransportBPM() const               { return 0.0; }

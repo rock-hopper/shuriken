@@ -173,7 +173,7 @@ private:
 struct SynthAudioSource : public AudioSource
 {
     SynthAudioSource( AudioIODevice* audioDevice = NULL ) :
-        m_jackDevice( audioDevice != NULL && audioDevice->canFillMidiBuffer() ? audioDevice : NULL )
+        m_jackDevice( audioDevice != NULL && audioDevice->canHandleMidiInput() ? audioDevice : NULL )
     {
         // Add the sine wave voice to the synth
         const int polyphony = 10;

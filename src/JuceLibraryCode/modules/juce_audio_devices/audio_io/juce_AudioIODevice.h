@@ -295,8 +295,29 @@ public:
     */
     virtual bool setAudioPreprocessingEnabled (bool shouldBeEnabled);
 
-    virtual bool canFillMidiBuffer() const;
+    /** True if this device has the ability to handle MIDI input.
+
+        This is only true of JACK devices.
+    */
+    virtual bool canHandleMidiInput() const;
+
+    /** Fill a MidiBuffer with incoming MIDI messages.
+
+        This should only be called for devices which return true from canHandleMidiInput().
+    */
     virtual void fillMidiBuffer (MidiBuffer& bufferToFill, int numSamples);
+
+    /** True if this device has the ability to synchronise with JACK transport.
+
+        This is only true of JACK devices.
+    */
+    virtual bool canSyncWithJackTransport() const;
+
+    /** Get the current JACK transport BPM.
+
+        This should only be called for devices which return true from canSyncWithJackTransport().
+    */
+    virtual double getJackTransportBPM() const;
 
     //==============================================================================
 protected:

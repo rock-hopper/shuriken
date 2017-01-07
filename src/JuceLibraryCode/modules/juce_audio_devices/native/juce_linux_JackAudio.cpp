@@ -143,7 +143,8 @@ public:
           midiPortIn (nullptr),
           positionInfo (new jack_position_t),
           fillMidiBufferRequested (false),
-          midiSampleOffset (0)
+          midiSampleOffset (0),
+          currentBPM (0.0)
     {
         jassert (deviceName.isNotEmpty());
 
@@ -280,7 +281,7 @@ public:
 
         deviceIsOpen = false;
 
-        Jack::g_currentBPM = 0.0;
+        currentBPM = 0.0;
 
         inChans.free();
         outChans.free();
@@ -349,7 +350,7 @@ public:
         return latency;
     }
 
-    bool canFillMidiBuffer() const override
+    bool canHandleMidiInput() const override
     {
         return midiEnabled;
     }
@@ -409,13 +410,23 @@ public:
         midiSampleOffset = 0;
     }
 
+    bool canSyncWithJackTransport() const override
+    {
+        return true;
+    }
+
+    double getJackTransportBPM() const override
+    {
+        return currentBPM;
+    }
+
     String inputId, outputId;
 
 private:
     void process (const int numSamples)
     {
         juce::jack_transport_query (client, positionInfo);
-        Jack::g_currentBPM = positionInfo->beats_per_minute;
+        currentBPM = positionInfo->beats_per_minute;
 
         if (midiPortIn != nullptr && fillMidiBufferRequested)
         {
@@ -518,6 +529,8 @@ private:
     MidiBuffer incomingMessages;
     bool fillMidiBufferRequested;
     int midiSampleOffset;
+
+    double currentBPM;
 };
 
 
