@@ -1921,27 +1921,34 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
 {
     if ( isChecked ) // Slice
     {
-        QUndoCommand* parentCommand = new QUndoCommand();
-        parentCommand->setText( tr("Slice") );
-
-        new SliceCommand( this,
-                          m_graphicsScene,
-                          m_ui->pushButton_Slice,
-                          m_ui->pushButton_Find,
-                          m_ui->actionAdd_Slice_Point,
-                          m_ui->actionSelect_Move,
-                          m_ui->actionAudition,
-                          m_ui->actionSelective_Time_Stretch,
-                          parentCommand );
-
-        QList<SharedSlicePointItem> slicePoints = m_graphicsScene->getSlicePointList();
-
-        foreach ( SharedSlicePointItem slicePoint, slicePoints )
+        if ( m_graphicsScene->getSlicePointFrameNums().isEmpty() )
         {
-            new DeleteSlicePointItemCommand( slicePoint, m_graphicsScene, m_ui->comboBox_SnapValues, parentCommand );
+            m_ui->pushButton_Slice->setChecked( false );
         }
+        else
+        {
+            QUndoCommand* parentCommand = new QUndoCommand();
+            parentCommand->setText( tr("Slice") );
 
-        m_undoStack.push( parentCommand );
+            new SliceCommand( this,
+                              m_graphicsScene,
+                              m_ui->pushButton_Slice,
+                              m_ui->pushButton_Find,
+                              m_ui->actionAdd_Slice_Point,
+                              m_ui->actionSelect_Move,
+                              m_ui->actionAudition,
+                              m_ui->actionSelective_Time_Stretch,
+                              parentCommand );
+
+            QList<SharedSlicePointItem> slicePoints = m_graphicsScene->getSlicePointList();
+
+            foreach ( SharedSlicePointItem slicePoint, slicePoints )
+            {
+                new DeleteSlicePointItemCommand( slicePoint, m_graphicsScene, m_ui->comboBox_SnapValues, parentCommand );
+            }
+
+            m_undoStack.push( parentCommand );
+        }
     }
     else // Unslice
     {
