@@ -63,7 +63,7 @@ SharedSampleBuffer AudioFileHandler::getSampleData( const QString filePath, cons
     // First try using aubio to load the file; if that fails, try using sndlib
     sampleBuffer = aubioLoadFile( path, startFrame, numFramesToRead );
 #else
-    // First try using sndlib to load the file; if that fails, try using sndlib
+    // First try using libsndfile to load the file; if that fails, try using sndlib
     sampleBuffer = sndfileLoadFile( path, startFrame, numFramesToRead );
 #endif
 
@@ -86,7 +86,7 @@ SharedSampleHeader AudioFileHandler::getSampleHeader( const QString filePath )
 
     SharedSampleHeader sampleHeader;
 
-    // If `0` is passed as `samplerate` to new_aubio_source, the sample rate of the original file is used.
+    // If `0` is passed as `samplerate` param to new_aubio_source, the sample rate of the original file is used.
     aubio_source_t* aubioSource = new_aubio_source( const_cast<char*>(path), 0, 4096 );
 
     if ( aubioSource != NULL ) // First try using aubio to read the header

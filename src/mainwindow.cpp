@@ -102,7 +102,7 @@ MainWindow::MainWindow( QWidget* parent ) :
 
         if ( fileInfo.exists() )
         {
-            if ( fileInfo.suffix() == FILE_EXTENSION)
+            if ( fileInfo.suffix().prepend('.') == FILE_EXTENSION)
                 openProject( filePath );
             else
                 importAudioFile( filePath );
