@@ -53,15 +53,17 @@ MainWindow::MainWindow( QWidget* parent ) :
     m_isProjectOpen( false )
 {
     // Check if a file path has been passed on the command line
+    QString filePath;
+
     if ( QApplication::arguments().size() > 1 )
     {
-        m_currentProjectFilePath = QApplication::arguments().at( 1 );
+        filePath = QApplication::arguments().at( 1 );
     }
 
     // Check if Non Session Manager is running
     const char* nsmUrl = getenv( "NSM_URL" );
 
-    if ( nsmUrl != NULL && m_currentProjectFilePath.isEmpty() )
+    if ( nsmUrl != NULL && filePath.isEmpty() )
     {
         m_nsmThread = new NsmListenerThread();
 
@@ -82,12 +84,29 @@ MainWindow::MainWindow( QWidget* parent ) :
         m_nsmThread->start();
     }
 
+    // Set up audio and user interface
     initialiseAudio();
     setupUI();
 
-    if ( QFileInfo( m_currentProjectFilePath ).exists() )
+    // Load project or audio file if necessary
+    if ( nsmUrl != NULL && filePath.isEmpty() )
     {
-        openProject( m_currentProjectFilePath );
+        if ( QFileInfo( m_currentProjectFilePath ).exists() )
+        {
+            openProject( m_currentProjectFilePath );
+        }
+    }
+    else if ( !filePath.isEmpty() )
+    {
+        const QFileInfo fileInfo( filePath );
+
+        if ( fileInfo.exists() )
+        {
+            if ( fileInfo.suffix() == FILE_EXTENSION)
+                openProject( filePath );
+            else
+                importAudioFile( filePath );
+        }
     }
 }
 

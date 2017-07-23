@@ -406,6 +406,63 @@ void MainWindow::openProject( const QString filePath )
 
 
 
+void MainWindow::importAudioFile( const QString filePath )
+{
+    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+
+    const QFileInfo fileInfo( filePath );
+    const QString fileName = fileInfo.fileName();
+
+    m_lastOpenedImportDir = fileInfo.absolutePath();
+
+    SharedSampleBuffer sampleBuffer = m_fileHandler.getSampleData( filePath );
+    SharedSampleHeader sampleHeader = m_fileHandler.getSampleHeader( filePath );
+
+    if ( sampleBuffer.isNull() || sampleHeader.isNull() )
+    {
+        QApplication::restoreOverrideCursor();
+        MessageBoxes::showWarningDialog( m_fileHandler.getLastErrorTitle(), m_fileHandler.getLastErrorInfo() );
+    }
+    else
+    {
+        closeProject();
+
+        m_sampleBufferList << sampleBuffer;
+        m_sampleHeader = sampleHeader;
+
+        const SharedWaveformItem item = m_graphicsScene->createWaveform( sampleBuffer, sampleHeader );
+        connectWaveformToMainWindow( item );
+
+        setUpSampler();
+
+        enableUI();
+
+        // Set status bar message
+        {
+            const QString channels = sampleHeader->numChans == 1 ? "Mono" : "Stereo";
+
+            const QString bits = QString::number( sampleHeader->bitsPerSample ) + " bits";
+
+            const QString rate = QString::number( sampleHeader->sampleRate ) + " Hz";
+
+            QString message = fileName + ", " + channels + ", " + bits + ", " + rate + ", " + sampleHeader->format;
+            m_ui->statusBar->showMessage( message );
+        }
+
+        if ( m_nsmThread != NULL )
+        {
+            m_nsmThread->sendMessage( NsmListenerThread::MSG_IS_DIRTY );
+            m_ui->actionSave_Project->setEnabled( true );
+        }
+
+        m_isProjectOpen = true;
+
+        QApplication::restoreOverrideCursor();
+    }
+}
+
+
+
 void MainWindow::exportAs( const QString tempDirPath,
                            const QString outputDirPath,
                            const QString samplesDirPath,
@@ -693,57 +750,7 @@ void MainWindow::importAudioFileDialog()
     // If user didn't click "Cancel"
     if ( ! filePath.isEmpty() )
     {
-        QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
-
-        const QFileInfo fileInfo( filePath );
-        const QString fileName = fileInfo.fileName();
-
-        m_lastOpenedImportDir = fileInfo.absolutePath();
-
-        SharedSampleBuffer sampleBuffer = m_fileHandler.getSampleData( filePath );
-        SharedSampleHeader sampleHeader = m_fileHandler.getSampleHeader( filePath );
-
-        if ( sampleBuffer.isNull() || sampleHeader.isNull() )
-        {
-            QApplication::restoreOverrideCursor();
-            MessageBoxes::showWarningDialog( m_fileHandler.getLastErrorTitle(), m_fileHandler.getLastErrorInfo() );
-        }
-        else
-        {
-            closeProject();
-
-            m_sampleBufferList << sampleBuffer;
-            m_sampleHeader = sampleHeader;
-
-            const SharedWaveformItem item = m_graphicsScene->createWaveform( sampleBuffer, sampleHeader );
-            connectWaveformToMainWindow( item );
-
-            setUpSampler();
-
-            enableUI();
-
-            // Set status bar message
-            {
-                const QString channels = sampleHeader->numChans == 1 ? "Mono" : "Stereo";
-
-                const QString bits = QString::number( sampleHeader->bitsPerSample ) + " bits";
-
-                const QString rate = QString::number( sampleHeader->sampleRate ) + " Hz";
-
-                QString message = fileName + ", " + channels + ", " + bits + ", " + rate + ", " + sampleHeader->format;
-                m_ui->statusBar->showMessage( message );
-            }
-
-            if ( m_nsmThread != NULL )
-            {
-                m_nsmThread->sendMessage( NsmListenerThread::MSG_IS_DIRTY );
-                m_ui->actionSave_Project->setEnabled( true );
-            }
-
-            m_isProjectOpen = true;
-
-            QApplication::restoreOverrideCursor();
-        }
+        importAudioFile(filePath);
     }
 }
 

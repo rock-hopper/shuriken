@@ -90,7 +90,7 @@ private:
 
     void saveProject( QString filePath, bool isNsmSessionExport = false );
     void openProject( QString filePath );
-
+    void importAudioFile( QString filePath );
     void exportAs( QString tempDirPath,
                    QString outputDirPath,
                    QString samplesDirPath,
