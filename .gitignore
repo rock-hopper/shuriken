@@ -18,6 +18,7 @@ moc_*.cpp
 qrc_*.cpp
 Makefile
 *-build-*
+.qmake.stash
 
 # Project specific
 
@@ -28,4 +29,5 @@ src/SndLibShuriken/config.status
 src/SndLibShuriken/sndlib-config
 src/SndLibShuriken/sndlib.pc
 src/SndLibShuriken/unix-config.h
+src/SndLibShuriken/makefile
 
