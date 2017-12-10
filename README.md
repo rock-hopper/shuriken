@@ -40,6 +40,8 @@ The build script also provides some other options:
     ./build --help
 
 You must have either qmake or qmake-qt4 installed as well as the aubio (>=0.4.1) and rubberband (>=1.3) dev files.
+
+Once built, you can install Shuriken with the "make install" command as root.
 ___
 
 As noted above, Shuriken requires the latest incarnation of the aubio library which I've packaged for Ubuntu Precise and Trusty, and AVLinux 6:
