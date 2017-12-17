@@ -127,7 +127,11 @@ void WaveformItem::setRect( const qreal x, const qreal y, const qreal width, con
 {
     QGraphicsRectItem::setRect( x, y, width, height );
     setBackgroundGradient();
-    resetSampleBins();
+
+    if ( m_globalScaleFactor != NOT_SET )
+    {
+        resetSampleBins();
+    }
 }
 
 
