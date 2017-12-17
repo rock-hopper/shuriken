@@ -175,7 +175,7 @@ function checkDependencies()
         errorCode=1
     fi
 
-    if [ ! -e "/usr/bin/libtool" ]; then
+    if [[ ! -e "/usr/bin/libtool" && ! -e "/usr/bin/libtoolize" ]]; then
         echo "libtool not found"
         errorCode=1
     fi
