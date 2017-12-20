@@ -44,17 +44,23 @@ ExportDialog::ExportDialog( QWidget* parent ) :
     m_directoryValidator = new DirectoryValidator();
     m_ui->lineEdit_OutputDir->setValidator( m_directoryValidator );
 
-    QObject::connect( m_directoryValidator, SIGNAL( isValid(bool) ),
-                      this, SLOT( displayDirValidityText(bool) ) );
+    connect( m_directoryValidator, SIGNAL( isValid(bool) ),
+             this, SLOT( displayDirValidityText(bool) ) );
 
-    QObject::connect( m_directoryValidator, SIGNAL( isValid(bool) ),
-                      m_ui->pushButton_Create, SLOT( setDisabled(bool) ) );
+    connect( m_directoryValidator, SIGNAL( isValid(bool) ),
+             m_ui->pushButton_Create, SLOT( setDisabled(bool) ) );
 
-    QObject::connect( m_ui->lineEdit_OutputDir, SIGNAL( textChanged(QString) ),
-                      this, SLOT( enableOkButtonIfInputValid() ) );
+    connect( m_ui->lineEdit_OutputDir, SIGNAL( textChanged(QString) ),
+             this, SLOT( enableOkButtonIfInputValid() ) );
 
-    QObject::connect( m_ui->lineEdit_FileName, SIGNAL( textChanged(QString) ),
-                      this, SLOT( enableOkButtonIfInputValid() ) );
+    connect( m_ui->lineEdit_FileName, SIGNAL( textChanged(QString) ),
+             this, SLOT( enableOkButtonIfInputValid() ) );
+
+    connect( m_ui->checkBox_ExportAudio, SIGNAL( clicked(bool) ),
+             this, SLOT( enableOkButtonIfInputValid() ) );
+
+    connect( m_ui->checkBox_ExportMidi, SIGNAL( clicked(bool) ),
+             this, SLOT( enableOkButtonIfInputValid() ) );
 
 
     // Populate combo boxes
@@ -382,9 +388,16 @@ void ExportDialog::enableOkButtonIfInputValid()
 {
     QPushButton* okButton = m_ui->buttonBox->button( QDialogButtonBox::Ok );
 
-    if ( m_ui->lineEdit_OutputDir->hasAcceptableInput() && m_ui->lineEdit_FileName->hasAcceptableInput() )
+    if ( m_ui->checkBox_ExportAudio->isChecked() || m_ui->checkBox_ExportMidi->isChecked() )
     {
-        okButton->setEnabled( true );
+        if ( m_ui->lineEdit_OutputDir->hasAcceptableInput() && m_ui->lineEdit_FileName->hasAcceptableInput() )
+        {
+            okButton->setEnabled( true );
+        }
+        else
+        {
+            okButton->setEnabled( false );
+        }
     }
     else
     {
