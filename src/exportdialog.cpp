@@ -511,8 +511,6 @@ void ExportDialog::on_comboBox_Format_currentIndexChanged( const QString text )
 
 void ExportDialog::on_radioButton_AudioFiles_clicked()
 {
-    m_ui->label_FileName->setText( tr( "File Name(s):" ) );
-
     foreach ( QAbstractButton* button, m_ui->buttonGroup_Numbering->buttons() )
     {
         button->setEnabled( true );
@@ -548,8 +546,6 @@ void ExportDialog::on_radioButton_AudioFiles_clicked()
 
 void ExportDialog::on_radioButton_H2Drumkit_clicked()
 {
-    m_ui->label_FileName->setText( tr( "Kit Name:" ) );
-
     foreach ( QAbstractButton* button, m_ui->buttonGroup_Numbering->buttons() )
     {
         button->setEnabled( false );
@@ -587,8 +583,6 @@ void ExportDialog::on_radioButton_H2Drumkit_clicked()
 
 void ExportDialog::on_radioButton_SFZ_clicked()
 {
-    m_ui->label_FileName->setText( tr( "SFZ Name:" ) );
-
     foreach ( QAbstractButton* button, m_ui->buttonGroup_Numbering->buttons() )
     {
         button->setEnabled( false );
@@ -626,8 +620,6 @@ void ExportDialog::on_radioButton_SFZ_clicked()
 
 void ExportDialog::on_radioButton_Akai_clicked()
 {
-    m_ui->label_FileName->setText( tr( "PGM Name:" ) );
-
     foreach ( QAbstractButton* button, m_ui->buttonGroup_Numbering->buttons() )
     {
         button->setEnabled( false );
