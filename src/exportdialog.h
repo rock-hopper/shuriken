@@ -88,7 +88,8 @@ private:
     ScopedPointer<DirectoryValidator> m_directoryValidator;
 
 private slots:
-    void on_comboBox_MidiFile_activated( QString text );
+    void on_checkBox_ExportAudio_clicked( bool isChecked );
+    void on_checkBox_ExportMidi_clicked( bool isChecked );
     void on_radioButton_Akai_clicked();
     void on_radioButton_SFZ_clicked();
     void on_radioButton_H2Drumkit_clicked();

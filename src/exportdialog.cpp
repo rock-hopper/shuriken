@@ -91,14 +91,6 @@ ExportDialog::ExportDialog( QWidget* parent ) :
         }
     }
 
-    // Populate "MIDI File" combo box
-    {
-        QStringList textList;
-        textList << "Don't Export" << "Export" << "Export Only";
-
-        m_ui->comboBox_MidiFile->addItems( textList );
-    }
-
     // Populate "Mute Group" combo box
     {
         QStringList textList;
@@ -135,30 +127,29 @@ QString ExportDialog::getOutputDirPath() const
 
 int ExportDialog::getExportType() const
 {
-    int exportType;
+    int exportType = 0;
 
-    if ( m_ui->comboBox_MidiFile->currentText() == "Export Only" )
+    if ( m_ui->checkBox_ExportAudio->isChecked() )
     {
-        exportType = EXPORT_MIDI_FILE;
-    }
-    else if ( m_ui->radioButton_AudioFiles->isChecked() )
-    {
-        exportType = EXPORT_AUDIO_FILES;
-    }
-    else if ( m_ui->radioButton_H2Drumkit->isChecked() )
-    {
-        exportType = EXPORT_H2DRUMKIT | EXPORT_AUDIO_FILES;
-    }
-    else if ( m_ui->radioButton_SFZ->isChecked() )
-    {
-        exportType = EXPORT_SFZ | EXPORT_AUDIO_FILES;
-    }
-    else if ( m_ui->radioButton_Akai->isChecked() )
-    {
-        exportType = EXPORT_AKAI_PGM | EXPORT_AUDIO_FILES;
+        if ( m_ui->radioButton_AudioFiles->isChecked() )
+        {
+            exportType = EXPORT_AUDIO_FILES;
+        }
+        else if ( m_ui->radioButton_H2Drumkit->isChecked() )
+        {
+            exportType = EXPORT_H2DRUMKIT | EXPORT_AUDIO_FILES;
+        }
+        else if ( m_ui->radioButton_SFZ->isChecked() )
+        {
+            exportType = EXPORT_SFZ | EXPORT_AUDIO_FILES;
+        }
+        else if ( m_ui->radioButton_Akai->isChecked() )
+        {
+            exportType = EXPORT_AKAI_PGM | EXPORT_AUDIO_FILES;
+        }
     }
 
-    if ( m_ui->comboBox_MidiFile->currentText() == "Export" )
+    if ( m_ui->checkBox_ExportMidi->isChecked() )
     {
         exportType |= EXPORT_MIDI_FILE;
     }
@@ -348,7 +339,7 @@ void ExportDialog::setPlatformFileNameValidator()
 
 void ExportDialog::enableMidiFileTypeRadioButtons()
 {
-    if ( m_ui->comboBox_MidiFile->currentText() == "Export" || m_ui->comboBox_MidiFile->currentText() == "Export Only" )
+    if ( m_ui->checkBox_ExportMidi->isChecked() )
     {
         foreach ( QAbstractButton* button, m_ui->buttonGroup_Midi->buttons() )
         {
@@ -663,56 +654,56 @@ void ExportDialog::on_radioButton_Akai_clicked()
 
 
 
-void ExportDialog::on_comboBox_MidiFile_activated( const QString text )
+void ExportDialog::on_checkBox_ExportAudio_clicked( const bool isChecked )
 {
-    if ( text == "Export Only" )
+    foreach ( QAbstractButton* button, m_ui->buttonGroup_Export->buttons() )
     {
-        foreach ( QAbstractButton* button, m_ui->buttonGroup_Export->buttons() )
-        {
-            button->setEnabled( false );
-        }
+        button->setEnabled( isChecked );
+    }
+
+    {
+        const bool enable = isChecked && m_ui->radioButton_AudioFiles->isChecked();
 
         foreach ( QAbstractButton* button, m_ui->buttonGroup_Numbering->buttons() )
         {
-            button->setEnabled( false );
+            button->setEnabled( enable );
         }
+    }
 
-        m_ui->comboBox_Encoding->setEnabled( false );
-        m_ui->comboBox_Format->setEnabled( false );
-        m_ui->comboBox_Model->setEnabled( false );
-        m_ui->comboBox_SampleRate->setEnabled( false );
+    m_ui->comboBox_Encoding->setEnabled( isChecked );
+    m_ui->comboBox_Format->setEnabled( isChecked );
+    m_ui->comboBox_Model->setEnabled( isChecked );
+    m_ui->comboBox_SampleRate->setEnabled( isChecked );
 
+    if ( !isChecked && m_ui->checkBox_ExportMidi->isChecked() )
+    {
         enableMidiFileTypeRadioButtons();
     }
-    else
+    else if ( isChecked && m_ui->radioButton_Akai->isChecked() )
     {
-        foreach ( QAbstractButton* button, m_ui->buttonGroup_Export->buttons() )
-        {
-            button->setEnabled( true );
-        }
+        disableMidiFileTypeRadioButtons();
+        m_ui->radioButton_MidiType1->setChecked( true );
+    }
+}
 
-        foreach ( QAbstractButton* button, m_ui->buttonGroup_Numbering->buttons() )
-        {
-            button->setEnabled( true );
-        }
 
-        m_ui->comboBox_Encoding->setEnabled( true );
-        m_ui->comboBox_Format->setEnabled( true );
-        m_ui->comboBox_Model->setEnabled( true );
-        m_ui->comboBox_SampleRate->setEnabled( true );
 
-        if ( m_ui->radioButton_Akai->isChecked() )
+void ExportDialog::on_checkBox_ExportMidi_clicked( const bool isChecked )
+{
+    if ( isChecked )
+    {
+        if ( m_ui->checkBox_ExportAudio->isChecked() && m_ui->radioButton_Akai->isChecked() )
         {
             disableMidiFileTypeRadioButtons();
             m_ui->radioButton_MidiType1->setChecked( true );
-        }
-        else if ( text == "Don't Export")
-        {
-            disableMidiFileTypeRadioButtons();
         }
         else
         {
             enableMidiFileTypeRadioButtons();
         }
+    }
+    else
+    {
+        disableMidiFileTypeRadioButtons();
     }
 }
