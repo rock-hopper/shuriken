@@ -3,7 +3,9 @@
 # -------------------------------------------------
 QMAKE_CXXFLAGS += -msse \
     -msse2 \
-    -std=c++11
+    -std=c++11 \
+    -Wno-misleading-indentation \
+    -Wno-unused-parameter
 QT += opengl
 TARGET = shuriken
 TEMPLATE = app
