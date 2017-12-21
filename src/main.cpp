@@ -39,6 +39,9 @@ void messageHandler( QtMsgType messageType, const char* message )
     case QtDebugMsg:
         text = QString( "Debug: %1" ).arg( message );
         break;
+    case QtInfoMsg:
+        text = QString( "Info: %1" ).arg( message );
+        break;
     case QtWarningMsg:
         text = QString( "Warning: %1" ).arg( message );
         break;
