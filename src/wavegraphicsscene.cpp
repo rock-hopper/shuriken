@@ -46,7 +46,7 @@ WaveGraphicsScene::WaveGraphicsScene( const qreal x, const qreal y, const qreal 
     m_timer = new QTimeLine();
     m_timer->setFrameRange( 0, 100 );
     m_timer->setCurveShape( QTimeLine::LinearCurve );
-    m_timer->setUpdateInterval( 17 );
+    m_timer->setUpdateInterval( 17 ); // 17ms - roughly 60 fps
 
     m_animation = new QGraphicsItemAnimation;
     m_animation->setItem( m_playhead );
@@ -871,9 +871,9 @@ void WaveGraphicsScene::resizePlayhead()
     {
         m_timer->stop();
 
-        m_animation->clear();
-        m_animation->setPosAt( 0.0, QPointF( 0.0, BpmRuler::HEIGHT ) );
-        m_animation->setPosAt( 1.0, QPointF( width() - 1, BpmRuler::HEIGHT ) );
+        //m_animation->clear();
+        //m_animation->setPosAt( 0.0, QPointF( 0.0, BpmRuler::HEIGHT ) );
+        //m_animation->setPosAt( 1.0, QPointF( width() - 1, BpmRuler::HEIGHT ) );
 
         m_playhead->setLine( 0.0, 0.0, 0.0, height() - BpmRuler::HEIGHT );
 

@@ -47,6 +47,7 @@ public:
     enum InteractionMode { SELECT_MOVE_ITEMS, MULTI_SELECT_ITEMS, AUDITION_ITEMS };
 
     InteractionMode getInteractionMode() const              { return m_interactionMode; }
+
     void setInteractionMode( InteractionMode mode );
 
     // Creates a new waveform item and adds it to the scene
