@@ -509,26 +509,7 @@ QList<int> WaveGraphicsScene::getSlicePointFrameNums() const
 
     qSort( slicePointFrameNums );
 
-    const int totalNumFrames = getTotalNumFrames( m_waveformItemList );
-    const int minFramesBetweenSlicePoints = roundToIntAccurate( m_sampleHeader->sampleRate * AudioAnalyser::MIN_INTER_ONSET_SECS );
-
-    QList<int> amendedFrameNumList;
-    int prevFrameNum = 0;
-
-    foreach ( int frameNum, slicePointFrameNums )
-    {
-        if ( frameNum > minFramesBetweenSlicePoints &&
-             frameNum < totalNumFrames - minFramesBetweenSlicePoints )
-        {
-            if ( frameNum > prevFrameNum + minFramesBetweenSlicePoints )
-            {
-                amendedFrameNumList << frameNum;
-                prevFrameNum = frameNum;
-            }
-        }
-    }
-
-    return amendedFrameNumList;
+    return slicePointFrameNums;
 }
 
 
