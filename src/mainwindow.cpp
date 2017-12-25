@@ -532,8 +532,8 @@ void MainWindow::setupUI()
         m_ui->comboBox_TimeSigNumerator->addItems( numeratorTextList );
         m_ui->comboBox_TimeSigDenominator->addItems( denominatorTextList );
 
-        m_ui->comboBox_TimeSigNumerator->setCurrentIndex( 3 );   // 4
-        m_ui->comboBox_TimeSigDenominator->setCurrentIndex( 2 ); // 4
+        m_ui->comboBox_TimeSigNumerator->setCurrentIndex( 3 );   // "4"
+        m_ui->comboBox_TimeSigDenominator->setCurrentIndex( 2 ); // "4"
     }
 
     // Populate "Units" combo box
@@ -821,10 +821,10 @@ void MainWindow::getDetectionSettings( AudioAnalyser::DetectionSettings& setting
 {
     int currentIndex;
 
-    // From aubio website: "Typical threshold values are within 0.001 and 0.900." Default is 0.3 in aubio-0.4.0
     currentIndex = m_ui->comboBox_DetectMethod->currentIndex();
     settings.detectionMethod = m_ui->comboBox_DetectMethod->itemData( currentIndex ).toString().toLocal8Bit();
 
+    // From aubio website: "Typical threshold values are within 0.001 and 0.900." Default is 0.3 in aubio-0.4.0
     settings.threshold = m_ui->horizontalSlider_Threshold->value() / 100.0;
 
     currentIndex = m_ui->comboBox_WindowSize->currentIndex();
@@ -1009,6 +1009,51 @@ void MainWindow::copySelectedSamplesToClipboard()
             m_copiedNoteTimeRatios << 1.0;
         }
     }
+}
+
+
+
+QList<int> MainWindow::getSnapFrameNums() const
+{
+    QList<int> slicePointFrameNumList;
+    int divisionsPerBeat = m_ui->comboBox_SnapValues->currentData().toInt();
+
+    if ( divisionsPerBeat > 0 )
+    {
+        int totalNumFrames = 0;
+        int numBeats = 0;
+
+        foreach ( SharedSampleBuffer sampleBuffer, m_sampleBufferList )
+        {
+            totalNumFrames += sampleBuffer->getNumFrames();
+        }
+
+        if ( m_ui->comboBox_Units->currentText() == tr("Bars") )
+        {
+            int numBars = m_ui->spinBox_Length->value();
+
+            numBeats = numBars * m_ui->comboBox_TimeSigNumerator->currentText().toInt();
+        }
+        else // Units set to "Beats"
+        {
+            numBeats = m_ui->spinBox_Length->value();
+        }
+
+        if ( numBeats > 0 )
+        {
+            int audioSliceLength = totalNumFrames / ( numBeats * divisionsPerBeat );
+
+            int frameNum = audioSliceLength;
+
+            while ( frameNum < totalNumFrames )
+            {
+                slicePointFrameNumList.append( frameNum );
+                frameNum += audioSliceLength;
+            }
+        }
+    }
+
+    return slicePointFrameNumList;
 }
 
 
@@ -1903,11 +1948,11 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
 
     int numBeats = 0;
 
-    if ( m_ui->comboBox_Units->currentIndex() == UNITS_BARS )
+    if ( m_ui->comboBox_Units->currentText() == tr("Bars") )
     {
         numBeats = m_ui->spinBox_Length->value() * numerator;
     }
-    else // UNITS_BEATS
+    else // Beats
     {
         numBeats = m_ui->spinBox_Length->value();
     }
@@ -2030,26 +2075,6 @@ void MainWindow::on_pushButton_Find_clicked()
 {
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    QUndoCommand* parentCommand = new QUndoCommand();
-
-    // Set command text
-    if ( m_ui->comboBox_Find->currentText() == tr( "Onsets" ) )
-    {
-        parentCommand->setText( tr("Find Onsets") );
-    }
-    else
-    {
-        parentCommand->setText( tr("Find Beats") );
-    }
-
-    // Remove current slice point items if present
-    const QList<SharedSlicePointItem> slicePointItemList = m_graphicsScene->getSlicePointList();
-
-    foreach ( SharedSlicePointItem item, slicePointItemList )
-    {
-        new DeleteSlicePointItemCommand( item, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
-    }
-
     // Get detection settings
     AudioAnalyser::DetectionSettings settings;
     getDetectionSettings( settings );
@@ -2061,9 +2086,16 @@ void MainWindow::on_pushButton_Find_clicked()
     {
         slicePointFrameNumList = AudioAnalyser::findOnsetFrameNums( m_sampleBufferList.first(), settings );
     }
-    else
+    else // Find Beats
     {
-        slicePointFrameNumList = AudioAnalyser::findBeatFrameNums( m_sampleBufferList.first(), settings );
+        if ( m_ui->comboBox_DetectMethod->currentData().toString() == "snap" )
+        {
+            slicePointFrameNumList = getSnapFrameNums();
+        }
+        else
+        {
+            slicePointFrameNumList = AudioAnalyser::findBeatFrameNums( m_sampleBufferList.first(), settings );
+        }
     }
 
     // Adjust slice points according to zero-crossing settings
@@ -2101,15 +2133,70 @@ void MainWindow::on_pushButton_Find_clicked()
         }
     }
 
-    // Add new slice point items
-    foreach ( int frameNum, slicePointFrameNumList )
+    if ( slicePointFrameNumList.count() > 0 )
     {
-        new AddSlicePointItemCommand( frameNum, true, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
+        QUndoCommand* parentCommand = new QUndoCommand();
+
+        // Set command text
+        if ( m_ui->comboBox_Find->currentText() == tr( "Onsets" ) )
+        {
+            parentCommand->setText( tr("Find Onsets") );
+        }
+        else
+        {
+            parentCommand->setText( tr("Find Beats") );
+        }
+
+        // Remove current slice point items if present
+        const QList<SharedSlicePointItem> slicePointItemList = m_graphicsScene->getSlicePointList();
+
+        foreach ( SharedSlicePointItem item, slicePointItemList )
+        {
+            new DeleteSlicePointItemCommand( item, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
+        }
+
+        // Add new slice point items
+        foreach ( int frameNum, slicePointFrameNumList )
+        {
+            new AddSlicePointItemCommand( frameNum, true, m_graphicsScene, m_ui->pushButton_Slice, m_ui->comboBox_SnapValues, parentCommand );
+        }
+
+        m_undoStack.push( parentCommand );
     }
 
-    m_undoStack.push( parentCommand );
-
     QApplication::restoreOverrideCursor();
+}
+
+
+
+void MainWindow::on_comboBox_Find_currentIndexChanged( const int )
+{
+    if ( m_ui->comboBox_Find->currentText() == tr( "Beats" ) )
+    {
+        // If "Snap Values" isn't already in the Detection Method combobox then add it
+        if ( m_ui->comboBox_DetectMethod->findData( "snap" ) == -1 )
+        {
+            m_ui->comboBox_DetectMethod->addItem( tr("Snap Values"), "snap" );
+            m_ui->comboBox_DetectMethod->setCurrentIndex( m_ui->comboBox_DetectMethod->count() - 1 );
+        }
+    }
+    else // Find Onsets
+    {
+        int indexOfSnapItem;
+
+        // If "Snap Values" is in the Detection Method combobox then remove it
+        if ( (indexOfSnapItem = m_ui->comboBox_DetectMethod->findData("snap")) != -1 )
+        {
+            int currentIndex = m_ui->comboBox_DetectMethod->currentIndex();
+
+            if ( currentIndex == m_ui->comboBox_DetectMethod->count() - 1 )
+                currentIndex = 0;
+
+            m_ui->comboBox_DetectMethod->removeItem( indexOfSnapItem );
+
+            m_ui->comboBox_DetectMethod->setCurrentIndex( currentIndex );
+        }
+    }
 }
 
 

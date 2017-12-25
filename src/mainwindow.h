@@ -115,13 +115,13 @@ private:
 
     void copySelectedSamplesToClipboard();
 
+    QList<int> getSnapFrameNums() const;
+
 
     Ui::MainWindow* m_ui; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
     QActionGroup* m_interactionGroup;
     QList<QAction*> m_recentProjectsActions;
-
-    enum LengthUnits { UNITS_BARS, UNITS_BEATS };
 
     WaveGraphicsScene* m_graphicsScene;
 
@@ -193,6 +193,7 @@ private slots:
     void on_doubleSpinBox_NewBPM_valueChanged( double newBPM );
     void on_doubleSpinBox_OriginalBPM_valueChanged( double originalBPM );
     void on_pushButton_CalcBPM_clicked();
+    void on_comboBox_Find_currentIndexChanged( int index );
     void on_pushButton_Find_clicked();
     void on_horizontalSlider_Threshold_valueChanged( int value );
     void on_pushButton_Slice_clicked( bool isChecked );
