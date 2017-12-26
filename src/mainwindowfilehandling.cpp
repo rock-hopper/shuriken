@@ -288,6 +288,7 @@ void MainWindow::openProject( const QString filePath )
                 connectWaveformToMainWindow( item );
 
                 enableUI();
+                m_ui->comboBox_SnapValues->setEnabled( true );
 
                 if ( ! settings.slicePointFrameNums.isEmpty() )
                 {
@@ -436,6 +437,7 @@ void MainWindow::importAudioFile( const QString filePath )
         setUpSampler();
 
         enableUI();
+        m_ui->comboBox_SnapValues->setEnabled( true );
 
         // Set status bar message
         {

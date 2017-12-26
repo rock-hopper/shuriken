@@ -70,7 +70,7 @@ void AddSlicePointItemCommand::undo()
 
     if ( m_graphicsScene->getSlicePointList().isEmpty() )
     {
-        m_snapComboBox->setEnabled( false );
+        //m_snapComboBox->setEnabled( false );
 
         if ( m_sliceButton != NULL )
             m_sliceButton->setEnabled( false );
@@ -204,7 +204,7 @@ void DeleteSlicePointItemCommand::redo()
 
     if ( m_graphicsScene->getSlicePointList().isEmpty() )
     {
-        m_snapComboBox->setEnabled( false );
+        //m_snapComboBox->setEnabled( false );
 
         if ( m_sliceButton != NULL )
             m_sliceButton->setEnabled( false );
@@ -219,6 +219,7 @@ SliceCommand::SliceCommand( MainWindow* const mainWindow,
                             WaveGraphicsScene* const graphicsScene,
                             QPushButton* const sliceButton,
                             QPushButton* const findButton,
+                            QComboBox* const snapComboBox,
                             QAction* const addSlicePointAction,
                             QAction* const selectMoveItemsAction,
                             QAction* const auditionItemsAction,
@@ -229,6 +230,7 @@ SliceCommand::SliceCommand( MainWindow* const mainWindow,
     m_graphicsScene( graphicsScene ),
     m_sliceButton( sliceButton ),
     m_findButton( findButton ),
+    m_snapComboBox( snapComboBox ),
     m_addSlicePointAction( addSlicePointAction ),
     m_selectMoveItemsAction( selectMoveItemsAction ),
     m_auditionItemsAction( auditionItemsAction ),
@@ -261,6 +263,7 @@ void SliceCommand::undo()
 
     m_sliceButton->setChecked( false );
     m_findButton->setEnabled( true );
+    m_snapComboBox->setEnabled( true );
     m_addSlicePointAction->setEnabled( true );
     m_selectiveTimeStretchAction->setEnabled( false );
     m_auditionItemsAction->trigger();
@@ -293,6 +296,7 @@ void SliceCommand::redo()
 
     m_sliceButton->setChecked( true );
     m_findButton->setEnabled( false );
+    m_snapComboBox->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
 
     if ( m_mainWindow->m_rubberbandAudioSource != NULL )
@@ -313,6 +317,7 @@ UnsliceCommand::UnsliceCommand( MainWindow* const mainWindow,
                                 WaveGraphicsScene* const graphicsScene,
                                 QPushButton* const sliceButton,
                                 QPushButton* const findButton,
+                                QComboBox* const snapComboBox,
                                 QAction* const addSlicePointAction,
                                 QAction* const selectMoveItemsAction,
                                 QAction* const auditionItemsAction,
@@ -323,6 +328,7 @@ UnsliceCommand::UnsliceCommand( MainWindow* const mainWindow,
     m_graphicsScene( graphicsScene ),
     m_sliceButton( sliceButton ),
     m_findButton( findButton ),
+    m_snapComboBox( snapComboBox ),
     m_addSlicePointAction( addSlicePointAction ),
     m_selectMoveItemsAction( selectMoveItemsAction ),
     m_auditionItemsAction( auditionItemsAction ),
@@ -356,6 +362,7 @@ void UnsliceCommand::undo()
 
     m_sliceButton->setChecked( true );
     m_findButton->setEnabled( false );
+    m_snapComboBox->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
 
     if ( m_mainWindow->m_rubberbandAudioSource != NULL )
@@ -392,6 +399,7 @@ void UnsliceCommand::redo()
 
     m_sliceButton->setChecked( false );
     m_findButton->setEnabled( true );
+    m_snapComboBox->setEnabled( true );
     m_addSlicePointAction->setEnabled( true );
     m_selectiveTimeStretchAction->setEnabled( false );
     m_auditionItemsAction->trigger();
@@ -407,6 +415,7 @@ EnableSelectiveTSCommand::EnableSelectiveTSCommand( MainWindow* const mainWindow
                                                     OptionsDialog* const optionsDialog,
                                                     WaveGraphicsScene* const graphicsScene,
                                                     QPushButton* const sliceButton,
+                                                    QComboBox* const snapComboBox,
                                                     QAction* const addSlicePointAction,
                                                     QAction* const selectMoveItemsAction,
                                                     QAction* const multiSelectItemsAction,
@@ -420,6 +429,7 @@ EnableSelectiveTSCommand::EnableSelectiveTSCommand( MainWindow* const mainWindow
     m_optionsDialog( optionsDialog ),
     m_graphicsScene( graphicsScene ),
     m_sliceButton( sliceButton ),
+    m_snapComboBox( snapComboBox ),
     m_addSlicePointAction( addSlicePointAction ),
     m_selectMoveItemsAction( selectMoveItemsAction ),
     m_multiSelectItemsAction( multiSelectItemsAction ),
@@ -439,6 +449,7 @@ void EnableSelectiveTSCommand::undo()
     m_multiSelectItemsAction->setEnabled( true );
     m_auditionItemsAction->setEnabled( true );
     m_addSlicePointAction->setEnabled( true );
+    m_snapComboBox->setEnabled( false );
 
     if ( m_graphicsScene->getSlicePointList().size() > 0 || m_sampleBufferList.size() > 1 )
     {
@@ -465,6 +476,7 @@ void EnableSelectiveTSCommand::redo()
     m_auditionItemsAction->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
     m_sliceButton->setEnabled( false );
+    m_snapComboBox->setEnabled( true );
     m_selectiveTimeStretchAction->setChecked( true );
     m_pasteAction->setEnabled( false );
 }
@@ -477,6 +489,7 @@ DisableSelectiveTSCommand::DisableSelectiveTSCommand( MainWindow* const mainWind
                                                       OptionsDialog* const optionsDialog,
                                                       WaveGraphicsScene* const graphicsScene,
                                                       QPushButton* const sliceButton,
+                                                      QComboBox* const snapComboBox,
                                                       QAction* const addSlicePointAction,
                                                       QAction* const selectMoveItemsAction,
                                                       QAction* const multiSelectItemsAction,
@@ -490,6 +503,7 @@ DisableSelectiveTSCommand::DisableSelectiveTSCommand( MainWindow* const mainWind
     m_optionsDialog( optionsDialog ),
     m_graphicsScene( graphicsScene ),
     m_sliceButton( sliceButton ),
+    m_snapComboBox( snapComboBox ),
     m_addSlicePointAction( addSlicePointAction ),
     m_selectMoveItemsAction( selectMoveItemsAction ),
     m_multiSelectItemsAction( multiSelectItemsAction ),
@@ -512,6 +526,7 @@ void DisableSelectiveTSCommand::undo()
     m_auditionItemsAction->setEnabled( false );
     m_addSlicePointAction->setEnabled( false );
     m_sliceButton->setEnabled( false );
+    m_snapComboBox->setEnabled( true );
     m_selectiveTimeStretchAction->setChecked( true );
     m_pasteAction->setEnabled( false );
 }
@@ -524,6 +539,7 @@ void DisableSelectiveTSCommand::redo()
     m_multiSelectItemsAction->setEnabled( true );
     m_auditionItemsAction->setEnabled( true );
     m_addSlicePointAction->setEnabled( true );
+    m_snapComboBox->setEnabled( false );
 
     if ( m_graphicsScene->getSlicePointList().size() > 0 || m_sampleBufferList.size() > 1 )
     {

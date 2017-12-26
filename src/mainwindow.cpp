@@ -1045,7 +1045,7 @@ QList<int> MainWindow::getSnapFrameNums() const
 
             int frameNum = audioSliceLength;
 
-            while ( frameNum < totalNumFrames )
+            while ( frameNum <= totalNumFrames - audioSliceLength )
             {
                 slicePointFrameNumList.append( frameNum );
                 frameNum += audioSliceLength;
@@ -1998,6 +1998,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
                               m_graphicsScene,
                               m_ui->pushButton_Slice,
                               m_ui->pushButton_Find,
+                              m_ui->comboBox_SnapValues,
                               m_ui->actionAdd_Slice_Point,
                               m_ui->actionSelect_Move,
                               m_ui->actionAudition,
@@ -2052,6 +2053,7 @@ void MainWindow::on_pushButton_Slice_clicked( const bool isChecked )
                             m_graphicsScene,
                             m_ui->pushButton_Slice,
                             m_ui->pushButton_Find,
+                            m_ui->comboBox_SnapValues,
                             m_ui->actionAdd_Slice_Point,
                             m_ui->actionSelect_Move,
                             m_ui->actionAudition,
@@ -2405,6 +2407,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
                                       m_optionsDialog,
                                       m_graphicsScene,
                                       m_ui->pushButton_Slice,
+                                      m_ui->comboBox_SnapValues,
                                       m_ui->actionAdd_Slice_Point,
                                       m_ui->actionSelect_Move,
                                       m_ui->actionMulti_Select,
@@ -2447,6 +2450,7 @@ void MainWindow::on_actionSelective_Time_Stretch_triggered( const bool isChecked
                                        m_optionsDialog,
                                        m_graphicsScene,
                                        m_ui->pushButton_Slice,
+                                       m_ui->comboBox_SnapValues,
                                        m_ui->actionAdd_Slice_Point,
                                        m_ui->actionSelect_Move,
                                        m_ui->actionMulti_Select,

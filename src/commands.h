@@ -119,6 +119,7 @@ public:
                   WaveGraphicsScene* graphicsScene,
                   QPushButton* sliceButton,
                   QPushButton* findButton,
+                  QComboBox* snapComboBox,
                   QAction* addSlicePointAction,
                   QAction* selectMoveItemsAction,
                   QAction* auditionItemsAction,
@@ -133,6 +134,7 @@ private:
     WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
     QPushButton* const m_findButton;
+    QComboBox* const m_snapComboBox;
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
     QAction* const m_auditionItemsAction;
@@ -148,6 +150,7 @@ public:
                     WaveGraphicsScene* graphicsScene,
                     QPushButton* sliceButton,
                     QPushButton* findButton,
+                    QComboBox* snapComboBox,
                     QAction* addSlicePointAction,
                     QAction* selectMoveItemsAction,
                     QAction* auditionItemsAction,
@@ -162,6 +165,7 @@ private:
     WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
     QPushButton* const m_findButton;
+    QComboBox* const m_snapComboBox;
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
     QAction* const m_auditionItemsAction;
@@ -177,6 +181,7 @@ public:
                               OptionsDialog* optionsDialog,
                               WaveGraphicsScene* graphicsScene,
                               QPushButton* sliceButton,
+                              QComboBox* snapComboBox,
                               QAction* addSlicePointAction,
                               QAction* selectMoveItemsAction,
                               QAction* multiSelectItemsAction,
@@ -194,6 +199,7 @@ private:
     OptionsDialog* const m_optionsDialog;
     WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
+    QComboBox* const m_snapComboBox;
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
     QAction* const m_multiSelectItemsAction;
@@ -213,6 +219,7 @@ public:
                                OptionsDialog* optionsDialog,
                                WaveGraphicsScene* graphicsScene,
                                QPushButton* sliceButton,
+                               QComboBox* snapComboBox,
                                QAction* addSlicePointAction,
                                QAction* selectMoveItemsAction,
                                QAction* multiSelectItemsAction,
@@ -230,6 +237,7 @@ private:
     OptionsDialog* const m_optionsDialog;
     WaveGraphicsScene* const m_graphicsScene;
     QPushButton* const m_sliceButton;
+    QComboBox* const m_snapComboBox;
     QAction* const m_addSlicePointAction;
     QAction* const m_selectMoveItemsAction;
     QAction* const m_multiSelectItemsAction;
