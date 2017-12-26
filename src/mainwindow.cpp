@@ -1016,7 +1016,7 @@ void MainWindow::copySelectedSamplesToClipboard()
 QList<int> MainWindow::getSnapFrameNums() const
 {
     QList<int> slicePointFrameNumList;
-    int divisionsPerBeat = m_ui->comboBox_SnapValues->currentData().toInt();
+    int divisionsPerBeat = m_ui->comboBox_SnapValues->itemData( m_ui->comboBox_SnapValues->currentIndex() ).toInt();
 
     if ( divisionsPerBeat > 0 )
     {
@@ -2090,7 +2090,7 @@ void MainWindow::on_pushButton_Find_clicked()
     }
     else // Find Beats
     {
-        if ( m_ui->comboBox_DetectMethod->currentData().toString() == "snap" )
+        if ( m_ui->comboBox_DetectMethod->currentText() == tr( "Snap Values" ) )
         {
             slicePointFrameNumList = getSnapFrameNums();
         }
