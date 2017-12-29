@@ -161,6 +161,8 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/JuceLibraryCode/modules/juce_events/native/juce_android_Messaging.cpp \
     src/JuceLibraryCode/modules/juce_events/timers/juce_Timer.cpp \
     src/JuceLibraryCode/modules/juce_events/timers/juce_MultiTimer.cpp \
+    src/Graffik_Legacy/basiceventfilter.cpp \
+    src/Graffik_Legacy/skinneddial.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/wavegraphicsview.cpp \
@@ -193,8 +195,7 @@ SOURCES += src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.cpp \
     src/nsmlistenerthread.cpp \
     src/jackoutputsdialog.cpp \
     src/sampleutils.cpp \
-    src/Graffik_Legacy/basiceventfilter.cpp \
-    src/Graffik_Legacy/skinneddial.cpp
+    src/calcbpmdialog.cpp
 HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/AppConfig.h \
     src/JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -399,6 +400,8 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/JuceLibraryCode/modules/juce_events/native/juce_osx_MessageQueue.h \
     src/JuceLibraryCode/modules/juce_events/timers/juce_Timer.h \
     src/JuceLibraryCode/modules/juce_events/timers/juce_MultiTimer.h \
+    src/Graffik_Legacy/basiceventfilter.h \
+    src/Graffik_Legacy/skinneddial.h \
     src/mainwindow.h \
     src/wavegraphicsview.h \
     src/waveformitem.h \
@@ -432,8 +435,7 @@ HEADERS += src/JuceLibraryCode/JuceHeader.h \
     src/nsmlistenerthread.h \
     src/jackoutputsdialog.h \
     src/sampleutils.h \
-    src/Graffik_Legacy/basiceventfilter.h \
-    src/Graffik_Legacy/skinneddial.h
+    src/calcbpmdialog.h
 FORMS += src/mainwindow.ui \
     src/optionsdialog.ui \
     src/helpform.ui \
@@ -442,7 +444,8 @@ FORMS += src/mainwindow.ui \
     src/aboutdialog.ui \
     src/exportdialog.ui \
     src/confirmbpmdialog.ui \
-    src/jackoutputsdialog.ui
+    src/jackoutputsdialog.ui \
+    src/calcbpmdialog.ui
 INCLUDEPATH += src \
     src/SndLibShuriken \
     src/JuceLibraryCode
