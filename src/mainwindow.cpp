@@ -31,6 +31,7 @@
 #include "applygaindialog.h"
 #include "applygainrampdialog.h"
 #include "aboutdialog.h"
+#include "calcbpmdialog.h"
 #include "messageboxes.h"
 #include "sampleutils.h"
 #include "textfilehandler.h"
@@ -1058,6 +1059,56 @@ QList<int> MainWindow::getSnapFrameNums() const
 
 
 
+void MainWindow::CalculateBPM()
+{
+    const int numerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
+
+    int numBeats = 0;
+    qreal bpm = 0;
+
+    if ( m_ui->comboBox_Units->currentText() == tr("Bars") )
+    {
+        numBeats = m_ui->spinBox_Length->value() * numerator;
+    }
+    else // Beats
+    {
+        numBeats = m_ui->spinBox_Length->value();
+    }
+
+    if ( numBeats > 0 )
+    {
+        const int numFrames = SampleUtils::getTotalNumFrames( m_sampleBufferList );
+
+        const qreal numSeconds = numFrames / m_sampleHeader->sampleRate;
+
+        bpm = numBeats / ( numSeconds / 60 );
+    }
+    else
+    {
+        AudioAnalyser::DetectionSettings settings;
+        getDetectionSettings( settings );
+
+        bpm = AudioAnalyser::calcBPM( m_sampleBufferList.first(), settings );
+    }
+
+    m_ui->doubleSpinBox_OriginalBPM->setValue( bpm );
+    m_ui->doubleSpinBox_NewBPM->setValue( bpm );
+
+    const int index = m_ui->comboBox_SnapValues->currentIndex();
+    const int divisionsPerBeat = m_ui->comboBox_SnapValues->itemData( index ).toInt();
+
+    m_graphicsScene->setBpmRulerMarks( m_ui->doubleSpinBox_OriginalBPM->value(),
+                                       numerator,
+                                       divisionsPerBeat  );
+
+    if ( m_rubberbandAudioSource != NULL )
+    {
+        m_rubberbandAudioSource->setOriginalBPM( m_ui->doubleSpinBox_OriginalBPM->value() );
+    }
+}
+
+
+
 //==================================================================================================
 // Private Static:
 
@@ -1944,38 +1995,20 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_pushButton_CalcBPM_clicked()
 {
-    const int numerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
-
-    int numBeats = 0;
-
-    if ( m_ui->comboBox_Units->currentText() == tr("Bars") )
+    if ( m_ui->spinBox_Length->value() > 0 )
     {
-        numBeats = m_ui->spinBox_Length->value() * numerator;
+        CalculateBPM();
     }
-    else // Beats
+    else
     {
-        numBeats = m_ui->spinBox_Length->value();
-    }
+        CalcBpmDialog dialog;
 
-    const int numFrames = SampleUtils::getTotalNumFrames( m_sampleBufferList );
+        const int result = dialog.exec();
 
-    const qreal numSeconds = numFrames / m_sampleHeader->sampleRate;
-
-    const qreal bpm = numBeats / ( numSeconds / 60 );
-
-    m_ui->doubleSpinBox_OriginalBPM->setValue( bpm );
-    m_ui->doubleSpinBox_NewBPM->setValue( bpm );
-
-    const int index = m_ui->comboBox_SnapValues->currentIndex();
-    const int divisionsPerBeat = m_ui->comboBox_SnapValues->itemData( index ).toInt();
-
-    m_graphicsScene->setBpmRulerMarks( m_ui->doubleSpinBox_OriginalBPM->value(),
-                                       numerator,
-                                       divisionsPerBeat  );
-
-    if ( m_rubberbandAudioSource != NULL )
-    {
-        m_rubberbandAudioSource->setOriginalBPM( m_ui->doubleSpinBox_OriginalBPM->value() );
+        if ( result == QDialog::Accepted )
+        {
+            CalculateBPM();
+        }
     }
 }
 

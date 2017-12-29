@@ -117,6 +117,8 @@ private:
 
     QList<int> getSnapFrameNums() const;
 
+    void CalculateBPM();
+
 
     Ui::MainWindow* m_ui; // "Go to slot..." in Qt Designer won't work if this is changed to ScopedPointer<Ui::MainWindow>
 
