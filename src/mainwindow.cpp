@@ -1059,7 +1059,7 @@ QList<int> MainWindow::getSnapFrameNums() const
 
 
 
-void MainWindow::CalculateBPM()
+void MainWindow::calculateBPM()
 {
     const int numerator = m_ui->comboBox_TimeSigNumerator->currentText().toInt();
 
@@ -1997,7 +1997,7 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
 {
     if ( m_ui->spinBox_Length->value() > 0 )
     {
-        CalculateBPM();
+        calculateBPM();
     }
     else
     {
@@ -2007,7 +2007,7 @@ void MainWindow::on_pushButton_CalcBPM_clicked()
 
         if ( result == QDialog::Accepted )
         {
-            CalculateBPM();
+            calculateBPM();
         }
     }
 }
