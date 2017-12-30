@@ -822,7 +822,15 @@ void MainWindow::getDetectionSettings( AudioAnalyser::DetectionSettings& setting
 {
     int currentIndex;
 
-    currentIndex = m_ui->comboBox_DetectMethod->currentIndex();
+    if ( m_ui->comboBox_DetectMethod->currentText() == tr( "Snap Values" ) )
+    {
+        currentIndex = 0; // Broadband Energy
+    }
+    else
+    {
+        currentIndex = m_ui->comboBox_DetectMethod->currentIndex();
+    }
+
     settings.detectionMethod = m_ui->comboBox_DetectMethod->itemData( currentIndex ).toString().toLocal8Bit();
 
     // From aubio website: "Typical threshold values are within 0.001 and 0.900." Default is 0.3 in aubio-0.4.0
