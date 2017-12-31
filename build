@@ -146,17 +146,31 @@ function checkDependencies()
 {
     declare -i errorCode=0
 
-    pkg-config --exists 'alsa > 1.0.18
-                         aubio >= 0.4.1
-                         jack >= 0.118
-                         liblo >= 0.26
-                         QtOpenGL >= 4.5.3
-                         QtCore >= 4.6.1
-                         QtGui >= 4.5.3
-                         rubberband
-                         samplerate
-                         sndfile >= 1.0.20
-                         x11' --print-errors
+    if $isQt4Wanted; then
+        pkg-config --exists 'alsa > 1.0.18
+                             aubio >= 0.4.1
+                             jack >= 0.118
+                             liblo >= 0.26
+                             QtOpenGL >= 4.5.3
+                             QtCore >= 4.6.1
+                             QtGui >= 4.5.3
+                             rubberband
+                             samplerate
+                             sndfile >= 1.0.20
+                             x11' --print-errors --short-errors
+    else
+        pkg-config --exists 'alsa > 1.0.18
+                             aubio >= 0.4.1
+                             jack >= 0.118
+                             liblo >= 0.26
+                             Qt5OpenGL
+                             Qt5Core
+                             Qt5Gui
+                             rubberband
+                             samplerate
+                             sndfile >= 1.0.20
+                             x11' --print-errors --short-errors
+    fi
 
     errorCode=$?
 
