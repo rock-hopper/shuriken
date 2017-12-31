@@ -17,12 +17,11 @@ Main features:
 - set the number of JACK outputs and route any audio slice to any output
 - time stretching in offline or real-time mode (via rubberband)
 - time stretch individual audio slices and quantise your beats
-- NSM session management support
-- LADISH L1 session management support
+- NSM and LADISH L1 session management support
 - ALSA and JACK MIDI
 - import a wide range of audio file formats (via libsndfile and the built-in sndlib library)
 - export audio slices in WAV, AIFF, AU, FLAC, or Ogg format, with options for encoding and sample rate
-- export Hydrogen Drumkit, SFZ, Akai .pgm, or MIDI file
+- export Hydrogen Drumkit, SFZ, Akai .pgm (MPC 500/1000/2500), or MIDI file
 
 Shuriken can either be built using Qt Creator or the supplied build script. To use the build script, simply open a terminal in Shuriken's root directory and enter:
 
@@ -44,14 +43,9 @@ You must have either qmake or qmake-qt4 installed as well as the aubio (>=0.4.1)
 Once built, you can install Shuriken with the "make install" command as root.
 ___
 
-As noted above, Shuriken requires the latest incarnation of the aubio library which I've packaged for Ubuntu Precise and Trusty, and AVLinux 6:
+As noted above, Shuriken requires version 0.4.1 (or greater) of the aubio library. I've packaged libaubio for older versions of Ubuntu:
 
 https://launchpad.net/~rock-hopper/+archive/ubuntu/audiotools
-
-https://dl.dropboxusercontent.com/u/23511236/libaubio4_0.4.1-1avl6_i386.deb
-https://dl.dropboxusercontent.com/u/23511236/libaubio4-dev_0.4.1-1avl6_i386.deb
-https://dl.dropboxusercontent.com/u/23511236/libaubio4-doc_0.4.1-1avl6_all.deb
-https://dl.dropboxusercontent.com/u/23511236/libaubio4_0.4.1-1avl6.source.tar.gz
 
 I'm aware that some software depends on the old aubio library so I've made sure there are no dependency issues with libaubio4 and the old libaubio2 package: the two sit side-by-side and applications which require the old aubio library are unaffected by the presence of the new.
 
