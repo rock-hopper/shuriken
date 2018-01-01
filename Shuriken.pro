@@ -1,12 +1,24 @@
 # -------------------------------------------------
 # Project created by QtCreator 2013-08-19T11:08:15
 # -------------------------------------------------
+*-g++* {
+    GCC_VERSION = $$system("g++ -dumpversion | head -c1")
+    greaterThan(GCC_VERSION, 5) {
+        message( "g++ >= 6 found" )
+        CONFIG += nopie nowarning
+    } else {
+        greaterThan(GCC_VERSION, 4) {
+            message( "g++ >= 5 found" )
+            CONFIG += nowarning
+        }
+    }
+}
 QMAKE_CXXFLAGS += -msse \
     -msse2 \
-    -std=c++11 \
-    -Wno-misleading-indentation \
+    -std=c++11
+nowarning: QMAKE_CXXFLAGS += -Wno-misleading-indentation \
     -Wno-unused-parameter
-QMAKE_LFLAGS += -no-pie  # needed for GCC6 to make sure an executable file is created and not a shared library
+nopie: QMAKE_LFLAGS += -no-pie
 QT += opengl
 TARGET = shuriken
 TEMPLATE = app
