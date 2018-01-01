@@ -6,6 +6,7 @@ QMAKE_CXXFLAGS += -msse \
     -std=c++11 \
     -Wno-misleading-indentation \
     -Wno-unused-parameter
+QMAKE_LFLAGS += -no-pie  # needed for GCC6 to make sure an executable file is created and not a shared library
 QT += opengl
 TARGET = shuriken
 TEMPLATE = app
