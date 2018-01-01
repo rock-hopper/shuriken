@@ -39,7 +39,7 @@ void messageHandler( QtMsgType messageType, const char* message )
     case QtDebugMsg:
         text = QString( "Debug: %1" ).arg( message );
         break;
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= 0x050500
     case QtInfoMsg:
         text = QString( "Info: %1" ).arg( message );
         break;
