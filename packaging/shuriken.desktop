@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=Shuriken
+GenericName=Beat Slicer
+GenericName[fr]=Trancheur de rythme
+Comment=Shuriken Beat Slicer
+Comment[fr]=Trancheur de rythme
+Exec=shuriken %F
+Icon=shuriken
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;AudioVideoEditing;
