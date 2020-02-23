@@ -233,10 +233,15 @@ function makeShuriken()
         echo "qmake-qt4 ./Shuriken.pro -r -spec linux-g++$arch $configOptions"
         qmake-qt4 ./Shuriken.pro -r -spec linux-g++$arch $configOptions
     else
-        echo "qmake ./Shuriken.pro -r -spec linux-g++$arch $configOptions"
-        qmake ./Shuriken.pro -r -spec linux-g++$arch $configOptions
+        if [ -e "/usr/bin/qmake-qt5" ]; then
+            echo "qmake-qt5 ./Shuriken.pro -r -spec linux-g++$arch $configOptions"
+            qmake-qt5 ./Shuriken.pro -r -spec linux-g++$arch $configOptions
+        else
+            echo "qmake ./Shuriken.pro -r -spec linux-g++$arch $configOptions"
+            qmake ./Shuriken.pro -r -spec linux-g++$arch $configOptions
+        fi
     fi
-    
+
     make -w
 }
 
