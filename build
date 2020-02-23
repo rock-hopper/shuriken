@@ -179,8 +179,8 @@ function checkDependencies()
         errorCode=1
     fi
 
-    if ! $isQt4Wanted && [ ! -e "/usr/bin/qmake" ]; then
-        echo "qmake not found"
+    if ! $isQt4Wanted && [ ! -e "/usr/bin/qmake-qt5" ] && [ ! -e "/usr/bin/qmake" ]; then
+        echo "couldn't find qmake or qmake-qt5"
         errorCode=1
     fi
     
